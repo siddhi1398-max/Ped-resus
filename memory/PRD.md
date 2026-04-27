@@ -1,54 +1,66 @@
 # PED.RESUS — Pediatric Emergency Reference
 
 ## Original Problem Statement
-Pediatric emergency reference app. Expanded from an initial HTML prototype into a comprehensive PALS/pediatric reference with interactive clinical pathways, scores, and one-time-purchase PDF export.
-
-## User Choices
-- Design: Design agent (Swiss/high-contrast, no-gradients)
-- Auth: None (public tool)
-- PDF export: One-time Stripe purchase (lifetime)
-- Price: ₹50 INR (minimum Stripe allows; user requested ₹20 but Stripe requires ≥ $0.50 USD ≈ ₹42)
-- Paywall model: Trial — all tabs free, PDF export gated
-- Restore: Email-based restore via backend
+Public, offline-style, weight-driven pediatric emergency reference for ED clinicians.
+Hard-coded medical constants (doses, equipment sizes, algorithms) plus interactive
+calculations, decision pathways, severity scores, neonatal resuscitation, imaging
+reference, and exportable patient case PDFs. **No authentication. No paywall.**
 
 ## Architecture
-- Frontend: React 19 + CRA + Tailwind + shadcn/ui + next-themes + jspdf + jspdf-autotable + @phosphor-icons/react + fontsource (Chivo / IBM Plex Sans / JetBrains Mono)
-- Backend: FastAPI + MongoDB + motor + emergentintegrations (Stripe checkout)
-- State: React context (`WeightContext`) shared across tabs; localStorage for unlock state
+- **Frontend** — React + Tailwind + shadcn/ui + Phosphor icons
+  - Hardcoded medical constants in `/app/frontend/src/data/`
+  - Tab-based UI in `/app/frontend/src/components/tabs/`
+- **Backend** — FastAPI + MongoDB (minimal — only `/api/` and `/api/status` for
+  health check / log)
+- No auth, no payments, no third-party integrations.
 
-## Implemented (as of Feb 2026)
+## Tab Structure (final, 12 tabs)
+1. Calculator
+2. Equipment & Tubes
+3. Resuscitation (RSI quickstart, infusions, rule of 6s, 7-Ps checklist)
+4. Drug Doses
+5. Fluids
+6. Vitals by Age
+7. Severity Scores (Pain, GCS, PEWS, Croup, Dehydration, PRAM)
+8. Sedation & Analgesia (Local Anaesthetics, PSA, Nerve Blocks, LAST)
+9. Neonatal (NRP)
+10. PALS Algorithms
+11. Clinical Pathways (Interactive runner + Differential lookup)
+12. Imaging (X-Ray, CT, MRI, POCUS)
 
-### 11 Tabs
-1. **Calculator** — 38 reactive dose cards for current weight
-2. **Equipment & Tubes** — Broselow tape + full tube/airway table + formulas
-3. **RSI / Sedation** — merged airway + sedation tab with 4 sub-sections:
-   - RSI Quickstart (pre-med, induction, paralysis, post-intubation) + reversal calculations
-   - Infusions (mL/hr) — interactive calculator for 13 continuous infusions
-   - Rule of 6s — Tintinalli 109-1/2 (mL/hr ≡ mcg/kg/min); 8 drugs with live mixture + pump-rate calc
-   - 7 Ps Checklist (Walls)
-4. **Drug Doses** — 50+ drugs (incl. diclofenac, ketorolac, hydromorphone, oxycodone, tramadol, IN ketamine, nitrous oxide, local anaesthetics, sucrose 24%, PGE1, caffeine citrate, surfactant, vit K, etc.) with category filter, search, live-calc
-5. **Fluids** — maintenance, Parkland burns, DKA protocol, age-adjusted EBV, ABL, NPO deficit, local anaesthetic max-dose, transfusion quick-ref
-6. **Vitals by Age** — HR/RR/SBP/DBP + temp + SpO₂ notes
-7. **Pain & Scores** — 6 interactive scorers (FLACC, FACES, NRS, Peds GCS, PEWS, Westley Croup, Gorelick Dehydration, PRAM Asthma) with auto-tool selection, decision pathways, and weight-specific footer doses
-8. **Pathways** — interactive decision trees (fever in infant, PECARN head injury, respiratory distress differential, acute abdomen with 10 surgical branches, trauma primary survey ABCDE). Each result includes care plan + PDF export
-9. **Neonatal (NRP)** — NRP 2020 content: dose cards, APGAR, SpO₂ targets, equipment by weight, UVC depth, pearls
-10. **PALS Algorithms** — 7 algorithms updated to **2025 AHA**: NRP, Cardiac Arrest (with official AHA PDF link + physiology-directed CPR + ECPR), Bradycardia, Tachycardia, Shock, Anaphylaxis, Status Epilepticus. Includes 2025 key-updates panel (6 big-number callouts) + SVG CPR-cadence visual
-11. **Differentials** — 7 F&L-style diagnostic algorithms (altered mental status, acute limp, vomiting, fever-rash, apnoea/BRUE, syncope, first seizure) each with mnemonic, structured DDx table, and red-flag panel
+## What's Implemented
+**Feb 2026 — restructure & deployment prep**
+- Removed app paywall and all Stripe backend/frontend code
+- Renamed RSI/Sedation tab → Resuscitation
+- Created Sedation & Analgesia tab with: local-anaesthetic max-dose table, PSA
+  principles + 6 ED regimens, 8 pediatric nerve blocks (FICB, digital, auricular,
+  supraorbital, infraorbital, femoral, haematoma, penile), LAST rescue protocol
+- Created Imaging tab with 4 modalities × 8/4/4/7 high-yield findings, inline CC
+  images with `onError` fallback, Radiopaedia deep links
+- Merged Pathways + Differentials into single Clinical Pathways tab (toggle modes)
+- Removed orphan files: AppPaywall.jsx, purchase.js, PathwaysTab.jsx,
+  DifferentialsTab.jsx; cleared dead `LOCAL_ANAESTHETICS` export from fluids.js
+- Backend simplified to `/api/` and `/api/status` only
 
-### Payments (Stripe one-time)
-- Backend: `/api/payments/create-checkout`, `/checkout-status/{id}`, `/restore-by-email`, `/webhook/stripe`
-- Server-defined price (₹50); no client price manipulation
-- `payment_transactions` MongoDB collection (email, session_id, status, idempotent updates)
-- Webhook with event signature verification via emergentintegrations
-- Frontend: `PaywallDialog` with Buy/Restore modes, Stripe redirect, polling on return, restore-by-email
-- Gated exports: TopBar "Export PDF" + Pathways result "Download Care Plan PDF" (shows Lock icon when locked)
+**Earlier work (carried over)**
+- Broselow tape + zone indicator
+- 70+ drugs in `data/drugs.js` with weight-reactive dose calculator
+- 2025 AHA PALS algorithms, NRP flow
+- Care plan PDF export from pathway results; patient case PDF from TopBar
+- 10 differential algorithms, 7 interactive pathways
 
-### Reference citations throughout
-- 2025 AHA PALS · NRP 2020 · Tintinalli Emergency Medicine · Fleischer & Ludwig · Harriet Lane Handbook 23rd ed · IAP guidelines
+## Testing Status
+- `iteration_1.json`: backend 100%, frontend 100% (50/52 assertions, 2 false positives)
+- Pytest backend suite at `/app/backend/tests/backend_test.py`
 
-## Next Tasks / Backlog
-- P1: Care-plan "bundle" button on score results (extend beyond pathways)
-- P2: Infusion dose-check (prevent re-dose within safe window)
-- P2: Apgar / GCS quick-scorer add to Neonatal tab
-- P2: Offline PWA with service worker
-- P2: i18n (es/fr/hi) for international use
+## Backlog / Future
+- P2: dose-check safety feature comparing requested vs given doses (session memory)
+- P2: Service-worker for fully offline PWA install
+- P3: Migrate FastAPI shutdown handler to lifespan API
+- P3: Print-friendly view for individual nerve-block / imaging cards
+
+## Key Files
+- `/app/backend/server.py` — minimal FastAPI
+- `/app/frontend/src/App.js` — 12-tab router
+- `/app/frontend/src/data/{drugs,fluids,vitals,scores,pathways,differentials,sedationAnalgesia,imaging,...}.js`
+- `/app/frontend/src/components/tabs/*` — one component per tab

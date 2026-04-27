@@ -87,15 +87,6 @@ export function npoDeficit(weightKg, hoursNPO) {
   return hourly * hoursNPO;
 }
 
-// Local anaesthetic max safe doses (mg/kg) and their volumes at common concentrations
-export const LOCAL_ANAESTHETICS = [
-  { name: "Lidocaine (plain)", mgPerKg: 4.5, max: 300, concentration: "1% = 10 mg/mL" },
-  { name: "Lidocaine + adrenaline", mgPerKg: 7, max: 500, concentration: "1% = 10 mg/mL" },
-  { name: "Bupivacaine (plain)", mgPerKg: 2, max: 175, concentration: "0.25% = 2.5 mg/mL" },
-  { name: "Bupivacaine + adrenaline", mgPerKg: 2.5, max: 225, concentration: "0.25% = 2.5 mg/mL" },
-  { name: "Ropivacaine", mgPerKg: 3, max: 200, concentration: "0.2% = 2 mg/mL" },
-];
-
 // Transfusion thresholds (commonly quoted paediatric ED / peri-op)
 export const TRANSFUSION_NOTES = [
   { label: "pRBC trigger (stable child)", value: "Hb < 7 g/dL" },

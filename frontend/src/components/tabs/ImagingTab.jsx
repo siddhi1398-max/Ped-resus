@@ -95,13 +95,19 @@ export default function ImagingTab() {
                     alt={active.imgAlt}
                     className="w-full rounded bg-white"
                     loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.nextSibling?.style && (e.currentTarget.nextSibling.style.display = "flex");
+                    }}
                   />
-                ) : (
-                  <div className="aspect-video rounded bg-slate-200 dark:bg-slate-800 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 gap-2">
-                    <ImageSquare size={32} weight="duotone" />
-                    <div className="text-[10px] font-mono uppercase tracking-widest">View case on Radiopaedia</div>
-                  </div>
-                )}
+                ) : null}
+                <div
+                  className="aspect-video rounded bg-slate-200 dark:bg-slate-800 flex-col items-center justify-center text-slate-500 dark:text-slate-400 gap-2"
+                  style={{ display: active.imgUrl ? "none" : "flex" }}
+                >
+                  <ImageSquare size={32} weight="duotone" />
+                  <div className="text-[10px] font-mono uppercase tracking-widest">View case on Radiopaedia</div>
+                </div>
                 {active.imgAlt && (
                   <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-2 leading-snug">{active.imgAlt}</div>
                 )}

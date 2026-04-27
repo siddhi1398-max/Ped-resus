@@ -220,12 +220,19 @@ function NerveBlocksSection() {
                   alt={active.imgAlt}
                   className="w-full rounded mb-2 bg-white"
                   loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextSibling?.style && (e.currentTarget.nextSibling.style.display = "flex");
+                  }}
                 />
-              ) : (
-                <div className="aspect-video rounded bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 text-xs font-mono uppercase tracking-widest mb-2">
-                  Reference image
-                </div>
-              )}
+              ) : null}
+              <div
+                className="aspect-video rounded bg-slate-200 dark:bg-slate-800 flex-col items-center justify-center text-slate-500 dark:text-slate-400 text-xs font-mono uppercase tracking-widest mb-2 gap-2 p-3 text-center"
+                style={{ display: active.imgUrl ? "none" : "flex" }}
+              >
+                <span>Reference diagram</span>
+                <span className="text-[9px] normal-case tracking-normal opacity-75">See linked source for ultrasound clips & step-by-step</span>
+              </div>
               <div className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 leading-snug">{active.imgAlt}</div>
               <a
                 href={active.refUrl}
