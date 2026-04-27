@@ -23,13 +23,15 @@ import VitalsTab from "./components/tabs/VitalsTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
 import AlgorithmsTab from "./components/tabs/AlgorithmsTab";
 import FluidsTab from "./components/tabs/FluidsTab";
-import { Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Baby } from "@phosphor-icons/react";
+import ScoresTab from "./components/tabs/ScoresTab";
+import { Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Baby, ClipboardText } from "@phosphor-icons/react";
 
 const TABS = [
   { id: "calculator", label: "Calculator", icon: Calculator, Comp: CalculatorTab },
   { id: "equipment", label: "Equipment & Tubes", icon: Wrench, Comp: EquipmentTab },
   { id: "drugs", label: "Drug Doses", icon: Pill, Comp: DrugsTab },
   { id: "vitals", label: "Vitals by Age", icon: Heartbeat, Comp: VitalsTab },
+  { id: "scores", label: "Pain & Scores", icon: ClipboardText, Comp: ScoresTab },
   { id: "neonatal", label: "Neonatal (NRP)", icon: Baby, Comp: NeonatalTab },
   { id: "algorithms", label: "PALS Algorithms", icon: TreeStructure, Comp: AlgorithmsTab },
   { id: "fluids", label: "Fluids", icon: Drop, Comp: FluidsTab },
