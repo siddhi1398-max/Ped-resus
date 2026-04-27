@@ -2,7 +2,7 @@ import { useWeight } from "../../context/WeightContext";
 import DoseCard from "../DoseCard";
 import BroselowTape from "../BroselowTape";
 import { estimateAge, estimateETT, estimateDepth, minSBP, fmt } from "../../lib/calc";
-import { maintenanceFluid } from "../../data/fluids";
+import { maintenanceFluid, estimatedBloodVolume, ebvPerKgForWeight } from "../../data/fluids";
 
 export default function CalculatorTab() {
   const { weight: w } = useWeight();
@@ -44,7 +44,7 @@ export default function CalculatorTab() {
     { cat: "resuscitation", title: "Defibrillation 4 J/kg", val: fmt(Math.min(w * 4, 200)), unit: "J" },
     { cat: "airway", title: "ETT Size (est.)", val: estimateETT(w), unit: "mm ID" },
     { cat: "airway", title: "ETT Depth (oral)", val: estimateDepth(w), unit: "cm" },
-    { cat: "other", title: "Blood Volume ~80 mL/kg", val: fmt(w * 80), unit: "mL" },
+    { cat: "other", title: "Blood Volume (age-adjusted)", val: fmt(estimatedBloodVolume(w)), unit: `mL (${ebvPerKgForWeight(w)} mL/kg)` },
     { cat: "other", title: "Min Systolic BP", val: minSBP(w), unit: "mmHg" },
   ];
 

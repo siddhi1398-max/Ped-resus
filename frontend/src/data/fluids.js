@@ -44,3 +44,65 @@ export const FLUID_TYPES = [
   { name: "3% Hypertonic Saline", na: "513", cl: "513", use: "Raised ICP, severe hyponatraemia" },
   { name: "0.45% NaCl + 5% Dex", na: "77", cl: "77", use: "Maintenance (older guidance)" },
 ];
+
+// ─── Peri-op / Emergency Physician calculations ────────────────────────
+// Age-adjusted Estimated Blood Volume (mL/kg) per PASNA / paediatric anaesthesia refs
+export const EBV_TABLE = [
+  { group: "Premature infant", mlPerKg: 100 },
+  { group: "Full-term neonate", mlPerKg: 90 },
+  { group: "Infant 3 mo – 1 yr", mlPerKg: 80 },
+  { group: "Child > 1 yr", mlPerKg: 75 },
+  { group: "Adolescent / adult", mlPerKg: 70 },
+];
+
+export function ebvPerKgForWeight(weightKg) {
+  // Approximate age band from weight
+  if (weightKg <= 2) return 100; // premature
+  if (weightKg <= 4) return 90;  // term neonate
+  if (weightKg <= 10) return 80; // 3 mo – 1 yr
+  if (weightKg <= 40) return 75; // child
+  return 70; // adolescent / adult
+}
+
+export function estimatedBloodVolume(weightKg) {
+  return weightKg * ebvPerKgForWeight(weightKg);
+}
+
+// Allowable Blood Loss
+// ABL = EBV × (Hgb_start − Hgb_min) / Hgb_average
+export function allowableBloodLoss(weightKg, hgbStart, hgbMin) {
+  const ebv = estimatedBloodVolume(weightKg);
+  const hgbAvg = (hgbStart + hgbMin) / 2;
+  if (!hgbAvg) return 0;
+  return Math.max(0, ebv * (hgbStart - hgbMin) / hgbAvg);
+}
+
+// NPO fluid deficit (Holliday-Segar 4-2-1 × hours NPO)
+export function npoDeficit(weightKg, hoursNPO) {
+  const hourly = weightKg <= 10
+    ? weightKg * 4
+    : weightKg <= 20
+      ? 40 + (weightKg - 10) * 2
+      : 60 + (weightKg - 20);
+  return hourly * hoursNPO;
+}
+
+// Local anaesthetic max safe doses (mg/kg) and their volumes at common concentrations
+export const LOCAL_ANAESTHETICS = [
+  { name: "Lidocaine (plain)", mgPerKg: 4.5, max: 300, concentration: "1% = 10 mg/mL" },
+  { name: "Lidocaine + adrenaline", mgPerKg: 7, max: 500, concentration: "1% = 10 mg/mL" },
+  { name: "Bupivacaine (plain)", mgPerKg: 2, max: 175, concentration: "0.25% = 2.5 mg/mL" },
+  { name: "Bupivacaine + adrenaline", mgPerKg: 2.5, max: 225, concentration: "0.25% = 2.5 mg/mL" },
+  { name: "Ropivacaine", mgPerKg: 3, max: 200, concentration: "0.2% = 2 mg/mL" },
+];
+
+// Transfusion thresholds (commonly quoted paediatric ED / peri-op)
+export const TRANSFUSION_NOTES = [
+  { label: "pRBC trigger (stable child)", value: "Hb < 7 g/dL" },
+  { label: "pRBC trigger (cardiac / critically ill)", value: "Hb < 8–9 g/dL" },
+  { label: "Volume (pRBC)", value: "10–15 mL/kg over 2–4 h" },
+  { label: "Platelets", value: "10 mL/kg; threshold < 10 × 10⁹/L (stable) or < 50 with bleeding" },
+  { label: "FFP", value: "10–15 mL/kg for active bleeding / coagulopathy" },
+  { label: "Cryoprecipitate", value: "5–10 mL/kg for fibrinogen < 1 g/L" },
+  { label: "Massive transfusion ratio", value: "1 : 1 : 1 (pRBC : FFP : Plt)" },
+];

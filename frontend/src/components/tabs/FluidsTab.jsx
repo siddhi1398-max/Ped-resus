@@ -1,14 +1,33 @@
 import { useState } from "react";
 import { useWeight } from "../../context/WeightContext";
-import { maintenanceFluid, maintenanceDaily, parklandBurns, DKA_PROTOCOL, FLUID_TYPES } from "../../data/fluids";
+import {
+  maintenanceFluid,
+  maintenanceDaily,
+  parklandBurns,
+  DKA_PROTOCOL,
+  FLUID_TYPES,
+  estimatedBloodVolume,
+  ebvPerKgForWeight,
+  allowableBloodLoss,
+  npoDeficit,
+  LOCAL_ANAESTHETICS,
+  TRANSFUSION_NOTES,
+  EBV_TABLE,
+} from "../../data/fluids";
 import { Input } from "../ui/input";
 import DoseCard from "../DoseCard";
 
 export default function FluidsTab() {
   const { weight } = useWeight();
   const [bsa, setBsa] = useState(10);
+  const [hgbStart, setHgbStart] = useState(12);
+  const [hgbMin, setHgbMin] = useState(7);
+  const [hoursNPO, setHoursNPO] = useState(6);
 
   const parkland = parklandBurns(weight, bsa);
+  const ebv = estimatedBloodVolume(weight);
+  const abl = allowableBloodLoss(weight, hgbStart, hgbMin);
+  const deficit = npoDeficit(weight, hoursNPO);
 
   return (
     <div className="space-y-6">
@@ -98,6 +117,154 @@ export default function FluidsTab() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* ─── Peri-op / ED calculations ─────────────────────────────── */}
+      <div className="pt-2 border-t-2 border-slate-900 dark:border-white">
+        <div className="flex items-baseline justify-between mb-4 mt-6">
+          <h3 className="font-sans font-bold text-xl tracking-tight">Peri-operative / ED Calculations</h3>
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">PASNA-inspired</span>
+        </div>
+
+        {/* EBV card + table */}
+        <div>
+          <h4 className="font-sans font-bold text-base mb-2">Estimated Blood Volume (EBV)</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <DoseCard testid="ebv-card" category="resuscitation" title={`EBV · ${weight} kg`} value={ebv.toFixed(0)} unit={`mL (${ebvPerKgForWeight(weight)} mL/kg)`} note="Age-adjusted per peri-op reference" />
+            <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-900 dark:bg-slate-950 text-white">
+                    <th className="p-2 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Age band</th>
+                    <th className="p-2 text-left font-mono text-[10px] uppercase tracking-[0.15em]">mL/kg</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {EBV_TABLE.map((e) => (
+                    <tr key={e.group} className="border-t border-slate-200 dark:border-slate-800 odd:bg-slate-50 dark:odd:bg-slate-900/40">
+                      <td className="p-2">{e.group}</td>
+                      <td className="p-2 font-mono font-bold">{e.mlPerKg}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Allowable Blood Loss */}
+        <div className="mt-5">
+          <h4 className="font-sans font-bold text-base mb-2">Allowable Blood Loss (ABL)</h4>
+          <div className="flex flex-wrap gap-3 items-end mb-3">
+            <label className="flex flex-col gap-1">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Starting Hgb (g/dL)</span>
+              <Input
+                data-testid="hgb-start"
+                type="number"
+                step="0.1"
+                min="4"
+                max="22"
+                value={hgbStart}
+                onChange={(e) => setHgbStart(Math.max(4, Math.min(22, +e.target.value || 4)))}
+                className="w-28 font-mono text-right"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Minimum acceptable Hgb</span>
+              <Input
+                data-testid="hgb-min"
+                type="number"
+                step="0.1"
+                min="4"
+                max="20"
+                value={hgbMin}
+                onChange={(e) => setHgbMin(Math.max(4, Math.min(20, +e.target.value || 4)))}
+                className="w-28 font-mono text-right"
+              />
+            </label>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <DoseCard testid="abl-card" category="resuscitation" title="Allowable Blood Loss" value={abl.toFixed(0)} unit="mL (before transfusion)" />
+            <DoseCard testid="abl-formula" category="other" title="Formula" value="EBV × ΔHgb / Hgb̄" unit={`${ebv.toFixed(0)} × ${(hgbStart - hgbMin).toFixed(1)} / ${((hgbStart + hgbMin) / 2).toFixed(1)}`} />
+            <DoseCard testid="transfuse-thresh" category="resuscitation" title="pRBC transfuse" value="Hb < 7" unit="g/dL (stable child)" note="< 8–9 if cardiac / critical" />
+          </div>
+        </div>
+
+        {/* NPO deficit */}
+        <div className="mt-5">
+          <h4 className="font-sans font-bold text-base mb-2">NPO Fluid Deficit</h4>
+          <div className="flex flex-wrap gap-3 items-end mb-3">
+            <label className="flex flex-col gap-1">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Hours NPO</span>
+              <Input
+                data-testid="hours-npo"
+                type="number"
+                step="0.5"
+                min="0"
+                max="24"
+                value={hoursNPO}
+                onChange={(e) => setHoursNPO(Math.max(0, Math.min(24, +e.target.value || 0)))}
+                className="w-28 font-mono text-right"
+              />
+            </label>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <DoseCard testid="npo-deficit" category="fluid" title="Total NPO deficit" value={deficit.toFixed(0)} unit="mL (hours × 4-2-1)" />
+            <DoseCard testid="npo-replace-1" category="fluid" title="1st hour replace" value={(deficit / 2).toFixed(0)} unit="mL + maintenance" note="Holliday-Segar replacement: 50% in 1st hr" />
+            <DoseCard testid="npo-replace-2" category="fluid" title="Hours 2–3 replace" value={(deficit / 4).toFixed(0)} unit="mL/hr + maintenance" note="25% per hour × 2 hours" />
+          </div>
+        </div>
+
+        {/* Local anaesthetic maxes */}
+        <div className="mt-5">
+          <h4 className="font-sans font-bold text-base mb-2">Local Anaesthetic — Max Safe Dose</h4>
+          <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="bg-slate-900 dark:bg-slate-950 text-white">
+                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Agent</th>
+                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">mg/kg</th>
+                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Max mg</th>
+                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Max for {weight} kg</th>
+                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Concentration</th>
+                </tr>
+              </thead>
+              <tbody>
+                {LOCAL_ANAESTHETICS.map((la) => {
+                  const maxMg = Math.min(weight * la.mgPerKg, la.max);
+                  return (
+                    <tr key={la.name} className="border-t border-slate-200 dark:border-slate-800 odd:bg-slate-50 dark:odd:bg-slate-900/40">
+                      <td className="p-3 font-bold">{la.name}</td>
+                      <td className="p-3 font-mono">{la.mgPerKg}</td>
+                      <td className="p-3 font-mono">{la.max}</td>
+                      <td className="p-3 font-mono font-bold text-red-600 dark:text-red-400">{maxMg.toFixed(1)} mg</td>
+                      <td className="p-3 font-mono text-xs text-slate-500 dark:text-slate-400">{la.concentration}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+            Total dose includes any infiltrated during the case. Bupivacaine cardiotoxicity — have 20% intralipid
+            available (1.5 mL/kg bolus, then 0.25 mL/kg/min).
+          </p>
+        </div>
+
+        {/* Transfusion quick-ref */}
+        <div className="mt-5">
+          <h4 className="font-sans font-bold text-base mb-2">Transfusion Quick Reference</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {TRANSFUSION_NOTES.map((t) => (
+              <div key={t.label} className="rounded-md border border-slate-200 dark:border-slate-800 p-3 bg-white dark:bg-slate-900/50 flex items-baseline gap-3">
+                <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400 min-w-[40%]">
+                  {t.label}
+                </span>
+                <span className="font-mono text-sm font-bold text-red-600 dark:text-red-400">{t.value}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
