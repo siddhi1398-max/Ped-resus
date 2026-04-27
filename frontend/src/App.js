@@ -26,7 +26,6 @@ import FluidsTab from "./components/tabs/FluidsTab";
 import ScoresTab from "./components/tabs/ScoresTab";
 import RsiSedationTab from "./components/tabs/RsiSedationTab";
 import DifferentialsTab from "./components/tabs/DifferentialsTab";
-import { AppGate } from "./components/AppPaywall";
 import { Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Baby, ClipboardText, Syringe, Stethoscope } from "@phosphor-icons/react";
 
 function Home() {
@@ -95,11 +94,7 @@ function App() {
           <Routes>
             <Route
               path="/"
-              element={
-                <AppGate>
-                  <Home />
-                </AppGate>
-              }
+              element={<Home />}
             />
           </Routes>
         </BrowserRouter>
