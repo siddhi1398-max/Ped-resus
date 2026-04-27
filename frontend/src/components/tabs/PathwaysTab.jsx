@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useWeight } from "../../context/WeightContext";
 import { PATHWAYS } from "../../data/pathways";
 import { exportCarePlanPDF } from "../../lib/exportCarePlan";
-import { isUnlocked } from "../../lib/purchase";
-import { ArrowLeft, FilePdf, CaretRight, Diamond, Lock } from "@phosphor-icons/react";
+import { ArrowLeft, FilePdf, CaretRight, Diamond } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 const TONE = {
@@ -12,20 +11,22 @@ const TONE = {
   emerald: "bg-emerald-100 text-emerald-900 border-emerald-400 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-700",
 };
 
-export default function PathwaysTab({ onRequireUnlock }) {
+export default function PathwaysTab({ embedded = false }) {
   const { weight } = useWeight();
   const [activeId, setActiveId] = useState(null);
 
   if (!activeId) {
     return (
       <div className="space-y-5">
-        <div>
-          <h2 className="font-sans font-bold text-2xl sm:text-3xl tracking-tight mb-1">Clinical Pathways</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            Interactive decision-tree pathways for acute medical &amp; surgical emergencies. References:{" "}
-            <strong>Tintinalli · Fleischer &amp; Ludwig · Harriet Lane · IAP</strong>.
-          </p>
-        </div>
+        {!embedded && (
+          <div>
+            <h2 className="font-sans font-bold text-2xl sm:text-3xl tracking-tight mb-1">Clinical Pathways</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Interactive decision-tree pathways for acute medical &amp; surgical emergencies. References:{" "}
+              <strong>Tintinalli · Fleischer &amp; Ludwig · Harriet Lane · IAP</strong>.
+            </p>
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {PATHWAYS.map((p) => (
             <button
@@ -56,12 +57,11 @@ export default function PathwaysTab({ onRequireUnlock }) {
       pathway={pathway}
       weight={weight}
       onExit={() => setActiveId(null)}
-      onRequireUnlock={onRequireUnlock}
     />
   );
 }
 
-function PathwayRunner({ pathway, weight, onExit, onRequireUnlock }) {
+function PathwayRunner({ pathway, weight, onExit }) {
   const [history, setHistory] = useState([pathway.start]);
   const currentId = history[history.length - 1];
   const node = pathway.nodes[currentId];
@@ -75,10 +75,6 @@ function PathwayRunner({ pathway, weight, onExit, onRequireUnlock }) {
   const restart = () => setHistory([pathway.start]);
 
   const exportPDF = () => {
-    if (!isUnlocked()) {
-      onRequireUnlock?.();
-      return;
-    }
     const bundle = {
       title: `${pathway.title} · Care Plan`,
       source: pathway.source,

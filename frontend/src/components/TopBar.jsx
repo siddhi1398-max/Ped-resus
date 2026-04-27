@@ -5,13 +5,12 @@ import { useWeight } from "../context/WeightContext";
 import { estimateAge } from "../lib/calc";
 import { zoneForWeight } from "../data/broselow";
 import { exportPatientCasePDF } from "../lib/exportPdf";
-import { isUnlocked } from "../lib/purchase";
-import { Sun, Moon, FilePdf, Heartbeat, Lock } from "@phosphor-icons/react";
+import { Sun, Moon, FilePdf, Heartbeat } from "@phosphor-icons/react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { useMemo } from "react";
 
-export default function TopBar({ onRequireUnlock }) {
+export default function TopBar() {
   const { weight, setWeight } = useWeight();
   const { theme, setTheme } = useTheme();
   const zone = zoneForWeight(weight);
@@ -24,10 +23,6 @@ export default function TopBar({ onRequireUnlock }) {
   };
 
   const handleExport = () => {
-    if (!isUnlocked()) {
-      onRequireUnlock?.();
-      return;
-    }
     try {
       exportPatientCasePDF(weight);
       toast.success(`Dose sheet exported for ${weight} kg`);
@@ -70,8 +65,8 @@ export default function TopBar({ onRequireUnlock }) {
               onClick={handleExport}
               className="gap-2 bg-red-600 hover:bg-red-700 text-white dark:bg-red-500 dark:hover:bg-red-600"
             >
-              {isUnlocked() ? <FilePdf size={18} weight="bold" /> : <Lock size={18} weight="bold" />}
-              <span className="hidden sm:inline">{isUnlocked() ? "Export PDF" : "Unlock PDF"}</span>
+              <FilePdf size={18} weight="bold" />
+              <span className="hidden sm:inline">Export PDF</span>
             </Button>
           </div>
         </div>

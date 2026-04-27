@@ -11,7 +11,7 @@ import "@fontsource/jetbrains-mono/700.css";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { WeightProvider } from "./context/WeightContext";
 import TopBar from "./components/TopBar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
@@ -25,20 +25,12 @@ import AlgorithmsTab from "./components/tabs/AlgorithmsTab";
 import FluidsTab from "./components/tabs/FluidsTab";
 import ScoresTab from "./components/tabs/ScoresTab";
 import RsiSedationTab from "./components/tabs/RsiSedationTab";
-import PathwaysTab from "./components/tabs/PathwaysTab";
 import DifferentialsTab from "./components/tabs/DifferentialsTab";
-import PaywallDialog from "./components/PaywallDialog";
-import { Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Baby, ClipboardText, Syringe, Path, Stethoscope } from "@phosphor-icons/react";
+import { AppGate } from "./components/AppPaywall";
+import { Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Baby, ClipboardText, Syringe, Stethoscope } from "@phosphor-icons/react";
 
 function Home() {
   const [tab, setTab] = useState("calculator");
-  const [paywallOpen, setPaywallOpen] = useState(false);
-
-  // Auto-open paywall on return from Stripe checkout
-  useEffect(() => {
-    const p = new URLSearchParams(window.location.search);
-    if (p.get("session_id")) setPaywallOpen(true);
-  }, []);
 
   const TABS = [
     { id: "calculator", label: "Calculator", icon: Calculator, Comp: CalculatorTab },
@@ -47,8 +39,7 @@ function Home() {
     { id: "drugs", label: "Drug Doses", icon: Pill, Comp: DrugsTab },
     { id: "fluids", label: "Fluids", icon: Drop, Comp: FluidsTab },
     { id: "vitals", label: "Vitals by Age", icon: Heartbeat, Comp: VitalsTab },
-    { id: "scores", label: "Pain & Scores", icon: ClipboardText, Comp: ScoresTab },
-    { id: "pathways", label: "Pathways", icon: Path, Comp: PathwaysTab },
+    { id: "scores", label: "Scores & Pathways", icon: ClipboardText, Comp: ScoresTab },
     { id: "neonatal", label: "Neonatal (NRP)", icon: Baby, Comp: NeonatalTab },
     { id: "algorithms", label: "PALS Algorithms", icon: TreeStructure, Comp: AlgorithmsTab },
     { id: "differentials", label: "Differentials", icon: Stethoscope, Comp: DifferentialsTab },
@@ -56,7 +47,7 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-slate-100" style={{ fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
-      <TopBar onRequireUnlock={() => setPaywallOpen(true)} />
+      <TopBar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <Tabs value={tab} onValueChange={setTab} data-testid="main-tabs">
           <TabsList className="w-full justify-start flex-wrap h-auto p-1.5 bg-slate-100 dark:bg-slate-900 gap-1">
@@ -77,7 +68,7 @@ function Home() {
           </TabsList>
           {TABS.map((t) => (
             <TabsContent key={t.id} value={t.id} className="mt-6 sm:mt-8 focus-visible:outline-none">
-              <t.Comp onRequireUnlock={() => setPaywallOpen(true)} />
+              <t.Comp />
             </TabsContent>
           ))}
         </Tabs>
@@ -91,7 +82,6 @@ function Home() {
           </div>
         </footer>
       </main>
-      <PaywallDialog open={paywallOpen} onOpenChange={setPaywallOpen} />
       <Toaster position="top-center" richColors />
     </div>
   );
@@ -103,7 +93,14 @@ function App() {
       <WeightProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route
+              path="/"
+              element={
+                <AppGate>
+                  <Home />
+                </AppGate>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </WeightProvider>
