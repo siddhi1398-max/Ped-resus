@@ -1,0 +1,148 @@
+{
+  "theme": {
+    "mode": "light_and_dark",
+    "primary_default": "light",
+    "archetype": "Archetype 4 (Swiss & High-Contrast)",
+    "rationale": "For an emergency pediatric reference, absolute clarity, data legibility, and function-first design are paramount. The Swiss & High-Contrast archetype provides the necessary authority and scannability under high-pressure situations."
+  },
+  "typography": {
+    "font_install_commands": [
+      "yarn add @fontsource/chivo",
+      "yarn add @fontsource/ibm-plex-sans",
+      "yarn add @fontsource/jetbrains-mono"
+    ],
+    "headings": {
+      "family": "Chivo",
+      "css_class": "font-sans font-bold tracking-tight",
+      "forbidden": ["Inter", "Roboto", "Open Sans", "Lato"]
+    },
+    "body": {
+      "family": "IBM Plex Sans",
+      "css_class": "font-sans leading-relaxed text-slate-800 dark:text-slate-200"
+    },
+    "mono_data": {
+      "family": "JetBrains Mono",
+      "css_class": "font-mono tracking-tight",
+      "usage": "MUST be used for all numerical values, dose amounts, weights, and formulas to ensure precise tabular alignment and readability (e.g., distinguishing 1, I, l, 0, O)."
+    },
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl font-black tracking-tighter",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-semibold",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base sm:text-sm",
+      "labels": "text-xs font-bold uppercase tracking-[0.2em]"
+    }
+  },
+  "colors": {
+    "background": {
+      "light": "#FFFFFF",
+      "light_surface": "#F8F9FA",
+      "dark": "#0A0A0A",
+      "dark_surface": "#121212"
+    },
+    "text": {
+      "light": "#1A1D20",
+      "light_muted": "#6C757D",
+      "dark": "#E9ECEF",
+      "dark_muted": "#ADB5BD"
+    },
+    "brand_primary": {
+      "light": "#E03131",
+      "dark": "#FA5252",
+      "usage": "Used sparingly for extreme critical alerts (e.g., Defibrillation, Cardiac Arrest). Do not overuse."
+    },
+    "brand_secondary": {
+      "light": "#1971C2",
+      "dark": "#339AF0",
+      "usage": "Used for standard CTA, selected tabs, active states."
+    },
+    "broselow_tape": {
+      "grey": {"hex": "#868E96", "text": "text-white", "weight": "3-5 kg"},
+      "pink": {"hex": "#F06595", "text": "text-white", "weight": "6-7 kg"},
+      "red": {"hex": "#E03131", "text": "text-white", "weight": "8-9 kg"},
+      "purple": {"hex": "#9C36B5", "text": "text-white", "weight": "10-11 kg"},
+      "yellow": {"hex": "#FCC419", "text": "text-black", "weight": "12-14 kg"},
+      "white": {"hex": "#FFFFFF", "border": "border-slate-300", "text": "text-black", "weight": "15-18 kg"},
+      "blue": {"hex": "#1971C2", "text": "text-white", "weight": "19-23 kg"},
+      "orange": {"hex": "#F76707", "text": "text-white", "weight": "24-29 kg"},
+      "green": {"hex": "#2F9E44", "text": "text-white", "weight": "30-36 kg"}
+    },
+    "drug_categories": {
+      "resuscitation": {"bg": "bg-red-100 dark:bg-red-950", "border": "border-red-500", "text": "text-red-900 dark:text-red-100"},
+      "sedation": {"bg": "bg-purple-100 dark:bg-purple-950", "border": "border-purple-500", "text": "text-purple-900 dark:text-purple-100"},
+      "antibiotic": {"bg": "bg-blue-100 dark:bg-blue-950", "border": "border-blue-500", "text": "text-blue-900 dark:text-blue-100"},
+      "fluid": {"bg": "bg-cyan-100 dark:bg-cyan-950", "border": "border-cyan-500", "text": "text-cyan-900 dark:text-cyan-100"},
+      "airway": {"bg": "bg-green-100 dark:bg-green-950", "border": "border-green-500", "text": "text-green-900 dark:text-green-100"}
+    }
+  },
+  "layout_and_spacing": {
+    "grid_system": {
+      "type": "Control Room Grid",
+      "columns": "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4",
+      "gap": "gap-3 sm:gap-4",
+      "usage": "Use this dense grid for the Live Dose Cards to ensure maximum visibility of drugs on a single screen without scrolling."
+    },
+    "spacing_scale": {
+      "internal_padding": "p-4 sm:p-6",
+      "section_gap": "gap-8 sm:gap-12",
+      "rule": "Generous spacing between major sections, but tight spacing within data cards."
+    },
+    "surfaces": {
+      "top_bar": "Sticky/Fixed top, z-50, crystal glassmorphism: backdrop-blur-xl bg-white/80 dark:bg-black/80, 1px bottom border border-slate-200 dark:border-slate-800.",
+      "dose_cards": "Flat solid background, 1px subtle border, rounded-md (max 8px radius). No heavy shadows. Use drug_categories colors for left border accent (e.g. border-l-4).",
+      "data_tables": "border-collapse, alternating row colors (zebra striping) using very subtle grays (e.g., bg-slate-50 dark:bg-slate-900) for scannability."
+    }
+  },
+  "components": {
+    "ui_library": "shadcn/ui",
+    "top_bar": {
+      "elements": ["Weight Slider", "Numeric Input (kg)", "Estimated Age Readout", "Dark Mode Toggle", "Export PDF Button"],
+      "slider_rules": "Must be thick (h-4 or h-6 track) for easy touch targeting. Thumb must be prominent. Real-time value updates."
+    },
+    "tabs": {
+      "style": "Full width, scrollable on mobile. Active tab must have high contrast (e.g., solid brand_secondary background or thick underline)."
+    },
+    "broselow_tape": {
+      "style": "A horizontal bar split into 9 proportional color blocks. Each block is clickable to auto-set the weight slider to the median of that zone. Use precise hex codes from colors.broselow_tape."
+    },
+    "algorithms": {
+      "style": "Flowchart style step cards. Use arrows (Phosphor icons) between steps. Differentiate 'Decision' nodes (diamond or outlined) from 'Action' nodes (solid fills)."
+    }
+  },
+  "icons_and_media": {
+    "library": "@phosphor-icons/react",
+    "install_command": "yarn add @phosphor-icons/react",
+    "usage": "Dense dashboards require Phosphor icons. Use regular or bold weights.",
+    "images": {
+      "policy": "NO IMAGES. Do not use <img> tags, placeholders, or dummy images. The application is a clinical tool; rely strictly on typography, color-coding, and SVG icons."
+    }
+  },
+  "motion_and_interactions": {
+    "hover": "Slight border darkening or subtle background tint change. No dramatic scale transformations. Focus on speed.",
+    "focus": "All inputs/buttons MUST have a highly visible focus ring: focus:ring-2 focus:ring-brand_secondary focus:outline-none focus:ring-offset-2 dark:focus:ring-offset-black",
+    "active": "Press states should be immediate: active:scale-[0.98] transition-transform duration-75"
+  },
+  "accessibility_and_testing": {
+    "contrast": "Text must pass WCAG AA (4.5:1). Dark mode MUST be tested for readable contrast on Broselow colors.",
+    "test_ids": {
+      "rule": "All interactive elements MUST include data-testid attribute.",
+      "examples": [
+        "data-testid='weight-slider'",
+        "data-testid='weight-input'",
+        "data-testid='export-pdf-button'",
+        "data-testid='tab-equipment'",
+        "data-testid='dose-card-adrenaline'"
+      ]
+    }
+  },
+  "instructions_to_main_agent": [
+    "Prioritize load speed and instantaneous reactivity of the weight slider modifying all dose cards.",
+    "Implement the Broselow Tape as a visual index that also functions as quick-nav (clicking 'Purple' sets weight to ~10.5kg).",
+    "Ensure the Equipment Tube Table is fully responsive; wrap in overflow-x-auto for mobile devices.",
+    "For the Algorithm flowcharts, build semantic HTML cards connected by CSS or simple SVG lines, do not embed static images.",
+    "For PDF export, use a library like 'react-to-pdf' or 'jspdf'. Ensure the exported document uses a clean, white background regardless of the user's active theme.",
+    "Strictly follow the color mappings for drug categories to allow clinicians to rapidly distinguish sedation from resuscitation meds visually.",
+    "Always use JetBrains Mono for numbers to avoid misreading critical doses."
+  ]
+}
