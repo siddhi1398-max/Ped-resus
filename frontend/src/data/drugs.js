@@ -249,6 +249,17 @@ export const DRUGS = [
     notes: "Avoid if dehydrated or <3 mo.",
   },
   {
+    id: "diclofenac",
+    name: "Diclofenac",
+    indication: "Moderate pain / musculoskeletal / post-op",
+    category: "analgesia",
+    dosePerKg: 1,
+    unit: "mg",
+    max: 50,
+    route: "PO / PR / IM",
+    notes: "1 mg/kg q8h (max 50 mg/dose, 150 mg/day). Avoid < 6 mo. PR/IM preferred if vomiting. Same NSAID cautions: hydration, no active bleeding, renal function.",
+  },
+  {
     id: "ketorolac",
     name: "Ketorolac (Toradol)",
     indication: "Moderate pain (post-op, renal colic)",
@@ -855,15 +866,14 @@ export const DRUGS = [
 ];
 
 export const DRUG_CATEGORIES = [
-  { id: "all", label: "All" },
-  { id: "resuscitation", label: "Resuscitation" },
-  { id: "sedation", label: "Sedation / RSI" },
-  { id: "airway", label: "Airway / Paralysis" },
-  { id: "anticonvulsant", label: "Anticonvulsant" },
-  { id: "analgesia", label: "Analgesia" },
-  { id: "antibiotic", label: "Antibiotic" },
-  { id: "fluid", label: "Fluid / Electrolyte" },
-  { id: "other", label: "Other" },
+  { id: "all", label: "All", matches: null },
+  { id: "resuscitation", label: "Resuscitation", matches: ["resuscitation"] },
+  { id: "rsi-sedation", label: "RSI / Sedation", matches: ["sedation", "airway"] },
+  { id: "anticonvulsant", label: "Anticonvulsant", matches: ["anticonvulsant"] },
+  { id: "analgesia", label: "Analgesia", matches: ["analgesia"] },
+  { id: "antibiotic", label: "Antibiotic", matches: ["antibiotic"] },
+  { id: "fluid", label: "Fluid / Electrolyte", matches: ["fluid"] },
+  { id: "other", label: "Other", matches: ["other"] },
 ];
 
 export function computeDrugDose(drug, weight) {

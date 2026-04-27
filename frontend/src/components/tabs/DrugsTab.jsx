@@ -21,8 +21,10 @@ export default function DrugsTab() {
   const [cat, setCat] = useState("all");
 
   const filtered = useMemo(() => {
+    const catDef = DRUG_CATEGORIES.find((c) => c.id === cat);
+    const matches = catDef?.matches; // null means "all"
     return DRUGS.filter((d) => {
-      const matchCat = cat === "all" || d.category === cat;
+      const matchCat = !matches || matches.includes(d.category);
       const matchQ =
         !q ||
         d.name.toLowerCase().includes(q.toLowerCase()) ||

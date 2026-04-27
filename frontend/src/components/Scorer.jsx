@@ -18,18 +18,26 @@ const TONE = {
 export default function Scorer({ definition, onResult, extraFooter }) {
   const [picks, setPicks] = useState({});
 
-  const { total, allPicked } = useMemo(() => {
+  const { total, allPicked, pickedLabels } = useMemo(() => {
     let sum = 0;
     let all = true;
+    const labels = {};
     for (const item of definition.items) {
       const v = picks[item.key];
-      if (v == null) all = false;
-      else sum += v;
+      if (v == null) {
+        all = false;
+      } else {
+        sum += v;
+        const opt = item.options.find((o) => o.v === v);
+        labels[item.key] = { label: item.label, value: v, text: opt?.l || "" };
+      }
     }
-    return { total: sum, allPicked: all };
+    return { total: sum, allPicked: all, pickedLabels: labels };
   }, [picks, definition.items]);
 
-  const interpretation = allPicked ? definition.interpret(total) : null;
+  const interpretation = allPicked
+    ? { ...definition.interpret(total), picks: pickedLabels }
+    : null;
 
   useEffect(() => {
     if (onResult) onResult(interpretation);

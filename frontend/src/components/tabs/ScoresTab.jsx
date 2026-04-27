@@ -1,6 +1,9 @@
 import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
 import Scorer, { TONE } from "../Scorer";
+import { FilePdf } from "@phosphor-icons/react";
+import { toast } from "sonner";
+import { exportCarePlanPDF } from "../../lib/exportCarePlan";
 import {
   FLACC,
   FACES,
