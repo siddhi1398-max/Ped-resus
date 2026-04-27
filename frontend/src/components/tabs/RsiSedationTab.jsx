@@ -1,6 +1,7 @@
 import { useWeight } from "../../context/WeightContext";
 import { RSI_PRE_MEDICATION, RSI_INDUCTION, RSI_PARALYSIS, RSI_POST, RSI_CHECKLIST } from "../../data/infusions";
 import InfusionCalculator from "../InfusionCalculator";
+import RuleOfSixs from "../RuleOfSixs";
 import { useState } from "react";
 
 const TONE_CARD = {
@@ -13,6 +14,7 @@ const TONE_CARD = {
 const SECTIONS = [
   { id: "quickstart", label: "RSI Quickstart" },
   { id: "infusions", label: "Infusions (mL/hr)" },
+  { id: "rule6", label: "Rule of 6s" },
   { id: "checklist", label: "7 Ps Checklist" },
 ];
 
@@ -49,6 +51,7 @@ export default function RsiSedationTab() {
 
       {sec === "quickstart" && <Quickstart weight={weight} />}
       {sec === "infusions" && <InfusionCalculator />}
+      {sec === "rule6" && <RuleOfSixs />}
       {sec === "checklist" && <Checklist />}
     </div>
   );
