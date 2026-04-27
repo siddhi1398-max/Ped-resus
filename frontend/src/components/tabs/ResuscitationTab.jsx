@@ -18,16 +18,16 @@ const SECTIONS = [
   { id: "checklist", label: "7 Ps Checklist" },
 ];
 
-export default function RsiSedationTab() {
+export default function ResuscitationTab() {
   const { weight } = useWeight();
   const [sec, setSec] = useState("quickstart");
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-sans font-bold text-2xl sm:text-3xl tracking-tight mb-1">RSI / Sedation</h2>
+        <h2 className="font-sans font-bold text-2xl sm:text-3xl tracking-tight mb-1">Resuscitation</h2>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Rapid sequence intubation, paralysis, post-intubation sedation & infusions for{" "}
+          RSI quickstart, post-intubation infusions, Rule of 6s & 7-Ps checklist for{" "}
           <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{weight} kg</span>.
         </p>
       </div>

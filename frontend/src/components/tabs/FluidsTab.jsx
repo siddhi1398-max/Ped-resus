@@ -10,7 +10,6 @@ import {
   ebvPerKgForWeight,
   allowableBloodLoss,
   npoDeficit,
-  LOCAL_ANAESTHETICS,
   TRANSFUSION_NOTES,
   EBV_TABLE,
 } from "../../data/fluids";
@@ -214,42 +213,6 @@ export default function FluidsTab() {
             <DoseCard testid="npo-replace-1" category="fluid" title="1st hour replace" value={(deficit / 2).toFixed(0)} unit="mL + maintenance" note="Holliday-Segar replacement: 50% in 1st hr" />
             <DoseCard testid="npo-replace-2" category="fluid" title="Hours 2–3 replace" value={(deficit / 4).toFixed(0)} unit="mL/hr + maintenance" note="25% per hour × 2 hours" />
           </div>
-        </div>
-
-        {/* Local anaesthetic maxes */}
-        <div className="mt-5">
-          <h4 className="font-sans font-bold text-base mb-2">Local Anaesthetic — Max Safe Dose</h4>
-          <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="bg-slate-900 dark:bg-slate-950 text-white">
-                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Agent</th>
-                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">mg/kg</th>
-                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Max mg</th>
-                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Max for {weight} kg</th>
-                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Concentration</th>
-                </tr>
-              </thead>
-              <tbody>
-                {LOCAL_ANAESTHETICS.map((la) => {
-                  const maxMg = Math.min(weight * la.mgPerKg, la.max);
-                  return (
-                    <tr key={la.name} className="border-t border-slate-200 dark:border-slate-800 odd:bg-slate-50 dark:odd:bg-slate-900/40">
-                      <td className="p-3 font-bold">{la.name}</td>
-                      <td className="p-3 font-mono">{la.mgPerKg}</td>
-                      <td className="p-3 font-mono">{la.max}</td>
-                      <td className="p-3 font-mono font-bold text-red-600 dark:text-red-400">{maxMg.toFixed(1)} mg</td>
-                      <td className="p-3 font-mono text-xs text-slate-500 dark:text-slate-400">{la.concentration}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-            Total dose includes any infiltrated during the case. Bupivacaine cardiotoxicity — have 20% intralipid
-            available (1.5 mL/kg bolus, then 0.25 mL/kg/min).
-          </p>
         </div>
 
         {/* Transfusion quick-ref */}

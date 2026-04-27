@@ -18,15 +18,20 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
 import { Toaster } from "./components/ui/sonner";
 import CalculatorTab from "./components/tabs/CalculatorTab";
 import EquipmentTab from "./components/tabs/EquipmentTab";
+import ResuscitationTab from "./components/tabs/ResuscitationTab";
 import DrugsTab from "./components/tabs/DrugsTab";
+import FluidsTab from "./components/tabs/FluidsTab";
 import VitalsTab from "./components/tabs/VitalsTab";
+import ScoresTab from "./components/tabs/ScoresTab";
+import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
 import AlgorithmsTab from "./components/tabs/AlgorithmsTab";
-import FluidsTab from "./components/tabs/FluidsTab";
-import ScoresTab from "./components/tabs/ScoresTab";
-import RsiSedationTab from "./components/tabs/RsiSedationTab";
-import DifferentialsTab from "./components/tabs/DifferentialsTab";
-import { Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Baby, ClipboardText, Syringe, Stethoscope } from "@phosphor-icons/react";
+import ClinicalPathwaysTab from "./components/tabs/ClinicalPathwaysTab";
+import ImagingTab from "./components/tabs/ImagingTab";
+import {
+  Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Baby,
+  ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon,
+} from "@phosphor-icons/react";
 
 function Home() {
   const [tab, setTab] = useState("calculator");
@@ -34,14 +39,16 @@ function Home() {
   const TABS = [
     { id: "calculator", label: "Calculator", icon: Calculator, Comp: CalculatorTab },
     { id: "equipment", label: "Equipment & Tubes", icon: Wrench, Comp: EquipmentTab },
-    { id: "rsi", label: "RSI / Sedation", icon: Syringe, Comp: RsiSedationTab },
+    { id: "resuscitation", label: "Resuscitation", icon: Syringe, Comp: ResuscitationTab },
     { id: "drugs", label: "Drug Doses", icon: Pill, Comp: DrugsTab },
     { id: "fluids", label: "Fluids", icon: Drop, Comp: FluidsTab },
     { id: "vitals", label: "Vitals by Age", icon: Heartbeat, Comp: VitalsTab },
-    { id: "scores", label: "Scores & Pathways", icon: ClipboardText, Comp: ScoresTab },
+    { id: "scores", label: "Severity Scores", icon: ClipboardText, Comp: ScoresTab },
+    { id: "sedation", label: "Sedation & Analgesia", icon: FirstAid, Comp: SedationAnalgesiaTab },
     { id: "neonatal", label: "Neonatal (NRP)", icon: Baby, Comp: NeonatalTab },
     { id: "algorithms", label: "PALS Algorithms", icon: TreeStructure, Comp: AlgorithmsTab },
-    { id: "differentials", label: "Differentials", icon: Stethoscope, Comp: DifferentialsTab },
+    { id: "pathways", label: "Clinical Pathways", icon: Stethoscope, Comp: ClinicalPathwaysTab },
+    { id: "imaging", label: "Imaging", icon: ImageIcon, Comp: ImagingTab },
   ];
 
   return (
@@ -92,10 +99,7 @@ function App() {
       <WeightProvider>
         <BrowserRouter>
           <Routes>
-            <Route
-              path="/"
-              element={<Home />}
-            />
+            <Route path="/" element={<Home />} />
           </Routes>
         </BrowserRouter>
       </WeightProvider>
