@@ -1,8 +1,10 @@
 import { useWeight } from "../../context/WeightContext";
 import { RSI_PRE_MEDICATION, RSI_INDUCTION, RSI_PARALYSIS, RSI_POST, RSI_CHECKLIST } from "../../data/infusions";
+import { ICD_INSERTION, VENTILATOR_SETTINGS } from "../../data/criticalCare";
 import InfusionCalculator from "../InfusionCalculator";
 import RuleOfSixs from "../RuleOfSixs";
 import { useState } from "react";
+import { Warning } from "@phosphor-icons/react";
 
 const TONE_CARD = {
   emerald: "border-l-emerald-500 dark:border-l-emerald-400",
@@ -16,6 +18,8 @@ const SECTIONS = [
   { id: "infusions", label: "Infusions (mL/hr)" },
   { id: "rule6", label: "Rule of 6s" },
   { id: "checklist", label: "7 Ps Checklist" },
+  { id: "icd", label: "ICD Insertion" },
+  { id: "vent", label: "Ventilator Settings" },
 ];
 
 export default function ResuscitationTab() {
@@ -53,6 +57,8 @@ export default function ResuscitationTab() {
       {sec === "infusions" && <InfusionCalculator />}
       {sec === "rule6" && <RuleOfSixs />}
       {sec === "checklist" && <Checklist />}
+      {sec === "icd" && <IcdSection weight={weight} />}
+      {sec === "vent" && <VentSection />}
     </div>
   );
 }
@@ -160,6 +166,157 @@ function Checklist() {
           </ul>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ═══════════════════════════ ICD Insertion ═══════════════════════════
+function IcdSection({ weight }) {
+  return (
+    <div className="space-y-5" data-testid="icd-section">
+      <div className="rounded-md border-2 border-red-400 dark:border-red-700 bg-red-50 dark:bg-red-950/40 p-4">
+        <div className="flex items-center gap-2 text-red-800 dark:text-red-200 mb-1">
+          <Warning size={16} weight="fill" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold">Tension pneumothorax</span>
+        </div>
+        <p className="text-sm text-red-900 dark:text-red-100">
+          Clinical diagnosis. Needle decompress at 4–5th ICS mid-axillary line (or 2nd ICS MCL) BEFORE ICD insertion.
+          Do NOT wait for imaging.
+        </p>
+      </div>
+
+      <BulletBlock title="Indications" items={ICD_INSERTION.indications} />
+      <BulletBlock title="Contraindications" items={ICD_INSERTION.contraindications} tone="amber" />
+
+      <div>
+        <h4 className="font-sans font-bold text-base mb-2">Tube size by weight ({weight} kg)</h4>
+        <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="bg-slate-900 dark:bg-slate-950 text-white">
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Patient</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">General range</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Pneumothorax</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Fluid / blood</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ICD_INSERTION.sizingTable.map((s) => (
+                <tr key={s.weight} className="border-t border-slate-200 dark:border-slate-800 odd:bg-slate-50 dark:odd:bg-slate-900/40">
+                  <td className="p-3 font-bold">{s.weight}</td>
+                  <td className="p-3 font-mono">{s.french}</td>
+                  <td className="p-3 font-mono text-emerald-700 dark:text-emerald-400">{s.pneumo}</td>
+                  <td className="p-3 font-mono text-red-700 dark:text-red-400">{s.fluid}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <BulletBlock title="Equipment" items={ICD_INSERTION.equipment} />
+      <NumberedSteps title="Technique (open / blunt-dissection — preferred)" items={ICD_INSERTION.technique} />
+      <BulletBlock title="Post-procedure care" items={ICD_INSERTION.postProcedure} />
+      <BulletBlock title="Removal criteria & technique" items={ICD_INSERTION.removal} tone="emerald" />
+      <BulletBlock title="Complications" items={ICD_INSERTION.complications} tone="amber" />
+
+      <div className="text-xs text-slate-500 dark:text-slate-400 italic">
+        References: Tintinalli ch. 30 · BTS Pleural Disease Guideline · APLS · Open Pediatrics chest tube module.
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════ Ventilator Settings ═══════════════════════════
+function VentSection() {
+  return (
+    <div className="space-y-5" data-testid="vent-section">
+      <div>
+        <h4 className="font-sans font-bold text-base mb-3">Initial Settings</h4>
+        <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="bg-slate-900 dark:bg-slate-950 text-white">
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Parameter</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Pediatric</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Neonatal</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Pearls</th>
+              </tr>
+            </thead>
+            <tbody>
+              {VENTILATOR_SETTINGS.initial.map((r) => (
+                <tr key={r.param} className="border-t border-slate-200 dark:border-slate-800 odd:bg-slate-50 dark:odd:bg-slate-900/40 align-top">
+                  <td className="p-3 font-bold whitespace-nowrap">{r.param}</td>
+                  <td className="p-3 font-mono text-xs">{r.pediatric}</td>
+                  <td className="p-3 font-mono text-xs text-cyan-700 dark:text-cyan-400">{r.neonatal}</td>
+                  <td className="p-3 text-xs text-slate-600 dark:text-slate-300 max-w-sm">{r.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <BulletBlock title="Sedation & paralysis" items={VENTILATOR_SETTINGS.sedationParalysis} />
+
+      <div>
+        <h4 className="font-sans font-bold text-base mb-2">Troubleshooting (DOPE)</h4>
+        <div className="space-y-2">
+          {VENTILATOR_SETTINGS.troubleshooting.map((t) => (
+            <div key={t.problem} className="rounded-md border border-l-4 border-l-red-500 dark:border-l-red-400 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-3">
+              <div className="font-bold text-sm">{t.problem}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1"><span className="font-mono uppercase tracking-widest text-[9px]">Causes</span> · {t.causes}</div>
+              <div className="text-sm text-slate-700 dark:text-slate-200 mt-1.5"><span className="font-mono uppercase tracking-widest text-[9px] text-red-600 dark:text-red-400">Action</span> · {t.action}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <BulletBlock title="Lung-protective / rescue strategies" items={VENTILATOR_SETTINGS.protectiveStrategy} tone="amber" />
+      <BulletBlock title="Weaning & extubation" items={VENTILATOR_SETTINGS.weaning} tone="emerald" />
+
+      <div className="text-xs text-slate-500 dark:text-slate-400 italic">
+        References: PALICC pediatric ARDS guidelines · Open Pediatrics ventilation modules · F&L ch. 8 · Tintinalli ch. 31.
+      </div>
+    </div>
+  );
+}
+
+function BulletBlock({ title, items, tone }) {
+  const toneClass = tone === "amber"
+    ? "border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30"
+    : tone === "emerald"
+      ? "border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30"
+      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50";
+  return (
+    <div>
+      <h4 className="font-sans font-bold text-base mb-2">{title}</h4>
+      <ul className={`space-y-1.5 rounded-md border p-4 text-sm ${toneClass}`}>
+        {items.map((i) => (
+          <li key={i} className="flex gap-2 leading-relaxed">
+            <span className="opacity-60">·</span>
+            <span>{i}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function NumberedSteps({ title, items }) {
+  return (
+    <div>
+      <h4 className="font-sans font-bold text-base mb-2">{title}</h4>
+      <ol className="space-y-2 rounded-md border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900/50 text-sm">
+        {items.map((item, i) => (
+          <li key={item} className="flex gap-3">
+            <span className="font-mono text-red-600 dark:text-red-400 font-black text-sm w-7 shrink-0 pt-0.5">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span className="leading-relaxed">{item}</span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

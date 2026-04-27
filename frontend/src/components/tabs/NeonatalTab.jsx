@@ -10,6 +10,8 @@ import {
   uvcDepth,
 } from "../../data/neonatal";
 import DoseCard from "../DoseCard";
+import Scorer from "../Scorer";
+import { STOPS_SCORE } from "../../data/stops";
 import { Baby, Warning } from "@phosphor-icons/react";
 
 const TONE_MAP = {
@@ -99,6 +101,17 @@ export default function NeonatalTab() {
           Assess at 1 and 5 min. If 5-min score &lt; 7, reassess every 5 min up to 20 min. APGAR does NOT guide
           resuscitation decisions — those are based on HR, tone, respiration in real time.
         </p>
+      </section>
+
+      {/* STOPS — neonatal mortality prognostic score */}
+      <section data-testid="stops-section">
+        <h3 className="font-sans font-bold text-lg mb-1">STOPS — Neonatal Mortality Score</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
+          Bedside prognostic score on NICU admission. <strong>S</strong>ensorium · <strong>T</strong>emperature ·{" "}
+          <strong>O</strong>xygenation · <strong>P</strong>erfusion · <strong>S</strong>ugar. Each scored 0–2 (total 0–10).
+          Score &gt; 2 predicts mortality with ~83% accuracy. Validated for low-resource settings.
+        </p>
+        <Scorer definition={STOPS_SCORE} />
       </section>
 
       {/* Neonatal vitals */}
