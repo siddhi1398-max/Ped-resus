@@ -1,5 +1,25 @@
 export const ALGORITHMS = [
   {
+    id: "nrp",
+    title: "Neonatal Resuscitation (NRP)",
+    subtitle: "Delivery-room resuscitation — NRP 2020 algorithm",
+    color: "resuscitation",
+    steps: [
+      { type: "decision", title: "Term? Good tone? Breathing/crying?", body: "If YES to all → routine care with mother (warm, dry, skin-to-skin). If NO to any → proceed." },
+      { type: "action", title: "Initial steps (first 30 s)", body: "Warm (radiant warmer or plastic bag if <32 wk), dry, stimulate, position (sniffing), clear airway if needed. Start clock." },
+      { type: "decision", title: "Apnoea/gasping OR HR < 100?", body: "Assess breathing and heart rate at 30 s." },
+      { type: "action", title: "PPV (by 60 s)", body: "Positive pressure ventilation: 40–60 breaths/min at 20–25 cmH₂O. Room air if ≥35 wk; 21–30% if <35 wk. Attach SpO₂ (right hand) + ECG." },
+      { type: "decision", title: "HR still < 100 after 15 s PPV?", body: "Check chest rise. If inadequate → MR SOPA." },
+      { type: "action", title: "MR SOPA corrective steps", body: "Mask adjust · Reposition airway · Suction · Open mouth · Pressure increase · Airway (intubate or LMA)." },
+      { type: "decision", title: "HR < 60 after 30 s of effective PPV?", body: "Effective = visible chest rise with PPV." },
+      { type: "action", title: "Intubate + 100% O₂ + Chest compressions", body: "3:1 compressions:ventilations. 90 compressions + 30 breaths per minute (120 events/min). Depth ⅓ AP diameter. Two-thumb encircling technique." },
+      { type: "action", title: "Vascular access — UVC", body: "Place emergency umbilical venous catheter (low, 3–4 cm)." },
+      { type: "action", title: "Adrenaline (Epinephrine)", body: "IV/UVC: 0.01–0.03 mg/kg of 1:10,000 (0.1–0.3 mL/kg). ETT (if no access yet): 0.05–0.1 mg/kg (0.5–1 mL/kg 1:10,000). Repeat q3–5 min." },
+      { type: "action", title: "Volume expansion", body: "If hypovolaemia suspected: 10 mL/kg NS or O-neg blood IV/UVC over 5–10 min. May repeat." },
+      { type: "action", title: "Consider causes & post-resus", body: "Pneumothorax, hypovolaemia, hypoglycaemia. Therapeutic hypothermia (33–34 °C × 72 h) if ≥36 wk with moderate-severe HIE within 6 h of birth." },
+    ],
+  },
+  {
     id: "cardiac-arrest",
     title: "Cardiac Arrest (PALS)",
     subtitle: "Pulseless arrest — shockable & non-shockable",
