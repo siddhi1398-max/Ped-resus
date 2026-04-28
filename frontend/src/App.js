@@ -55,6 +55,11 @@ const firebaseConfig = {
   appId: "1:70799823874:web:b5d4801bf42a0f8c5d431b",
   measurementId: "G-B8JL4THBDL",
 };
+const DEVELOPER = {
+  name: "Dr. Siddhi Naik",
+  title: "Emergency Physician & Developer",
+  contact: "siddhi1398@gmail.com",
+};
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
@@ -69,10 +74,10 @@ const PRICE_INR = 30;
 const ALL_TABS = [
   { id: "calculator",    label: "Calculator",          icon: Calculator,    Comp: CalculatorTab,       free: true  },
   { id: "equipment",     label: "Equipment & Tubes",   icon: Wrench,        Comp: EquipmentTab,        free: false },
-  { id: "resuscitation", label: "Resuscitation",       icon: Syringe,       Comp: ResuscitationTab,    free: false },
+  { id: "resuscitation", label: "Resuscitation",       icon: Syringe,       Comp: ResuscitationTab,    free: true },
   { id: "drugs",         label: "Drug Doses",          icon: Pill,          Comp: DrugsTab,            free: false },
   { id: "fluids",        label: "Fluids",              icon: Drop,          Comp: FluidsTab,           free: false },
-  { id: "vitals",        label: "Vitals by Age",       icon: Heartbeat,     Comp: VitalsTab,           free: false },
+  { id: "vitals",        label: "Vitals by Age",       icon: Heartbeat,     Comp: VitalsTab,           free: true },
   { id: "scores",        label: "Severity Scores",     icon: ClipboardText, Comp: ScoresTab,           free: false },
   { id: "sedation",      label: "Sedation & Analgesia",icon: FirstAid,      Comp: SedationAnalgesiaTab,free: false },
   { id: "neonatal",      label: "Neonatal (NRP)",      icon: Baby,          Comp: NeonatalTab,         free: false },
