@@ -70,7 +70,8 @@ const DEV_TITLE = "Emergency Physician";
 const DEV_EMAIL = "siddhi1398@gmail.com";
 
 // ─── TABS — set free: true to allow without payment ──────────────────────────
-
+// free: true  → anyone can open without payment
+// free: false → shows paywall modal when clicked (but user can close & use free tabs)
 const ALL_TABS = [
   { id: "calculator",    label: "Calculator",          icon: Calculator,    Comp: CalculatorTab,        free: true  },
   { id: "equipment",     label: "Equipment & Tubes",   icon: Wrench,        Comp: EquipmentTab,         free: false },
