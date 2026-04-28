@@ -58,6 +58,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 const auth        = getAuth(firebaseApp);
 const db          = getFirestore(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
+const RAZORPAY_KEY_ID = "rzp_live_SivP8eeXWFKStM";
 
 // ── EDIT YOUR DETAILS HERE ────────────────────────────────────────────────────
 const PRICE_INR = 30;
