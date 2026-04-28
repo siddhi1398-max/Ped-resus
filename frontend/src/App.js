@@ -66,7 +66,7 @@ const PRICE_INR = 30;
 
 // ── UPDATE YOUR NAME HERE ─────────────────────────────────────────────────────
 const DEV_NAME = "Dr. Siddhi Naik";
-const DEV_TITLE = "Emergency Physician & Developer";
+const DEV_TITLE = "Emergency Physician";
 const DEV_EMAIL = "siddhi1398@gmail.com";
 
 // ─── TABS — set free: true to allow without payment ──────────────────────────
