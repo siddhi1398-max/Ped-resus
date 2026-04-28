@@ -61,8 +61,8 @@ const googleProvider = new GoogleAuthProvider();
 
 // ── EDIT YOUR DETAILS HERE ────────────────────────────────────────────────────
 const PRICE_INR = 30;
-const DEV_NAME  = "Dr. Siddhi";
-const DEV_TITLE = "Emergency Physician & Developer";
+const DEV_NAME  = "Dr. Siddhi Naik";
+const DEV_TITLE = "Emergency Physician";
 const DEV_EMAIL = "siddhi1398@gmail.com";
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
