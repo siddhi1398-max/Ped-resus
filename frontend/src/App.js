@@ -123,26 +123,17 @@ async function markUserPaid(uid, email, paymentId) {
   }
 }
 
-// ─── LOADING ──────────────────────────────────────────────────────────────────
-
-function LoadingScreen() {
-  return (
-    <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-8 h-8 border-2 border-slate-900 dark:border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-xs font-mono uppercase tracking-widest text-slate-400">Loading...</p>
-      </div>
-    </div>
-  );
-}
-
 // ─── PAYWALL MODAL ────────────────────────────────────────────────────────────
-
+// This modal appears as an overlay — closing it returns user to the free tab.
+// User does NOT lose any work or state when closing.
 function PaywallModal({ user, onSuccess, onClose }) {
-  const [loading, setLoading] = useState(false);
-  const [signingIn, setSigningIn] = useState(false);
+  const [step, setStep] = useState(user ? "pay" : "signin"); //"signin" | "pay"
+  const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
-
+// If user signs in while modal is open, advance to pay step
+  useEffect(() => {
+    if (user && step === "signin") setStep ("pay); }, [user, step]); 
+                                      
   const handleGoogleSignIn = async () => {
     setSigningIn(true);
     setError("");
