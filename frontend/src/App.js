@@ -31,6 +31,7 @@ import ImagingTab from "./components/tabs/ImagingTab";
 import {
   Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon,
+  Lock,
 } from "@phosphor-icons/react";
 
 // Firebase
@@ -63,7 +64,31 @@ const googleProvider = new GoogleAuthProvider();
 const RAZORPAY_KEY_ID = process.env.REACT_APP_RAZORPAY_KEY;
 const PRICE_INR = 30;
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+// ─── TAB DEFINITIONS ─────────────────────────────────────────────────────────
+// free: true = accessible without payment
+const ALL_TABS = [
+  { id: "calculator",    label: "Calculator",          icon: Calculator,    Comp: CalculatorTab,       free: true  },
+  { id: "equipment",     label: "Equipment & Tubes",   icon: Wrench,        Comp: EquipmentTab,        free: false },
+  { id: "resuscitation", label: "Resuscitation",       icon: Syringe,       Comp: ResuscitationTab,    free: false },
+  { id: "drugs",         label: "Drug Doses",          icon: Pill,          Comp: DrugsTab,            free: false },
+  { id: "fluids",        label: "Fluids",              icon: Drop,          Comp: FluidsTab,           free: false },
+  { id: "vitals",        label: "Vitals by Age",       icon: Heartbeat,     Comp: VitalsTab,           free: false },
+  { id: "scores",        label: "Severity Scores",     icon: ClipboardText, Comp: ScoresTab,           free: false },
+  { id: "sedation",      label: "Sedation & Analgesia",icon: FirstAid,      Comp: SedationAnalgesiaTab,free: false },
+  { id: "neonatal",      label: "Neonatal (NRP)",      icon: Baby,          Comp: NeonatalTab,         free: false },
+  { id: "algorithms",    label: "PALS Algorithms",     icon: TreeStructure, Comp: AlgorithmsTab,       free: false },
+  { id: "pathways",      label: "Clinical Pathways",   icon: Stethoscope,   Comp: ClinicalPathwaysTab, free: false },
+  { id: "imaging",       label: "Imaging",             icon: ImageIcon,     Comp: ImagingTab,          free: false },
+];
+
+// ─── DEVELOPER CREDIT ─────────────────────────────────────────────────────────
+const DEVELOPER = {
+  name: "Dr. Siddhi",
+  title: "Emergency Physician & Developer",
+  contact: "siddhi1398@gmail.com", // update if needed
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
 function loadRazorpayScript() {
   return new Promise((resolve) => {
     if (document.getElementById("razorpay-script")) return resolve(true);
@@ -78,8 +103,7 @@ function loadRazorpayScript() {
 
 async function checkUserPaid(uid) {
   try {
-    const ref = doc(db, "paid_users", uid);
-    const snap = await getDoc(ref);
+    const snap = await getDoc(doc(db, "paid_users", uid));
     return snap.exists() && snap.data().paid === true;
   } catch {
     return false;
@@ -95,396 +119,318 @@ async function markUserPaid(uid, email, paymentId) {
       paidAt: new Date().toISOString(),
     });
   } catch (e) {
-    console.error("Failed to save payment record:", e);
+    console.error("Failed to save payment:", e);
   }
 }
 
 // ─── LOADING SCREEN ───────────────────────────────────────────────────────────
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
       <div className="text-center">
-        <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-xs font-mono uppercase tracking-widest text-slate-400">
-          Loading...
-        </p>
+        <div className="w-8 h-8 border-2 border-slate-900 dark:border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-xs font-mono uppercase tracking-widest text-slate-400">Loading...</p>
       </div>
     </div>
   );
 }
 
-// ─── SIGN IN PAGE ─────────────────────────────────────────────────────────────
-function SignInPage({ onSignIn }) {
+// ─── PAYWALL MODAL (overlay on locked tabs) ───────────────────────────────────
+function PaywallModal({ user, onSuccess, onClose, onSignIn }) {
   const [loading, setLoading] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState("");
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
+    setSigningIn(true);
     setError("");
     try {
       await signInWithPopup(auth, googleProvider);
-      // onAuthStateChanged in parent will handle the rest
-    } catch (e) {
+    } catch {
       setError("Sign-in failed. Please try again.");
-      setLoading(false);
+      setSigningIn(false);
     }
   };
-
-  return (
-    <div
-      className="min-h-screen bg-white dark:bg-black flex flex-col"
-      style={{ fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}
-    >
-      {/* Topbar */}
-      <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between">
-        <span className="font-mono text-xs uppercase tracking-[0.2em] font-bold text-slate-900 dark:text-white">
-          PED.RESUS
-        </span>
-        <span className="text-xs text-slate-400 uppercase tracking-widest font-mono">
-          Emergency Reference
-        </span>
-      </div>
-
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-sm">
-          {/* Icon */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-slate-900 dark:bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
-              🏥
-            </div>
-            <h1
-              className="text-3xl font-black text-slate-900 dark:text-white mb-2"
-              style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
-            >
-              Welcome back
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Sign in with Google to access PedResus on any device
-            </p>
-          </div>
-
-          {/* Sign in card */}
-          <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800">
-            {error && (
-              <div className="mb-4 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                {error}
-              </div>
-            )}
-
-            <button
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-3.5 px-4 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-            >
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-700 rounded-full animate-spin" />
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 48 48">
-                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                  <path fill="none" d="M0 0h48v48H0z"/>
-                </svg>
-              )}
-              {loading ? "Signing in..." : "Continue with Google"}
-            </button>
-
-            <p className="text-center text-[10px] text-slate-400 mt-4 font-mono">
-              Your access is tied to your Google account — works on all devices
-            </p>
-          </div>
-
-          <p className="text-center text-[10px] text-slate-400 mt-6 leading-relaxed">
-            New user? Sign in first, then complete the ₹30 one-time payment to unlock access.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── PAYWALL PAGE ─────────────────────────────────────────────────────────────
-function PaywallPage({ user, onSuccess }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handlePay = async () => {
     setLoading(true);
     setError("");
-
     const loaded = await loadRazorpayScript();
     if (!loaded) {
-      setError("Failed to load payment gateway. Check your internet connection.");
+      setError("Failed to load payment gateway.");
       setLoading(false);
       return;
     }
-
     const options = {
       key: RAZORPAY_KEY_ID,
       amount: PRICE_INR * 100,
       currency: "INR",
       name: "PedResus — Pediatric Emergency Reference",
-      description: "Lifetime Access · One-time Payment",
-      prefill: {
-        name: user.displayName || "",
-        email: user.email || "",
-      },
-      notes: { uid: user.uid, product: "PedResus Lifetime Access" },
+      description: "Lifetime Access · All Features",
+      prefill: { name: user?.displayName || "", email: user?.email || "" },
       theme: { color: "#0f172a" },
-      handler: async function (response) {
+      handler: async (response) => {
         await markUserPaid(user.uid, user.email, response.razorpay_payment_id);
         onSuccess();
       },
-      modal: {
-        ondismiss: () => setLoading(false),
-      },
+      modal: { ondismiss: () => setLoading(false) },
     };
-
     const rzp = new window.Razorpay(options);
-    rzp.on("payment.failed", (response) => {
-      setError("Payment failed: " + response.error.description);
+    rzp.on("payment.failed", (r) => {
+      setError("Payment failed: " + r.error.description);
       setLoading(false);
     });
     rzp.open();
   };
 
-  const handleSignOut = async () => {
-    await signOut(auth);
-  };
-
-  const features = [
-    "Weight-based drug dose calculator",
-    "Resuscitation drugs (PALS 2020)",
-    "Sedation & analgesia protocols",
-    "Status epilepticus stepwise protocol",
-    "India-specific empirical antibiotics",
-    "Fluids, vitals, severity scores",
-    "PALS algorithms & clinical pathways",
-    "Neonatal NRP reference",
-    "Broselow tape + ETT sizing",
-    "Based on Fleischer & Ludwig, Harriet Lane & IAP 2024",
-  ];
-
   return (
-    <div
-      className="min-h-screen bg-white dark:bg-black flex flex-col"
-      style={{ fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}
-    >
-      {/* Topbar */}
-      <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between">
-        <span className="font-mono text-xs uppercase tracking-[0.2em] font-bold text-slate-900 dark:text-white">
-          PED.RESUS
-        </span>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            {user.photoURL && (
-              <img src={user.photoURL} alt="" className="w-6 h-6 rounded-full" />
-            )}
-            <span className="text-xs text-slate-500 hidden sm:block">{user.email}</span>
-          </div>
-          <button
-            onClick={handleSignOut}
-            className="text-xs text-slate-400 hover:text-slate-600 font-mono underline"
-          >
-            Sign out
-          </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md p-8 relative">
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-light"
+        >
+          ✕
+        </button>
+
+        {/* Lock icon */}
+        <div className="w-12 h-12 bg-slate-900 dark:bg-white rounded-xl flex items-center justify-center mx-auto mb-5">
+          <Lock size={22} weight="bold" className="text-white dark:text-slate-900" />
         </div>
-      </div>
 
-      <div className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-12 sm:py-16 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-        {/* Left */}
-        <div>
-          <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 rounded-full mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Signed in as {user.displayName?.split(" ")[0] || "Doctor"}
+        <h2
+          className="text-2xl font-black text-center text-slate-900 dark:text-white mb-2"
+          style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
+        >
+          Unlock Full Access
+        </h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">
+          All 11 clinical tabs · ₹{PRICE_INR} one-time · All devices
+        </p>
+
+        {error && (
+          <div className="mb-4 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            {error}
           </div>
+        )}
 
-          <h1
-            className="text-4xl sm:text-5xl font-black leading-tight mb-4 text-slate-900 dark:text-white"
-            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
-          >
-            One payment.
-            <br />
-            <span className="text-slate-400">Every device.</span>
-            <br />
-            Forever.
-          </h1>
-
-          <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8 max-w-sm">
-            Your access is linked to your Google account — pay once and sign in from your phone, tablet, or laptop anytime.
-          </p>
-
-          <div className="flex flex-wrap gap-2 mb-8">
-            {["Fleischer & Ludwig 7th ed", "Harriet Lane 22nd ed", "IAP Guidelines 2024", "PALS 2020"].map((r) => (
-              <span key={r} className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-slate-500">
-                {r}
-              </span>
-            ))}
-          </div>
-
-          <div className="space-y-2.5">
-            {features.map((f) => (
-              <div key={f} className="flex items-start gap-2.5 text-sm text-slate-600 dark:text-slate-300">
-                <span className="mt-0.5 w-4 h-4 rounded-full bg-slate-900 dark:bg-white text-white dark:text-black text-[9px] flex items-center justify-center font-bold flex-shrink-0">✓</span>
-                {f}
+        {/* What's included */}
+        <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 mb-5">
+          <div className="grid grid-cols-2 gap-2">
+            {ALL_TABS.filter(t => !t.free).slice(0, 8).map(t => (
+              <div key={t.id} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white text-[8px] flex items-center justify-center font-bold flex-shrink-0">✓</span>
+                {t.label}
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right: Payment card */}
-        <div>
-          <div className="bg-slate-900 dark:bg-slate-950 rounded-2xl p-8 text-white border border-slate-800">
-            <div className="text-center pb-7 mb-7 border-b border-slate-700">
-              <p className="text-xs font-mono uppercase tracking-[0.2em] text-slate-400 mb-3">
-                One-time Access
-              </p>
-              <div className="flex items-start justify-center gap-1">
-                <span className="text-2xl font-light text-slate-400 mt-2">₹</span>
-                <span className="text-7xl font-black leading-none" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-                  {PRICE_INR}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-2 font-mono">Lifetime · All devices · No subscription</p>
+        {!user ? (
+          // Not signed in → show Google sign in first
+          <>
+            <button
+              onClick={handleGoogleSignIn}
+              disabled={signingIn}
+              className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all mb-3 disabled:opacity-50 shadow-sm"
+            >
+              {signingIn ? (
+                <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-700 rounded-full animate-spin" />
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 48 48">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+              )}
+              {signingIn ? "Signing in..." : "Sign in with Google to continue"}
+            </button>
+            <p className="text-center text-[10px] text-slate-400 font-mono">
+              Sign in first, then pay ₹{PRICE_INR} to unlock all features
+            </p>
+          </>
+        ) : (
+          // Signed in → show pay button
+          <>
+            <div className="flex items-center gap-2 mb-4 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-lg px-3 py-2">
+              {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
+              <span className="text-xs text-emerald-700 dark:text-emerald-400 font-mono">Signed in as {user.email}</span>
             </div>
-
-            <div className="space-y-3 mb-7">
-              {[
-                "Linked to your Google account",
-                "Works on phone, tablet & laptop",
-                "All 12 clinical tabs unlocked",
-                "UPI · Cards · NetBanking",
-              ].map((f) => (
-                <div key={f} className="flex items-center gap-3 text-sm text-slate-300">
-                  <span className="w-4 h-4 rounded-full bg-emerald-500 text-white text-[9px] flex items-center justify-center font-bold flex-shrink-0">✓</span>
-                  {f}
-                </div>
-              ))}
-            </div>
-
-            {error && (
-              <div className="mb-4 text-xs text-red-400 bg-red-950 border border-red-800 rounded-lg px-3 py-2">
-                {error}
-              </div>
-            )}
-
             <button
               onClick={handlePay}
               disabled={loading}
-              className="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-4 rounded-xl text-sm transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-slate-900 dark:bg-white hover:bg-slate-700 dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold py-4 rounded-xl text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
             >
               {loading ? (
-                <>
-                  <span className="w-3.5 h-3.5 border-2 border-slate-400 border-t-slate-900 rounded-full animate-spin" />
-                  Opening payment...
-                </>
+                <><span className="w-3.5 h-3.5 border-2 border-slate-400 border-t-white rounded-full animate-spin" />Opening payment...</>
               ) : (
-                <>🔒 Pay ₹{PRICE_INR} & Unlock Access</>
+                <>🔒 Pay ₹{PRICE_INR} — Unlock All Features</>
               )}
             </button>
-
-            <p className="text-center text-[10px] text-slate-600 mt-4 font-mono">
-              Secured by Razorpay · India's trusted payment gateway
+            <p className="text-center text-[10px] text-slate-500 mt-3 font-mono">
+              Secured by Razorpay · UPI · Cards · NetBanking
             </p>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-// ─── PROTECTED HOME ───────────────────────────────────────────────────────────
-function ProtectedHome() {
-  const [authState, setAuthState] = useState("loading"); // loading | signed-out | unpaid | paid
+// ─── MAIN HOME APP ────────────────────────────────────────────────────────────
+function Home() {
+  const [tab, setTab] = useState("calculator");
   const [user, setUser] = useState(null);
+  const [paid, setPaid] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        setUser(null);
-        setAuthState("signed-out");
-        return;
-      }
       setUser(firebaseUser);
-      const paid = await checkUserPaid(firebaseUser.uid);
-      setAuthState(paid ? "paid" : "unpaid");
+      if (firebaseUser) {
+        const hasPaid = await checkUserPaid(firebaseUser.uid);
+        setPaid(hasPaid);
+      } else {
+        setPaid(false);
+      }
+      setAuthLoading(false);
     });
     return () => unsub();
   }, []);
 
-  if (authState === "loading") return <LoadingScreen />;
-  if (authState === "signed-out") return <SignInPage />;
-  if (authState === "unpaid") return <PaywallPage user={user} onSuccess={() => setAuthState("paid")} />;
-  return <Home user={user} />;
-}
+  const handleTabClick = (tabId) => {
+    const tabDef = ALL_TABS.find(t => t.id === tabId);
+    if (!tabDef.free && !paid) {
+      setShowPaywall(true);
+      return;
+    }
+    setTab(tabId);
+  };
 
-// ─── MAIN HOME APP ────────────────────────────────────────────────────────────
-function Home({ user }) {
-  const [tab, setTab] = useState("calculator");
-
-  const TABS = [
-    { id: "calculator",    label: "Calculator",          icon: Calculator,    Comp: CalculatorTab },
-    { id: "equipment",     label: "Equipment & Tubes",   icon: Wrench,        Comp: EquipmentTab },
-    { id: "resuscitation", label: "Resuscitation",       icon: Syringe,       Comp: ResuscitationTab },
-    { id: "drugs",         label: "Drug Doses",          icon: Pill,          Comp: DrugsTab },
-    { id: "fluids",        label: "Fluids",              icon: Drop,          Comp: FluidsTab },
-    { id: "vitals",        label: "Vitals by Age",       icon: Heartbeat,     Comp: VitalsTab },
-    { id: "scores",        label: "Severity Scores",     icon: ClipboardText, Comp: ScoresTab },
-    { id: "sedation",      label: "Sedation & Analgesia",icon: FirstAid,      Comp: SedationAnalgesiaTab },
-    { id: "neonatal",      label: "Neonatal (NRP)",      icon: Baby,          Comp: NeonatalTab },
-    { id: "algorithms",    label: "PALS Algorithms",     icon: TreeStructure, Comp: AlgorithmsTab },
-    { id: "pathways",      label: "Clinical Pathways",   icon: Stethoscope,   Comp: ClinicalPathwaysTab },
-    { id: "imaging",       label: "Imaging",             icon: ImageIcon,     Comp: ImagingTab },
-  ];
+  const handlePaywallSuccess = () => {
+    setPaid(true);
+    setShowPaywall(false);
+  };
 
   const handleSignOut = async () => {
     await signOut(auth);
+    setPaid(false);
   };
+
+  if (authLoading) return <LoadingScreen />;
 
   return (
     <div
       className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-slate-100"
       style={{ fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}
     >
+      {/* Paywall Modal */}
+      {showPaywall && (
+        <PaywallModal
+          user={user}
+          onSuccess={handlePaywallSuccess}
+          onClose={() => setShowPaywall(false)}
+        />
+      )}
+
       <TopBar />
+
+      {/* Auth status bar */}
+      <div className="border-b border-slate-100 dark:border-slate-900 px-4 sm:px-6 py-2 flex items-center justify-between max-w-7xl mx-auto">
+        <div className="flex items-center gap-2">
+          {paid ? (
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Full Access
+            </span>
+          ) : (
+            <button
+              onClick={() => setShowPaywall(true)}
+              className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-amber-600 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 px-2 py-1 rounded-full hover:bg-amber-100 transition-colors"
+            >
+              <Lock size={10} weight="bold" />
+              Free Plan — Unlock All ₹{PRICE_INR}
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {user ? (
+            <div className="flex items-center gap-2">
+              {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
+              <span className="text-[10px] text-slate-400 font-mono hidden sm:block">{user.email}</span>
+              <button onClick={handleSignOut} className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign out</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowPaywall(true)}
+              className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline"
+            >
+              Sign in
+            </button>
+          )}
+        </div>
+      </div>
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <Tabs value={tab} onValueChange={setTab} data-testid="main-tabs">
+        <Tabs value={tab} onValueChange={() => {}} data-testid="main-tabs">
           <TabsList className="w-full justify-start flex-wrap h-auto p-1.5 bg-slate-100 dark:bg-slate-900 gap-1">
-            {TABS.map((t) => {
+            {ALL_TABS.map((t) => {
               const Icon = t.icon;
+              const isLocked = !t.free && !paid;
               return (
                 <TabsTrigger
                   key={t.id}
                   value={t.id}
                   data-testid={`tab-${t.id}`}
-                  className="gap-2 font-mono text-[11px] uppercase tracking-[0.15em] data-[state=active]:bg-slate-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-slate-900"
+                  onClick={() => handleTabClick(t.id)}
+                  className="gap-2 font-mono text-[11px] uppercase tracking-[0.15em] data-[state=active]:bg-slate-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-slate-900 relative"
                 >
                   <Icon size={14} weight="bold" />
                   {t.label}
+                  {isLocked && (
+                    <Lock size={9} weight="bold" className="text-amber-500 ml-0.5" />
+                  )}
                 </TabsTrigger>
               );
             })}
           </TabsList>
-          {TABS.map((t) => (
+
+          {ALL_TABS.map((t) => (
             <TabsContent key={t.id} value={t.id} className="mt-6 sm:mt-8 focus-visible:outline-none">
               <t.Comp />
             </TabsContent>
           ))}
         </Tabs>
 
-        <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row justify-between gap-2">
-          <div>
-            <span className="font-mono uppercase tracking-[0.15em]">PED.RESUS</span> — Pediatric Emergency Reference
+        {/* Footer with developer credit */}
+        <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex flex-col sm:flex-row justify-between gap-4">
+            <div>
+              <span className="font-mono uppercase tracking-[0.15em] text-slate-700 dark:text-slate-300">PED.RESUS</span>
+              <span className="mx-2 text-slate-300 dark:text-slate-600">·</span>
+              Pediatric Emergency Reference
+              <div className="mt-1 text-[10px] text-slate-400">
+                Based on Fleischer & Ludwig 7th ed · Harriet Lane 22nd ed · IAP Guidelines 2024 · PALS 2020
+              </div>
+            </div>
+            <div className="text-right sm:text-right">
+              <div className="text-[10px] text-slate-400 mb-0.5">Designed & Developed by</div>
+              <div className="font-semibold text-slate-600 dark:text-slate-300 font-mono">{DEVELOPER.name}</div>
+              <div className="text-[10px] text-slate-400">{DEVELOPER.title}</div>
+              <a
+                href={`mailto:${DEVELOPER.contact}`}
+                className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors underline"
+              >
+                {DEVELOPER.contact}
+              </a>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span>Reference only. Verify against local formularies before administration.</span>
-            {user && (
-              <button onClick={handleSignOut} className="underline hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
-                Sign out
-              </button>
-            )}
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-900 text-[10px] text-slate-400 text-center">
+            ⚠️ Clinical reference only. Always verify doses against institutional protocols before administration.
           </div>
         </footer>
       </main>
@@ -500,7 +446,7 @@ function App() {
       <WeightProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<ProtectedHome />} />
+            <Route path="/" element={<Home />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
