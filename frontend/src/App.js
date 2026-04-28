@@ -114,7 +114,7 @@ async function checkUserPaid(uid) {
 // Without this, there is no order_id → no signature → no webhook verification.
 async function createRazorpayOrder(uid, email) {
   try {
-    const res = await fetch("/.netlify/functions/create-order", {
+    const res = await fetch("/frontend/create-order", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ uid, email, amount: PRICE_INR * 100 }),
@@ -133,7 +133,7 @@ async function createRazorpayOrder(uid, email) {
 // 2. Writes paid: true to Firestore for this Firebase UID
 async function verifyPaymentBackend(uid, email, orderId, paymentId, signature) {
   try {
-    const res = await fetch("/.netlify/functions/verify-payment", {
+    const res = await fetch("/frontend/verify-payment", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({
