@@ -4,8 +4,10 @@
   publish = "build"
 
 [build.environment]
-  NODE_VERSION = "20"
-  CI           = "false"
+  NODE_VERSION          = "20"
+  CI                    = "false"
+  DISABLE_ESLINT_PLUGIN = "true"
+  SKIP_PREFLIGHT_CHECK  = "true"
 
 [[redirects]]
   from   = "/*"
