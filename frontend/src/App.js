@@ -35,7 +35,7 @@ import {
 
 // ─── CONFIGURATION ────────────────────────────────────────────────────────────
 // Replace with your actual Razorpay Key ID from razorpay.com → Settings → API Keys
-const RAZORPAY_KEY_ID = "YOUR_RAZORPAY_KEY_ID";
+const RAZORPAY_KEY_ID = process.env.REACT_APP_RAZORPAY_KEY;
 const PRICE_INR = 30;           // Change price here if needed
 const ACCESS_KEY = "ped_resus_access"; // localStorage key
 // ──────────────────────────────────────────────────────────────────────────────
