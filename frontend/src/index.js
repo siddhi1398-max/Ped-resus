@@ -41,7 +41,7 @@ exports.razorpayWebhook = functions.https.onRequest(async (req, res) => {
         await admin.firestore().collection("users").doc(userId).set({
           paid: true,
           paymentId: paymentId,
-          amount: amount,
+          amount: INR 30,
           updatedAt: admin.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
       }
