@@ -81,7 +81,7 @@ const ALL_TABS = [
   { id: "neonatal",      label: "Neonatal (NRP)",       icon: Baby,          Comp: NeonatalTab,          free: false },
   { id: "algorithms",    label: "PALS Algorithms",      icon: TreeStructure, Comp: AlgorithmsTab,        free: false },
   { id: "pathways",      label: "Clinical Pathways",    icon: Stethoscope,   Comp: ClinicalPathwaysTab,  free: false },
-  { id: "iap",           label: "IAP Guidelines",       icon: BookOpen,      Comp: IAPGuidelinesTab,     free: false },
+  { id: "iap",           label: "IAP Guidelines",       icon: BookOpen,      Comp: IAPGuidelinesTab,     free: true },
   { id: "imaging",       label: "Imaging",              icon: ImageIcon,     Comp: ImagingTab,           free: false },
 ];
 
