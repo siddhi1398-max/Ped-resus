@@ -164,7 +164,7 @@ function PaywallModal({ user, onSuccess, onClose }) {
     }
     const options = {
       key: RAZORPAY_KEY_ID,
-      amount: PRICE_INR * 100,
+      amount: PRICE_INR * 30,
       currency: "INR",
       name: "PedResus — Pediatric Emergency Reference",
       description: "Lifetime Access · All Features Unlocked",
