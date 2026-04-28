@@ -65,7 +65,7 @@ const RAZORPAY_KEY_ID = process.env.REACT_APP_RAZORPAY_KEY;
 const PRICE_INR = 30;
 
 // ── UPDATE YOUR NAME HERE ─────────────────────────────────────────────────────
-const DEV_NAME = "Dr. Siddhi";
+const DEV_NAME = "Dr. Siddhi Naik";
 const DEV_TITLE = "Emergency Physician & Developer";
 const DEV_EMAIL = "siddhi1398@gmail.com";
 
@@ -74,10 +74,10 @@ const DEV_EMAIL = "siddhi1398@gmail.com";
 const ALL_TABS = [
   { id: "calculator",    label: "Calculator",          icon: Calculator,    Comp: CalculatorTab,        free: true  },
   { id: "equipment",     label: "Equipment & Tubes",   icon: Wrench,        Comp: EquipmentTab,         free: false },
-  { id: "resuscitation", label: "Resuscitation",       icon: Syringe,       Comp: ResuscitationTab,     free: false },
+  { id: "resuscitation", label: "Resuscitation",       icon: Syringe,       Comp: ResuscitationTab,     free: true },
   { id: "drugs",         label: "Drug Doses",          icon: Pill,          Comp: DrugsTab,             free: false },
   { id: "fluids",        label: "Fluids",              icon: Drop,          Comp: FluidsTab,            free: false },
-  { id: "vitals",        label: "Vitals by Age",       icon: Heartbeat,     Comp: VitalsTab,            free: false },
+  { id: "vitals",        label: "Vitals by Age",       icon: Heartbeat,     Comp: VitalsTab,            free: true },
   { id: "scores",        label: "Severity Scores",     icon: ClipboardText, Comp: ScoresTab,            free: false },
   { id: "sedation",      label: "Sedation & Analgesia",icon: FirstAid,      Comp: SedationAnalgesiaTab, free: false },
   { id: "neonatal",      label: "Neonatal (NRP)",      icon: Baby,          Comp: NeonatalTab,          free: false },
