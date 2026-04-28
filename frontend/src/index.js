@@ -20,21 +20,21 @@ exports.razorpayWebhook = functions.https.onRequest(async (req, res) => {
       .update(JSON.stringify(req.body))
       .digest("hex");
 
-    // ❌ Reject if signature invalid
+    // Reject if signature invalid
     if (signature !== expectedSignature) {
       return res.status(400).send("Invalid signature");
     }
 
     const event = req.body.event;
 
-    // ✅ Handle successful payment
+    // Handle successful payment
     if (event === "payment.captured") {
       const payment = req.body.payload.payment.entity;
 
       const paymentId = payment.id;
       const amount = payment.amount;
 
-      // 🔑 Identify user (you must pass this during payment)
+      // Identify user (you must pass this during payment)
       const userId = payment.notes?.userId;
 
       if (userId) {
