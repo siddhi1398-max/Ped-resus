@@ -34,7 +34,6 @@ import {
   Lock,
 } from "@phosphor-icons/react";
 
-// Firebase
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -45,7 +44,8 @@ import {
 } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
-// ─── FIREBASE CONFIG ──────────────────────────────────────────────────────────
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+
 const firebaseConfig = {
   apiKey: "AIzaSyC794KlXXWDOANEEtq2-s4cU8J9cD_9Qgs",
   authDomain: "pedresus-3fb27.firebaseapp.com",
@@ -55,45 +55,39 @@ const firebaseConfig = {
   appId: "1:70799823874:web:b5d4801bf42a0f8c5d431b",
   measurementId: "G-B8JL4THBDL",
 };
-const DEVELOPER = {
-  name: "Dr. Siddhi Naik",
-  title: "Emergency Physician & Developer",
-  contact: "siddhi1398@gmail.com",
-};
+
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 
-// ─── RAZORPAY CONFIG ──────────────────────────────────────────────────────────
 const RAZORPAY_KEY_ID = process.env.REACT_APP_RAZORPAY_KEY;
 const PRICE_INR = 30;
 
-// ─── TAB DEFINITIONS ─────────────────────────────────────────────────────────
-// free: true = accessible without payment
+// ── UPDATE YOUR NAME HERE ─────────────────────────────────────────────────────
+const DEV_NAME = "Dr. Siddhi";
+const DEV_TITLE = "Emergency Physician & Developer";
+const DEV_EMAIL = "siddhi1398@gmail.com";
+
+// ─── TABS — set free: true to allow without payment ──────────────────────────
+
 const ALL_TABS = [
-  { id: "calculator",    label: "Calculator",          icon: Calculator,    Comp: CalculatorTab,       free: true  },
-  { id: "equipment",     label: "Equipment & Tubes",   icon: Wrench,        Comp: EquipmentTab,        free: false },
-  { id: "resuscitation", label: "Resuscitation",       icon: Syringe,       Comp: ResuscitationTab,    free: true },
-  { id: "drugs",         label: "Drug Doses",          icon: Pill,          Comp: DrugsTab,            free: false },
-  { id: "fluids",        label: "Fluids",              icon: Drop,          Comp: FluidsTab,           free: false },
-  { id: "vitals",        label: "Vitals by Age",       icon: Heartbeat,     Comp: VitalsTab,           free: true },
-  { id: "scores",        label: "Severity Scores",     icon: ClipboardText, Comp: ScoresTab,           free: false },
-  { id: "sedation",      label: "Sedation & Analgesia",icon: FirstAid,      Comp: SedationAnalgesiaTab,free: false },
-  { id: "neonatal",      label: "Neonatal (NRP)",      icon: Baby,          Comp: NeonatalTab,         free: false },
-  { id: "algorithms",    label: "PALS Algorithms",     icon: TreeStructure, Comp: AlgorithmsTab,       free: false },
-  { id: "pathways",      label: "Clinical Pathways",   icon: Stethoscope,   Comp: ClinicalPathwaysTab, free: false },
-  { id: "imaging",       label: "Imaging",             icon: ImageIcon,     Comp: ImagingTab,          free: false },
+  { id: "calculator",    label: "Calculator",          icon: Calculator,    Comp: CalculatorTab,        free: true  },
+  { id: "equipment",     label: "Equipment & Tubes",   icon: Wrench,        Comp: EquipmentTab,         free: false },
+  { id: "resuscitation", label: "Resuscitation",       icon: Syringe,       Comp: ResuscitationTab,     free: false },
+  { id: "drugs",         label: "Drug Doses",          icon: Pill,          Comp: DrugsTab,             free: false },
+  { id: "fluids",        label: "Fluids",              icon: Drop,          Comp: FluidsTab,            free: false },
+  { id: "vitals",        label: "Vitals by Age",       icon: Heartbeat,     Comp: VitalsTab,            free: false },
+  { id: "scores",        label: "Severity Scores",     icon: ClipboardText, Comp: ScoresTab,            free: false },
+  { id: "sedation",      label: "Sedation & Analgesia",icon: FirstAid,      Comp: SedationAnalgesiaTab, free: false },
+  { id: "neonatal",      label: "Neonatal (NRP)",      icon: Baby,          Comp: NeonatalTab,          free: false },
+  { id: "algorithms",    label: "PALS Algorithms",     icon: TreeStructure, Comp: AlgorithmsTab,        free: false },
+  { id: "pathways",      label: "Clinical Pathways",   icon: Stethoscope,   Comp: ClinicalPathwaysTab,  free: false },
+  { id: "imaging",       label: "Imaging",             icon: ImageIcon,     Comp: ImagingTab,           free: false },
 ];
 
-// ─── DEVELOPER CREDIT ─────────────────────────────────────────────────────────
-const DEVELOPER = {
-  name: "Dr. Siddhi",
-  title: "Emergency Physician & Developer",
-  contact: "siddhi1398@gmail.com", // update if needed
-};
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
 function loadRazorpayScript() {
   return new Promise((resolve) => {
     if (document.getElementById("razorpay-script")) return resolve(true);
@@ -128,7 +122,8 @@ async function markUserPaid(uid, email, paymentId) {
   }
 }
 
-// ─── LOADING SCREEN ───────────────────────────────────────────────────────────
+// ─── LOADING ──────────────────────────────────────────────────────────────────
+
 function LoadingScreen() {
   return (
     <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
@@ -140,8 +135,9 @@ function LoadingScreen() {
   );
 }
 
-// ─── PAYWALL MODAL (overlay on locked tabs) ───────────────────────────────────
-function PaywallModal({ user, onSuccess, onClose, onSignIn }) {
+// ─── PAYWALL MODAL ────────────────────────────────────────────────────────────
+
+function PaywallModal({ user, onSuccess, onClose }) {
   const [loading, setLoading] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState("");
@@ -162,7 +158,7 @@ function PaywallModal({ user, onSuccess, onClose, onSignIn }) {
     setError("");
     const loaded = await loadRazorpayScript();
     if (!loaded) {
-      setError("Failed to load payment gateway.");
+      setError("Failed to load payment gateway. Check your connection.");
       setLoading(false);
       return;
     }
@@ -171,7 +167,7 @@ function PaywallModal({ user, onSuccess, onClose, onSignIn }) {
       amount: PRICE_INR * 100,
       currency: "INR",
       name: "PedResus — Pediatric Emergency Reference",
-      description: "Lifetime Access · All Features",
+      description: "Lifetime Access · All Features Unlocked",
       prefill: { name: user?.displayName || "", email: user?.email || "" },
       theme: { color: "#0f172a" },
       handler: async (response) => {
@@ -191,15 +187,11 @@ function PaywallModal({ user, onSuccess, onClose, onSignIn }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md p-8 relative">
-        {/* Close */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-light"
-        >
-          ✕
-        </button>
+        >✕</button>
 
-        {/* Lock icon */}
         <div className="w-12 h-12 bg-slate-900 dark:bg-white rounded-xl flex items-center justify-center mx-auto mb-5">
           <Lock size={22} weight="bold" className="text-white dark:text-slate-900" />
         </div>
@@ -211,19 +203,12 @@ function PaywallModal({ user, onSuccess, onClose, onSignIn }) {
           Unlock Full Access
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">
-          All 11 clinical tabs · ₹{PRICE_INR} one-time · All devices
+          All 11 clinical tabs · ₹{PRICE_INR} one-time · Works on all devices
         </p>
 
-        {error && (
-          <div className="mb-4 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-            {error}
-          </div>
-        )}
-
-        {/* What's included */}
         <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 mb-5">
           <div className="grid grid-cols-2 gap-2">
-            {ALL_TABS.filter(t => !t.free).slice(0, 8).map(t => (
+            {ALL_TABS.filter(t => !t.free).map(t => (
               <div key={t.id} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
                 <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white text-[8px] flex items-center justify-center font-bold flex-shrink-0">✓</span>
                 {t.label}
@@ -232,13 +217,16 @@ function PaywallModal({ user, onSuccess, onClose, onSignIn }) {
           </div>
         </div>
 
+        {error && (
+          <div className="mb-4 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>
+        )}
+
         {!user ? (
-          // Not signed in → show Google sign in first
           <>
             <button
               onClick={handleGoogleSignIn}
               disabled={signingIn}
-              className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all mb-3 disabled:opacity-50 shadow-sm"
+              className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-all mb-3 disabled:opacity-50 shadow-sm"
             >
               {signingIn ? (
                 <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-700 rounded-full animate-spin" />
@@ -257,16 +245,15 @@ function PaywallModal({ user, onSuccess, onClose, onSignIn }) {
             </p>
           </>
         ) : (
-          // Signed in → show pay button
           <>
             <div className="flex items-center gap-2 mb-4 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-lg px-3 py-2">
               {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
-              <span className="text-xs text-emerald-700 dark:text-emerald-400 font-mono">Signed in as {user.email}</span>
+              <span className="text-xs text-emerald-700 dark:text-emerald-400 font-mono truncate">{user.email}</span>
             </div>
             <button
               onClick={handlePay}
               disabled={loading}
-              className="w-full bg-slate-900 dark:bg-white hover:bg-slate-700 dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold py-4 rounded-xl text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full bg-slate-900 dark:bg-white hover:bg-slate-700 text-white dark:text-slate-900 font-bold py-4 rounded-xl text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
             >
               {loading ? (
@@ -285,7 +272,8 @@ function PaywallModal({ user, onSuccess, onClose, onSignIn }) {
   );
 }
 
-// ─── MAIN HOME APP ────────────────────────────────────────────────────────────
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+
 function Home() {
   const [tab, setTab] = useState("calculator");
   const [user, setUser] = useState(null);
@@ -324,6 +312,7 @@ function Home() {
   const handleSignOut = async () => {
     await signOut(auth);
     setPaid(false);
+    setUser(null);
   };
 
   if (authLoading) return <LoadingScreen />;
@@ -333,7 +322,6 @@ function Home() {
       className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-slate-100"
       style={{ fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}
     >
-      {/* Paywall Modal */}
       {showPaywall && (
         <PaywallModal
           user={user}
@@ -344,13 +332,13 @@ function Home() {
 
       <TopBar />
 
-      {/* Auth status bar */}
+      {/* Status bar */}
       <div className="border-b border-slate-100 dark:border-slate-900 px-4 sm:px-6 py-2 flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
+        <div>
           {paid ? (
             <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Full Access
+              Full Access Unlocked
             </span>
           ) : (
             <button
@@ -358,7 +346,7 @@ function Home() {
               className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-amber-600 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 px-2 py-1 rounded-full hover:bg-amber-100 transition-colors"
             >
               <Lock size={10} weight="bold" />
-              Free Plan — Unlock All ₹{PRICE_INR}
+              Free Plan · Unlock All for ₹{PRICE_INR}
             </button>
           )}
         </div>
@@ -370,10 +358,7 @@ function Home() {
               <button onClick={handleSignOut} className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign out</button>
             </div>
           ) : (
-            <button
-              onClick={() => setShowPaywall(true)}
-              className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline"
-            >
+            <button onClick={() => setShowPaywall(true)} className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">
               Sign in
             </button>
           )}
@@ -392,13 +377,11 @@ function Home() {
                   value={t.id}
                   data-testid={`tab-${t.id}`}
                   onClick={() => handleTabClick(t.id)}
-                  className="gap-2 font-mono text-[11px] uppercase tracking-[0.15em] data-[state=active]:bg-slate-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-slate-900 relative"
+                  className="gap-2 font-mono text-[11px] uppercase tracking-[0.15em] data-[state=active]:bg-slate-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-slate-900"
                 >
                   <Icon size={14} weight="bold" />
                   {t.label}
-                  {isLocked && (
-                    <Lock size={9} weight="bold" className="text-amber-500 ml-0.5" />
-                  )}
+                  {isLocked && <Lock size={9} weight="bold" className="text-amber-500 ml-0.5" />}
                 </TabsTrigger>
               );
             })}
@@ -411,7 +394,7 @@ function Home() {
           ))}
         </Tabs>
 
-        {/* Footer with developer credit */}
+        {/* Footer */}
         <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex flex-col sm:flex-row justify-between gap-4">
             <div>
@@ -419,18 +402,15 @@ function Home() {
               <span className="mx-2 text-slate-300 dark:text-slate-600">·</span>
               Pediatric Emergency Reference
               <div className="mt-1 text-[10px] text-slate-400">
-                Based on Fleischer & Ludwig 7th ed · Harriet Lane 22nd ed · IAP Guidelines 2024 · PALS 2020
+                Fleischer & Ludwig 7th ed · Harriet Lane 22nd ed · IAP Guidelines 2024 · PALS 2020
               </div>
             </div>
-            <div className="text-right sm:text-right">
+            <div className="text-right">
               <div className="text-[10px] text-slate-400 mb-0.5">Designed & Developed by</div>
-              <div className="font-semibold text-slate-600 dark:text-slate-300 font-mono">{DEVELOPER.name}</div>
-              <div className="text-[10px] text-slate-400">{DEVELOPER.title}</div>
-              <a
-                href={`mailto:${DEVELOPER.contact}`}
-                className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors underline"
-              >
-                {DEVELOPER.contact}
+              <div className="font-semibold text-slate-700 dark:text-slate-300 font-mono">{DEV_NAME}</div>
+              <div className="text-[10px] text-slate-400">{DEV_TITLE}</div>
+              <a href={`mailto:${DEV_EMAIL}`} className="text-[10px] text-slate-400 hover:text-slate-600 transition-colors underline">
+                {DEV_EMAIL}
               </a>
             </div>
           </div>
@@ -444,7 +424,6 @@ function Home() {
   );
 }
 
-// ─── ROOT APP ─────────────────────────────────────────────────────────────────
 function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
