@@ -16,6 +16,7 @@ import { WeightProvider } from "./context/WeightContext";
 import TopBar from "./components/TopBar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
 import { Toaster } from "./components/ui/sonner";
+import { toast } from "sonner";
 import CalculatorTab from "./components/tabs/CalculatorTab";
 import EquipmentTab from "./components/tabs/EquipmentTab";
 import ResuscitationTab from "./components/tabs/ResuscitationTab";
@@ -32,7 +33,7 @@ import IAPGuidelinesTab from "./components/tabs/IAPGuidelinesTab";
 import {
   Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon,
-  Lock, X, CheckCircle, BookOpen,
+  Lock, X, CheckCircle, BookOpen, Warning,
 } from "@phosphor-icons/react";
 
 import { initializeApp } from "firebase/app";
@@ -40,36 +41,33 @@ import {
   getAuth, signInWithPopup, GoogleAuthProvider,
   onAuthStateChanged, signOut,
 } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import {
+  getFirestore, doc, setDoc, getDoc, onSnapshot,
+} from "firebase/firestore";
 
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
-
+// ─── FIREBASE CONFIG ──────────────────────────────────────────────────────────
 const firebaseConfig = {
-  apiKey: "AIzaSyC794KlXXWDOANEEtq2-s4cU8J9cD_9Qgs",
-  authDomain: "pedresus-3fb27.firebaseapp.com",
-  projectId: "pedresus-3fb27",
-  storageBucket: "pedresus-3fb27.firebasestorage.app",
+  apiKey:            "AIzaSyC794KlXXWDOANEEtq2-s4cU8J9cD_9Qgs",
+  authDomain:        "pedresus-3fb27.firebaseapp.com",
+  projectId:         "pedresus-3fb27",
+  storageBucket:     "pedresus-3fb27.firebasestorage.app",
   messagingSenderId: "70799823874",
-  appId: "1:70799823874:web:b5d4801bf42a0f8c5d431b",
-  measurementId: "G-B8JL4THBDL",
+  appId:             "1:70799823874:web:b5d4801bf42a0f8c5d431b",
+  measurementId:     "G-B8JL4THBDL",
 };
 
-const firebaseApp = initializeApp(firebaseConfig);
-const auth        = getAuth(firebaseApp);
-const db          = getFirestore(firebaseApp);
+const firebaseApp    = initializeApp(firebaseConfig);
+const auth           = getAuth(firebaseApp);
+const db             = getFirestore(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
-const RAZORPAY_KEY_ID = "rzp_live_SivP8eeXWFKStM";
 
-// ── EDIT YOUR DETAILS HERE ────────────────────────────────────────────────────
+// ─── APP CONFIG ───────────────────────────────────────────────────────────────
 const PRICE_INR = 30;
 const DEV_NAME  = "Dr. Siddhi Naik";
 const DEV_TITLE = "Emergency Physician";
 const DEV_EMAIL = "siddhi1398@gmail.com";
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
-// free: true  → always accessible without payment
-// free: false → paywall drawer appears, but Calculator still usable after closing
-
 const ALL_TABS = [
   { id: "calculator",    label: "Calculator",           icon: Calculator,    Comp: CalculatorTab,        free: true  },
   { id: "equipment",     label: "Equipment & Tubes",    icon: Wrench,        Comp: EquipmentTab,         free: false },
@@ -91,41 +89,78 @@ const ALL_TABS = [
 function loadRazorpayScript() {
   return new Promise((resolve) => {
     if (document.getElementById("razorpay-script")) return resolve(true);
-    const s = document.createElement("script");
-    s.id    = "razorpay-script";
-    s.src   = "https://checkout.razorpay.com/v1/checkout.js";
+    const s   = document.createElement("script");
+    s.id      = "razorpay-script";
+    s.src     = "https://checkout.razorpay.com/v1/checkout.js";
     s.onload  = () => resolve(true);
     s.onerror = () => resolve(false);
     document.body.appendChild(s);
   });
 }
 
+// Check Firestore if user has paid
 async function checkUserPaid(uid) {
   try {
     const snap = await getDoc(doc(db, "paid_users", uid));
     return snap.exists() && snap.data().paid === true;
-  } catch { return false; }
+  } catch (e) {
+    console.error("checkUserPaid error:", e);
+    return false;
+  }
 }
 
-async function markUserPaid(uid, email, paymentId) {
+// ── STEP 1: Create Razorpay order via backend ─────────────────────────────────
+// This calls your Netlify function which creates the order server-side.
+// Without this, there is no order_id → no signature → no webhook verification.
+async function createRazorpayOrder(uid, email) {
   try {
-    await setDoc(doc(db, "paid_users", uid), {
-      paid: true, email, paymentId,
-      paidAt: new Date().toISOString(),
+    const res = await fetch("/.netlify/functions/create-order", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ uid, email, amount: PRICE_INR * 100 }),
     });
-  } catch (e) { console.error("Failed to save payment:", e); }
+    if (!res.ok) throw new Error("Order creation failed");
+    return await res.json(); // { orderId, amount, currency }
+  } catch (e) {
+    console.error("createRazorpayOrder error:", e);
+    return null;
+  }
+}
+
+// ── STEP 2: Verify payment via backend after Razorpay success callback ─────────
+// Sends payment details to your Netlify function which:
+// 1. Verifies the Razorpay signature (prevents fraud)
+// 2. Writes paid: true to Firestore for this Firebase UID
+async function verifyPaymentBackend(uid, email, orderId, paymentId, signature) {
+  try {
+    const res = await fetch("/.netlify/functions/verify-payment", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        firebase_uid:        uid,
+        email,
+        razorpay_order_id:   orderId,
+        razorpay_payment_id: paymentId,
+        razorpay_signature:  signature,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Verification failed");
+    return true;
+  } catch (e) {
+    console.error("verifyPaymentBackend error:", e);
+    return false;
+  }
 }
 
 // ─── PAYWALL DRAWER ───────────────────────────────────────────────────────────
-// Bottom drawer — slides up, NON-BLOCKING.
-// User can close anytime (✕ button, Escape key, click outside)
-// and continue using the free Calculator tab.
 
 function PaywallDrawer({ user, onSuccess, onClose }) {
-  const [step,      setStep]      = useState(user ? "pay" : "signin");
-  const [signingIn, setSigningIn] = useState(false);
-  const [paying,    setPaying]    = useState(false);
-  const [error,     setError]     = useState("");
+  const [step,       setStep]      = useState(user ? "pay" : "signin");
+  const [signingIn,  setSigningIn] = useState(false);
+  const [paying,     setPaying]    = useState(false);
+  const [verifying,  setVerifying] = useState(false);
+  const [error,      setError]     = useState("");
 
   // Escape key closes drawer
   useEffect(() => {
@@ -139,6 +174,22 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
     if (user && step === "signin") setStep("pay");
   }, [user, step]);
 
+  // Listen for Firestore payment confirmation in real-time
+  // This catches both webhook writes AND direct writes (belt & suspenders)
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = onSnapshot(
+      doc(db, "paid_users", user.uid),
+      (snap) => {
+        if (snap.exists() && snap.data().paid === true) {
+          toast.success("Payment confirmed! All tabs unlocked 🎉");
+          onSuccess();
+        }
+      }
+    );
+    return () => unsubscribe();
+  }, [user, onSuccess]);
+
   const handleSignIn = async () => {
     setSigningIn(true);
     setError("");
@@ -151,28 +202,70 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
   };
 
   const handlePay = async () => {
+    if (!user) return;
     setPaying(true);
     setError("");
+
+    // Step 1: Load Razorpay JS
     const loaded = await loadRazorpayScript();
     if (!loaded) {
-      setError("Failed to load payment gateway. Check your connection.");
+      setError("Failed to load Razorpay. Check your internet connection.");
       setPaying(false);
       return;
     }
+
+    // Step 2: Create order via backend (gets orderId for signature)
+    const order = await createRazorpayOrder(user.uid, user.email);
+    if (!order) {
+      setError("Could not create payment order. Please try again.");
+      setPaying(false);
+      return;
+    }
+
+    // Step 3: Open Razorpay checkout with orderId
     const options = {
-      key:         process.env.REACT_APP_RAZORPAY_KEY,
-      amount:      PRICE_INR * 100,
-      currency:    "INR",
-      name:        "PedResus — Pediatric Emergency Reference",
+      key:      process.env.REACT_APP_RAZORPAY_KEY,
+      amount:   order.amount,
+      currency: order.currency || "INR",
+      order_id: order.orderId,  // ← critical: needed for signature verification
+      name:     "PedResus — Pediatric Emergency Reference",
       description: "Lifetime Access · All Features",
-      prefill:     { name: user?.displayName || "", email: user?.email || "" },
-      theme:       { color: "#0f172a" },
+      prefill:  { name: user.displayName || "", email: user.email || "" },
+      theme:    { color: "#0f172a" },
+
       handler: async (response) => {
-        await markUserPaid(user.uid, user.email, response.razorpay_payment_id);
-        onSuccess();
+        // Step 4: Verify payment signature on backend → writes to Firestore
+        setPaying(false);
+        setVerifying(true);
+        setError("");
+
+        const verified = await verifyPaymentBackend(
+          user.uid,
+          user.email,
+          response.razorpay_order_id,
+          response.razorpay_payment_id,
+          response.razorpay_signature,
+        );
+
+        if (verified) {
+          // Firestore onSnapshot listener above will fire and call onSuccess()
+          // But also call directly as backup
+          toast.success("Payment verified! Unlocking access...");
+          onSuccess();
+        } else {
+          setError("Payment verification failed. Contact support with payment ID: " + response.razorpay_payment_id);
+        }
+        setVerifying(false);
       },
-      modal: { ondismiss: () => setPaying(false) },
+
+      modal: {
+        ondismiss: () => {
+          setPaying(false);
+          setVerifying(false);
+        },
+      },
     };
+
     const rzp = new window.Razorpay(options);
     rzp.on("payment.failed", (r) => {
       setError("Payment failed: " + r.error.description);
@@ -181,9 +274,15 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
     rzp.open();
   };
 
+  const btnLabel = () => {
+    if (verifying) return "Verifying payment...";
+    if (paying)    return "Opening Razorpay...";
+    return `🔒 Pay ₹${PRICE_INR} — Unlock Everything`;
+  };
+
   return (
     <>
-      {/* Backdrop — click to close */}
+      {/* Backdrop */}
       <div
         className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px]"
         onClick={onClose}
@@ -193,7 +292,7 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
       {/* Drawer */}
       <div
         className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl border-t border-slate-200 dark:border-slate-700"
-        style={{ maxHeight: "88vh", overflowY: "auto" }}
+        style={{ maxHeight: "90vh", overflowY: "auto" }}
         role="dialog"
         aria-modal="false"
         aria-label="Unlock full access"
@@ -213,30 +312,28 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
               Unlock Full Access
             </h2>
             <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-              ₹{PRICE_INR} one-time · All devices · Lifetime · Press Esc or ✕ to close
+              ₹{PRICE_INR} one-time · All devices · Lifetime · Esc or ✕ to close
             </p>
           </div>
           <button
             onClick={onClose}
             className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex-shrink-0"
             aria-label="Close"
-            title="Close — continue using the free Calculator"
           >
             <X size={16} weight="bold" />
           </button>
         </div>
 
-        <div className="px-5 pb-6">
+        <div className="px-5 pb-8">
           {/* Free tab reminder */}
           <div className="flex items-center gap-2 mb-4 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-lg px-3 py-2">
             <CheckCircle size={14} weight="fill" className="text-emerald-500 flex-shrink-0" />
             <p className="text-xs text-emerald-700 dark:text-emerald-400">
-              <strong>Calculator tab is always free.</strong>{" "}
-              Close this anytime and keep using it — no obligation.
+              <strong>Calculator tab is always free.</strong> Close anytime — no obligation.
             </p>
           </div>
 
-          {/* What's included */}
+          {/* What's unlocked */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mb-4">
             {ALL_TABS.filter(t => !t.free).map(t => {
               const Icon = t.icon;
@@ -252,7 +349,7 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
             })}
           </div>
 
-          {/* Step indicator (only shown if not signed in) */}
+          {/* Step indicator */}
           {!user && (
             <div className="flex items-center gap-2 mb-4">
               <div className={`flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider ${step === "signin" ? "text-slate-900 dark:text-white font-bold" : "text-slate-400"}`}>
@@ -271,13 +368,23 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
             </div>
           )}
 
+          {/* Error */}
           {error && (
-            <div className="mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              {error}
+            <div className="mb-3 flex items-start gap-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              <Warning size={14} className="flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
             </div>
           )}
 
-          {/* STEP 1: Sign in with Google */}
+          {/* Verifying state */}
+          {verifying && (
+            <div className="mb-3 flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <div className="w-3.5 h-3.5 border-2 border-amber-400 border-t-amber-700 rounded-full animate-spin flex-shrink-0" />
+              Verifying payment with Razorpay... please wait.
+            </div>
+          )}
+
+          {/* STEP 1: Sign in */}
           {step === "signin" && (
             <button
               onClick={handleSignIn}
@@ -315,21 +422,19 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
                   Switch
                 </button>
               </div>
+
               <button
                 onClick={handlePay}
-                disabled={paying}
-                className="w-full bg-slate-900 dark:bg-white hover:bg-slate-700 dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold py-3.5 rounded-xl text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                disabled={paying || verifying}
+                className="w-full bg-slate-900 dark:bg-white hover:bg-slate-700 dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold py-3.5 rounded-xl text-sm transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                 style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
               >
-                {paying ? (
-                  <>
-                    <span className="w-3.5 h-3.5 border-2 border-slate-400 border-t-white rounded-full animate-spin" />
-                    Opening Razorpay...
-                  </>
-                ) : (
-                  <>🔒 Pay ₹{PRICE_INR} — Unlock Everything</>
+                {(paying || verifying) && (
+                  <span className="w-3.5 h-3.5 border-2 border-slate-400 border-t-white dark:border-t-slate-900 rounded-full animate-spin" />
                 )}
+                {btnLabel()}
               </button>
+
               <p className="text-center text-[10px] text-slate-400 mt-2 font-mono">
                 Razorpay · UPI · Cards · NetBanking · Wallets
               </p>
@@ -350,7 +455,6 @@ function Home() {
   const [authReady,  setAuthReady]  = useState(false);
   const [showDrawer, setShowDrawer] = useState(false);
 
-  // Listen for auth state silently in background
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
@@ -365,6 +469,21 @@ function Home() {
     return () => unsub();
   }, []);
 
+  // Real-time Firestore listener — catches webhook writes on any device
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = onSnapshot(
+      doc(db, "paid_users", user.uid),
+      (snap) => {
+        if (snap.exists() && snap.data().paid === true) {
+          setPaid(true);
+          setShowDrawer(false);
+        }
+      }
+    );
+    return () => unsubscribe();
+  }, [user]);
+
   const handleTabClick = useCallback((tabId) => {
     const tabDef = ALL_TABS.find(t => t.id === tabId);
     if (!tabDef) return;
@@ -372,7 +491,6 @@ function Home() {
       setTab(tabId);
       setShowDrawer(false);
     } else {
-      // Show drawer — user stays on current tab underneath
       setShowDrawer(true);
     }
   }, [paid]);
@@ -422,6 +540,7 @@ function Home() {
             </button>
           ) : null}
         </div>
+
         <div className="flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-2">
@@ -453,7 +572,7 @@ function Home() {
         <Tabs value={tab} onValueChange={() => {}} data-testid="main-tabs">
           <TabsList className="w-full justify-start flex-wrap h-auto p-1.5 bg-slate-100 dark:bg-slate-900 gap-1">
             {ALL_TABS.map((t) => {
-              const Icon  = t.icon;
+              const Icon     = t.icon;
               const isLocked = !t.free && !paid;
               return (
                 <TabsTrigger
@@ -485,13 +604,10 @@ function Home() {
           ))}
         </Tabs>
 
-        {/* Footer */}
         <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex flex-col sm:flex-row justify-between gap-4">
             <div>
-              <span className="font-mono uppercase tracking-[0.15em] text-slate-700 dark:text-slate-300">
-                PED.RESUS
-              </span>
+              <span className="font-mono uppercase tracking-[0.15em] text-slate-700 dark:text-slate-300">PED.RESUS</span>
               <span className="mx-2 text-slate-300 dark:text-slate-600">·</span>
               Pediatric Emergency Reference
               <div className="mt-1 text-[10px] text-slate-400">
@@ -500,14 +616,9 @@ function Home() {
             </div>
             <div className="text-right">
               <div className="text-[10px] text-slate-400 mb-0.5">Designed & Developed by</div>
-              <div className="font-semibold text-slate-700 dark:text-slate-300 font-mono">
-                {DEV_NAME}
-              </div>
+              <div className="font-semibold text-slate-700 dark:text-slate-300 font-mono">{DEV_NAME}</div>
               <div className="text-[10px] text-slate-400">{DEV_TITLE}</div>
-              <a
-                href={`mailto:${DEV_EMAIL}`}
-                className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors underline"
-              >
+              <a href={`mailto:${DEV_EMAIL}`} className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors underline">
                 {DEV_EMAIL}
               </a>
             </div>
@@ -522,8 +633,6 @@ function Home() {
     </div>
   );
 }
-
-// ─── ROOT ─────────────────────────────────────────────────────────────────────
 
 function App() {
   return (
