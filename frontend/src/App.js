@@ -74,17 +74,17 @@ const DEV_EMAIL = "siddhi1398@gmail.com";
 // free: false → shows paywall modal when clicked (but user can close & use free tabs)
 const ALL_TABS = [
   { id: "calculator",    label: "Calculator",          icon: Calculator,    Comp: CalculatorTab,        free: true  },
-  { id: "equipment",     label: "Equipment & Tubes",   icon: Wrench,        Comp: EquipmentTab,         free: false },
+  { id: "equipment",     label: "Equipment & Tubes",   icon: Wrench,        Comp: EquipmentTab,         free: true },
   { id: "resuscitation", label: "Resuscitation",       icon: Syringe,       Comp: ResuscitationTab,     free: true },
-  { id: "drugs",         label: "Drug Doses",          icon: Pill,          Comp: DrugsTab,             free: false },
-  { id: "fluids",        label: "Fluids",              icon: Drop,          Comp: FluidsTab,            free: false },
+  { id: "drugs",         label: "Drug Doses",          icon: Pill,          Comp: DrugsTab,             free: true },
+  { id: "fluids",        label: "Fluids",              icon: Drop,          Comp: FluidsTab,            free: true },
   { id: "vitals",        label: "Vitals by Age",       icon: Heartbeat,     Comp: VitalsTab,            free: true },
-  { id: "scores",        label: "Severity Scores",     icon: ClipboardText, Comp: ScoresTab,            free: false },
-  { id: "sedation",      label: "Sedation & Analgesia",icon: FirstAid,      Comp: SedationAnalgesiaTab, free: false },
-  { id: "neonatal",      label: "Neonatal (NRP)",      icon: Baby,          Comp: NeonatalTab,          free: false },
-  { id: "algorithms",    label: "PALS Algorithms",     icon: TreeStructure, Comp: AlgorithmsTab,        free: false },
-  { id: "pathways",      label: "Clinical Pathways",   icon: Stethoscope,   Comp: ClinicalPathwaysTab,  free: false },
-  { id: "imaging",       label: "Imaging",             icon: ImageIcon,     Comp: ImagingTab,           free: false },
+  { id: "scores",        label: "Severity Scores",     icon: ClipboardText, Comp: ScoresTab,            free: true },
+  { id: "sedation",      label: "Sedation & Analgesia",icon: FirstAid,      Comp: SedationAnalgesiaTab, free: true },
+  { id: "neonatal",      label: "Neonatal (NRP)",      icon: Baby,          Comp: NeonatalTab,          free: true },
+  { id: "algorithms",    label: "PALS Algorithms",     icon: TreeStructure, Comp: AlgorithmsTab,        free: true },
+  { id: "pathways",      label: "Clinical Pathways",   icon: Stethoscope,   Comp: ClinicalPathwaysTab,  free: true },
+  { id: "imaging",       label: "Imaging",             icon: ImageIcon,     Comp: ImagingTab,           free: true },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
