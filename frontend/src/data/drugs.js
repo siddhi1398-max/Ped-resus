@@ -389,50 +389,6 @@ export const DRUGS = [
     notes: "For minor procedures (venepuncture, heel-prick, IM) in neonates/young infants. Combine with non-nutritive sucking.",
   },
   {
-    id: "ceftriaxone",
-    name: "Ceftriaxone",
-    indication: "Sepsis",
-    category: "antibiotic",
-    dosePerKg: 50,
-    unit: "mg",
-    max: 2000,
-    route: "IV / IM",
-    notes: "Once daily.",
-  },
-  {
-    id: "ceftriaxone-meningitis",
-    name: "Ceftriaxone (meningitis)",
-    indication: "Meningitis",
-    category: "antibiotic",
-    dosePerKg: 100,
-    unit: "mg",
-    max: 4000,
-    route: "IV",
-    notes: "Loading dose. Continue 100 mg/kg/day.",
-  },
-  {
-    id: "amoxicillin",
-    name: "Amoxicillin",
-    indication: "Pneumonia / ENT infection",
-    category: "antibiotic",
-    dosePerKg: 30,
-    unit: "mg",
-    max: 1000,
-    route: "PO / IV",
-    notes: "TDS dosing.",
-  },
-  {
-    id: "gentamicin",
-    name: "Gentamicin",
-    indication: "Gram-negative sepsis",
-    category: "antibiotic",
-    dosePerKg: 7.5,
-    unit: "mg",
-    max: 400,
-    route: "IV",
-    notes: "Once daily (>1 mo).",
-  },
-  {
     id: "mannitol",
     name: "Mannitol 20%",
     indication: "Raised ICP",
@@ -729,9 +685,6 @@ export const DRUGS = [
 //             NCDC India Antimicrobial Guidelines · WHO AWaRe 2022
 //             NVBDCP · RNTCP Guidelines
 //
-// HOW TO USE: Copy all entries below into your DRUGS array in drugs.js
-//             Place after the existing antibiotic entries
-//
 // SYRUP FORMULATION GUIDE (added to each drug's notes):
 //   Each entry includes:
 //   - Syrup/suspension concentration available in India
@@ -754,8 +707,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "40–50 mg/kg/day ÷ BD or TDS (IAP/WHO AWaRe 2022). High-dose (DRSP): 80–90 mg/kg/day ÷ BD.",
-      "SYRUP: 125 mg/5 mL → give (dose ÷ 25) mL per dose | 250 mg/5 mL → give (dose ÷ 50) mL per dose.",
-      "Example 10 kg child: 400 mg/dose → 16 mL of 125mg/5mL OR 8 mL of 250mg/5mL.",
       "Indian brands (125 mg/5mL): Mox-125, Novamox-125, Amoxil-125, Wymox-125.",
       "Indian brands (250 mg/5mL): Mox-250, Novamox-250, Amoxil-250.",
       "Dispersible tablets (500 mg): Mox-500 DT — can be dissolved in water for infants.",
@@ -776,7 +727,6 @@ export const DRUGS = [
       "45 mg/kg/day ÷ BD (amoxicillin component). High-dose: 80–90 mg/kg/day for DRSP or AOM failure.",
       "SYRUP 228.5 mg/5mL (amox 200 + clav 28.5): give (dose ÷ 40) mL per dose.",
       "SYRUP 457 mg/5mL (amox 400 + clav 57): give (dose ÷ 80) mL per dose — preferred for BD dosing.",
-      "Example 10 kg: 450 mg/dose → ~11 mL of 228.5/5mL OR ~5.6 mL of 457/5mL.",
       "Indian brands (228.5/5mL): Augmentin-228 DS, Moxclav-228, Clavam-228, Amoxyclav-228.",
       "Indian brands (457/5mL): Augmentin-457 ES, Moxclav-457, Clavam-457.",
       "IV: Augmentin 1.2 g vial (amox 1 g + clav 200 mg) — 30 mg/kg q8h IV.",
@@ -795,8 +745,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "25 mg/kg/dose TDS (each component). Combination covers strep + staph.",
-      "SYRUP 250 mg/5mL (Ampicillin 125 + Cloxacillin 125): give (dose ÷ 25) mL per dose.",
-      "Example 10 kg: 250 mg/dose → 5 mL (1 tsp) of 250/5 mL suspension.",
       "Indian brands: Ampicloxa-250 suspension, Clampicil-DS, Biocilin-CX syrup.",
       "Give on empty stomach (30 min before food). Shake well before use.",
       "Note: Limited evidence for combination vs monotherapy — use when both organisms suspected.",
@@ -814,8 +762,6 @@ export const DRUGS = [
     route: "PO / IV",
     notes: [
       "25 mg/kg/dose QID PO (mild-mod). IV: 50 mg/kg/dose q6h (max 2 g/dose).",
-      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose.",
-      "Example 10 kg: 250 mg → 10 mL (2 tsp) of 125/5 mL syrup QID.",
       "Indian brands (syrup): Klox-125 DS, Bioclox-125, Cloxin-125 suspension.",
       "IV brands: Klox 250/500 mg vials, Bioclox injection.",
       "MUST give on empty stomach — food reduces absorption by 50%. IAP first-line for MSSA.",
@@ -837,9 +783,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "8 mg/kg/day OD or BD (max 400 mg/day). Typhoid (IAP): 10–15 mg/kg/day × 14 days.",
-      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose.",
-      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose.",
-      "Example 10 kg: 80 mg/day OD → 8 mL of 50/5mL OR 4 mL of 100/5mL once daily.",
       "Indian brands (50 mg/5mL): Taxim-O 50, Zifi-50, Cefix-50, Mahacef-50, Topcef-50.",
       "Indian brands (100 mg/5mL): Taxim-O 100, Zifi-100, Cefix-100, Mahacef-100.",
       "Pineapple/mango flavour available (Taxim-O). Shake well, reconstitute with water.",
@@ -858,9 +801,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "5 mg/kg/dose BD (max 200 mg/dose). Take with food (↑absorption 30%).",
-      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose BD.",
-      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose BD.",
-      "Example 10 kg: 50 mg/dose BD → 5 mL of 50/5mL OR 2.5 mL of 100/5mL.",
       "Indian brands (50 mg/5mL): Cepodem-50, Cefoprox-50, Topcef-50, Vantin-50, Pedocef-50.",
       "Indian brands (100 mg/5mL): Cepodem-100, Cefoprox-100.",
       "Good palatability; better S. pneumoniae cover than cefixime. AOM: 5 days course.",
@@ -878,8 +818,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "15 mg/kg/dose BD (max 500 mg/dose). Must give with food.",
-      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose BD.",
-      "Example 10 kg: 150 mg/dose → 6 mL of 125/5mL BD.",
       "Indian brands: Ceftin-125 DS, Supacef-125, Zocef-125, Altacef-125 suspension.",
       "IV form: Zinacef, Ceftum, Supacef 250/750 mg vials. IV dose: 50–100 mg/kg/day ÷ q8h.",
       "2nd generation; good H. influenzae and Moraxella cover. Bitter aftertaste — give with juice.",
@@ -898,8 +836,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "7 mg/kg/dose BD or 14 mg/kg OD (max 300 mg BD or 600 mg OD). AOM: OD acceptable.",
-      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose.",
-      "Example 10 kg: 70 mg/dose BD → 2.8 mL (≈3 mL) of 125/5mL BD.",
       "Indian brands: Adcef-125, Cednir-125, Omnicef-125 suspension.",
       "Excellent palatability (cherry/strawberry flavour). Good for otitis-prone children.",
       "Avoid within 2 hr of iron/antacids. Stools may turn red (harmless — warn parents).",
@@ -917,9 +853,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "15 mg/kg/dose BD (max 500 mg/dose) or 30 mg/kg OD. Strep throat: OD × 10 days.",
-      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose.",
-      "SYRUP 250 mg/5mL: give (dose ÷ 50) mL per dose.",
-      "Example 10 kg: 150 mg/dose BD → 6 mL of 125/5mL OR 3 mL of 250/5mL.",
       "Indian brands: Droxyl-125/250 DS, Cefastar-125, Bioxyl-125 suspension.",
       "1st gen oral cephalosporin. OD dosing improves compliance for GAS pharyngitis.",
       "Can be given with or without food. Good palatability.",
@@ -998,9 +931,6 @@ export const DRUGS = [
       "Standard: 10 mg/kg day 1 (max 500 mg), then 5 mg/kg days 2–5 (max 250 mg).",
       "Typhoid (IAP): 20 mg/kg OD × 7 days (max 1 g/day). Pertussis: 10 mg/kg OD × 5 days.",
       "Scrub typhus <8 yr (IAP): 10 mg/kg OD × 5 days.",
-      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose.",
-      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose.",
-      "Example 10 kg: 100 mg day 1 → 5 mL of 100/5mL OR 2.5 mL of 200/5mL.",
       "Indian brands (100 mg/5mL): Azithral-100, Azee-100, Zithromax-100, Zady-100.",
       "Indian brands (200 mg/5mL): Azithral-200, Azee-200, Zithromax-200.",
       "Give 1 hr before or 2 hr after food. Avoid antacids. QT prolongation — check ECG in neonates.",
@@ -1018,9 +948,6 @@ export const DRUGS = [
     route: "PO / IV",
     notes: [
       "7.5 mg/kg/dose BD (max 500 mg/dose). H. pylori triple therapy: 7.5 mg/kg BD × 14 days.",
-      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose BD.",
-      "SYRUP 250 mg/5mL: give (dose ÷ 50) mL per dose BD.",
-      "Example 10 kg: 75 mg/dose BD → 3 mL of 125/5mL BD.",
       "Indian brands (125 mg/5mL): Claribid-125, Klaricid-125, Crixan-125, Biaxin-125 suspension.",
       "Bitter taste despite flavouring — mix with juice or give after food. Refrigerate suspension.",
       "Strong CYP3A4 inhibitor — check interactions (carbamazepine, statins).",
@@ -1039,9 +966,6 @@ export const DRUGS = [
     notes: [
       "12.5 mg/kg/dose QID (max 500 mg/dose). Pertussis: 10 mg/kg TDS × 14 days (IAP).",
       "Prokinetic (low dose for gastroparesis): 3 mg/kg TDS before feeds.",
-      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose.",
-      "SYRUP 200 mg/5mL (ethylsuccinate): give (dose ÷ 40) mL per dose.",
-      "Example 10 kg: 125 mg/dose QID → 5 mL of 125/5mL QID.",
       "Indian brands (125 mg/5mL): Erythrocin-125, Eryped-125, E-Mycin-125.",
       "Indian brands (200 mg/5mL EES): Erythrocin-200 EES.",
       "QT prolongation — avoid in cardiac patients, neonates. Give before food for better absorption.",
@@ -1090,8 +1014,6 @@ export const DRUGS = [
     route: "PO / IV",
     notes: [
       "PO: 10–15 mg/kg BD (max 750 mg). IV: 10 mg/kg q12h (max 400 mg). Typhoid: 15 mg/kg BD × 7–10 days.",
-      "SYRUP 250 mg/5mL: give (dose ÷ 50) mL per dose BD.",
-      "Example 10 kg: 100 mg/dose BD → 2 mL of 250/5mL BD.",
       "Indian brands (250 mg/5mL suspension): Cifran-250 suspension, Ciplox-250 susp, Zoxan-250.",
       "IV brands: Ciprobid 100/200 mg IV, Ciplox IV.",
       "Reserve for specific indications (fluoroquinolone resistance rising in India).",
@@ -1110,8 +1032,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "7.5 mg/kg BD (max 400 mg/dose). Typhoid (resistant): 10 mg/kg BD × 7 days.",
-      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose BD.",
-      "Example 10 kg: 75 mg → 7.5 mL of 50/5mL BD.",
       "Indian brands: Zanocin-50 susp, Oflox-50 susp, Zenflox-50 oral suspension.",
       "Also available as ofloxacin + metronidazole suspension (Oflomac-M, Norflox-M) for diarrhoea.",
       "Note: Ofloxacin+metronidazole combinations widely used in India for GI infections — questionable evidence.",
@@ -1135,7 +1055,6 @@ export const DRUGS = [
       "7.5 mg/kg TDS PO (max 400 mg/dose). Amoebiasis (IAP): 10 mg/kg TDS × 10 days.",
       "Giardia: 5 mg/kg TDS × 5 days. IV: 7.5 mg/kg q8h.",
       "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose TDS.",
-      "Example 10 kg: 75 mg/dose TDS → ~1.9 mL (≈2 mL) of 200/5mL TDS.",
       "Indian brands (200 mg/5mL): Flagyl-200 susp, Metrogyl-200 susp, Aldezole susp, Metronid susp.",
       "IV: Metrogyl IV 500 mg/100 mL, Flagyl IV.",
       "PR: Metronidazole suppositories 500 mg (Flagyl suppositories) — for vomiting children.",
@@ -1194,9 +1113,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "20 mg/kg OD × 7 days (max 1 g/day). IAP 2024 first-line for uncomplicated enteric fever.",
-      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose OD.",
-      "Example 10 kg: 200 mg OD → 5 mL of 200/5mL OD.",
-      "Example 15 kg: 300 mg OD → 7.5 mL of 200/5mL OD.",
       "Indian brands: Azithral-200, Azee-200, Zithromax-200 susp.",
       "Effective against ESBL Salmonella. Outpatient treatment possible for uncomplicated cases.",
       "Switch to ceftriaxone 100 mg/kg IV if complicated (perforated/toxic/high fever >5 days).",
@@ -1233,7 +1149,6 @@ export const DRUGS = [
     notes: [
       "50–75 mg/kg/day ÷ QID (max 3–4 g/day). Typhoid: 75 mg/kg/day × 14 days.",
       "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose QID.",
-      "Example 10 kg at 50 mg/kg/day: 125 mg/dose QID → 5 mL (1 tsp) QID.",
       "Indian brands (125 mg/5mL): Paraxin-125 suspension, Kemicetine palmitate susp.",
       "Still used in resource-limited India — cheap and widely available. Piyush Gupta recommends for susceptible typhoid.",
       "AVOID in neonates (Grey Baby Syndrome). Monitor CBC weekly (aplastic anaemia risk — rare but fatal).",
@@ -1276,9 +1191,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "10 mg/kg OD × 5 days (max 500 mg). IAP endorsed alternative to doxycycline for <8 yr.",
-      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose OD.",
-      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose OD.",
-      "Example 10 kg: 100 mg OD → 5 mL of 100/5mL OR 2.5 mL of 200/5mL OD.",
       "Indian brands: Azithral-100/200, Azee-100/200 suspension.",
       "Monitor fever defervescence — if no improvement in 48 hr, reconsider diagnosis.",
       "CSF penetration adequate for scrub typhus meningitis cases.",
@@ -1378,8 +1290,7 @@ export const DRUGS = [
     route: "PO / IV",
     notes: [
       "<12 yr: 10 mg/kg q8h (max 600 mg/dose). ≥12 yr: 600 mg q12h.",
-      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose q8h.",
-      "Example 10 kg: 100 mg q8h → 5 mL of 100/5mL q8h.",
+      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose TDS.",
       "Indian brands (100 mg/5mL): Lizolid-100 susp, Linox-100 susp, Linospan-100 susp, Zyvox-100.",
       "100% oral bioavailability — switch IV to PO early (same efficacy, much cheaper).",
       "Monitor CBC weekly: thrombocytopenia, anaemia common with >2 weeks use.",
@@ -1483,8 +1394,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "Treatment: 10 mg/kg OD (max 300 mg). LTBI prophylaxis: 10 mg/kg OD × 6 months.",
-      "SYRUP 50 mg/5mL or 100 mg/5mL: give (dose ÷ 10 or ÷ 20) mL OD.",
-      "Example 10 kg: 100 mg OD → 10 mL of 50/5mL OR 5 mL of 100/5mL.",
       "Indian brands: Isokin-100 syrup, INH suspension (various). Tablet: 100 mg, 300 mg.",
       "Combination tablets: Rifater (INH+R+PZA), Rimactazid (INH+R) widely used in India.",
       "Give with pyridoxine (vitamin B6) 5–10 mg/day to prevent peripheral neuropathy.",
@@ -1600,8 +1509,6 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "10 mg base/kg day 1 & 2, then 5 mg base/kg day 3 (max 600 mg/dose days 1–2, 300 mg day 3).",
-      "SYRUP 50 mg base/5mL: give (dose ÷ 10) mL per dose.",
-      "Example 10 kg: 100 mg base → 10 mL (2 tsp) of 50 mg/5mL.",
       "Indian brands (50 mg/5mL): Lariago syrup, Malarex syrup, Resochin syrup.",
       "P. vivax still largely chloroquine-sensitive in India (NVBDCP 2023).",
       "Follow with primaquine for radical cure (check G6PD first — MANDATORY).",
@@ -1644,8 +1551,6 @@ export const DRUGS = [
     notes: [
       "Invasive candida: 6–12 mg/kg/day OD (max 400 mg/day; loading 12 mg/kg day 1).",
       "Oropharyngeal thrush: 3 mg/kg OD × 7 days. Prophylaxis (immunocompromised): 3–6 mg/kg OD.",
-      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose OD.",
-      "Example 10 kg: 60 mg OD → 6 mL of 50/5mL.",
       "Indian brands (50 mg/5mL): Forcan-50 susp, Syscan-50 susp, Zocon-50 susp, Flucos-50.",
       "IV: Forcan-100/200 mg IV, Syscan IV. Same dose IV as PO.",
       "CYP3A4 inhibitor — check interactions (cyclosporine, tacrolimus, warfarin).",
@@ -1706,8 +1611,6 @@ export const DRUGS = [
       "Helminths (>2 yr): 400 mg single dose (>10 kg). <10 kg or 1–2 yr: 200 mg single dose.",
       "NCC (neurocysticercosis): 15 mg/kg/day BD × 4 weeks + dexamethasone (IAP).",
       "Giardia: 400 mg OD × 5 days.",
-      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL.",
-      "Example: 400 mg → 10 mL (2 tsp) of 200/5mL.",
       "Indian brands (200 mg/5mL): Zentel-200 suspension, Bandy-Plus susp, Noworm susp.",
       "Take with fatty food (↑absorption for tissue infections). MDA programme drug.",
     ].join(" "),
@@ -1788,8 +1691,6 @@ export const DRUGS = [
     notes: [
       "HSV encephalitis/neonatal: 20 mg/kg q8h IV × 14–21 days.",
       "Severe varicella: 10 mg/kg q8h IV × 5–7 days. Oral varicella: 20 mg/kg QID × 5 days (max 800 mg/dose).",
-      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose.",
-      "Example 10 kg (varicella oral): 200 mg QID → 5 mL of 200/5mL QID.",
       "Indian brands (200 mg/5mL): Zovirax-200 suspension, Acivir-200 susp, Herpex-200 susp.",
       "IV: Zovirax, Acivir, Vacilovir 250/500 mg vials.",
       "Ensure adequate hydration during IV therapy (nephrotoxic if dehydrated). Infuse over 1 hr.",
@@ -1800,10 +1701,15 @@ export const DRUGS = [
 // QUICK SYRUP DOSE REFERENCE TABLE
 // ═══════════════════════════════════════════════════════════════════════════════
 //
-// HOW TO CALCULATE mL FROM SYRUP CONCENTRATION:
-//   mL per dose = (dose in mg) ÷ (concentration in mg/mL)
-//   Concentration (mg/mL) = strength/5   [e.g. 125mg/5mL → 25 mg/mL]
-//
+  { 
+    "HOW TO CALCULATE mL FROM SYRUP CONCENTRATION:"
+    "mL per dose = (dose in mg) ÷ (concentration in mg/mL)"
+    "Concentration (mg/mL) = strength/5"
+    "SYRUP: 50 mg/5mL: give (dose ÷ 10) mL per dose.",
+    "SYRUP: 100 mg/5mL: give (dose ÷ 20) mL per dose.",
+    "SYRUP: 125 mg/5 mL → give (dose ÷ 25) mL per dose.",
+    "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose.",
+  },
 // COMMON CONCENTRATIONS AVAILABLE IN INDIA:
 //   Amoxicillin:           125 mg/5mL | 250 mg/5mL
 //   Co-amoxiclav:          228.5 mg/5mL | 457 mg/5mL
