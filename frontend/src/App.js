@@ -38,7 +38,7 @@ import {
 
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 
 // ─── FIREBASE ─────────────────────────────────────────────────────────────────
 const firebaseConfig = {
@@ -80,98 +80,141 @@ function loadRazorpay() {
   return new Promise((resolve) => {
     if (window.Razorpay) return resolve(true);
     const s = document.createElement("script");
-    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.src     = "https://checkout.razorpay.com/v1/checkout.js";
     s.onload  = () => resolve(true);
     s.onerror = () => resolve(false);
     document.body.appendChild(s);
   });
 }
 
-async function checkPaid(uid) {
+// Check if UID has paid
+async function checkPaidByUid(uid) {
   try {
     const snap = await getDoc(doc(db, "paid_users", uid));
     return snap.exists() && snap.data().paid === true;
-  } catch (e) {
-    console.error("checkPaid error:", e);
-    return false;
-  }
+  } catch { return false; }
 }
 
-// This is the critical function — writes to Firestore after payment
-// Uses db and auth directly from module scope so it's never undefined
-async function savePaidUser(uid, email, paymentId) {
-  console.log("savePaidUser called:", uid, email, paymentId);
-  const ref = doc(db, "paid_users", uid);
-  await setDoc(ref, {
-    paid:      true,
-    email:     email || "",
-    paymentId: paymentId || "",
-    paidAt:    new Date().toISOString(),
-  }, { merge: true }); // merge:true means it won't overwrite existing fields
-  console.log("savePaidUser success");
+// Check if email has paid (for users who paid without signing in)
+async function checkPaidByEmail(email) {
+  try {
+    const q    = query(collection(db, "paid_emails"), where("email", "==", email.toLowerCase()));
+    const snap = await getDocs(q);
+    return !snap.empty;
+  } catch { return false; }
+}
+
+// Save payment against UID (for signed-in users)
+async function savePaidByUid(uid, email, paymentId) {
+  await setDoc(doc(db, "paid_users", uid), {
+    paid: true, email: email || "", paymentId, paidAt: new Date().toISOString(),
+  }, { merge: true });
+}
+
+// Save payment against email (for users who paid without signing in)
+async function savePaidByEmail(email, paymentId) {
+  const key = email.toLowerCase().replace(/[^a-z0-9]/g, "_");
+  await setDoc(doc(db, "paid_emails", key), {
+    email: email.toLowerCase(), paymentId, paidAt: new Date().toISOString(),
+  });
+}
+
+// When a signed-in user's email matches a paid_emails record, upgrade them to paid_users
+async function linkEmailPaymentToUid(uid, email) {
+  const hasPaidByEmail = await checkPaidByEmail(email);
+  if (hasPaidByEmail) {
+    await setDoc(doc(db, "paid_users", uid), {
+      paid: true, email, linkedFromEmail: true, paidAt: new Date().toISOString(),
+    }, { merge: true });
+    return true;
+  }
+  return false;
+}
+
+// Full check: uid first, then email fallback
+async function checkAndLinkPaid(uid, email) {
+  const paidByUid = await checkPaidByUid(uid);
+  if (paidByUid) return true;
+  if (email) {
+    const linked = await linkEmailPaymentToUid(uid, email);
+    if (linked) return true;
+  }
+  return false;
 }
 
 // ─── PAYWALL DIALOG ───────────────────────────────────────────────────────────
+// Two paths: Sign in with Google OR Pay directly with email
 function PaywallDialog({ user, onSuccess, onClose }) {
-  const [step,  setStep]  = useState(user ? "pay" : "signin");
-  const [busy,  setBusy]  = useState(false);
-  const [error, setError] = useState("");
+  // "choose" | "signin" | "signin_loading" | "pay_direct" | "paying" | "done"
+  const [step,       setStep]      = useState(user ? "pay_direct" : "choose");
+  const [email,      setEmail]     = useState(user?.email || "");
+  const [busy,       setBusy]      = useState(false);
+  const [error,      setError]     = useState("");
 
-  // Keep user in a ref so Razorpay handler can always access latest value
   const userRef = useRef(user);
   useEffect(() => { userRef.current = user; }, [user]);
 
-  // When user signs in move to pay step
+  // If user signs in mid-flow, check if they've already paid
   useEffect(() => {
-    if (user && step === "signin") setStep("pay");
-  }, [user, step]);
+    if (!user) return;
+    setEmail(user.email || "");
+    (async () => {
+      const paid = await checkAndLinkPaid(user.uid, user.email);
+      if (paid) {
+        toast.success("Access restored! Welcome back 🎉");
+        onSuccess();
+      } else {
+        setStep("pay_direct");
+      }
+    })();
+  }, [user, onSuccess]);
 
+  // ── Google Sign In ──
   const handleSignIn = async () => {
-    setBusy(true);
-    setError("");
+    setBusy(true); setError("");
+    setStep("signin_loading");
     try {
       await signInWithPopup(auth, googleProvider);
-      // useEffect above moves to "pay" step
-    } catch (e) {
-      console.error("Sign in error:", e);
+      // useEffect above handles next step
+    } catch {
       setError("Sign-in failed. Please try again.");
+      setStep("choose");
     }
     setBusy(false);
   };
 
+  // ── Pay with Razorpay (works with or without login) ──
   const handlePay = async () => {
-    // Capture user at the moment Pay is clicked — store in local var AND ref
-    const currentUser = userRef.current || auth.currentUser;
-    if (!currentUser) {
-      setError("Please sign in first.");
+    const payEmail = (userRef.current?.email || email || "").trim();
+    const uid      = userRef.current?.uid || null;
+
+    if (!payEmail || !payEmail.includes("@")) {
+      setError("Please enter a valid email to receive your receipt.");
       return;
     }
 
-    // Capture uid and email in local variables NOW
-    // These will be available inside the Razorpay handler closure
-    const uid   = currentUser.uid;
-    const email = currentUser.email;
-
-    console.log("handlePay: uid =", uid, "email =", email);
-
-    setBusy(true);
-    setError("");
+    setBusy(true); setError("");
+    setStep("paying");
 
     const loaded = await loadRazorpay();
     if (!loaded) {
       setError("Could not load Razorpay. Check your internet.");
       setBusy(false);
+      setStep("pay_direct");
       return;
     }
 
     const rzpKey = process.env.REACT_APP_RAZORPAY_KEY_ID;
-    console.log("Razorpay key:", rzpKey ? "found" : "MISSING");
-
     if (!rzpKey) {
-      setError("Payment configuration missing. Contact " + DEV_EMAIL);
+      setError("Payment config missing. Contact " + DEV_EMAIL);
       setBusy(false);
+      setStep("pay_direct");
       return;
     }
+
+    // Capture in local vars for closure
+    const capturedEmail = payEmail;
+    const capturedUid   = uid;
 
     const options = {
       key:         rzpKey,
@@ -179,49 +222,51 @@ function PaywallDialog({ user, onSuccess, onClose }) {
       currency:    "INR",
       name:        "PedResus",
       description: "Lifetime Access — All Features",
-      prefill:     { name: currentUser.displayName || "", email: email },
-      theme:       { color: "#0f172a" },
+      prefill:     {
+        name:  userRef.current?.displayName || "",
+        email: capturedEmail,
+      },
+      theme: { color: "#0f172a" },
 
-      // This handler runs after successful payment
-      // uid and email are captured in closure above — always available
-      handler: async function(response) {
-        console.log("Payment success:", response);
-        console.log("Saving to Firestore for uid:", uid);
-
+      handler: async (response) => {
         try {
-          await savePaidUser(uid, email, response.razorpay_payment_id);
-          console.log("Firestore save successful");
+          // Always save by email (works for everyone)
+          await savePaidByEmail(capturedEmail, response.razorpay_payment_id);
+
+          // If signed in, also save by UID for instant future access
+          if (capturedUid) {
+            await savePaidByUid(capturedUid, capturedEmail, response.razorpay_payment_id);
+          }
+
+          setStep("done");
           toast.success("Payment successful! All tabs unlocked 🎉");
           setBusy(false);
-          onSuccess();
+          setTimeout(() => onSuccess(), 1500);
         } catch (e) {
-          console.error("Firestore save failed:", e);
-          // Even if Firestore fails, show payment ID so user can contact support
+          console.error("Save failed:", e);
           setError(
             `Payment successful (ID: ${response.razorpay_payment_id}) but save failed. ` +
-            `Email ${DEV_EMAIL} with this ID and we'll unlock manually.`
+            `Email ${DEV_EMAIL} with this ID to unlock manually.`
           );
           setBusy(false);
+          setStep("pay_direct");
         }
       },
 
       modal: {
         ondismiss: () => {
-          console.log("Razorpay modal dismissed");
           setBusy(false);
+          setStep(capturedUid ? "pay_direct" : "choose");
         },
       },
     };
 
-    console.log("Opening Razorpay with options:", options);
     const rzp = new window.Razorpay(options);
-
     rzp.on("payment.failed", (r) => {
-      console.error("Payment failed:", r.error);
       setError("Payment failed: " + r.error.description);
       setBusy(false);
+      setStep(capturedUid ? "pay_direct" : "choose");
     });
-
     rzp.open();
   };
 
@@ -229,17 +274,16 @@ function PaywallDialog({ user, onSuccess, onClose }) {
     <>
       <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl border-t border-slate-200 dark:border-slate-700 px-5 pb-10 pt-4"
-        style={{ maxHeight: "80vh", overflowY: "auto" }}
-      >
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl border-t border-slate-200 dark:border-slate-700 px-5 pb-10 pt-4"
+        style={{ maxHeight: "85vh", overflowY: "auto" }}>
+
         {/* Handle */}
         <div className="flex justify-center mb-4">
           <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-5">
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white"
               style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
@@ -262,32 +306,86 @@ function PaywallDialog({ user, onSuccess, onClose }) {
           </div>
         )}
 
-        {/* STEP 1: Sign in */}
-        {step === "signin" && (
-          <button onClick={handleSignIn} disabled={busy}
-            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl py-4 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-all disabled:opacity-50 shadow-sm">
-            {busy
-              ? <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
-              : <svg width="18" height="18" viewBox="0 0 48 48">
-                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
-            }
-            {busy ? "Signing in..." : "Continue with Google"}
-          </button>
-        )}
-
-        {/* STEP 2: Pay */}
-        {step === "pay" && user && (
+        {/* ── CHOOSE: Two options ── */}
+        {step === "choose" && (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-xs">
-              {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
-              <span className="font-mono text-slate-600 dark:text-slate-300 truncate">{user.email}</span>
-              <button onClick={() => signOut(auth)} className="ml-auto text-[10px] text-slate-400 underline">Switch</button>
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-center mb-4">
+              Choose how you'd like to continue
+            </p>
+
+            {/* Option 1: Sign in with Google */}
+            <button onClick={handleSignIn}
+              className="w-full flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm">
+              <svg width="18" height="18" viewBox="0 0 48 48" className="flex-shrink-0">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              </svg>
+              <div className="text-left">
+                <div>Sign in with Google</div>
+                <div className="text-[10px] font-normal text-slate-400 font-mono">then pay · access on all devices</div>
+              </div>
+            </button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+              <span className="text-[10px] text-slate-400 font-mono">or</span>
+              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
             </div>
 
+            {/* Option 2: Pay directly */}
+            <button onClick={() => setStep("pay_direct")}
+              className="w-full flex items-center gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl px-4 py-3.5 text-sm font-semibold hover:bg-slate-700 transition-all"
+              style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+              <span className="text-lg flex-shrink-0">🔒</span>
+              <div className="text-left">
+                <div>Pay ₹{PRICE_INR} directly</div>
+                <div className="text-[10px] font-normal opacity-60 font-mono">no account needed · just your email</div>
+              </div>
+            </button>
+
+            <p className="text-center text-[10px] text-slate-400 font-mono pt-1">
+              Razorpay · UPI · Cards · NetBanking · Wallets
+            </p>
+          </div>
+        )}
+
+        {/* ── SIGNING IN ── */}
+        {step === "signin_loading" && (
+          <div className="flex flex-col items-center gap-3 py-8">
+            <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+            <p className="text-sm text-slate-500 font-mono">Signing in...</p>
+          </div>
+        )}
+
+        {/* ── PAY DIRECTLY (no login needed) ── */}
+        {(step === "pay_direct" || step === "paying") && (
+          <div className="space-y-3">
+            {/* Show logged-in user OR email input */}
+            {user ? (
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-xs">
+                {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
+                <span className="font-mono text-slate-600 dark:text-slate-300 truncate">{user.email}</span>
+                <button onClick={() => signOut(auth)} className="ml-auto text-[10px] text-slate-400 underline">Switch</button>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">
+                  Your email (for receipt & access restore)
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                />
+              </div>
+            )}
+
+            {/* Pay button */}
             <button onClick={handlePay} disabled={busy}
               className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl text-sm hover:bg-slate-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
               style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
@@ -295,9 +393,38 @@ function PaywallDialog({ user, onSuccess, onClose }) {
               {busy ? "Opening Razorpay..." : `🔒 Pay ₹${PRICE_INR} — Unlock Everything`}
             </button>
 
+            {/* Back to choose if not logged in */}
+            {!user && (
+              <button onClick={() => { setStep("choose"); setError(""); }}
+                className="w-full text-[11px] text-slate-400 hover:text-slate-600 font-mono underline text-center">
+                ← Back
+              </button>
+            )}
+
             <p className="text-center text-[10px] text-slate-400 font-mono">
               Razorpay · UPI · Cards · NetBanking · Wallets
             </p>
+
+            {/* Tip for non-logged-in users */}
+            {!user && (
+              <div className="text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-center">
+                💡 Use the same email when signing in later to restore access automatically
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── DONE ── */}
+        {step === "done" && (
+          <div className="text-center py-6">
+            <div className="text-5xl mb-3">🎉</div>
+            <div className="font-bold text-slate-900 dark:text-white text-lg mb-1">All tabs unlocked!</div>
+            <p className="text-xs text-slate-400 mb-2">You now have lifetime access on all devices.</p>
+            {!user && (
+              <p className="text-[11px] text-slate-400 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 mt-3">
+                Sign in with Google using <strong>{email}</strong> anytime to restore access automatically.
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -317,7 +444,7 @@ function Home() {
     return onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
-        const hasPaid = await checkPaid(u.uid);
+        const hasPaid = await checkAndLinkPaid(u.uid, u.email);
         setPaid(hasPaid);
       } else {
         setPaid(false);
@@ -342,11 +469,7 @@ function Home() {
       style={{ fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
 
       {showDialog && (
-        <PaywallDialog
-          user={user}
-          onSuccess={handleUnlock}
-          onClose={() => setShowDialog(false)}
-        />
+        <PaywallDialog user={user} onSuccess={handleUnlock} onClose={() => setShowDialog(false)} />
       )}
 
       <TopBar />
@@ -371,16 +494,11 @@ function Home() {
             <>
               {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
               <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[160px]">{user.email}</span>
-              <button
-                onClick={() => { signOut(auth); setPaid(false); setUser(null); setTab("calculator"); }}
-                className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">
-                Sign out
-              </button>
+              <button onClick={() => { signOut(auth); setPaid(false); setUser(null); setTab("calculator"); }}
+                className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign out</button>
             </>
           ) : authReady ? (
-            <button onClick={() => setShowDialog(true)} className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">
-              Sign in
-            </button>
+            <button onClick={() => setShowDialog(true)} className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign in</button>
           ) : null}
         </div>
       </div>
