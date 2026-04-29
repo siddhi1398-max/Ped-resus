@@ -1,4 +1,3 @@
-// api/verify-payment.js
 const crypto = require("crypto");
 const { initializeApp, cert, getApps } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
@@ -17,6 +16,11 @@ function getDb() {
 }
 
 module.exports = async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, firebase_uid, email } = req.body;
@@ -37,11 +41,11 @@ module.exports = async function handler(req, res) {
   try {
     const db = getDb();
     await db.collection("paid_users").doc(firebase_uid).set({
-      paid:      true,
-      email:     email || "",
-      paymentId: razorpay_payment_id,
-      orderId:   razorpay_order_id,
-      paidAt:    new Date().toISOString(),
+      paid:       true,
+      email:      email || "",
+      paymentId:  razorpay_payment_id,
+      orderId:    razorpay_order_id,
+      paidAt:     new Date().toISOString(),
       verifiedBy: "razorpay-webhook",
     });
 
