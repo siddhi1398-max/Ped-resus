@@ -110,8 +110,6 @@ async function checkUserPaid(uid) {
 }
 
 // ── STEP 1: Create Razorpay order via backend ─────────────────────────────────
-// This calls your Netlify function which creates the order server-side.
-// Without this, there is no order_id → no signature → no webhook verification.
 async function createRazorpayOrder(uid, email) {
   try {
     const res = await fetch("/api/create-order", {
@@ -128,12 +126,9 @@ async function createRazorpayOrder(uid, email) {
 }
 
 // ── STEP 2: Verify payment via backend after Razorpay success callback ─────────
-// Sends payment details to your Netlify function which:
-// 1. Verifies the Razorpay signature (prevents fraud)
-// 2. Writes paid: true to Firestore for this Firebase UID
 async function verifyPaymentBackend(uid, email, orderId, paymentId, signature) {
   try {
-    const res = await fetch("/frontend/verify-payment", {
+    const res = await fetch("/api/verify-payment", {  // ← FIXED: was /frontend/verify-payment
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({
@@ -175,7 +170,6 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
   }, [user, step]);
 
   // Listen for Firestore payment confirmation in real-time
-  // This catches both webhook writes AND direct writes (belt & suspenders)
   useEffect(() => {
     if (!user) return;
     const unsubscribe = onSnapshot(
@@ -214,7 +208,7 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
       return;
     }
 
-    // Step 2: Create order via backend (gets orderId for signature)
+    // Step 2: Create order via backend
     const order = await createRazorpayOrder(user.uid, user.email);
     if (!order) {
       setError("Could not create payment order. Please try again.");
@@ -222,19 +216,19 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
       return;
     }
 
-    // Step 3: Open Razorpay checkout with orderId
+    // Step 3: Open Razorpay checkout
     const options = {
-      key:      process.env.REACT_APP_RAZORPAY_KEY,
+      key:      process.env.REACT_APP_RAZORPAY_KEY_ID,  // ← FIXED: was REACT_APP_RAZORPAY_KEY
       amount:   order.amount,
       currency: order.currency || "INR",
-      order_id: order.orderId,  // ← critical: needed for signature verification
+      order_id: order.orderId,
       name:     "PedResus — Pediatric Emergency Reference",
       description: "Lifetime Access · All Features",
       prefill:  { name: user.displayName || "", email: user.email || "" },
       theme:    { color: "#0f172a" },
 
       handler: async (response) => {
-        // Step 4: Verify payment signature on backend → writes to Firestore
+        // Step 4: Verify payment signature on backend
         setPaying(false);
         setVerifying(true);
         setError("");
@@ -248,8 +242,6 @@ function PaywallDrawer({ user, onSuccess, onClose }) {
         );
 
         if (verified) {
-          // Firestore onSnapshot listener above will fire and call onSuccess()
-          // But also call directly as backup
           toast.success("Payment verified! Unlocking access...");
           onSuccess();
         } else {
@@ -469,7 +461,7 @@ function Home() {
     return () => unsub();
   }, []);
 
-  // Real-time Firestore listener — catches webhook writes on any device
+  // Real-time Firestore listener
   useEffect(() => {
     if (!user) return;
     const unsubscribe = onSnapshot(
