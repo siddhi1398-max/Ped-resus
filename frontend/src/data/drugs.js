@@ -801,6 +801,8 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "5 mg/kg/dose BD (max 200 mg/dose). Take with food (↑absorption 30%).",
+      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose BD.",
+      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose BD.",
       "Indian brands (50 mg/5mL): Cepodem-50, Cefoprox-50, Topcef-50, Vantin-50, Pedocef-50.",
       "Indian brands (100 mg/5mL): Cepodem-100, Cefoprox-100.",
       "Good palatability; better S. pneumoniae cover than cefixime. AOM: 5 days course.",
@@ -818,6 +820,7 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "15 mg/kg/dose BD (max 500 mg/dose). Must give with food.",
+      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose BD.",
       "Indian brands: Ceftin-125 DS, Supacef-125, Zocef-125, Altacef-125 suspension.",
       "IV form: Zinacef, Ceftum, Supacef 250/750 mg vials. IV dose: 50–100 mg/kg/day ÷ q8h.",
       "2nd generation; good H. influenzae and Moraxella cover. Bitter aftertaste — give with juice.",
@@ -948,6 +951,8 @@ export const DRUGS = [
     route: "PO / IV",
     notes: [
       "7.5 mg/kg/dose BD (max 500 mg/dose). H. pylori triple therapy: 7.5 mg/kg BD × 14 days.",
+      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose BD.",
+      "SYRUP 250 mg/5mL: give (dose ÷ 50) mL per dose BD.",
       "Indian brands (125 mg/5mL): Claribid-125, Klaricid-125, Crixan-125, Biaxin-125 suspension.",
       "Bitter taste despite flavouring — mix with juice or give after food. Refrigerate suspension.",
       "Strong CYP3A4 inhibitor — check interactions (carbamazepine, statins).",
@@ -1014,6 +1019,7 @@ export const DRUGS = [
     route: "PO / IV",
     notes: [
       "PO: 10–15 mg/kg BD (max 750 mg). IV: 10 mg/kg q12h (max 400 mg). Typhoid: 15 mg/kg BD × 7–10 days.",
+      "SYRUP 250 mg/5mL: give (dose ÷ 50) mL per dose BD.",
       "Indian brands (250 mg/5mL suspension): Cifran-250 suspension, Ciplox-250 susp, Zoxan-250.",
       "IV brands: Ciprobid 100/200 mg IV, Ciplox IV.",
       "Reserve for specific indications (fluoroquinolone resistance rising in India).",
@@ -1032,6 +1038,7 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "7.5 mg/kg BD (max 400 mg/dose). Typhoid (resistant): 10 mg/kg BD × 7 days.",
+      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose BD.",
       "Indian brands: Zanocin-50 susp, Oflox-50 susp, Zenflox-50 oral suspension.",
       "Also available as ofloxacin + metronidazole suspension (Oflomac-M, Norflox-M) for diarrhoea.",
       "Note: Ofloxacin+metronidazole combinations widely used in India for GI infections — questionable evidence.",
