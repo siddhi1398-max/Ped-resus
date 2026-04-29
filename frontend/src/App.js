@@ -37,13 +37,10 @@ import {
 } from "@phosphor-icons/react";
 
 import { initializeApp } from "firebase/app";
-import {
-  getAuth, signInWithPopup, GoogleAuthProvider,
-  onAuthStateChanged, signOut,
-} from "firebase/auth";
-import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
-// ─── FIREBASE CONFIG ──────────────────────────────────────────────────────────
+// ─── FIREBASE ─────────────────────────────────────────────────────────────────
 const firebaseConfig = {
   apiKey:            "AIzaSyC794KlXXWDOANEEtq2-s4cU8J9cD_9Qgs",
   authDomain:        "pedresus-3fb27.firebaseapp.com",
@@ -52,19 +49,16 @@ const firebaseConfig = {
   messagingSenderId: "70799823874",
   appId:             "1:70799823874:web:b5d4801bf42a0f8c5d431b",
 };
-
 const app            = initializeApp(firebaseConfig);
 const auth           = getAuth(app);
 const db             = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
-// ─── CONSTANTS ────────────────────────────────────────────────────────────────
 const PRICE_INR = 30;
 const DEV_NAME  = "Dr. Siddhi Naik";
 const DEV_TITLE = "Emergency Physician";
 const DEV_EMAIL = "siddhi1398@gmail.com";
 
-// ─── TABS ─────────────────────────────────────────────────────────────────────
 const ALL_TABS = [
   { id: "calculator",    label: "Calculator",           icon: Calculator,    Comp: CalculatorTab,        free: true  },
   { id: "equipment",     label: "Equipment & Tubes",    icon: Wrench,        Comp: EquipmentTab,         free: false },
@@ -81,134 +75,108 @@ const ALL_TABS = [
   { id: "imaging",       label: "Imaging",              icon: ImageIcon,     Comp: ImagingTab,           free: false },
 ];
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-function loadRazorpayScript() {
+// Load Razorpay script dynamically
+function loadRazorpay() {
   return new Promise((resolve) => {
-    if (document.getElementById("razorpay-script")) return resolve(true);
-    const s   = document.createElement("script");
-    s.id      = "razorpay-script";
-    s.src     = "https://checkout.razorpay.com/v1/checkout.js";
+    if (window.Razorpay) return resolve(true);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
     s.onload  = () => resolve(true);
     s.onerror = () => resolve(false);
     document.body.appendChild(s);
   });
 }
 
-async function checkUserPaid(uid) {
+// Check Firestore if user has paid
+async function checkPaid(uid) {
   try {
     const snap = await getDoc(doc(db, "paid_users", uid));
     return snap.exists() && snap.data().paid === true;
-  } catch {
-    return false;
-  }
+  } catch { return false; }
+}
+
+// Mark user as paid in Firestore (called after successful payment)
+async function markPaid(uid, email, paymentId) {
+  await setDoc(doc(db, "paid_users", uid), {
+    paid: true,
+    email,
+    paymentId,
+    paidAt: new Date().toISOString(),
+  });
 }
 
 // ─── PAYWALL DIALOG ───────────────────────────────────────────────────────────
-// Simple 3-step flow: Sign in → Pay → Unlocked
 function PaywallDialog({ user, onSuccess, onClose }) {
   const [step,  setStep]  = useState(user ? "pay" : "signin");
+  const [busy,  setBusy]  = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (user && step === "signin") setStep("pay");
   }, [user, step]);
 
-  // ── Step 1: Google Sign In ──
   const handleSignIn = async () => {
-    setError("");
-    setStep("signin_loading");
+    setBusy(true); setError("");
     try {
       await signInWithPopup(auth, googleProvider);
     } catch {
-      setError("Sign-in failed. Please try again.");
-      setStep("signin");
+      setError("Sign-in failed. Try again.");
     }
+    setBusy(false);
   };
 
-  // ── Step 2: Pay with Razorpay ──
   const handlePay = async () => {
     if (!user) return;
-    setError("");
-    setStep("paying");
+    setBusy(true); setError("");
 
-    const loaded = await loadRazorpayScript();
+    const loaded = await loadRazorpay();
     if (!loaded) {
-      setError("Could not load Razorpay. Check your connection.");
-      setStep("pay");
+      setError("Could not load Razorpay. Check your internet.");
+      setBusy(false);
       return;
     }
 
-    let order;
-    try {
-      const res = await fetch("/api/create-order", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ uid: user.uid, email: user.email, amount: PRICE_INR * 100 }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      order = await res.json();
-    } catch {
-      setError("Could not create order. Please try again.");
-      setStep("pay");
-      return;
-    }
-
+    // Open Razorpay WITHOUT a backend order (simplest mode)
     const options = {
       key:         process.env.REACT_APP_RAZORPAY_KEY_ID,
-      amount:      order.amount,
-      currency:    order.currency || "INR",
-      order_id:    order.orderId,
+      amount:      PRICE_INR * 100,   // paise
+      currency:    "INR",
       name:        "PedResus",
-      description: "Lifetime Access · All Features",
+      description: "Lifetime Access",
       prefill:     { name: user.displayName || "", email: user.email || "" },
       theme:       { color: "#0f172a" },
 
       handler: async (response) => {
-        setStep("verifying");
+        // Payment successful — write to Firestore
         try {
-          const vRes = await fetch("/api/verify-payment", {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({
-              firebase_uid:        user.uid,
-              email:               user.email,
-              razorpay_order_id:   response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature:  response.razorpay_signature,
-            }),
-          });
-          if (!vRes.ok) throw new Error("Verification failed");
-          setStep("done");
-          toast.success("Payment verified! All tabs unlocked 🎉");
-          setTimeout(() => onSuccess(), 1500);
+          await markPaid(user.uid, user.email, response.razorpay_payment_id);
+          toast.success("Payment successful! All tabs unlocked 🎉");
+          onSuccess();
         } catch {
-          setError("Payment done but verification failed. Email " + DEV_EMAIL + " with payment ID: " + response.razorpay_payment_id);
-          setStep("pay");
+          toast.error("Payment done but save failed. Contact " + DEV_EMAIL);
         }
+        setBusy(false);
       },
 
-      modal: { ondismiss: () => setStep("pay") },
+      modal: {
+        ondismiss: () => setBusy(false),
+      },
     };
 
     const rzp = new window.Razorpay(options);
     rzp.on("payment.failed", (r) => {
       setError("Payment failed: " + r.error.description);
-      setStep("pay");
+      setBusy(false);
     });
     rzp.open();
   };
-
-  // Current step number for indicator
-  const curStepNum = step === "signin" || step === "signin_loading" ? 1
-                   : step === "pay" || step === "paying" || step === "verifying" ? 2
-                   : 3;
 
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl border-t border-slate-200 dark:border-slate-700 px-5 pb-8 pt-4"
-        style={{ maxHeight: "90vh", overflowY: "auto" }}>
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl border-t border-slate-200 dark:border-slate-700 px-5 pb-10 pt-4"
+        style={{ maxHeight: "80vh", overflowY: "auto" }}>
 
         {/* Handle */}
         <div className="flex justify-center mb-4">
@@ -216,7 +184,7 @@ function PaywallDialog({ user, onSuccess, onClose }) {
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white"
               style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
@@ -232,30 +200,6 @@ function PaywallDialog({ user, onSuccess, onClose }) {
           </button>
         </div>
 
-        {/* Step indicator */}
-        <div className="flex items-center mb-6">
-          {[`Sign in`, `Pay ₹${PRICE_INR}`, `Unlocked!`].map((label, i) => {
-            const n    = i + 1;
-            const done = n < curStepNum;
-            const active = n === curStepNum;
-            return (
-              <div key={i} className="flex items-center gap-1">
-                <div className={`flex items-center gap-1.5 text-[11px] font-mono
-                  ${active ? "text-slate-900 dark:text-white font-bold" : done ? "text-emerald-600" : "text-slate-400"}`}>
-                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold
-                    ${active ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
-                    : done ? "bg-emerald-500 text-white"
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-400"}`}>
-                    {done ? "✓" : n}
-                  </span>
-                  {label}
-                </div>
-                {i < 2 && <div className="mx-2 flex-1 h-px w-4 bg-slate-200 dark:bg-slate-700" />}
-              </div>
-            );
-          })}
-        </div>
-
         {/* Error */}
         {error && (
           <div className="mb-4 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
@@ -263,11 +207,11 @@ function PaywallDialog({ user, onSuccess, onClose }) {
           </div>
         )}
 
-        {/* ── STEP 1: Sign in ── */}
-        {(step === "signin" || step === "signin_loading") && (
-          <button onClick={handleSignIn} disabled={step === "signin_loading"}
-            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-all disabled:opacity-50 shadow-sm">
-            {step === "signin_loading"
+        {/* STEP 1: Sign in */}
+        {step === "signin" && (
+          <button onClick={handleSignIn} disabled={busy}
+            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl py-4 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-all disabled:opacity-50 shadow-sm">
+            {busy
               ? <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
               : <svg width="18" height="18" viewBox="0 0 48 48">
                   <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -276,26 +220,24 @@ function PaywallDialog({ user, onSuccess, onClose }) {
                   <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                 </svg>
             }
-            {step === "signin_loading" ? "Signing in..." : "Continue with Google"}
+            {busy ? "Signing in..." : "Continue with Google"}
           </button>
         )}
 
-        {/* ── STEP 2: Pay ── */}
-        {(step === "pay" || step === "paying" || step === "verifying") && user && (
+        {/* STEP 2: Pay */}
+        {step === "pay" && user && (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-xs">
               {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
-              <span className="font-mono truncate">{user.email}</span>
-              <button onClick={() => signOut(auth)} className="ml-auto text-slate-400 underline text-[10px]">Switch</button>
+              <span className="font-mono text-slate-600 dark:text-slate-300 truncate">{user.email}</span>
+              <button onClick={() => signOut(auth)} className="ml-auto text-[10px] text-slate-400 underline">Switch</button>
             </div>
 
-            <button onClick={handlePay} disabled={step !== "pay"}
+            <button onClick={handlePay} disabled={busy}
               className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl text-sm hover:bg-slate-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
               style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-              {step !== "pay" && <span className="w-4 h-4 border-2 border-slate-400 border-t-white dark:border-t-slate-900 rounded-full animate-spin" />}
-              {step === "paying"    ? "Opening Razorpay..."
-               : step === "verifying" ? "Verifying payment..."
-               : `🔒 Pay ₹${PRICE_INR} — Unlock Everything`}
+              {busy && <span className="w-4 h-4 border-2 border-slate-400 border-t-white dark:border-t-slate-900 rounded-full animate-spin" />}
+              {busy ? "Opening Razorpay..." : `🔒 Pay ₹${PRICE_INR} — Unlock Everything`}
             </button>
 
             <p className="text-center text-[10px] text-slate-400 font-mono">
@@ -303,21 +245,12 @@ function PaywallDialog({ user, onSuccess, onClose }) {
             </p>
           </div>
         )}
-
-        {/* ── STEP 3: Done ── */}
-        {step === "done" && (
-          <div className="text-center py-6">
-            <div className="text-5xl mb-3">🎉</div>
-            <div className="font-bold text-slate-900 dark:text-white text-lg mb-1">All tabs unlocked!</div>
-            <p className="text-xs text-slate-400">You now have lifetime access on all devices.</p>
-          </div>
-        )}
       </div>
     </>
   );
 }
 
-// ─── MAIN HOME ────────────────────────────────────────────────────────────────
+// ─── HOME ─────────────────────────────────────────────────────────────────────
 function Home() {
   const [tab,        setTab]        = useState("calculator");
   const [user,       setUser]       = useState(null);
@@ -326,36 +259,17 @@ function Home() {
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
-    return onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-      if (firebaseUser) {
-        const hasPaid = await checkUserPaid(firebaseUser.uid);
-        setPaid(hasPaid);
-      } else {
-        setPaid(false);
-      }
+    return onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      setPaid(u ? await checkPaid(u.uid) : false);
       setAuthReady(true);
     });
   }, []);
 
-  useEffect(() => {
-    if (!user) return;
-    return onSnapshot(doc(db, "paid_users", user.uid), (snap) => {
-      if (snap.exists() && snap.data().paid === true) {
-        setPaid(true);
-        setShowDialog(false);
-      }
-    });
-  }, [user]);
-
   const handleTabClick = useCallback((tabId) => {
-    const tabDef = ALL_TABS.find(t => t.id === tabId);
-    if (!tabDef) return;
-    if (tabDef.free || paid) {
-      setTab(tabId);
-    } else {
-      setShowDialog(true);
-    }
+    const t = ALL_TABS.find(t => t.id === tabId);
+    if (t?.free || paid) setTab(tabId);
+    else setShowDialog(true);
   }, [paid]);
 
   const handleUnlock = useCallback(() => {
@@ -367,9 +281,7 @@ function Home() {
     <div className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-slate-100"
       style={{ fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
 
-      {showDialog && (
-        <PaywallDialog user={user} onSuccess={handleUnlock} onClose={() => setShowDialog(false)} />
-      )}
+      {showDialog && <PaywallDialog user={user} onSuccess={handleUnlock} onClose={() => setShowDialog(false)} />}
 
       <TopBar />
 
