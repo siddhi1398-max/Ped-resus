@@ -1,6 +1,7 @@
 {
-  "name": "ped-resus-api",
+  "name": "ped-resus",
   "version": "1.0.0",
+  "private": true,
   "dependencies": {
     "razorpay": "^2.9.2",
     "firebase-admin": "^12.0.0"
