@@ -1199,6 +1199,8 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "10 mg/kg OD × 5 days (max 500 mg). IAP endorsed alternative to doxycycline for <8 yr.",
+      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose OD.",
+      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose OD.",
       "Indian brands: Azithral-100/200, Azee-100/200 suspension.",
       "Monitor fever defervescence — if no improvement in 48 hr, reconsider diagnosis.",
       "CSF penetration adequate for scrub typhus meningitis cases.",
