@@ -11,7 +11,7 @@ import "@fontsource/jetbrains-mono/700.css";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { WeightProvider } from "./context/WeightContext";
 import TopBar from "./components/TopBar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
@@ -79,7 +79,7 @@ const ALL_TABS = [
 function loadRazorpay() {
   return new Promise((resolve) => {
     if (window.Razorpay) return resolve(true);
-    const s = document.createElement("script");
+    const s   = document.createElement("script");
     s.src     = "https://checkout.razorpay.com/v1/checkout.js";
     s.onload  = () => resolve(true);
     s.onerror = () => resolve(false);
@@ -87,7 +87,6 @@ function loadRazorpay() {
   });
 }
 
-// Check if UID has paid
 async function checkPaidByUid(uid) {
   try {
     const snap = await getDoc(doc(db, "paid_users", uid));
@@ -95,7 +94,6 @@ async function checkPaidByUid(uid) {
   } catch { return false; }
 }
 
-// Check if email has paid (for users who paid without signing in)
 async function checkPaidByEmail(email) {
   try {
     const q    = query(collection(db, "paid_emails"), where("email", "==", email.toLowerCase()));
@@ -104,25 +102,10 @@ async function checkPaidByEmail(email) {
   } catch { return false; }
 }
 
-// Save payment against UID (for signed-in users)
-async function savePaidByUid(uid, email, paymentId) {
-  await setDoc(doc(db, "paid_users", uid), {
-    paid: true, email: email || "", paymentId, paidAt: new Date().toISOString(),
-  }, { merge: true });
-}
-
-// Save payment against email (for users who paid without signing in)
-async function savePaidByEmail(email, paymentId) {
-  const key = email.toLowerCase().replace(/[^a-z0-9]/g, "_");
-  await setDoc(doc(db, "paid_emails", key), {
-    email: email.toLowerCase(), paymentId, paidAt: new Date().toISOString(),
-  });
-}
-
-// When a signed-in user's email matches a paid_emails record, upgrade them to paid_users
-async function linkEmailPaymentToUid(uid, email) {
-  const hasPaidByEmail = await checkPaidByEmail(email);
-  if (hasPaidByEmail) {
+async function checkAndLinkPaid(uid, email) {
+  if (await checkPaidByUid(uid)) return true;
+  if (email && await checkPaidByEmail(email)) {
+    // Link email payment to uid for future logins
     await setDoc(doc(db, "paid_users", uid), {
       paid: true, email, linkedFromEmail: true, paidAt: new Date().toISOString(),
     }, { merge: true });
@@ -131,149 +114,135 @@ async function linkEmailPaymentToUid(uid, email) {
   return false;
 }
 
-// Full check: uid first, then email fallback
-async function checkAndLinkPaid(uid, email) {
-  const paidByUid = await checkPaidByUid(uid);
-  if (paidByUid) return true;
-  if (email) {
-    const linked = await linkEmailPaymentToUid(uid, email);
-    if (linked) return true;
-  }
-  return false;
+async function savePaidByUid(uid, email, paymentId) {
+  await setDoc(doc(db, "paid_users", uid), {
+    paid: true, email: email || "", paymentId, paidAt: new Date().toISOString(),
+  }, { merge: true });
+}
+
+async function savePaidByEmail(email, paymentId) {
+  const key = email.toLowerCase().replace(/[^a-z0-9]/g, "_");
+  await setDoc(doc(db, "paid_emails", key), {
+    email: email.toLowerCase(), paymentId, paidAt: new Date().toISOString(),
+  });
+}
+
+// ─── RAZORPAY LAUNCHER ───────────────────────────────────────────────────────
+// Standalone function — no React state, no hooks, no closures issues
+// uid can be null for non-logged-in users
+function openRazorpay({ email, uid, displayName, onSuccess, onError, onDismiss }) {
+  const key = process.env.REACT_APP_RAZORPAY_KEY_ID;
+  if (!key) { onError("Payment config missing. Contact " + DEV_EMAIL); return; }
+
+  // Freeze values in local vars before passing to Razorpay
+  const frozenEmail = email;
+  const frozenUid   = uid;
+
+  const options = {
+    key,
+    amount:      PRICE_INR * 100,
+    currency:    "INR",
+    name:        "PedResus",
+    description: "Lifetime Access — All Features",
+    prefill:     { name: displayName || "", email: frozenEmail },
+    theme:       { color: "#0f172a" },
+
+    handler: async (response) => {
+      try {
+        // Always save by email
+        await savePaidByEmail(frozenEmail, response.razorpay_payment_id);
+        // Also save by UID if logged in
+        if (frozenUid) {
+          await savePaidByUid(frozenUid, frozenEmail, response.razorpay_payment_id);
+        }
+        onSuccess();
+      } catch (e) {
+        onError(
+          `Payment done (ID: ${response.razorpay_payment_id}) but save failed. ` +
+          `Email ${DEV_EMAIL} with this ID to unlock manually.`
+        );
+      }
+    },
+
+    modal: { ondismiss: onDismiss },
+  };
+
+  const rzp = new window.Razorpay(options);
+  rzp.on("payment.failed", (r) => onError("Payment failed: " + r.error.description));
+  rzp.open();
 }
 
 // ─── PAYWALL DIALOG ───────────────────────────────────────────────────────────
-// Two paths: Sign in with Google OR Pay directly with email
 function PaywallDialog({ user, onSuccess, onClose }) {
-  // "choose" | "signin" | "signin_loading" | "pay_direct" | "paying" | "done"
-  const [step,       setStep]      = useState(user ? "pay_direct" : "choose");
-  const [email,      setEmail]     = useState(user?.email || "");
-  const [busy,       setBusy]      = useState(false);
-  const [error,      setError]     = useState("");
+  const [view,  setView]  = useState("choose"); // "choose" | "login" | "pay"
+  const [email, setEmail] = useState("");
+  const [busy,  setBusy]  = useState(false);
+  const [error, setError] = useState("");
 
-  const userRef = useRef(user);
-  useEffect(() => { userRef.current = user; }, [user]);
-
-  // If user signs in mid-flow, check if they've already paid
+  // If already logged in, skip choose screen
   useEffect(() => {
-    if (!user) return;
-    setEmail(user.email || "");
-    (async () => {
-      const paid = await checkAndLinkPaid(user.uid, user.email);
-      if (paid) {
-        toast.success("Access restored! Welcome back 🎉");
-        onSuccess();
-      } else {
-        setStep("pay_direct");
-      }
-    })();
-  }, [user, onSuccess]);
+    if (user) {
+      setEmail(user.email || "");
+      setView("choose");
+    }
+  }, [user]);
 
   // ── Google Sign In ──
   const handleSignIn = async () => {
     setBusy(true); setError("");
-    setStep("signin_loading");
     try {
       await signInWithPopup(auth, googleProvider);
-      // useEffect above handles next step
+      // onAuthStateChanged in Home will detect login
+      // checkAndLinkPaid will run and unlock if already paid
+      onClose(); // close dialog — Home will handle unlock
     } catch {
       setError("Sign-in failed. Please try again.");
-      setStep("choose");
     }
     setBusy(false);
   };
 
-  // ── Pay with Razorpay (works with or without login) ──
+  // ── Pay directly (no login needed) ──
   const handlePay = async () => {
-    const payEmail = (userRef.current?.email || email || "").trim();
-    const uid      = userRef.current?.uid || null;
-
+    const payEmail = user?.email || email.trim();
     if (!payEmail || !payEmail.includes("@")) {
-      setError("Please enter a valid email to receive your receipt.");
+      setError("Please enter a valid email.");
       return;
     }
 
     setBusy(true); setError("");
-    setStep("paying");
 
     const loaded = await loadRazorpay();
     if (!loaded) {
       setError("Could not load Razorpay. Check your internet.");
       setBusy(false);
-      setStep("pay_direct");
       return;
     }
 
-    const rzpKey = process.env.REACT_APP_RAZORPAY_KEY_ID;
-    if (!rzpKey) {
-      setError("Payment config missing. Contact " + DEV_EMAIL);
-      setBusy(false);
-      setStep("pay_direct");
-      return;
-    }
-
-    // Capture in local vars for closure
-    const capturedEmail = payEmail;
-    const capturedUid   = uid;
-
-    const options = {
-      key:         rzpKey,
-      amount:      PRICE_INR * 100,
-      currency:    "INR",
-      name:        "PedResus",
-      description: "Lifetime Access — All Features",
-      prefill:     {
-        name:  userRef.current?.displayName || "",
-        email: capturedEmail,
+    openRazorpay({
+      email:       payEmail,
+      uid:         user?.uid || null,
+      displayName: user?.displayName || "",
+      onSuccess: () => {
+        setBusy(false);
+        toast.success("Payment successful! All tabs unlocked 🎉");
+        onSuccess();
       },
-      theme: { color: "#0f172a" },
-
-      handler: async (response) => {
-        try {
-          // Always save by email (works for everyone)
-          await savePaidByEmail(capturedEmail, response.razorpay_payment_id);
-
-          // If signed in, also save by UID for instant future access
-          if (capturedUid) {
-            await savePaidByUid(capturedUid, capturedEmail, response.razorpay_payment_id);
-          }
-
-          setStep("done");
-          toast.success("Payment successful! All tabs unlocked 🎉");
-          setBusy(false);
-          setTimeout(() => onSuccess(), 1500);
-        } catch (e) {
-          console.error("Save failed:", e);
-          setError(
-            `Payment successful (ID: ${response.razorpay_payment_id}) but save failed. ` +
-            `Email ${DEV_EMAIL} with this ID to unlock manually.`
-          );
-          setBusy(false);
-          setStep("pay_direct");
-        }
+      onError: (msg) => {
+        setBusy(false);
+        setError(msg);
       },
-
-      modal: {
-        ondismiss: () => {
-          setBusy(false);
-          setStep(capturedUid ? "pay_direct" : "choose");
-        },
+      onDismiss: () => {
+        setBusy(false);
       },
-    };
-
-    const rzp = new window.Razorpay(options);
-    rzp.on("payment.failed", (r) => {
-      setError("Payment failed: " + r.error.description);
-      setBusy(false);
-      setStep(capturedUid ? "pay_direct" : "choose");
     });
-    rzp.open();
   };
 
   return (
     <>
+      {/* Backdrop */}
       <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
+      {/* Sheet */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl border-t border-slate-200 dark:border-slate-700 px-5 pb-10 pt-4"
         style={{ maxHeight: "85vh", overflowY: "auto" }}>
 
@@ -306,124 +275,90 @@ function PaywallDialog({ user, onSuccess, onClose }) {
           </div>
         )}
 
-        {/* ── CHOOSE: Two options ── */}
-        {step === "choose" && (
+        {/* ── CHOOSE VIEW: two big options side by side ── */}
+        {view === "choose" && (
           <div className="space-y-3">
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-center mb-4">
-              Choose how you'd like to continue
-            </p>
 
-            {/* Option 1: Sign in with Google */}
-            <button onClick={handleSignIn}
-              className="w-full flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm">
-              <svg width="18" height="18" viewBox="0 0 48 48" className="flex-shrink-0">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-              </svg>
-              <div className="text-left">
-                <div>Sign in with Google</div>
-                <div className="text-[10px] font-normal text-slate-400 font-mono">then pay · access on all devices</div>
-              </div>
-            </button>
-
-            {/* Divider */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-              <span className="text-[10px] text-slate-400 font-mono">or</span>
-              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-            </div>
-
-            {/* Option 2: Pay directly */}
-            <button onClick={() => setStep("pay_direct")}
-              className="w-full flex items-center gap-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl px-4 py-3.5 text-sm font-semibold hover:bg-slate-700 transition-all"
-              style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-              <span className="text-lg flex-shrink-0">🔒</span>
-              <div className="text-left">
-                <div>Pay ₹{PRICE_INR} directly</div>
-                <div className="text-[10px] font-normal opacity-60 font-mono">no account needed · just your email</div>
-              </div>
-            </button>
-
-            <p className="text-center text-[10px] text-slate-400 font-mono pt-1">
-              Razorpay · UPI · Cards · NetBanking · Wallets
-            </p>
-          </div>
-        )}
-
-        {/* ── SIGNING IN ── */}
-        {step === "signin_loading" && (
-          <div className="flex flex-col items-center gap-3 py-8">
-            <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
-            <p className="text-sm text-slate-500 font-mono">Signing in...</p>
-          </div>
-        )}
-
-        {/* ── PAY DIRECTLY (no login needed) ── */}
-        {(step === "pay_direct" || step === "paying") && (
-          <div className="space-y-3">
-            {/* Show logged-in user OR email input */}
+            {/* Already logged in — show user + pay button */}
             {user ? (
-              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-xs">
-                {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
-                <span className="font-mono text-slate-600 dark:text-slate-300 truncate">{user.email}</span>
-                <button onClick={() => signOut(auth)} className="ml-auto text-[10px] text-slate-400 underline">Switch</button>
-              </div>
+              <>
+                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-xs mb-2">
+                  {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
+                  <span className="font-mono text-slate-600 dark:text-slate-300 truncate">{user.email}</span>
+                  <button onClick={() => signOut(auth)} className="ml-auto text-[10px] text-slate-400 underline">Switch</button>
+                </div>
+                <button onClick={handlePay} disabled={busy}
+                  className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl text-sm hover:bg-slate-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                  style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                  {busy && <span className="w-4 h-4 border-2 border-slate-400 border-t-white rounded-full animate-spin" />}
+                  {busy ? "Opening Razorpay..." : `🔒 Pay ₹${PRICE_INR} — Unlock Everything`}
+                </button>
+                <p className="text-center text-[10px] text-slate-400 font-mono">
+                  Razorpay · UPI · Cards · NetBanking · Wallets
+                </p>
+              </>
             ) : (
-              <div>
-                <label className="block text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">
-                  Your email (for receipt & access restore)
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
-                />
-              </div>
-            )}
+              <>
+                {/* NOT logged in — show two separate options */}
+                <p className="text-xs text-slate-500 text-center mb-2">Choose how you'd like to continue</p>
 
-            {/* Pay button */}
-            <button onClick={handlePay} disabled={busy}
-              className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl text-sm hover:bg-slate-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-              style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-              {busy && <span className="w-4 h-4 border-2 border-slate-400 border-t-white dark:border-t-slate-900 rounded-full animate-spin" />}
-              {busy ? "Opening Razorpay..." : `🔒 Pay ₹${PRICE_INR} — Unlock Everything`}
-            </button>
+                {/* Option A: Sign in with Google */}
+                <div className="border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+                  <div className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                    Sign in with Google
+                  </div>
+                  <div className="text-[10px] text-slate-400 mb-3">
+                    Sign in first, then pay. Access syncs across all your devices automatically.
+                  </div>
+                  <button onClick={handleSignIn} disabled={busy}
+                    className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-all disabled:opacity-50">
+                    {busy
+                      ? <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+                      : <svg width="16" height="16" viewBox="0 0 48 48">
+                          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        </svg>
+                    }
+                    Continue with Google
+                  </button>
+                </div>
 
-            {/* Back to choose if not logged in */}
-            {!user && (
-              <button onClick={() => { setStep("choose"); setError(""); }}
-                className="w-full text-[11px] text-slate-400 hover:text-slate-600 font-mono underline text-center">
-                ← Back
-              </button>
-            )}
+                {/* Divider */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                  <span className="text-[10px] text-slate-400 font-mono">or</span>
+                  <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                </div>
 
-            <p className="text-center text-[10px] text-slate-400 font-mono">
-              Razorpay · UPI · Cards · NetBanking · Wallets
-            </p>
+                {/* Option B: Pay directly with email */}
+                <div className="border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+                  <div className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                    Pay directly — no account needed
+                  </div>
+                  <div className="text-[10px] text-slate-400 mb-3">
+                    Enter your email, pay with UPI/card. Sign in later with the same email to restore access.
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 mb-2"
+                  />
+                  <button onClick={handlePay} disabled={busy}
+                    className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-2.5 rounded-lg text-sm hover:bg-slate-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                    style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                    {busy && <span className="w-4 h-4 border-2 border-slate-400 border-t-white rounded-full animate-spin" />}
+                    {busy ? "Opening Razorpay..." : `🔒 Pay ₹${PRICE_INR}`}
+                  </button>
+                </div>
 
-            {/* Tip for non-logged-in users */}
-            {!user && (
-              <div className="text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 text-center">
-                💡 Use the same email when signing in later to restore access automatically
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── DONE ── */}
-        {step === "done" && (
-          <div className="text-center py-6">
-            <div className="text-5xl mb-3">🎉</div>
-            <div className="font-bold text-slate-900 dark:text-white text-lg mb-1">All tabs unlocked!</div>
-            <p className="text-xs text-slate-400 mb-2">You now have lifetime access on all devices.</p>
-            {!user && (
-              <p className="text-[11px] text-slate-400 bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2 mt-3">
-                Sign in with Google using <strong>{email}</strong> anytime to restore access automatically.
-              </p>
+                <p className="text-center text-[10px] text-slate-400 font-mono pt-1">
+                  Razorpay · UPI · Cards · NetBanking · Wallets
+                </p>
+              </>
             )}
           </div>
         )}
@@ -446,6 +381,7 @@ function Home() {
       if (u) {
         const hasPaid = await checkAndLinkPaid(u.uid, u.email);
         setPaid(hasPaid);
+        if (hasPaid) setShowDialog(false);
       } else {
         setPaid(false);
       }
@@ -528,7 +464,7 @@ function Home() {
           ))}
         </Tabs>
 
-        <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+        <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate.400">
           <div className="flex flex-col sm:flex-row justify-between gap-4">
             <div>
               <span className="font-mono uppercase tracking-[0.15em] text-slate-700 dark:text-slate-300">PED.RESUS</span>
