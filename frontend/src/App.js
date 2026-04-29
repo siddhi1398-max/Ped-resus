@@ -11,7 +11,7 @@ import "@fontsource/jetbrains-mono/700.css";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { WeightProvider } from "./context/WeightContext";
 import TopBar from "./components/TopBar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
@@ -49,9 +49,9 @@ const firebaseConfig = {
   messagingSenderId: "70799823874",
   appId:             "1:70799823874:web:b5d4801bf42a0f8c5d431b",
 };
-const app            = initializeApp(firebaseConfig);
-const auth           = getAuth(app);
-const db             = getFirestore(app);
+const firebaseApp    = initializeApp(firebaseConfig);
+const auth           = getAuth(firebaseApp);
+const db             = getFirestore(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 
 const PRICE_INR = 30;
@@ -75,7 +75,7 @@ const ALL_TABS = [
   { id: "imaging",       label: "Imaging",              icon: ImageIcon,     Comp: ImagingTab,           free: false },
 ];
 
-// Load Razorpay script dynamically
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 function loadRazorpay() {
   return new Promise((resolve) => {
     if (window.Razorpay) return resolve(true);
@@ -87,22 +87,28 @@ function loadRazorpay() {
   });
 }
 
-// Check Firestore if user has paid
 async function checkPaid(uid) {
   try {
     const snap = await getDoc(doc(db, "paid_users", uid));
     return snap.exists() && snap.data().paid === true;
-  } catch { return false; }
+  } catch (e) {
+    console.error("checkPaid error:", e);
+    return false;
+  }
 }
 
-// Mark user as paid in Firestore (called after successful payment)
-async function markPaid(uid, email, paymentId) {
-  await setDoc(doc(db, "paid_users", uid), {
-    paid: true,
-    email,
-    paymentId,
-    paidAt: new Date().toISOString(),
-  });
+// This is the critical function — writes to Firestore after payment
+// Uses db and auth directly from module scope so it's never undefined
+async function savePaidUser(uid, email, paymentId) {
+  console.log("savePaidUser called:", uid, email, paymentId);
+  const ref = doc(db, "paid_users", uid);
+  await setDoc(ref, {
+    paid:      true,
+    email:     email || "",
+    paymentId: paymentId || "",
+    paidAt:    new Date().toISOString(),
+  }, { merge: true }); // merge:true means it won't overwrite existing fields
+  console.log("savePaidUser success");
 }
 
 // ─── PAYWALL DIALOG ───────────────────────────────────────────────────────────
@@ -111,23 +117,45 @@ function PaywallDialog({ user, onSuccess, onClose }) {
   const [busy,  setBusy]  = useState(false);
   const [error, setError] = useState("");
 
+  // Keep user in a ref so Razorpay handler can always access latest value
+  const userRef = useRef(user);
+  useEffect(() => { userRef.current = user; }, [user]);
+
+  // When user signs in move to pay step
   useEffect(() => {
     if (user && step === "signin") setStep("pay");
   }, [user, step]);
 
   const handleSignIn = async () => {
-    setBusy(true); setError("");
+    setBusy(true);
+    setError("");
     try {
       await signInWithPopup(auth, googleProvider);
-    } catch {
-      setError("Sign-in failed. Try again.");
+      // useEffect above moves to "pay" step
+    } catch (e) {
+      console.error("Sign in error:", e);
+      setError("Sign-in failed. Please try again.");
     }
     setBusy(false);
   };
 
   const handlePay = async () => {
-    if (!user) return;
-    setBusy(true); setError("");
+    // Capture user at the moment Pay is clicked — store in local var AND ref
+    const currentUser = userRef.current || auth.currentUser;
+    if (!currentUser) {
+      setError("Please sign in first.");
+      return;
+    }
+
+    // Capture uid and email in local variables NOW
+    // These will be available inside the Razorpay handler closure
+    const uid   = currentUser.uid;
+    const email = currentUser.email;
+
+    console.log("handlePay: uid =", uid, "email =", email);
+
+    setBusy(true);
+    setError("");
 
     const loaded = await loadRazorpay();
     if (!loaded) {
@@ -136,38 +164,64 @@ function PaywallDialog({ user, onSuccess, onClose }) {
       return;
     }
 
-    // Open Razorpay WITHOUT a backend order (simplest mode)
+    const rzpKey = process.env.REACT_APP_RAZORPAY_KEY_ID;
+    console.log("Razorpay key:", rzpKey ? "found" : "MISSING");
+
+    if (!rzpKey) {
+      setError("Payment configuration missing. Contact " + DEV_EMAIL);
+      setBusy(false);
+      return;
+    }
+
     const options = {
-      key:         process.env.REACT_APP_RAZORPAY_KEY_ID,
-      amount:      PRICE_INR * 100,   // paise
+      key:         rzpKey,
+      amount:      PRICE_INR * 100,
       currency:    "INR",
       name:        "PedResus",
-      description: "Lifetime Access",
-      prefill:     { name: user.displayName || "", email: user.email || "" },
+      description: "Lifetime Access — All Features",
+      prefill:     { name: currentUser.displayName || "", email: email },
       theme:       { color: "#0f172a" },
 
-      handler: async (response) => {
-        // Payment successful — write to Firestore
+      // This handler runs after successful payment
+      // uid and email are captured in closure above — always available
+      handler: async function(response) {
+        console.log("Payment success:", response);
+        console.log("Saving to Firestore for uid:", uid);
+
         try {
-          await markPaid(user.uid, user.email, response.razorpay_payment_id);
+          await savePaidUser(uid, email, response.razorpay_payment_id);
+          console.log("Firestore save successful");
           toast.success("Payment successful! All tabs unlocked 🎉");
+          setBusy(false);
           onSuccess();
-        } catch {
-          toast.error("Payment done but save failed. Contact " + DEV_EMAIL);
+        } catch (e) {
+          console.error("Firestore save failed:", e);
+          // Even if Firestore fails, show payment ID so user can contact support
+          setError(
+            `Payment successful (ID: ${response.razorpay_payment_id}) but save failed. ` +
+            `Email ${DEV_EMAIL} with this ID and we'll unlock manually.`
+          );
+          setBusy(false);
         }
-        setBusy(false);
       },
 
       modal: {
-        ondismiss: () => setBusy(false),
+        ondismiss: () => {
+          console.log("Razorpay modal dismissed");
+          setBusy(false);
+        },
       },
     };
 
+    console.log("Opening Razorpay with options:", options);
     const rzp = new window.Razorpay(options);
+
     rzp.on("payment.failed", (r) => {
+      console.error("Payment failed:", r.error);
       setError("Payment failed: " + r.error.description);
       setBusy(false);
     });
+
     rzp.open();
   };
 
@@ -175,9 +229,10 @@ function PaywallDialog({ user, onSuccess, onClose }) {
     <>
       <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl border-t border-slate-200 dark:border-slate-700 px-5 pb-10 pt-4"
-        style={{ maxHeight: "80vh", overflowY: "auto" }}>
-
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl border-t border-slate-200 dark:border-slate-700 px-5 pb-10 pt-4"
+        style={{ maxHeight: "80vh", overflowY: "auto" }}
+      >
         {/* Handle */}
         <div className="flex justify-center mb-4">
           <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
@@ -202,7 +257,7 @@ function PaywallDialog({ user, onSuccess, onClose }) {
 
         {/* Error */}
         {error && (
-          <div className="mb-4 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          <div className="mb-4 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 break-words">
             {error}
           </div>
         )}
@@ -261,7 +316,12 @@ function Home() {
   useEffect(() => {
     return onAuthStateChanged(auth, async (u) => {
       setUser(u);
-      setPaid(u ? await checkPaid(u.uid) : false);
+      if (u) {
+        const hasPaid = await checkPaid(u.uid);
+        setPaid(hasPaid);
+      } else {
+        setPaid(false);
+      }
       setAuthReady(true);
     });
   }, []);
@@ -281,7 +341,13 @@ function Home() {
     <div className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-slate-100"
       style={{ fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
 
-      {showDialog && <PaywallDialog user={user} onSuccess={handleUnlock} onClose={() => setShowDialog(false)} />}
+      {showDialog && (
+        <PaywallDialog
+          user={user}
+          onSuccess={handleUnlock}
+          onClose={() => setShowDialog(false)}
+        />
+      )}
 
       <TopBar />
 
@@ -305,11 +371,16 @@ function Home() {
             <>
               {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
               <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[160px]">{user.email}</span>
-              <button onClick={() => { signOut(auth); setPaid(false); setUser(null); setTab("calculator"); }}
-                className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign out</button>
+              <button
+                onClick={() => { signOut(auth); setPaid(false); setUser(null); setTab("calculator"); }}
+                className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">
+                Sign out
+              </button>
             </>
           ) : authReady ? (
-            <button onClick={() => setShowDialog(true)} className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign in</button>
+            <button onClick={() => setShowDialog(true)} className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">
+              Sign in
+            </button>
           ) : null}
         </div>
       </div>
