@@ -1700,16 +1700,14 @@ export const DRUGS = [
 // ═══════════════════════════════════════════════════════════════════════════════
 // QUICK SYRUP DOSE REFERENCE TABLE
 // ═══════════════════════════════════════════════════════════════════════════════
-//
-  { 
-    "HOW TO CALCULATE mL FROM SYRUP CONCENTRATION:"
-    "mL per dose = (dose in mg) ÷ (concentration in mg/mL)"
-    "Concentration (mg/mL) = strength/5"
-    "SYRUP: 50 mg/5mL: give (dose ÷ 10) mL per dose.",
-    "SYRUP: 100 mg/5mL: give (dose ÷ 20) mL per dose.",
-    "SYRUP: 125 mg/5 mL → give (dose ÷ 25) mL per dose.",
-    "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose.",
-  },
+// HOW TO CALCULATE mL FROM SYRUP CONCENTRATION:
+// mL per dose = (dose in mg) ÷ (concentration in mg/mL)
+// Concentration (mg/mL) = strength/5
+// SYRUP: 50 mg/5mL: give (dose ÷ 10) mL per dose.
+// SYRUP: 100 mg/5mL: give (dose ÷ 20) mL per dose.
+// SYRUP: 125 mg/5 mL → give (dose ÷ 25) mL per dose.
+// SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose.
+  
 // COMMON CONCENTRATIONS AVAILABLE IN INDIA:
 //   Amoxicillin:           125 mg/5mL | 250 mg/5mL
 //   Co-amoxiclav:          228.5 mg/5mL | 457 mg/5mL
