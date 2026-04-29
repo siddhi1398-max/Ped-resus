@@ -1,4 +1,3 @@
-// netlify/functions/create-order.js
 // Creates a Razorpay order server-side.
 // The order_id is required for signature-based payment verification.
 
