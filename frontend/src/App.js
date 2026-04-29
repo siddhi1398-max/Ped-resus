@@ -114,7 +114,7 @@ async function checkUserPaid(uid) {
 // Without this, there is no order_id → no signature → no webhook verification.
 async function createRazorpayOrder(uid, email) {
   try {
-    const res = await fetch("/frontend/create-order", {
+    const res = await fetch("/api/create-order", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ uid, email, amount: PRICE_INR * 100 }),
