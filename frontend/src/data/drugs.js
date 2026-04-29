@@ -1120,6 +1120,7 @@ export const DRUGS = [
     route: "PO",
     notes: [
       "20 mg/kg OD × 7 days (max 1 g/day). IAP 2024 first-line for uncomplicated enteric fever.",
+      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose OD.",
       "Indian brands: Azithral-200, Azee-200, Zithromax-200 susp.",
       "Effective against ESBL Salmonella. Outpatient treatment possible for uncomplicated cases.",
       "Switch to ceftriaxone 100 mg/kg IV if complicated (perforated/toxic/high fever >5 days).",
