@@ -16,7 +16,7 @@ export default function RuleOfSixs() {
       <div className="rounded-md border-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900/50 p-4">
         <div className="flex items-baseline justify-between gap-3 flex-wrap mb-2">
           <div>
-            <h4 className="font-sans font-bold text-base">Rule of 6s — Tintinalli tables 109-1, 109-2</h4>
+            <h4 className="font-sans font-bold text-base">Rule of 6s</h4>
             <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400 mt-0.5">
               Paediatric infusion shortcut · mL/hr ≡ mcg/kg/min
             </div>
