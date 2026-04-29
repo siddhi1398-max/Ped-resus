@@ -723,50 +723,1113 @@ export const DRUGS = [
     notes: "Start ≥1 hr after fluids. No bolus.",
   },
   // ─── Antibiotics (Harriet Lane) ──────────────────────
+ // ═══════════════════════════════════════════════════════════════════════════════
+// INDIA-SPECIFIC ANTIBIOTIC ADDITIONS FOR DRUGS.JS
+// References: IAP Guidelines 2024 · Piyush Gupta Pediatric Drug Doses 18th Ed
+//             NCDC India Antimicrobial Guidelines · WHO AWaRe 2022
+//             NVBDCP · RNTCP Guidelines
+//
+// HOW TO USE: Copy all entries below into your DRUGS array in drugs.js
+//             Place after the existing antibiotic entries
+//
+// SYRUP FORMULATION GUIDE (added to each drug's notes):
+//   Each entry includes:
+//   - Syrup/suspension concentration available in India
+//   - How many mL to give per dose based on weight
+//   - Common Indian brand names
+// ═══════════════════════════════════════════════════════════════════════════════
+
+  // ══════════════════════════════════════════════════════════════════
+  // PENICILLINS
+  // ══════════════════════════════════════════════════════════════════
+
   {
-    id: "vancomycin",
-    name: "Vancomycin",
-    indication: "MRSA / sepsis",
+    id: "amoxicillin-susp",
+    name: "Amoxicillin (oral)",
+    indication: "Pneumonia / AOM / pharyngitis / UTI / skin",
+    category: "antibiotic",
+    dosePerKg: 40,
+    unit: "mg",
+    max: 1500,
+    route: "PO",
+    notes: [
+      "40–50 mg/kg/day ÷ BD or TDS (IAP/WHO AWaRe 2022). High-dose (DRSP): 80–90 mg/kg/day ÷ BD.",
+      "SYRUP: 125 mg/5 mL → give (dose ÷ 25) mL per dose | 250 mg/5 mL → give (dose ÷ 50) mL per dose.",
+      "Example 10 kg child: 400 mg/dose → 16 mL of 125mg/5mL OR 8 mL of 250mg/5mL.",
+      "Indian brands (125 mg/5mL): Mox-125, Novamox-125, Amoxil-125, Wymox-125.",
+      "Indian brands (250 mg/5mL): Mox-250, Novamox-250, Amoxil-250.",
+      "Dispersible tablets (500 mg): Mox-500 DT — can be dissolved in water for infants.",
+      "Give TDS; BD acceptable for pneumonia (IAP). Duration: 5–7 days RTI, 7–10 days AOM.",
+    ].join(" "),
+  },
+
+  {
+    id: "amoxiclav-susp",
+    name: "Amoxicillin-Clavulanate (Co-amoxiclav)",
+    indication: "AOM / sinusitis / LRTI / UTI / SSTI / animal bite",
+    category: "antibiotic",
+    dosePerKg: 45,
+    unit: "mg",
+    max: 1750,
+    route: "PO / IV",
+    notes: [
+      "45 mg/kg/day ÷ BD (amoxicillin component). High-dose: 80–90 mg/kg/day for DRSP or AOM failure.",
+      "SYRUP 228.5 mg/5mL (amox 200 + clav 28.5): give (dose ÷ 40) mL per dose.",
+      "SYRUP 457 mg/5mL (amox 400 + clav 57): give (dose ÷ 80) mL per dose — preferred for BD dosing.",
+      "Example 10 kg: 450 mg/dose → ~11 mL of 228.5/5mL OR ~5.6 mL of 457/5mL.",
+      "Indian brands (228.5/5mL): Augmentin-228 DS, Moxclav-228, Clavam-228, Amoxyclav-228.",
+      "Indian brands (457/5mL): Augmentin-457 ES, Moxclav-457, Clavam-457.",
+      "IV: Augmentin 1.2 g vial (amox 1 g + clav 200 mg) — 30 mg/kg q8h IV.",
+      "Give with food to reduce GI side effects. Add probiotic if prolonged course.",
+    ].join(" "),
+  },
+
+  {
+    id: "ampicillin-cloxacillin-susp",
+    name: "Ampicillin + Cloxacillin (Combination)",
+    indication: "Respiratory / skin / soft tissue infections (mixed cover)",
+    category: "antibiotic",
+    dosePerKg: 25,
+    unit: "mg",
+    max: 1000,
+    route: "PO",
+    notes: [
+      "25 mg/kg/dose TDS (each component). Combination covers strep + staph.",
+      "SYRUP 250 mg/5mL (Ampicillin 125 + Cloxacillin 125): give (dose ÷ 25) mL per dose.",
+      "Example 10 kg: 250 mg/dose → 5 mL (1 tsp) of 250/5 mL suspension.",
+      "Indian brands: Ampicloxa-250 suspension, Clampicil-DS, Biocilin-CX syrup.",
+      "Give on empty stomach (30 min before food). Shake well before use.",
+      "Note: Limited evidence for combination vs monotherapy — use when both organisms suspected.",
+    ].join(" "),
+  },
+
+  {
+    id: "cloxacillin-oral",
+    name: "Cloxacillin (oral)",
+    indication: "MSSA / impetigo / cellulitis / osteomyelitis (step-down)",
+    category: "antibiotic",
+    dosePerKg: 25,
+    unit: "mg",
+    max: 1000,
+    route: "PO / IV",
+    notes: [
+      "25 mg/kg/dose QID PO (mild-mod). IV: 50 mg/kg/dose q6h (max 2 g/dose).",
+      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose.",
+      "Example 10 kg: 250 mg → 10 mL (2 tsp) of 125/5 mL syrup QID.",
+      "Indian brands (syrup): Klox-125 DS, Bioclox-125, Cloxin-125 suspension.",
+      "IV brands: Klox 250/500 mg vials, Bioclox injection.",
+      "MUST give on empty stomach — food reduces absorption by 50%. IAP first-line for MSSA.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // CEPHALOSPORINS — ORAL (with syrup guide)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "cefixime-susp",
+    name: "Cefixime (oral)",
+    indication: "UTI / typhoid / AOM / LRTI / shigellosis",
+    category: "antibiotic",
+    dosePerKg: 8,
+    unit: "mg",
+    max: 400,
+    route: "PO",
+    notes: [
+      "8 mg/kg/day OD or BD (max 400 mg/day). Typhoid (IAP): 10–15 mg/kg/day × 14 days.",
+      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose.",
+      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose.",
+      "Example 10 kg: 80 mg/day OD → 8 mL of 50/5mL OR 4 mL of 100/5mL once daily.",
+      "Indian brands (50 mg/5mL): Taxim-O 50, Zifi-50, Cefix-50, Mahacef-50, Topcef-50.",
+      "Indian brands (100 mg/5mL): Taxim-O 100, Zifi-100, Cefix-100, Mahacef-100.",
+      "Pineapple/mango flavour available (Taxim-O). Shake well, reconstitute with water.",
+      "AMR note (IAP/IJP 2022): Shigella — use cefixime or azithromycin (fluoroquinolone resistance high in India).",
+    ].join(" "),
+  },
+
+  {
+    id: "cefpodoxime-susp",
+    name: "Cefpodoxime (oral)",
+    indication: "AOM / sinusitis / pharyngitis / UTI / LRTI",
+    category: "antibiotic",
+    dosePerKg: 5,
+    unit: "mg",
+    max: 200,
+    route: "PO",
+    notes: [
+      "5 mg/kg/dose BD (max 200 mg/dose). Take with food (↑absorption 30%).",
+      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose BD.",
+      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose BD.",
+      "Example 10 kg: 50 mg/dose BD → 5 mL of 50/5mL OR 2.5 mL of 100/5mL.",
+      "Indian brands (50 mg/5mL): Cepodem-50, Cefoprox-50, Topcef-50, Vantin-50, Pedocef-50.",
+      "Indian brands (100 mg/5mL): Cepodem-100, Cefoprox-100.",
+      "Good palatability; better S. pneumoniae cover than cefixime. AOM: 5 days course.",
+    ].join(" "),
+  },
+
+  {
+    id: "cefuroxime-susp",
+    name: "Cefuroxime Axetil (oral)",
+    indication: "AOM / sinusitis / pneumonia / UTI / skin / animal bite",
+    category: "antibiotic",
+    dosePerKg: 15,
+    unit: "mg",
+    max: 500,
+    route: "PO",
+    notes: [
+      "15 mg/kg/dose BD (max 500 mg/dose). Must give with food.",
+      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose BD.",
+      "Example 10 kg: 150 mg/dose → 6 mL of 125/5mL BD.",
+      "Indian brands: Ceftin-125 DS, Supacef-125, Zocef-125, Altacef-125 suspension.",
+      "IV form: Zinacef, Ceftum, Supacef 250/750 mg vials. IV dose: 50–100 mg/kg/day ÷ q8h.",
+      "2nd generation; good H. influenzae and Moraxella cover. Bitter aftertaste — give with juice.",
+      "Animal bites: 15 mg/kg BD × 5 days (IAP). Step-down from IV for pneumonia.",
+    ].join(" "),
+  },
+
+  {
+    id: "cefdinir-susp",
+    name: "Cefdinir (oral)",
+    indication: "AOM / sinusitis / pharyngitis / skin / mild pneumonia",
+    category: "antibiotic",
+    dosePerKg: 7,
+    unit: "mg",
+    max: 300,
+    route: "PO",
+    notes: [
+      "7 mg/kg/dose BD or 14 mg/kg OD (max 300 mg BD or 600 mg OD). AOM: OD acceptable.",
+      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose.",
+      "Example 10 kg: 70 mg/dose BD → 2.8 mL (≈3 mL) of 125/5mL BD.",
+      "Indian brands: Adcef-125, Cednir-125, Omnicef-125 suspension.",
+      "Excellent palatability (cherry/strawberry flavour). Good for otitis-prone children.",
+      "Avoid within 2 hr of iron/antacids. Stools may turn red (harmless — warn parents).",
+    ].join(" "),
+  },
+
+  {
+    id: "cefadroxil-susp",
+    name: "Cefadroxil (oral)",
+    indication: "Strep pharyngitis / skin / UTI / step-down osteomyelitis",
     category: "antibiotic",
     dosePerKg: 15,
     unit: "mg",
     max: 1000,
-    route: "IV over 60 min",
-    notes: "15–20 mg/kg q6–8h. Monitor troughs (15–20 mcg/mL for severe).",
+    route: "PO",
+    notes: [
+      "15 mg/kg/dose BD (max 500 mg/dose) or 30 mg/kg OD. Strep throat: OD × 10 days.",
+      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose.",
+      "SYRUP 250 mg/5mL: give (dose ÷ 50) mL per dose.",
+      "Example 10 kg: 150 mg/dose BD → 6 mL of 125/5mL OR 3 mL of 250/5mL.",
+      "Indian brands: Droxyl-125/250 DS, Cefastar-125, Bioxyl-125 suspension.",
+      "1st gen oral cephalosporin. OD dosing improves compliance for GAS pharyngitis.",
+      "Can be given with or without food. Good palatability.",
+    ].join(" "),
   },
+
+  // ══════════════════════════════════════════════════════════════════
+  // CEPHALOSPORINS — IV
+  // ══════════════════════════════════════════════════════════════════
+
   {
-    id: "meropenem",
-    name: "Meropenem",
-    indication: "Severe sepsis / meningitis",
+    id: "cefazolin-iv",
+    name: "Cefazolin (IV/IM)",
+    indication: "MSSA / surgical prophylaxis / mild-moderate SSTIs",
     category: "antibiotic",
-    dosePerKg: 20,
+    dosePerKg: 25,
     unit: "mg",
     max: 1000,
-    route: "IV",
-    notes: "20 mg/kg q8h; meningitis 40 mg/kg q8h (max 2 g).",
+    route: "IV / IM",
+    notes: [
+      "25–50 mg/kg/day ÷ q8h. Surgical prophylaxis: 30 mg/kg 30–60 min pre-op (max 2 g).",
+      "No oral/syrup form. IV only.",
+      "Indian brands: Reflin 250/500 mg, Cefazol 1g, Stazolin vials.",
+      "1st gen IV cephalosporin — excellent MSSA cover. Does not cross BBB.",
+    ].join(" "),
   },
+
   {
-    id: "clindamycin",
-    name: "Clindamycin",
-    indication: "Skin / soft tissue / toxic shock",
+    id: "cefotaxime-iv",
+    name: "Cefotaxime (IV/IM)",
+    indication: "Sepsis / meningitis / enteric fever / neonatal infection",
+    category: "antibiotic",
+    dosePerKg: 50,
+    unit: "mg",
+    max: 2000,
+    route: "IV / IM",
+    notes: [
+      "Sepsis: 50 mg/kg q8h. Meningitis: 75 mg/kg q6h (max 3 g/dose). Neonates: 50 mg/kg q12h (≤7d), q8h (>7d).",
+      "No oral form. IV/IM only.",
+      "Indian brands: Claforan, Taxim, Omnatax 250/500 mg/1g/2g vials.",
+      "Preferred over ceftriaxone in neonates (avoids bilirubin displacement). Excellent CSF penetration.",
+    ].join(" "),
+  },
+
+  {
+    id: "ceftazidime-iv",
+    name: "Ceftazidime (IV)",
+    indication: "Pseudomonas / nosocomial / febrile neutropenia / CF",
+    category: "antibiotic",
+    dosePerKg: 50,
+    unit: "mg",
+    max: 2000,
+    route: "IV",
+    notes: [
+      "50 mg/kg q8h (max 2 g/dose). Febrile neutropenia: 50 mg/kg q8h. CF: 50–75 mg/kg q8h.",
+      "No oral/syrup form.",
+      "Indian brands: Fortum, Ceftum, Ceftazid 500 mg/1g/2g vials.",
+      "Only 3rd-gen cephalosporin with reliable Pseudomonas coverage. Often combined with amikacin.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // MACROLIDES (with syrup guide)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "azithromycin-susp",
+    name: "Azithromycin (oral)",
+    indication: "Atypical pneumonia / pertussis / typhoid / scrub typhus (<8yr) / chlamydia",
     category: "antibiotic",
     dosePerKg: 10,
     unit: "mg",
-    max: 600,
-    route: "IV",
-    notes: "10 mg/kg q6–8h. Adjunct in toxic shock syndrome.",
+    max: 500,
+    route: "PO",
+    notes: [
+      "Standard: 10 mg/kg day 1 (max 500 mg), then 5 mg/kg days 2–5 (max 250 mg).",
+      "Typhoid (IAP): 20 mg/kg OD × 7 days (max 1 g/day). Pertussis: 10 mg/kg OD × 5 days.",
+      "Scrub typhus <8 yr (IAP): 10 mg/kg OD × 5 days.",
+      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose.",
+      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose.",
+      "Example 10 kg: 100 mg day 1 → 5 mL of 100/5mL OR 2.5 mL of 200/5mL.",
+      "Indian brands (100 mg/5mL): Azithral-100, Azee-100, Zithromax-100, Zady-100.",
+      "Indian brands (200 mg/5mL): Azithral-200, Azee-200, Zithromax-200.",
+      "Give 1 hr before or 2 hr after food. Avoid antacids. QT prolongation — check ECG in neonates.",
+    ].join(" "),
   },
+
   {
-    id: "azithromycin",
-    name: "Azithromycin",
-    indication: "Atypical pneumonia / pertussis",
+    id: "clarithromycin-susp",
+    name: "Clarithromycin (oral)",
+    indication: "Atypical pneumonia / H. pylori / pertussis / MAC / sinusitis",
+    category: "antibiotic",
+    dosePerKg: 7.5,
+    unit: "mg",
+    max: 500,
+    route: "PO / IV",
+    notes: [
+      "7.5 mg/kg/dose BD (max 500 mg/dose). H. pylori triple therapy: 7.5 mg/kg BD × 14 days.",
+      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose BD.",
+      "SYRUP 250 mg/5mL: give (dose ÷ 50) mL per dose BD.",
+      "Example 10 kg: 75 mg/dose BD → 3 mL of 125/5mL BD.",
+      "Indian brands (125 mg/5mL): Claribid-125, Klaricid-125, Crixan-125, Biaxin-125 suspension.",
+      "Bitter taste despite flavouring — mix with juice or give after food. Refrigerate suspension.",
+      "Strong CYP3A4 inhibitor — check interactions (carbamazepine, statins).",
+    ].join(" "),
+  },
+
+  {
+    id: "erythromycin-susp",
+    name: "Erythromycin (oral)",
+    indication: "Pertussis / atypical pneumonia / chlamydia / GAS pharyngitis (penicillin allergy)",
+    category: "antibiotic",
+    dosePerKg: 12.5,
+    unit: "mg",
+    max: 500,
+    route: "PO / IV",
+    notes: [
+      "12.5 mg/kg/dose QID (max 500 mg/dose). Pertussis: 10 mg/kg TDS × 14 days (IAP).",
+      "Prokinetic (low dose for gastroparesis): 3 mg/kg TDS before feeds.",
+      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose.",
+      "SYRUP 200 mg/5mL (ethylsuccinate): give (dose ÷ 40) mL per dose.",
+      "Example 10 kg: 125 mg/dose QID → 5 mL of 125/5mL QID.",
+      "Indian brands (125 mg/5mL): Erythrocin-125, Eryped-125, E-Mycin-125.",
+      "Indian brands (200 mg/5mL EES): Erythrocin-200 EES.",
+      "QT prolongation — avoid in cardiac patients, neonates. Give before food for better absorption.",
+      "Now largely replaced by azithromycin but still available and affordable.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // COTRIMOXAZOLE (TMP-SMX) — very commonly used in India
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "cotrimoxazole-susp",
+    name: "Co-trimoxazole (TMP-SMX)",
+    indication: "UTI / PCP prophylaxis / shigellosis / nocardia / stepdown typhoid",
+    category: "antibiotic",
+    dosePerKg: 4,
+    unit: "mg",
+    max: 320,
+    route: "PO / IV",
+    notes: [
+      "Dose as TMP component: 4–6 mg/kg TMP/dose BD. PCP treatment: 5 mg/kg TMP q6–8h.",
+      "PCP prophylaxis: 5 mg/kg TMP OD 3×/week (or daily in high-risk).",
+      "SYRUP 40 mg TMP + 200 mg SMX per 5mL (Paediatric suspension):",
+      "Give (TMP dose ÷ 8) mL per dose. Example 10 kg: 40 mg TMP → 5 mL BD.",
+      "Indian brands (suspension): Bactrim Paed suspension, Septran Paed suspension, Oriprim-DS susp.",
+      "Tablet (80 mg TMP + 400 mg SMX): half tab per 10 kg BD for UTI.",
+      "DS tablet (160 mg TMP + 800 mg SMX): 1 tab BD for >30 kg.",
+      "High resistance in India for Shigella and E. coli UTIs — culture before use.",
+      "Avoid in G6PD deficiency, sulfa allergy, <6 weeks age. Monitor CBC and renal function.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // FLUOROQUINOLONES
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "ciprofloxacin-susp",
+    name: "Ciprofloxacin (oral/IV)",
+    indication: "Typhoid (resistant) / complicated UTI / cholera / Pseudomonas (>5 yr)",
     category: "antibiotic",
     dosePerKg: 10,
     unit: "mg",
     max: 500,
     route: "PO / IV",
-    notes: "10 mg/kg day 1, then 5 mg/kg days 2–5.",
+    notes: [
+      "PO: 10–15 mg/kg BD (max 750 mg). IV: 10 mg/kg q12h (max 400 mg). Typhoid: 15 mg/kg BD × 7–10 days.",
+      "SYRUP 250 mg/5mL: give (dose ÷ 50) mL per dose BD.",
+      "Example 10 kg: 100 mg/dose BD → 2 mL of 250/5mL BD.",
+      "Indian brands (250 mg/5mL suspension): Cifran-250 suspension, Ciplox-250 susp, Zoxan-250.",
+      "IV brands: Ciprobid 100/200 mg IV, Ciplox IV.",
+      "Reserve for specific indications (fluoroquinolone resistance rising in India).",
+      "Avoid antacids, dairy within 2 hr. Avoid if cartilage concerns — use only when no alternative.",
+    ].join(" "),
   },
+
+  {
+    id: "ofloxacin-susp",
+    name: "Ofloxacin (oral)",
+    indication: "Typhoid / complicated UTI / MDR TB adjunct (>5 yr, no alternative)",
+    category: "antibiotic",
+    dosePerKg: 7.5,
+    unit: "mg",
+    max: 400,
+    route: "PO",
+    notes: [
+      "7.5 mg/kg BD (max 400 mg/dose). Typhoid (resistant): 10 mg/kg BD × 7 days.",
+      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose BD.",
+      "Example 10 kg: 75 mg → 7.5 mL of 50/5mL BD.",
+      "Indian brands: Zanocin-50 susp, Oflox-50 susp, Zenflox-50 oral suspension.",
+      "Also available as ofloxacin + metronidazole suspension (Oflomac-M, Norflox-M) for diarrhoea.",
+      "Note: Ofloxacin+metronidazole combinations widely used in India for GI infections — questionable evidence.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTI-ANAEROBIC / ANTI-PROTOZOAL
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "metronidazole-susp",
+    name: "Metronidazole (oral/IV)",
+    indication: "Amoebiasis / giardiasis / anaerobic infections / C. difficile",
+    category: "antibiotic",
+    dosePerKg: 7.5,
+    unit: "mg",
+    max: 400,
+    route: "PO / IV / PR",
+    notes: [
+      "7.5 mg/kg TDS PO (max 400 mg/dose). Amoebiasis (IAP): 10 mg/kg TDS × 10 days.",
+      "Giardia: 5 mg/kg TDS × 5 days. IV: 7.5 mg/kg q8h.",
+      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose TDS.",
+      "Example 10 kg: 75 mg/dose TDS → ~1.9 mL (≈2 mL) of 200/5mL TDS.",
+      "Indian brands (200 mg/5mL): Flagyl-200 susp, Metrogyl-200 susp, Aldezole susp, Metronid susp.",
+      "IV: Metrogyl IV 500 mg/100 mL, Flagyl IV.",
+      "PR: Metronidazole suppositories 500 mg (Flagyl suppositories) — for vomiting children.",
+      "Avoid alcohol. Give after food to reduce nausea. Metallic taste is common.",
+    ].join(" "),
+  },
+
+  {
+    id: "tinidazole-susp",
+    name: "Tinidazole (oral)",
+    indication: "Amoebiasis / giardiasis / trichomoniasis (better compliance than metronidazole)",
+    category: "antibiotic",
+    dosePerKg: 50,
+    unit: "mg",
+    max: 2000,
+    route: "PO",
+    notes: [
+      "Amoebiasis: 50 mg/kg OD × 3 days (max 2 g). Giardia: 50 mg/kg single dose (max 2 g).",
+      "No standard syrup — tablets can be crushed and given with food/jam.",
+      "Tablet: 300 mg, 500 mg. Crush 300 mg tab, mix with jam for young children.",
+      "Indian brands: Tiniba-300/500, Fasigyn-500, Tinvista, Topper-300.",
+      "OD dosing — better compliance than metronidazole TDS. Less bitter taste. Give with food.",
+    ].join(" "),
+  },
+
+  {
+    id: "secnidazole-granules",
+    name: "Secnidazole (oral)",
+    indication: "Amoebiasis / giardiasis (single dose convenience)",
+    category: "antibiotic",
+    dosePerKg: 30,
+    unit: "mg",
+    max: 2000,
+    route: "PO",
+    notes: [
+      "30 mg/kg single dose (max 2 g). IAP-recommended for amoebiasis.",
+      "Available as granules sachet (1 g) — mix with water/applesauce just before use.",
+      "Tablet: 1 g, 1.5 g. Indian brands: Secnil-1g sachet, Seczole, Flagentyl-1.5g.",
+      "Granule sachet (Secnil Forte 2g) for adults — use 1g sachet for children.",
+      "Single-dose compliance advantage — ideal for outpatient treatment.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTI-TYPHOIDAL (India-specific doses)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "azithromycin-typhoid",
+    name: "Azithromycin (enteric fever — high dose)",
+    indication: "Uncomplicated typhoid / drug-resistant Salmonella typhi (IAP first-line)",
+    category: "antibiotic",
+    dosePerKg: 20,
+    unit: "mg",
+    max: 1000,
+    route: "PO",
+    notes: [
+      "20 mg/kg OD × 7 days (max 1 g/day). IAP 2024 first-line for uncomplicated enteric fever.",
+      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose OD.",
+      "Example 10 kg: 200 mg OD → 5 mL of 200/5mL OD.",
+      "Example 15 kg: 300 mg OD → 7.5 mL of 200/5mL OD.",
+      "Indian brands: Azithral-200, Azee-200, Zithromax-200 susp.",
+      "Effective against ESBL Salmonella. Outpatient treatment possible for uncomplicated cases.",
+      "Switch to ceftriaxone 100 mg/kg IV if complicated (perforated/toxic/high fever >5 days).",
+    ].join(" "),
+  },
+
+  {
+    id: "ceftriaxone-typhoid",
+    name: "Ceftriaxone (complicated typhoid / inpatient)",
+    indication: "Complicated enteric fever / typhoid with complications",
+    category: "antibiotic",
+    dosePerKg: 75,
+    unit: "mg",
+    max: 3000,
+    route: "IV / IM",
+    notes: [
+      "75–100 mg/kg/day OD IV × 7–14 days (IAP). Severe/complicated: 14 days minimum.",
+      "No syrup form — IV/IM only.",
+      "Indian brands: Monocef, Oframax, Rocephin, Cefaxone 250 mg/500 mg/1 g/2 g vials.",
+      "IM: reconstitute with 1% lignocaine to reduce injection pain.",
+      "Step down to oral azithromycin or cefixime when afebrile × 48 hr and able to take orally.",
+    ].join(" "),
+  },
+
+  {
+    id: "chloramphenicol-oral",
+    name: "Chloramphenicol (oral — resource-limited settings)",
+    indication: "Typhoid (susceptible isolate) / meningitis (penicillin allergy) / rickettsial",
+    category: "antibiotic",
+    dosePerKg: 25,
+    unit: "mg",
+    max: 1000,
+    route: "PO / IV",
+    notes: [
+      "50–75 mg/kg/day ÷ QID (max 3–4 g/day). Typhoid: 75 mg/kg/day × 14 days.",
+      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose QID.",
+      "Example 10 kg at 50 mg/kg/day: 125 mg/dose QID → 5 mL (1 tsp) QID.",
+      "Indian brands (125 mg/5mL): Paraxin-125 suspension, Kemicetine palmitate susp.",
+      "Still used in resource-limited India — cheap and widely available. Piyush Gupta recommends for susceptible typhoid.",
+      "AVOID in neonates (Grey Baby Syndrome). Monitor CBC weekly (aplastic anaemia risk — rare but fatal).",
+      "Do not use if resistant (most Indian strains now resistant — confirm sensitivity).",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTI-RICKETTSIAL (Scrub Typhus — common in India)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "doxycycline-scrub",
+    name: "Doxycycline (scrub typhus / rickettsia — >8 yr)",
+    indication: "Scrub typhus / spotted fever / brucellosis / atypical pneumonia (>8 yr)",
+    category: "antibiotic",
+    dosePerKg: 2.2,
+    unit: "mg",
+    max: 100,
+    route: "PO / IV",
+    notes: [
+      "2.2 mg/kg BD (max 100 mg/dose). Scrub typhus (IAP): 2.2 mg/kg OD × 7–14 days.",
+      "Only use in >8 years (permanent teeth staining in younger children).",
+      "No standard paediatric syrup in India — tablet/capsule only. Capsule can be opened, mixed with food.",
+      "Tablet: 100 mg. Indian brands: Doxybid-100, Tetradox-100, Biodoxi-100, Doxt-100.",
+      "Take with full glass of water, remain upright 30 min after (oesophageal ulcer risk).",
+      "Give with food to reduce nausea but avoid dairy/antacids within 2 hr.",
+      "For <8 yr: use azithromycin (10 mg/kg OD × 5 days) — IAP endorsed alternative.",
+    ].join(" "),
+  },
+
+  {
+    id: "azithromycin-scrub",
+    name: "Azithromycin (scrub typhus — <8 yr)",
+    indication: "Scrub typhus in children <8 years (doxycycline alternative)",
+    category: "antibiotic",
+    dosePerKg: 10,
+    unit: "mg",
+    max: 500,
+    route: "PO",
+    notes: [
+      "10 mg/kg OD × 5 days (max 500 mg). IAP endorsed alternative to doxycycline for <8 yr.",
+      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose OD.",
+      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose OD.",
+      "Example 10 kg: 100 mg OD → 5 mL of 100/5mL OR 2.5 mL of 200/5mL OD.",
+      "Indian brands: Azithral-100/200, Azee-100/200 suspension.",
+      "Monitor fever defervescence — if no improvement in 48 hr, reconsider diagnosis.",
+      "CSF penetration adequate for scrub typhus meningitis cases.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // AMINOGLYCOSIDES (IV — with monitoring guide)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "amikacin-iv",
+    name: "Amikacin (IV/IM)",
+    indication: "Gram-negative sepsis / MDR organisms / neonatal sepsis (gentamicin resistant)",
+    category: "antibiotic",
+    dosePerKg: 15,
+    unit: "mg",
+    max: 1500,
+    route: "IV / IM",
+    notes: [
+      "Children >1 mo: 15–20 mg/kg OD IV over 30 min. Neonates: 15 mg/kg q24–48h (based on GA).",
+      "No oral/syrup form. IV/IM only.",
+      "Indian brands: Amikin 100/500 mg, Mikacin 100/250/500 mg, Amicin, Biklin.",
+      "Monitor levels: trough <5 mcg/mL (before dose), peak 20–30 mcg/mL (1 hr after dose).",
+      "Renal function daily in PICU. Avoid concurrent furosemide (↑ nephrotoxicity).",
+      "IAP: preferred over gentamicin when MDR GNB or prior gentamicin failure suspected.",
+    ].join(" "),
+  },
+
+  {
+    id: "netilmicin-iv",
+    name: "Netilmicin (IV/IM)",
+    indication: "Gram-negative sepsis (less nephrotoxic than gentamicin) / neonatal sepsis",
+    category: "antibiotic",
+    dosePerKg: 6,
+    unit: "mg",
+    max: 300,
+    route: "IV / IM",
+    notes: [
+      "Children: 6 mg/kg OD. Neonates: 3 mg/kg q12–24h depending on GA.",
+      "No oral form.",
+      "Indian brands: Netilin, Netromycin 25/100/150/200 mg vials.",
+      "Less nephrotoxic and ototoxic than gentamicin. Used widely in Indian NICUs.",
+      "Monitor renal function, trough levels (<2 mcg/mL).",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTI-MRSA / RESISTANT GRAM-POSITIVES
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "vancomycin-iv",
+    name: "Vancomycin (IV)",
+    indication: "MRSA / resistant gram-positive sepsis / meningitis / endocarditis",
+    category: "antibiotic",
+    dosePerKg: 15,
+    unit: "mg",
+    max: 750,
+    route: "IV over 60 min",
+    notes: [
+      "15 mg/kg q6h (severe MRSA/meningitis) or 15–20 mg/kg q8h. Infuse over ≥60 min.",
+      "No syrup. IV only. Oral vancomycin (for C. diff): 10 mg/kg QID PO (not absorbed systemically).",
+      "Indian brands: Vancorid, Vancocin 500 mg/1g vials.",
+      "Target trough 15–20 mcg/mL for severe infections (CNS, endocarditis, osteomyelitis).",
+      "Red man syndrome if infused fast — slow rate, premedicate with antihistamine.",
+      "Monitor renal function and audiology with prolonged use.",
+    ].join(" "),
+  },
+
+  {
+    id: "teicoplanin-iv",
+    name: "Teicoplanin (IV/IM)",
+    indication: "MRSA / resistant gram-positive / endocarditis (preferred in Indian ICUs)",
+    category: "antibiotic",
+    dosePerKg: 10,
+    unit: "mg",
+    max: 400,
+    route: "IV / IM",
+    notes: [
+      "Loading: 10 mg/kg q12h × 3 doses, then 6–10 mg/kg OD. Serious: 10 mg/kg OD maintenance.",
+      "No syrup. IV/IM only.",
+      "Indian brands: Targocid 200/400 mg, Teicoblast, Teicomycin.",
+      "Preferred over vancomycin in many Indian PICUs: OD dosing, less nephrotoxic, IM possible.",
+      "Target trough >10 mcg/mL (routine), >15–20 mcg/mL (endocarditis/deep infection).",
+    ].join(" "),
+  },
+
+  {
+    id: "linezolid-oral",
+    name: "Linezolid (oral/IV)",
+    indication: "MRSA / VRE / MDR-TB adjunct / bone and joint MRSA (oral step-down)",
+    category: "antibiotic",
+    dosePerKg: 10,
+    unit: "mg",
+    max: 600,
+    route: "PO / IV",
+    notes: [
+      "<12 yr: 10 mg/kg q8h (max 600 mg/dose). ≥12 yr: 600 mg q12h.",
+      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose q8h.",
+      "Example 10 kg: 100 mg q8h → 5 mL of 100/5mL q8h.",
+      "Indian brands (100 mg/5mL): Lizolid-100 susp, Linox-100 susp, Linospan-100 susp, Zyvox-100.",
+      "100% oral bioavailability — switch IV to PO early (same efficacy, much cheaper).",
+      "Monitor CBC weekly: thrombocytopenia, anaemia common with >2 weeks use.",
+      "Avoid tyramine-rich foods (cheese, soy sauce) — mild MAOI activity.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // CARBAPENEMS / RESERVE ANTIBIOTICS
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "meropenem-iv",
+    name: "Meropenem (IV)",
+    indication: "Severe sepsis / meningitis / MDR gram-negative / febrile neutropenia",
+    category: "antibiotic",
+    dosePerKg: 20,
+    unit: "mg",
+    max: 1000,
+    route: "IV over 30 min",
+    notes: [
+      "Sepsis: 20 mg/kg q8h (max 1 g). Meningitis: 40 mg/kg q8h (max 2 g). Neonates: 20 mg/kg q12h.",
+      "MDR/ESBL: consider extended infusion over 3–4 hr for better PK/PD.",
+      "No oral form.",
+      "Indian brands: Meronem, Meromer, Merotrol 500 mg/1g vials.",
+      "Preferred carbapenem for CNS infections (no seizure risk unlike imipenem). WHO Watch group.",
+      "Reserve for MDR/ESBL organisms — culture guidance essential.",
+    ].join(" "),
+  },
+
+  {
+    id: "piptaz-iv",
+    name: "Piperacillin-Tazobactam (Pip-Taz)",
+    indication: "Nosocomial sepsis / Pseudomonas / polymicrobial / febrile neutropenia",
+    category: "antibiotic",
+    dosePerKg: 100,
+    unit: "mg",
+    max: 4000,
+    route: "IV over 30 min",
+    notes: [
+      "100 mg/kg q8h (piperacillin component; max 4 g piperacillin/dose). Severe/neutropenia: q6h.",
+      "Extended infusion (over 4 hr) for MDR organisms improves PK/PD target attainment.",
+      "No oral form.",
+      "Indian brands: Tazocin 2.25g/4.5g, Piptaz, Pipzo, Tacicin.",
+      "Often combined with amikacin for double cover in PICU. Good biliary penetration.",
+      "WHO Watch group — use with culture guidance.",
+    ].join(" "),
+  },
+
+  {
+    id: "cefoperazone-sulbactam-iv",
+    name: "Cefoperazone-Sulbactam",
+    indication: "MDR gram-negative / Acinetobacter / nosocomial / biliary sepsis",
+    category: "antibiotic",
+    dosePerKg: 40,
+    unit: "mg",
+    max: 2000,
+    route: "IV over 30 min",
+    notes: [
+      "40–80 mg/kg q12h (max 2 g/dose). Severe MDR: 40 mg/kg q8h or q6h.",
+      "Ratio 1:1 (cefoperazone:sulbactam). Sulbactam has intrinsic Acinetobacter activity.",
+      "No oral form.",
+      "Indian brands: Magnamycin 1.5g/3g, Sulperazone 1.5g/3g, Cefobid-S, Bacperazone-S.",
+      "Very widely used in Indian PICUs — good availability and cost. Monitor PT/INR (vitamin K antagonism).",
+      "Give vitamin K 10 mg IM weekly with prolonged courses.",
+    ].join(" "),
+  },
+
+  {
+    id: "colistin-iv",
+    name: "Colistin (Polymyxin E) — LAST RESORT",
+    indication: "XDR/PDR Acinetobacter baumannii / Pseudomonas / Klebsiella — last resort only",
+    category: "antibiotic",
+    dosePerKg: 2.5,
+    unit: "mg",
+    max: 150,
+    route: "IV over 60 min",
+    notes: [
+      "Loading: 5 mg/kg colistin base activity (CBA) IV once. Maintenance: 2.5 mg/kg q12h.",
+      "Adjust for renal impairment. Nebulised colistin adjunct for VAP.",
+      "No oral form (poorly absorbed — PO only for bowel decontamination).",
+      "Indian brands: Colistin sulphate for injection (various generic), Coly-Mycin.",
+      "LAST RESORT — use ONLY for culture-confirmed XDR/PDR organisms.",
+      "Nephrotoxic (30–50%) and neurotoxic — monitor creatinine daily, watch for neuromuscular blockade.",
+      "Combine with meropenem or rifampicin for synergy against carbapenem-resistant organisms.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTI-TB (IAP / RNTCP / Piyush Gupta doses)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "isoniazid-susp",
+    name: "Isoniazid (INH)",
+    indication: "TB treatment / LTBI prophylaxis",
+    category: "antibiotic",
+    dosePerKg: 10,
+    unit: "mg",
+    max: 300,
+    route: "PO",
+    notes: [
+      "Treatment: 10 mg/kg OD (max 300 mg). LTBI prophylaxis: 10 mg/kg OD × 6 months.",
+      "SYRUP 50 mg/5mL or 100 mg/5mL: give (dose ÷ 10 or ÷ 20) mL OD.",
+      "Example 10 kg: 100 mg OD → 10 mL of 50/5mL OR 5 mL of 100/5mL.",
+      "Indian brands: Isokin-100 syrup, INH suspension (various). Tablet: 100 mg, 300 mg.",
+      "Combination tablets: Rifater (INH+R+PZA), Rimactazid (INH+R) widely used in India.",
+      "Give with pyridoxine (vitamin B6) 5–10 mg/day to prevent peripheral neuropathy.",
+      "Monitor LFTs monthly. Give 30 min before food for best absorption.",
+    ].join(" "),
+  },
+
+  {
+    id: "rifampicin-oral",
+    name: "Rifampicin",
+    indication: "TB treatment / meningococcal prophylaxis / H. influenzae prophylaxis",
+    category: "antibiotic",
+    dosePerKg: 15,
+    unit: "mg",
+    max: 600,
+    route: "PO",
+    notes: [
+      "TB: 15 mg/kg OD (max 600 mg). Meningococcal prophylaxis: 10 mg/kg q12h × 2 days (max 600 mg/dose).",
+      "SYRUP: No standard commercial syrup in India — extemporaneous preparation 20 mg/mL.",
+      "Capsule (150/300/450/600 mg) can be opened and mixed with jam/honey for young children.",
+      "Indian brands: Rimactane, R-Cin, Rifadin 150/300/450/600 mg capsules.",
+      "Combination: Rimactazid (R+H), Akurit (R+H+PZA+E) 4-drug fixed dose combination.",
+      "Orange-red urine, sweat, tears — warn parents (harmless but alarming). Enzyme inducer.",
+      "Do NOT give alone (rapid resistance). Always part of combination TB therapy.",
+    ].join(" "),
+  },
+
+  {
+    id: "pyrazinamide-susp",
+    name: "Pyrazinamide (PZA)",
+    indication: "TB treatment (intensive phase — first 2 months)",
+    category: "antibiotic",
+    dosePerKg: 35,
+    unit: "mg",
+    max: 2000,
+    route: "PO",
+    notes: [
+      "35 mg/kg OD (max 2 g). IAP/RNTCP: first 2 months of standard TB regimen (2HRZE/4HR).",
+      "SYRUP: extemporaneous 100 mg/mL preparation at some pharmacies.",
+      "Tablet: 500 mg, 750 mg. Crush tablet, mix with water/jam for children.",
+      "Indian brands: Pyrafat-500, PZA-Ciba-500, Pyzina-500. Fixed dose: Akurit-4, Rimstar-4.",
+      "Monitor uric acid (gout risk — less common in children). Monitor LFTs.",
+      "Arthralgia common — treatable with NSAIDs.",
+    ].join(" "),
+  },
+
+  {
+    id: "ethambutol-tab",
+    name: "Ethambutol (EMB)",
+    indication: "TB treatment (intensive phase — >5 years; caution <5 yr)",
+    category: "antibiotic",
+    dosePerKg: 20,
+    unit: "mg",
+    max: 1000,
+    route: "PO",
+    notes: [
+      "20 mg/kg OD (max 1 g). Part of 4-drug intensive phase (HRZE) per RNTCP/IAP.",
+      "CAUTION <5 yr — cannot reliably report visual changes (colour vision loss).",
+      "No commercial syrup in India. Tablet: 400 mg, 800 mg. Crush for young children.",
+      "Indian brands: Myambutol-400/800, Combutol-400/800.",
+      "Monitor colour vision and visual acuity monthly. Refer ophthalmology if any visual complaint.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTI-MALARIALS (NVBDCP India guidelines)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "artesunate-severe",
+    name: "Artesunate IV/IM (severe malaria)",
+    indication: "Severe/complicated P. falciparum malaria — IAP/NVBDCP first-line",
+    category: "antibiotic",
+    dosePerKg: 2.4,
+    unit: "mg",
+    max: 240,
+    route: "IV / IM",
+    notes: [
+      "2.4 mg/kg at 0, 12, 24 hr — then OD until able to take orally (minimum 3 days).",
+      "No syrup. IV/IM only.",
+      "Indian brands: Falcigo-60 mg vial, Larinate-60 mg, Artesun IV.",
+      "Reconstitute with 1 mL 5% sodium bicarbonate, then dilute with 5% dextrose.",
+      "Monitor for delayed haemolytic anaemia (up to 4 weeks post-treatment — check Hb).",
+      "Follow with full course oral ACT (artemether-lumefantrine) on recovery.",
+    ].join(" "),
+  },
+
+  {
+    id: "artemether-lumefantrine-tab",
+    name: "Artemether-Lumefantrine (Coartem / AL)",
+    indication: "Uncomplicated P. falciparum malaria — NVBDCP/IAP first-line oral",
+    category: "antibiotic",
+    fixedDose: "5–14 kg: 1 tab | 15–24 kg: 2 tabs | 25–34 kg: 3 tabs | >34 kg: 4 tabs — BD × 3 days",
+    unit: "tabs",
+    route: "PO with fatty food",
+    notes: [
+      "Each tab: artemether 20 mg + lumefantrine 120 mg. 6 doses over 3 days (0, 8, 24, 36, 48, 60 hr).",
+      "MUST give with fatty food (milk, biscuit, coconut water) — lumefantrine absorption increases 16-fold.",
+      "Indian brands: Coartem, Lumether, ALU, Artemether-L (various generics).",
+      "Dispersible paediatric tablet available (Coartem Dispersible) — dissolve in water for infants.",
+      "Avoid in first trimester. Monitor for QT prolongation in patients on other QT-prolonging drugs.",
+    ].join(" "),
+  },
+
+  {
+    id: "chloroquine-syrup",
+    name: "Chloroquine (P. vivax / P. malariae)",
+    indication: "Uncomplicated P. vivax / P. malariae (chloroquine-sensitive) — NVBDCP",
+    category: "antibiotic",
+    dosePerKg: 10,
+    unit: "mg",
+    max: 600,
+    route: "PO",
+    notes: [
+      "10 mg base/kg day 1 & 2, then 5 mg base/kg day 3 (max 600 mg/dose days 1–2, 300 mg day 3).",
+      "SYRUP 50 mg base/5mL: give (dose ÷ 10) mL per dose.",
+      "Example 10 kg: 100 mg base → 10 mL (2 tsp) of 50 mg/5mL.",
+      "Indian brands (50 mg/5mL): Lariago syrup, Malarex syrup, Resochin syrup.",
+      "P. vivax still largely chloroquine-sensitive in India (NVBDCP 2023).",
+      "Follow with primaquine for radical cure (check G6PD first — MANDATORY).",
+      "Bitter taste — mix with juice. Give after food. Take at same time daily.",
+    ].join(" "),
+  },
+
+  {
+    id: "primaquine-tab",
+    name: "Primaquine (P. vivax radical cure / transmission block)",
+    indication: "P. vivax radical cure / P. ovale / P. falciparum transmission blocking",
+    category: "antibiotic",
+    dosePerKg: 0.25,
+    unit: "mg",
+    max: 15,
+    route: "PO",
+    notes: [
+      "P. vivax radical cure: 0.25 mg/kg/day × 14 days (max 15 mg/day). P. falciparum gametocyte: 0.25 mg/kg single dose.",
+      "NO SYRUP in India. Tablet: 2.5 mg, 7.5 mg. Half/quarter tablet for young children.",
+      "Indian brands: Primaquine-2.5 mg, Malanil, Primaquin-7.5 mg.",
+      "MANDATORY G6PD SCREENING before use — causes severe haemolysis in G6PD deficiency.",
+      "Avoid <6 months, pregnancy. Give with food to reduce GI side effects.",
+      "Monitor Hb and urine colour (dark urine = haemolysis — STOP immediately).",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTI-FUNGAL
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "fluconazole-susp",
+    name: "Fluconazole (oral/IV)",
+    indication: "Invasive candidiasis / oropharyngeal thrush / cryptococcal / tinea / prophylaxis",
+    category: "antibiotic",
+    dosePerKg: 6,
+    unit: "mg",
+    max: 400,
+    route: "PO / IV",
+    notes: [
+      "Invasive candida: 6–12 mg/kg/day OD (max 400 mg/day; loading 12 mg/kg day 1).",
+      "Oropharyngeal thrush: 3 mg/kg OD × 7 days. Prophylaxis (immunocompromised): 3–6 mg/kg OD.",
+      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose OD.",
+      "Example 10 kg: 60 mg OD → 6 mL of 50/5mL.",
+      "Indian brands (50 mg/5mL): Forcan-50 susp, Syscan-50 susp, Zocon-50 susp, Flucos-50.",
+      "IV: Forcan-100/200 mg IV, Syscan IV. Same dose IV as PO.",
+      "CYP3A4 inhibitor — check interactions (cyclosporine, tacrolimus, warfarin).",
+    ].join(" "),
+  },
+
+  {
+    id: "nystatin-oral",
+    name: "Nystatin (oral suspension)",
+    indication: "Oral candidiasis (thrush) / GI candida prophylaxis in neonates",
+    category: "antibiotic",
+    fixedDose: "Neonates: 1 mL (100,000 u) QID | Infants: 2 mL (200,000 u) QID | Children: 5 mL (500,000 u) QID",
+    unit: "mL",
+    route: "PO (swish and swallow)",
+    notes: [
+      "SUSPENSION 100,000 units/mL. Apply half dose to each side of mouth. Swish, then swallow.",
+      "Not absorbed systemically — acts locally. Continue 48 hr after symptoms resolve.",
+      "Indian brands: Candid oral drops (nystatin 100,000 u/mL), Nystatin suspension.",
+      "Alternative for oral thrush: Clotrimazole 1% oral gel (Clotrimox gel, Canesten oral gel).",
+      "Give after feeds, not before.",
+    ].join(" "),
+  },
+
+  {
+    id: "amphotericin-b-iv",
+    name: "Amphotericin B (conventional / liposomal)",
+    indication: "Invasive fungal infections / visceral leishmaniasis (kala-azar)",
+    category: "antibiotic",
+    dosePerKg: 0.5,
+    unit: "mg",
+    max: 50,
+    route: "IV over 4–6 hr",
+    notes: [
+      "Conventional: 0.5–1 mg/kg/day (start 0.25, escalate). Test dose 0.1 mg/kg over 30 min first.",
+      "Liposomal (AmBisome): 3–5 mg/kg/day — less nephrotoxic, preferred if available.",
+      "Kala-azar (NVBDCP): Liposomal 3 mg/kg days 1–5 and 14 (total 15 mg/kg) OR conventional 1 mg/kg alternate days × 15 doses.",
+      "No oral form.",
+      "Indian brands: Fungizone (conventional). Liposomal: AmBisome, Amphomul.",
+      "Premedicate: paracetamol 15 mg/kg + diphenhydramine 1 mg/kg 30 min pre-infusion.",
+      "Monitor: creatinine, K⁺, Mg²⁺ daily; CBC twice weekly. Supplement K⁺ and Mg²⁺ prophylactically.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTIPARASITIC (India-relevant)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "albendazole-susp",
+    name: "Albendazole",
+    indication: "Intestinal helminths / neurocysticercosis / giardia / hydatid",
+    category: "antibiotic",
+    dosePerKg: 7.5,
+    unit: "mg",
+    max: 400,
+    route: "PO with fatty food",
+    notes: [
+      "Helminths (>2 yr): 400 mg single dose (>10 kg). <10 kg or 1–2 yr: 200 mg single dose.",
+      "NCC (neurocysticercosis): 15 mg/kg/day BD × 4 weeks + dexamethasone (IAP).",
+      "Giardia: 400 mg OD × 5 days.",
+      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL.",
+      "Example: 400 mg → 10 mL (2 tsp) of 200/5mL.",
+      "Indian brands (200 mg/5mL): Zentel-200 suspension, Bandy-Plus susp, Noworm susp.",
+      "Take with fatty food (↑absorption for tissue infections). MDA programme drug.",
+    ].join(" "),
+  },
+
+  {
+    id: "ivermectin-tab",
+    name: "Ivermectin (oral)",
+    indication: "Scabies / strongyloidiasis / head lice / filariasis (>15 kg / >5 yr)",
+    category: "antibiotic",
+    dosePerKg: 0.2,
+    unit: "mg",
+    max: 12,
+    route: "PO fasting",
+    notes: [
+      "200 mcg/kg single dose (>15 kg). Scabies: repeat day 14. Strongyloides: 200 mcg/kg OD × 2 days.",
+      "No syrup in India. Tablet: 3 mg, 6 mg, 12 mg. Crush and mix with water for young children.",
+      "Indian brands: Ivecop-3/6/12, Scabo-6, Ivermectol-12.",
+      "Give on empty stomach with water. Avoid antacids.",
+      "Avoid <15 kg (insufficient safety data). MDA programme drug for filariasis.",
+      "For crusted/Norwegian scabies: 200 mcg/kg days 1, 2, 8, 9, 15 + topical permethrin.",
+    ].join(" "),
+  },
+
+  {
+    id: "mebendazole-susp",
+    name: "Mebendazole",
+    indication: "Intestinal worms / pinworm / hookworm (alternative to albendazole)",
+    category: "antibiotic",
+    fixedDose: "Pinworm: 100 mg single dose, repeat in 2 weeks | Others: 100 mg BD × 3 days",
+    unit: "mg",
+    route: "PO",
+    notes: [
+      "Pinworm (Enterobius): 100 mg single dose, repeat after 2 weeks. Treat whole family.",
+      "Hookworm/roundworm/whipworm: 100 mg BD × 3 days or 500 mg single dose.",
+      "SYRUP 100 mg/5mL: 5 mL per dose (regardless of weight for >2 yr).",
+      "Indian brands: Mebex-100 suspension, Vermox-100, Wormin suspension.",
+      "Poorly absorbed — acts locally in gut. Safe in >2 yr. Avoid in pregnancy.",
+      "Can be given with or without food. Tablet can be chewed, swallowed, or mixed with food.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTI-LEISHMANIA (Kala-Azar — endemic in Bihar, UP, Jharkhand, WB)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "miltefosine-oral",
+    name: "Miltefosine (oral)",
+    indication: "Visceral leishmaniasis (kala-azar) — oral option (NVBDCP)",
+    category: "antibiotic",
+    dosePerKg: 2.5,
+    unit: "mg",
+    max: 100,
+    route: "PO with food",
+    notes: [
+      "2.5 mg/kg/day OD (max 100 mg) × 28 days. Weight-based: 2–11 kg: 10 mg/day; 12–25 kg: 20 mg/day; >25 kg: 50 mg/day.",
+      "Capsule: 10 mg, 50 mg. No syrup — open 10 mg capsule, mix with food for small children.",
+      "Indian brands: Impavido, Miltefos. Available through NVBDCP programme.",
+      "Avoid in pregnancy (teratogenic) — contraception required for 3 months after treatment.",
+      "GI side effects common (nausea, vomiting) — give with food. Monitor renal and liver function.",
+    ].join(" "),
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTIVIRAL (HSV / Varicella — commonly needed in paeds)
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: "acyclovir-susp",
+    name: "Acyclovir (oral/IV)",
+    indication: "Herpes encephalitis / neonatal HSV / severe varicella / zoster",
+    category: "antibiotic",
+    dosePerKg: 20,
+    unit: "mg",
+    max: 800,
+    route: "PO / IV",
+    notes: [
+      "HSV encephalitis/neonatal: 20 mg/kg q8h IV × 14–21 days.",
+      "Severe varicella: 10 mg/kg q8h IV × 5–7 days. Oral varicella: 20 mg/kg QID × 5 days (max 800 mg/dose).",
+      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose.",
+      "Example 10 kg (varicella oral): 200 mg QID → 5 mL of 200/5mL QID.",
+      "Indian brands (200 mg/5mL): Zovirax-200 suspension, Acivir-200 susp, Herpex-200 susp.",
+      "IV: Zovirax, Acivir, Vacilovir 250/500 mg vials.",
+      "Ensure adequate hydration during IV therapy (nephrotoxic if dehydrated). Infuse over 1 hr.",
+    ].join(" "),
+  },
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// QUICK SYRUP DOSE REFERENCE TABLE
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// HOW TO CALCULATE mL FROM SYRUP CONCENTRATION:
+//   mL per dose = (dose in mg) ÷ (concentration in mg/mL)
+//   Concentration (mg/mL) = strength/5   [e.g. 125mg/5mL → 25 mg/mL]
+//
+// COMMON CONCENTRATIONS AVAILABLE IN INDIA:
+//   Amoxicillin:           125 mg/5mL | 250 mg/5mL
+//   Co-amoxiclav:          228.5 mg/5mL | 457 mg/5mL
+//   Cefixime:              50 mg/5mL | 100 mg/5mL
+//   Cefpodoxime:           50 mg/5mL | 100 mg/5mL
+//   Cefuroxime:            125 mg/5mL
+//   Cefdinir:              125 mg/5mL
+//   Cefadroxil:            125 mg/5mL | 250 mg/5mL
+//   Azithromycin:          100 mg/5mL | 200 mg/5mL
+//   Clarithromycin:        125 mg/5mL | 250 mg/5mL
+//   Erythromycin:          125 mg/5mL | 200 mg/5mL (EES)
+//   Co-trimoxazole (paed): 40 mg TMP + 200 mg SMX per 5mL
+//   Metronidazole:         200 mg/5mL
+//   Ciprofloxacin:         250 mg/5mL
+//   Ofloxacin:             50 mg/5mL
+//   Chloramphenicol:       125 mg/5mL
+//   Fluconazole:           50 mg/5mL
+//   Albendazole:           200 mg/5mL
+//   Mebendazole:           100 mg/5mL
+//   Acyclovir:             200 mg/5mL
+//   Nystatin:              100,000 units/mL
+//   Linezolid:             100 mg/5mL
+//   Isoniazid:             50 mg/5mL | 100 mg/5mL
+//   Chloroquine:           50 mg base/5mL
+//
+// ═══════════════════════════════════════════════════════════════════════════════
   // ─── Respiratory ─────────────────────────────────────
   {
     id: "racemic-epi",
