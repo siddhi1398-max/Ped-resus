@@ -1706,7 +1706,22 @@ export const DRUGS = [
       "Ensure adequate hydration during IV therapy (nephrotoxic if dehydrated). Infuse over 1 hr.",
     ].join(" "),
   },
-
+  
+ <div className="rounded-md border-2 border-amber-400 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 p-4">
+        <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200 mb-2">
+          <Warning size={16} weight="fill" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold">QUICK SYRUP DOSE REFERENCE TABLE</span>
+        </div>
+        <ul className="text-sm space-y-1 text-amber-900 dark:text-amber-100">
+          <li className="flex gap-2"><span className="opacity-60">•</span><span></span>mL per dose = (dose in mg) ÷ (concentration in mg/mL)</li>
+          <li className="flex gap-2"><span className="opacity-60">•</span><span>Concentration (mg/mL) = strength/5</span></li>
+          <li className="flex gap-2"><span className="opacity-60">•</span><span>SYRUP: 50 mg/5mL: give (dose ÷ 10) mL per dose.</span></li>
+          <li className="flex gap-2"><span className="opacity-60">•</span><span>SYRUP: 100 mg/5mL: give (dose ÷ 20) mL per dose.</span></li>
+          <li className="flex gap-2"><span className="opacity-60">•</span><span>SYRUP: 125 mg/5 mL → give (dose ÷ 25) mL per dose.</span></li>
+          <li className="flex gap-2"><span className="opacity-60">•</span><span>SYRUP: 200 mg/5 mL → give (dose ÷ 40) mL per dose.</span></li>
+        </ul>
+      </div>
+    </div>
 // ═══════════════════════════════════════════════════════════════════════════════
 // QUICK SYRUP DOSE REFERENCE TABLE
 // ═══════════════════════════════════════════════════════════════════════════════
