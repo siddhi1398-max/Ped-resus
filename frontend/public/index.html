@@ -1,37 +1,49 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#0f172a" />
-        <meta name="description" content="Pediatric Emergency Reference — Weight-based drug doses, resuscitation protocols, and clinical tools for emergency physicians. Based on Fleischer & Ludwig, Harriet Lane & IAP Guidelines." />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <!-- PWA: Makes app installable on mobile (Add to Home Screen) -->
-        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="PedResus" />
+    <!-- Theme & PWA -->
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PedResus" />
+    <meta name="mobile-web-app-capable" content="yes" />
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" />
+    <!-- Icons -->
+    <link rel="icon" href="%PUBLIC_URL%/browser icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/browser icon.png" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/iOS homescreen.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/iOS homescreen.png" />
+    <link rel="android homescreen" href="%PUBLIC_URL%/android homescreen.png" />
+    <link rel="android homescreen" sizes="192x192" href="%PUBLIC_URL%/android homescreen.png" />
 
-        <!-- SEO / Social sharing -->
-        <meta property="og:title" content="PedResus — Pediatric Emergency Reference" />
-        <meta property="og:description" content="Weight-based drug doses & clinical protocols for ED physicians. Based on Harriet Lane, Fleischer & Ludwig, IAP Guidelines." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://ped-resus.netlify.app" />
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-        <title>PedResus — Pediatric Emergency Reference</title>
+    <!-- SEO -->
+    <meta name="description" content="Pediatric Emergency Reference — Weight-based drug doses, resuscitation protocols, IAP guidelines and clinical tools for emergency physicians." />
+    <meta name="keywords" content="pediatric emergency, drug doses, resuscitation, IAP guidelines, PALS, Harriet Lane, Fleischer Ludwig" />
+    <meta name="author" content="Dr. Siddhi" />
 
-        <!-- Suppress non-critical errors from Emergent build -->
-        <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
-    </head>
-    <body>
-        <noscript>You need to enable JavaScript to run this app.</noscript>
-        <div id="root"></div>
-        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    </body>
+    <!-- Open Graph (WhatsApp / LinkedIn previews) -->
+    <meta property="og:title" content="PedResus — Pediatric Emergency Reference" />
+    <meta property="og:description" content="Weight-based drug doses and clinical protocols. Based on Harriet Lane, Fleischer & Ludwig, IAP Guidelines." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ped-resus.vercel.app" />
+    <meta property="og:image" content="%PUBLIC_URL%/logo512.png" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="PedResus — Pediatric Emergency Reference" />
+    <meta name="twitter:description" content="Weight-based pediatric emergency drug doses." />
+    <meta name="twitter:image" content="%PUBLIC_URL%/logo512.png" />
+
+    <title>PedResus — Pediatric Emergency Reference</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
 </html>
-    
