@@ -601,7 +601,8 @@ export default function VentilatorTab() {
               ))}
             </div>
           </div>
-
+          }
+          
           {/* SBT protocol */}
           <Section title="Spontaneous Breathing Trial (SBT)" icon="🌬️" defaultOpen={true}>
             <div className="space-y-3">
