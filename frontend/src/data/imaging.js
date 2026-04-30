@@ -1,382 +1,287 @@
-// ═══════════════════════════════════════════════════════════════
-// Critical pediatric imaging quick reference
-// X-ray, CT, MRI, POCUS — high-yield findings for ED
-// All inline images from Wikimedia Commons (CC BY-SA / public domain)
-// External references link to Radiopaedia for additional cases
-// ═══════════════════════════════════════════════════════════════
+// frontend/src/components/tabs/ImagingTab.jsx
+// ─────────────────────────────────────────────────────────────────────────────
+// Renders the Imaging tab — categorized X-Ray, CT, MRI, POCUS findings
+// with images, key findings, pearls, DDx and Radiopaedia links.
+// Images sourced from Wikimedia Commons (open access).
+// ─────────────────────────────────────────────────────────────────────────────
 
-export const IMAGING_CATEGORIES = [
-  { id: "xray", label: "X-Ray" },
-  { id: "ct", label: "CT" },
-  { id: "mri", label: "MRI" },
-  { id: "pocus", label: "POCUS" },
-];
+import { useState } from "react";
+import {
+  IMAGING_CATEGORIES,
+  IMAGING_FINDINGS,
+} from "../../data/imagingData";
+import {
+  ArrowSquareOut,
+  CaretDown,
+  Image,
+  Warning,
+  Lightbulb,
+  ArrowsLeftRight,
+} from "@phosphor-icons/react";
 
-export const IMAGING_FINDINGS = {
-  xray: [
-    {
-      id: "steeple",
-      title: "Croup — Steeple Sign",
-      view: "AP soft-tissue neck",
-      keyFindings: [
-        "Subglottic narrowing in inverted V (steeple) shape",
-        "Loss of normal shoulder configuration of subglottic trachea",
-        "Lateral view shows loss of normal subglottic distension during inspiration",
-      ],
-      pearls: "Imaging NOT required for clinical croup. Reserve for atypical presentations or when alternative diagnosis (foreign body, retropharyngeal abscess) suspected. Steeple sign present in only ~50% of croup cases — its absence does not exclude croup.",
-      ddx: "Bacterial tracheitis, epiglottitis (thumbprint sign on lateral), foreign body",
-      refUrl: "https://radiopaedia.org/cases/croup-steeple-sign",
-    },
-    {
-      id: "thumbprint",
-      title: "Epiglottitis — Thumbprint Sign",
-      view: "Lateral soft-tissue neck",
-      keyFindings: [
-        "Swollen, rounded epiglottis (thumb-shape) above the larynx",
-        "Thickened aryepiglottic folds",
-        "Distended hypopharynx",
-      ],
-      pearls: "DO NOT obtain imaging if child unstable — go straight to OR with anaesthesia + ENT. Examination of throat is contraindicated until airway secured. Now rare since Hib vaccine but rising in unvaccinated populations.",
-      ddx: "Croup (steeple sign), retropharyngeal abscess (widened prevertebral space), bacterial tracheitis",
-      refUrl: "https://radiopaedia.org/articles/thumb-sign-epiglottis",
-    },
-    {
-      id: "retropharyngeal",
-      title: "Retropharyngeal Abscess",
-      view: "Lateral soft-tissue neck (true lateral, neck extended, in inspiration)",
-      keyFindings: [
-        "Prevertebral soft tissue thickening: > 7 mm at C2 OR > 14 mm at C6 (child < 15 yr) OR > 22 mm at C6 (adult)",
-        "Loss of cervical lordosis",
-        "Air-fluid level in retropharyngeal space",
-      ],
-      pearls: "False positives common with crying, neck flexion, expiration. Confirm with neck CT with contrast if clinical suspicion high. Causes airway compromise + meningitis risk.",
-      ddx: "Epiglottitis, croup, foreign body, prevertebral haematoma",
-      refUrl: "https://radiopaedia.org/articles/retropharyngeal-abscess",
-    },
-    {
-      id: "pneumonia",
-      title: "Lobar / Round Pneumonia",
-      view: "PA + Lateral chest",
-      imgUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Pneumonia_x-ray.jpg/640px-Pneumonia_x-ray.jpg",
-      imgAlt: "Right upper lobe consolidation on AP CXR (Wikimedia Commons / CDC)",
-      keyFindings: [
-        "Lobar consolidation with air bronchograms",
-        "Round pneumonia (paediatric peculiarity, age 2–8 yr) may mimic mass lesion",
-        "Silhouette sign localises the lobe (right middle lobe blurs right heart border, lingula blurs left)",
-        "Pleural effusion / empyema — meniscus on erect film, layering on supine",
-      ],
-      pearls: "Atypical pneumonia (Mycoplasma, viral) often shows interstitial / peri-bronchial pattern. Negative CXR does not exclude pneumonia in early disease — repeat in 24–48 h if clinical suspicion remains.",
-      ddx: "Atelectasis, CCAM (in young infant), pulmonary sequestration, mass lesion",
-      refUrl: "https://radiopaedia.org/articles/round-pneumonia",
-    },
-    {
-      id: "pneumothorax",
-      title: "Pneumothorax / Tension Pneumothorax",
-      view: "Erect PA chest (or supine if unable)",
-      keyFindings: [
-        "Visceral pleural line with absent lung markings beyond",
-        "Deep sulcus sign on supine film (lateral costophrenic angle abnormally deep / black)",
-        "Tension: mediastinal shift away, depressed hemidiaphragm, contralateral atelectasis",
-        "Subcutaneous emphysema in chest wall",
-      ],
-      pearls: "Tension pneumothorax = CLINICAL diagnosis. Don't wait for CXR — needle decompress at 2nd ICS MCL or 4–5th ICS AAL on affected side. Always check NG / ETT position post-procedure.",
-      ddx: "Bullae, large pneumatocoele, skin fold artefact, scapula edge",
-      refUrl: "https://radiopaedia.org/articles/pneumothorax",
-    },
-    {
-      id: "foreign-body-airway",
-      title: "Inhaled Foreign Body",
-      view: "Inspiratory + expiratory PA (or bilateral decubitus if uncooperative)",
-      keyFindings: [
-        "Most foreign bodies (peanuts, organic) are RADIOLUCENT — direct visualisation rare",
-        "Indirect signs: unilateral hyperinflation (air-trapping on expiratory film) on affected side",
-        "Mediastinum shifts AWAY from affected side on expiration",
-        "Decubitus film: dependent lung normally collapses; if foreign body, dependent lung remains hyper-inflated",
-        "Atelectasis distal to obstruction (if complete obstruction)",
-      ],
-      pearls: "Bronchoscopy is diagnostic AND therapeutic. Negative imaging does not exclude foreign body — clinical history of choking + unilateral findings = bronchoscopy. Right main bronchus most common site.",
-      ddx: "Pneumonia, asthma exacerbation, mucus plug, congenital lobar emphysema",
-      refUrl: "https://radiopaedia.org/articles/airway-foreign-body",
-    },
-    {
-      id: "foreign-body-coin",
-      title: "Oesophageal vs Tracheal Foreign Body (Coin)",
-      view: "Frontal CXR/neck",
-      keyFindings: [
-        "OESOPHAGEAL coin: appears EN FACE on AP view (round) — vocal cords in coronal plane orient coin coronally",
-        "TRACHEAL coin: appears EN FACE on LATERAL view (round) — tracheal cartilage rings orient coin sagittally",
-        "Battery (button) shows 'double-ring' / halo sign — RADIOLOGIC EMERGENCY for oesophageal lodgement",
-      ],
-      pearls: "Button battery in oesophagus = surgical emergency (mucosal burn within 2 h, perforation within 6 h). Honey 10 mL q10 min × up to 6 doses while awaiting endoscopy if age > 1 yr and < 12 h ingestion (NEJM 2018).",
-      ddx: "Coin, button battery, magnet, food bolus",
-      refUrl: "https://radiopaedia.org/articles/button-battery-ingestion",
-    },
-    {
-      id: "intussusception-xray",
-      title: "Intussusception — Plain Film",
-      view: "Supine + erect / left lateral decubitus AXR",
-      keyFindings: [
-        "Paucity of bowel gas in RUQ / RLQ",
-        "Soft-tissue mass (target sign or crescent sign) projecting into bowel gas",
-        "Small bowel obstruction pattern (dilated loops, air-fluid levels) in established cases",
-      ],
-      pearls: "Plain film insensitive. ULTRASOUND is investigation of choice (>95% sensitive). If clinical suspicion high, go direct to US/contrast enema.",
-      ddx: "Constipation, gastroenteritis, mass lesion",
-      refUrl: "https://radiopaedia.org/articles/intussusception",
-    },
-    {
-      id: "nec",
-      title: "Necrotising Enterocolitis (NEC)",
-      view: "Supine AXR + cross-table lateral / left lateral decubitus",
-      keyFindings: [
-        "Pneumatosis intestinalis (intramural gas) — pathognomonic",
-        "Portal venous gas (linear lucencies in liver shadow)",
-        "Pneumoperitoneum (free gas) — football sign / Rigler sign / cupula sign — surgical emergency",
-        "Fixed dilated bowel loop on serial films (suggests bowel necrosis)",
-      ],
-      pearls: "Bell staging: I (suspected), II (definite), III (advanced — perforation/shock). Stage III mandates surgical consult. Serial AXR every 6–12 h critical for early detection of perforation.",
-      ddx: "Volvulus, sepsis, ileus, bowel obstruction",
-      refUrl: "https://radiopaedia.org/articles/necrotizing-enterocolitis",
-    },
-    {
-      id: "skull-fracture",
-      title: "Pediatric Skull Fracture",
-      view: "AP + Lateral (CT preferred for trauma)",
-      keyFindings: [
-        "Lucent line (sharp, non-branching) — fracture",
-        "Suture: undulating, branching at known anatomic locations",
-        "Vascular groove: smoother, branching, well-defined cortical margins",
-        "Diastatic fracture: > 3 mm widening of suture",
-        "Depressed fracture: cortical depression > full thickness of skull",
-      ],
-      pearls: "Plain films have largely been replaced by CT for significant trauma. Skull fracture in infant < 1 yr without clear mechanism mandates safeguarding evaluation (NAI). Linear parietal fractures most common.",
-      ddx: "Suture, vascular groove, accessory suture",
-      refUrl: "https://radiopaedia.org/articles/skull-fracture",
-    },
-  ],
-
-  ct: [
-    {
-      id: "ct-head-trauma",
-      title: "Pediatric Head Trauma — CT findings",
-      view: "Non-contrast CT head",
-      keyFindings: [
-        "Epidural haematoma: biconvex (lentiform), respects sutures, often with skull fracture, lucid interval",
-        "Subdural haematoma: crescent shape, crosses sutures but not midline, common in NAI in infants",
-        "Subarachnoid haemorrhage: hyperdensity in sulci / basal cisterns",
-        "Intra-parenchymal haemorrhage: focal hyperdensity in brain tissue",
-        "Cerebral oedema: loss of grey-white differentiation, sulcal effacement, herniation",
-        "Skull fracture: best on bone windows",
-      ],
-      pearls: "PECARN rule guides imaging in age-appropriate groups. Classic NAI signs: subdural haemorrhages of different ages, retinal haemorrhages, posterior rib fractures. Always image the C-spine alongside head if mechanism warrants.",
-      ddx: "—",
-      refUrl: "https://radiopaedia.org/articles/extra-axial-haemorrhages",
-    },
-    {
-      id: "ct-appendicitis",
-      title: "Appendicitis — CT",
-      view: "CT abdomen/pelvis with IV ± oral contrast",
-      keyFindings: [
-        "Enlarged appendix > 6 mm with thickened wall (> 2 mm)",
-        "Periappendiceal fat stranding",
-        "Appendicolith (calcification within appendix lumen)",
-        "Free fluid / abscess (perforation)",
-        "Wall enhancement / target sign",
-      ],
-      pearls: "ULTRASOUND is preferred first-line in children (no radiation). CT reserved for inconclusive US or atypical presentation. MRI without contrast emerging as alternative in centres with capability.",
-      ddx: "Mesenteric adenitis, ileocolitis, ovarian pathology, Meckel diverticulitis",
-      refUrl: "https://radiopaedia.org/articles/acute-appendicitis",
-    },
-    {
-      id: "ct-pulmonary-embolism",
-      title: "Pulmonary Embolism (older child / adolescent)",
-      view: "CT pulmonary angiography (CTPA)",
-      keyFindings: [
-        "Filling defect within pulmonary artery / branches",
-        "Wedge-shaped peripheral infarct (Hampton's hump)",
-        "Right heart strain: RV enlargement, septal flattening, contrast reflux into IVC",
-      ],
-      pearls: "PE rare in children; consider in adolescents on OCP, malignancy, central line, prolonged immobilisation, thrombophilia. Wells score / D-dimer not validated < 18 yr — clinical pretest probability + imaging if suspicion.",
-      ddx: "Pneumonia, pleural effusion, atelectasis",
-      refUrl: "https://radiopaedia.org/articles/pulmonary-embolism",
-    },
-    {
-      id: "ct-c-spine",
-      title: "Cervical Spine Injury",
-      view: "CT C-spine (preferred over plain films in significant trauma)",
-      keyFindings: [
-        "Pseudosubluxation C2-C3 (and C3-C4) — physiological in <8 yr (anterior step < 4 mm)",
-        "Powers ratio (BC / OA): if > 1, atlanto-occipital dissociation",
-        "Atlanto-dental interval > 5 mm in child (3 mm in adult) abnormal",
-        "Spinous process avulsion — clay-shoveler fracture",
-        "SCIWORA — spinal cord injury without radiologic abnormality (MRI required)",
-      ],
-      pearls: "Pediatric C-spine has higher fulcrum (C2-C3 in young; C5-C6 in adult). MRI mandatory if persistent neurological signs despite normal CT (SCIWORA up to 60% in children). Use NEXUS / Canadian C-Spine rule to clear.",
-      ddx: "Pseudosubluxation, persistent ossification centres",
-      refUrl: "https://radiopaedia.org/articles/sciwora",
-    },
-  ],
-
-  mri: [
-    {
-      id: "mri-osteomyelitis",
-      title: "Osteomyelitis — MRI",
-      view: "MRI bone with contrast",
-      keyFindings: [
-        "T1: low signal in marrow (replacement by inflammation)",
-        "T2 / STIR: high signal in marrow + soft tissue oedema",
-        "Post-contrast: enhancement of marrow, periosteum, abscess rim",
-        "Subperiosteal abscess (collection elevating periosteum)",
-        "Sequestrum: necrotic bone fragment within abscess",
-      ],
-      pearls: "MRI is GOLD STANDARD for paediatric osteomyelitis (90% sensitive within 3–5 days vs X-ray 50% at 14 days). Plain X-ray normal in early disease. Most common site: metaphysis of long bones (rich blood supply).",
-      ddx: "Septic arthritis, malignancy (Ewing sarcoma, leukaemia), bone infarct, transient synovitis",
-      refUrl: "https://radiopaedia.org/articles/osteomyelitis",
-    },
-    {
-      id: "mri-discitis",
-      title: "Discitis / Vertebral Osteomyelitis",
-      view: "MRI spine with contrast",
-      keyFindings: [
-        "Reduced disc space height",
-        "T1: low signal in adjacent vertebral endplates",
-        "T2: high signal in disc + bone marrow oedema",
-        "Post-contrast enhancement of disc + endplates",
-        "Paraspinal soft tissue / abscess",
-      ],
-      pearls: "Children < 5 yr — refusal to walk, low-grade fever, may not localise pain. Consider in any irritable young child with elevated inflammatory markers and back arching. ESR/CRP elevated; blood cultures positive in 50%.",
-      ddx: "Vertebral malignancy, scoliosis, post-traumatic",
-      refUrl: "https://radiopaedia.org/articles/discitis-osteomyelitis",
-    },
-    {
-      id: "mri-encephalitis",
-      title: "Acute Encephalitis (HSV, ADEM)",
-      view: "MRI brain with contrast + DWI",
-      keyFindings: [
-        "HSV encephalitis: temporal lobe (asymmetric), insular cortex, cingulate gyrus involvement; restricted diffusion early; haemorrhagic conversion",
-        "ADEM: multiple asymmetric subcortical / deep white matter lesions, often involving thalami, basal ganglia, brainstem, spinal cord",
-        "Limbic encephalitis (autoimmune): symmetric mesial temporal hyperintensity",
-      ],
-      pearls: "Empirical Acyclovir while awaiting LP / MRI. HSV encephalitis untreated = 70% mortality. EEG often shows PLEDs in HSV.",
-      ddx: "Status epilepticus oedema, hypoxic-ischaemic injury, mitochondrial disease",
-      refUrl: "https://radiopaedia.org/articles/herpes-simplex-encephalitis",
-    },
-    {
-      id: "mri-tumour",
-      title: "Posterior Fossa Tumour",
-      view: "MRI brain with contrast",
-      keyFindings: [
-        "Medulloblastoma: midline (4th ventricle), enhancing, restricted diffusion, hydrocephalus",
-        "Pilocytic astrocytoma: cystic with enhancing mural nodule, off-midline (cerebellar hemisphere)",
-        "Ependymoma: arises from 4th ventricle, extends through foramina, calcification",
-        "Brainstem glioma: diffuse pontine expansion (DIPG), poor prognosis",
-      ],
-      pearls: "Early-morning vomiting + headache + ataxia in a child = posterior fossa tumour until proven otherwise. MRI emergent. Steroids reduce peritumoural oedema while awaiting neurosurgery.",
-      ddx: "Cerebellitis, abscess, demyelination",
-      refUrl: "https://radiopaedia.org/articles/posterior-cranial-fossa-tumours",
-    },
-  ],
-
-  pocus: [
-    {
-      id: "pocus-intussusception",
-      title: "Intussusception — POCUS",
-      view: "Right-lower / right-upper quadrant abdominal US",
-      keyFindings: [
-        "Target sign / 'doughnut' on transverse view: concentric hyperechoic + hypoechoic rings",
-        "Pseudo-kidney sign on longitudinal view: alternating hyperechoic and hypoechoic layers",
-        "Trapped mesentery (hyperechoic) within intussusceptum",
-        "Lymph nodes / Meckel's diverticulum may be lead point",
-      ],
-      pearls: "US is gold standard (95–100% sensitivity, 100% specificity). Reduction by hydrostatic (saline) or pneumatic (air) enema if no perforation. Surgery for failed reduction or perforation.",
-      ddx: "Intestinal duplication cyst, mesenteric adenitis with thickened bowel",
-      refUrl: "https://radiopaedia.org/articles/intussusception",
-    },
-    {
-      id: "pocus-pyloric",
-      title: "Pyloric Stenosis — POCUS",
-      view: "RUQ ultrasound (high-frequency probe)",
-      keyFindings: [
-        "Pyloric muscle thickness ≥ 3 mm (single wall)",
-        "Pyloric channel length ≥ 15 mm",
-        "Failed channel opening over 5–10 min real-time observation",
-        "Antral nipple sign (mucosa protruding into antrum)",
-      ],
-      pearls: "Diagnostic criteria: ≥ 3 mm wall AND ≥ 15 mm length (the 3 + 15 rule). Always correct hypochloraemic, hypokalaemic metabolic alkalosis BEFORE pyloromyotomy.",
-      ddx: "Pylorospasm (resolves on observation), gastritis, malrotation",
-      refUrl: "https://radiopaedia.org/articles/hypertrophic-pyloric-stenosis",
-    },
-    {
-      id: "pocus-fast",
-      title: "FAST in Pediatric Trauma",
-      view: "Hepatorenal (Morison's), splenorenal, pelvic, pericardial",
-      keyFindings: [
-        "Free fluid (anechoic / dark) in dependent peritoneal recesses",
-        "Pericardial effusion / tamponade physiology",
-        "Pleural fluid / haemothorax (extended FAST)",
-      ],
-      pearls: "Less sensitive in children than adults (50–80%) — solid organ injury can occur without free fluid. Negative FAST does NOT rule out injury — clinical assessment paramount. CT remains gold standard if clinically indicated.",
-      ddx: "Free fluid: trauma, ascites, ruptured ovarian cyst, ruptured appendix, perforation",
-      refUrl: "https://radiopaedia.org/articles/focused-assessment-with-sonography-for-trauma-fast",
-    },
-    {
-      id: "pocus-lung",
-      title: "Lung POCUS — A/B lines, Pneumothorax",
-      view: "Bilateral lung scan (8 zones)",
-      keyFindings: [
-        "A-lines (horizontal reverberation) = normal lung / pneumothorax",
-        "B-lines (vertical comet-tail) — > 3 per field = interstitial syndrome (pulmonary oedema, pneumonia, ARDS, contusion)",
-        "Lung sliding present = excludes pneumothorax with high specificity",
-        "Lung point — transition between sliding and absent sliding = 100% specific for pneumothorax",
-        "Consolidation: hepatisation of lung tissue ± dynamic air bronchograms",
-        "Pleural effusion: anechoic collection above diaphragm",
-      ],
-      pearls: "Absent sliding alone is 90% sensitive but only 78% specific for PTX (false positives: pleural adhesions, COPD). Always seek lung point for confirmation. Lung US faster than CXR for pneumothorax in trauma.",
-      ddx: "—",
-      refUrl: "https://radiopaedia.org/articles/lung-ultrasound",
-    },
-    {
-      id: "pocus-cardiac",
-      title: "Bedside Echo — Pericardial / RV strain",
-      view: "Subxiphoid, parasternal long, parasternal short, apical 4-chamber",
-      keyFindings: [
-        "Pericardial effusion: anechoic rim around heart",
-        "Cardiac tamponade: RV diastolic collapse, IVC dilation > 2 cm without respiratory variation",
-        "Septal flattening (D-shape LV) = RV pressure overload (PE, pulmonary HTN)",
-        "Global hypokinesis = sepsis / cardiomyopathy",
-        "Hyperdynamic LV with empty / small chambers = hypovolaemia",
-      ],
-      pearls: "Subxiphoid view often most useful in trauma. RUSH protocol (Rapid Ultrasound for Shock and Hypotension) for undifferentiated shock: pump–tank–pipes.",
-      ddx: "—",
-      refUrl: "https://radiopaedia.org/articles/extended-focused-assessment-with-sonography-for-trauma",
-    },
-    {
-      id: "pocus-bladder",
-      title: "Bladder Volume / Hydronephrosis",
-      view: "Suprapubic transverse + sagittal",
-      keyFindings: [
-        "Bladder volume = L × W × H × 0.52 (mL)",
-        "Hydronephrosis: dilated calyces / pelvis (anechoic central renal collecting system)",
-        "Grading: SFU / APRPD",
-        "Bladder wall thickening (> 5 mm full, > 3 mm empty) = chronic obstruction / cystitis",
-      ],
-      pearls: "Useful for pre-cath assessment in infants (avoids dry tap). Also identifies posterior urethral valves in male infant with hydronephrosis + thick-walled bladder + keyhole sign.",
-      ddx: "Multicystic dysplastic kidney, parapelvic cyst",
-      refUrl: "https://radiopaedia.org/articles/hydronephrosis",
-    },
-    {
-      id: "pocus-soft-tissue",
-      title: "Soft Tissue — Cellulitis vs Abscess",
-      view: "High-frequency linear probe over involved area",
-      keyFindings: [
-        "Cellulitis: cobblestone appearance (oedema between fat lobules)",
-        "Abscess: anechoic / hypoechoic well-defined collection ± posterior acoustic enhancement",
-        "Fluid swirl on compression = abscess",
-        "Foreign body: hyperechoic linear / oval structure with posterior shadow",
-      ],
-      pearls: "POCUS doubles sensitivity for abscess detection over clinical exam alone. Always check for foreign body if recent puncture / lac. Use sterile gel and probe cover for I&D guidance.",
-      ddx: "Haematoma, lymph node, lipoma, vascular malformation",
-      refUrl: "https://radiopaedia.org/articles/soft-tissue-abscess",
-    },
-  ],
+// ── Colour scheme per category ────────────────────────────────────────────────
+const CATEGORY_STYLE = {
+  xray:  { active: "bg-slate-900 text-white",         badge: "bg-slate-100 text-slate-600 border-slate-200"   },
+  ct:    { active: "bg-blue-700 text-white",           badge: "bg-blue-50 text-blue-700 border-blue-200"       },
+  mri:   { active: "bg-violet-700 text-white",         badge: "bg-violet-50 text-violet-700 border-violet-200" },
+  pocus: { active: "bg-emerald-700 text-white",        badge: "bg-emerald-50 text-emerald-700 border-emerald-200" },
 };
+
+// ── Fallback if image fails to load ───────────────────────────────────────────
+function ImageWithFallback({ src, alt, className }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div className={`${className} bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center gap-2 text-slate-400`}>
+        <Image size={28} weight="thin" />
+        <span className="text-[10px] font-mono text-center px-2">
+          Image unavailable
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setFailed(true)}
+      loading="lazy"
+    />
+  );
+}
+
+// ── Single finding card ───────────────────────────────────────────────────────
+function FindingCard({ finding, categoryId }) {
+  const [expanded, setExpanded] = useState(false);
+  const style = CATEGORY_STYLE[categoryId] || CATEGORY_STYLE.xray;
+
+  return (
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+
+      {/* ── Image ── */}
+      {finding.imgUrl ? (
+        <div className="relative">
+          <ImageWithFallback
+            src={finding.imgUrl}
+            alt={finding.imgAlt || finding.title}
+            className="w-full h-48 object-cover object-center bg-slate-100 dark:bg-slate-800"
+          />
+          {/* Attribution overlay */}
+          {finding.imgCredit && (
+            <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[9px] font-mono px-2 py-0.5 rounded-tl">
+              {finding.imgCredit}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="w-full h-32 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+          <Image size={32} weight="thin" />
+        </div>
+      )}
+
+      {/* ── Card body ── */}
+      <div className="p-4">
+        {/* Title + view */}
+        <div className="mb-3">
+          <h3
+            className="text-sm font-bold text-slate-900 dark:text-white leading-snug mb-1"
+            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
+          >
+            {finding.title}
+          </h3>
+          <span className={`inline-block text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${style.badge}`}>
+            {finding.view}
+          </span>
+        </div>
+
+        {/* Key findings — always visible */}
+        <div className="mb-3">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1.5">
+            Key Findings
+          </p>
+          <ul className="space-y-1">
+            {finding.keyFindings.map((kf, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0 mt-1.5" />
+                {kf}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Expand toggle */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors py-1 border-t border-slate-100 dark:border-slate-800 mt-2"
+        >
+          {expanded ? "Hide details" : "Show pearls & DDx"}
+          <CaretDown
+            size={12}
+            weight="bold"
+            className={`transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        {/* Expanded content */}
+        {expanded && (
+          <div className="mt-3 space-y-3 animate-in slide-in-from-top-1 duration-150">
+            {/* Clinical Pearl */}
+            {finding.pearls && (
+              <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Lightbulb size={12} weight="fill" className="text-amber-500" />
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold">
+                    Clinical Pearl
+                  </span>
+                </div>
+                <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+                  {finding.pearls}
+                </p>
+              </div>
+            )}
+
+            {/* DDx */}
+            {finding.ddx && finding.ddx !== "—" && (
+              <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <ArrowsLeftRight size={12} weight="bold" className="text-red-500" />
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-red-600 dark:text-red-400 font-bold">
+                    Differential Diagnosis
+                  </span>
+                </div>
+                <p className="text-xs text-red-800 dark:text-red-200 leading-relaxed">
+                  {finding.ddx}
+                </p>
+              </div>
+            )}
+
+            {/* Radiopaedia link */}
+            {finding.refUrl && (
+              <a
+                href={finding.refUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[10px] font-mono text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                <ArrowSquareOut size={11} weight="bold" />
+                View cases on Radiopaedia
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main ImagingTab component ─────────────────────────────────────────────────
+export default function ImagingTab() {
+  const [activeCategory, setActiveCategory] = useState("xray");
+  const [search, setSearch] = useState("");
+
+  const findings = IMAGING_FINDINGS[activeCategory] || [];
+
+  // Filter by search query
+  const filtered = search.trim()
+    ? findings.filter(f =>
+        f.title.toLowerCase().includes(search.toLowerCase()) ||
+        f.keyFindings.some(kf => kf.toLowerCase().includes(search.toLowerCase())) ||
+        (f.ddx && f.ddx.toLowerCase().includes(search.toLowerCase())) ||
+        (f.pearls && f.pearls.toLowerCase().includes(search.toLowerCase()))
+      )
+    : findings;
+
+  const style = CATEGORY_STYLE[activeCategory] || CATEGORY_STYLE.xray;
+
+  return (
+    <div>
+      {/* ── Header ── */}
+      <div className="mb-5">
+        <h2
+          className="text-lg font-black text-slate-900 dark:text-white mb-1"
+          style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
+        >
+          Pediatric Imaging Reference
+        </h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+          X-Ray · CT · MRI · POCUS — high-yield ED findings · Images: Wikimedia Commons (open access)
+        </p>
+      </div>
+
+      {/* ── Category tabs ── */}
+      <div className="flex gap-2 flex-wrap mb-5">
+        {IMAGING_CATEGORIES.map(cat => (
+          <button
+            key={cat.id}
+            onClick={() => { setActiveCategory(cat.id); setSearch(""); }}
+            className={`px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all border ${
+              activeCategory === cat.id
+                ? `${CATEGORY_STYLE[cat.id].active} border-transparent shadow-sm`
+                : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400"
+            }`}
+          >
+            {cat.label}
+            <span className="ml-1.5 opacity-60">
+              ({IMAGING_FINDINGS[cat.id]?.length || 0})
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* ── Search ── */}
+      <div className="relative mb-5">
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder={`Search ${IMAGING_CATEGORIES.find(c => c.id === activeCategory)?.label} findings...`}
+          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-slate-400 dark:focus:border-slate-500"
+        />
+        {search && (
+          <button
+            onClick={() => setSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* ── No results ── */}
+      {filtered.length === 0 && (
+        <div className="text-center py-16 text-slate-400">
+          <Warning size={32} weight="thin" className="mx-auto mb-3" />
+          <p className="text-sm font-mono">No findings match "{search}"</p>
+          <button
+            onClick={() => setSearch("")}
+            className="text-xs text-slate-400 underline mt-2"
+          >
+            Clear search
+          </button>
+        </div>
+      )}
+
+      {/* ── Cards grid ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filtered.map(finding => (
+          <FindingCard
+            key={finding.id}
+            finding={finding}
+            categoryId={activeCategory}
+          />
+        ))}
+      </div>
+
+      {/* ── Footer disclaimer ── */}
+      <div className="mt-8 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] text-slate-400 font-mono text-center leading-relaxed">
+        Images sourced from Wikimedia Commons under CC BY-SA / Public Domain licences. 
+        Attribution shown on each image. All findings reference Radiopaedia for extended case libraries.
+        <br />
+        ⚠️ Clinical reference only — always confirm with formal radiology reporting.
+      </div>
+    </div>
+  );
+}
