@@ -548,7 +548,8 @@ export default function VentilatorTab() {
               </div>
             </div>
           </div>
-
+          },
+          
           {/* Full sizing table */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
             <table className="w-full text-xs border-collapse">
