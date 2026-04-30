@@ -601,8 +601,7 @@ export const ORAL_DRUGS = [
     ageMin: 1,
     withFood: false,
     formulations: [
-      { conc: "500 mg/5mL", mgPerMl: 100, brands: ["Pedicloryl syrup",  "Mitflos-kid suspension", "Silence", "PediClix" ] },
-      { conc: "0.8 mg/mL" , mgPerMl: 0.8, brands: ["Pediryl syrup"] },
+      { conc: "500 mg/5mL", mgPerMl: 100, brands: ["Pedicloryl syrup",  "Mitflos-kid suspension", "Silence", "PediClix", "Clofris" ] },
     ],
     notes: "Initial dose: 80 mg/kg orally is the established starting dose for children undergoing non-painful diagnostic procedures.Supplemental dosing: 5 mg/kg every 5 minutes can be given starting at 30 minutes post-administration if the child remains inadequately sedated, continuing up to 60 minutes after the initial dose. Effective dose range: 25–75 mg/kg",
     route: "PO",
