@@ -587,7 +587,26 @@ export const ORAL_DRUGS = [
     notes: "Pre-op/procedural: 0.5–1 mg/kg oral 1 hr before (max 50 mg). Urticaria: 0.5 mg/kg TDS. Antihistamine with anxiolytic, antiemetic, antipruritc effects. Safe from 6 months.",
     route: "PO",
   },
-
+{
+    id: "Triclofos Sodium",
+    name: "Triclofos",
+    category: "sedation",
+    indication: "procedural sedation",
+    dosePerKg: 50,
+    frequency: "5mg/kg every 5 mins, upto 60 mins",
+    frequencyHours: null,
+    unit: "mg",
+    max: null,
+    maxDaily: null,
+    ageMin: 1,
+    withFood: false,
+    formulations: [
+      { conc: "500 mg/5mL", mgPerMl: 100, brands: ["Pedicloryl syrup",  "Mitflos-kid suspension", "Silence", "PediClix" ] },
+      { conc: "0.8 mg/mL" , mgPerMl: 0.8, brands: ["Pediryl syrup"] },
+    ],
+    notes: "Initial dose: 80 mg/kg orally is the established starting dose for children undergoing non-painful diagnostic procedures.Supplemental dosing: 5 mg/kg every 5 minutes can be given starting at 30 minutes post-administration if the child remains inadequately sedated, continuing up to 60 minutes after the initial dose. Effective dose range: 25–75 mg/kg",
+    route: "PO",
+  },
   {
     id: "melatonin-oral",
     name: "Melatonin",
