@@ -58,7 +58,7 @@ const googleProvider = new GoogleAuthProvider();
 const PRICE_INR = 30;
 const DEV_NAME  = "Dr. Siddhi Naik";
 const DEV_TITLE = "Emergency Physician";
-const DEV_EMAIL = "siddhi1398@gmail.com";
+const DEV_EMAIL = "dr.siddhi.em@gmail.com";
 
 const ALL_TABS = [
   { id: "calculator",    label: "Calculator",           icon: Calculator,    Comp: CalculatorTab,        free: true  },
