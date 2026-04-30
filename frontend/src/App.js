@@ -22,6 +22,7 @@ import EquipmentTab from "./components/tabs/EquipmentTab";
 import ResuscitationTab from "./components/tabs/ResuscitationTab";
 import DrugsTab from "./components/tabs/DrugsTab";
 import FluidsTab from "./components/tabs/FluidsTab";
+import SyrupCalculatorTab from "./components/tabs/SyrupCalculatorTab";
 import VitalsTab from "./components/tabs/VitalsTab";
 import ScoresTab from "./components/tabs/ScoresTab";
 import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
@@ -31,7 +32,7 @@ import ClinicalPathwaysTab from "./components/tabs/ClinicalPathwaysTab";
 import ImagingTab from "./components/tabs/ImagingTab";
 import IAPGuidelinesTab from "./components/tabs/IAPGuidelinesTab";
 import {
-  Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Baby,
+  Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon,
   Lock, X, BookOpen,
 } from "@phosphor-icons/react";
@@ -65,6 +66,7 @@ const ALL_TABS = [
   { id: "resuscitation", label: "Resuscitation",        icon: Syringe,       Comp: ResuscitationTab,     free: false },
   { id: "drugs",         label: "Drug Doses",           icon: Pill,          Comp: DrugsTab,             free: false },
   { id: "fluids",        label: "Fluids",               icon: Drop,          Comp: FluidsTab,            free: false },
+  { id: "syrup",         label: "Syrup Calculator",     icon: Eyedropper,    Comp: SyrupCalculatorTab,   free: false },
   { id: "vitals",        label: "Vitals by Age",        icon: Heartbeat,     Comp: VitalsTab,            free: false },
   { id: "scores",        label: "Severity Scores",      icon: ClipboardText, Comp: ScoresTab,            free: false },
   { id: "sedation",      label: "Sedation & Analgesia", icon: FirstAid,      Comp: SedationAnalgesiaTab, free: false },
