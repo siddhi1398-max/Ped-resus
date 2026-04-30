@@ -35,12 +35,5 @@
   "orientation": "portrait-primary",
   "categories": ["medical", "health", "education"],
   "shortcuts": [
-    {
-      "name": "Drug Calculator",
-      "short_name": "Calculator",
-      "description": "Open weight-based drug dose calculator",
-      "url": "/?tab=calculator",
-      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
-    }
   ]
 }
