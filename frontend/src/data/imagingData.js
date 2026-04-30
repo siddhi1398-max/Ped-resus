@@ -20,9 +20,9 @@ export const IMAGING_FINDINGS = {
       id: "steeple",
       title: "Croup — Steeple Sign",
       view: "AP soft-tissue neck",
-      imgUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Croup_steeple_sign.jpg/400px-Croup_steeple_sign.jpg",
-      imgAlt: "AP neck X-ray showing steeple sign of croup — subglottic narrowing. Wikimedia Commons, CC BY-SA 3.0",
-      imgCredit: "Wikimedia Commons · CC BY-SA 3.0",
+      imgUrl: "https://en.wikipedia.org/wiki/Steeple_sign#/media/File:Croup_steeple_sign.jpg",
+      imgAlt: "AP neck X-ray showing steeple sign of croup — subglottic narrowing.",
+      imgCredit: "Wikipedia.org",
       keyFindings: [
         "Subglottic narrowing in inverted V (steeple) shape",
         "Loss of normal shoulder configuration of subglottic trachea",
