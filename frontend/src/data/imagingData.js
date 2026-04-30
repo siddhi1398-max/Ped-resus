@@ -20,7 +20,7 @@ export const IMAGING_FINDINGS = {
       id: "steeple",
       title: "Croup — Steeple Sign",
       view: "AP soft-tissue neck",
-      imgUrl: "https://en.wikipedia.org/wiki/Steeple_sign#/media/File:Croup_steeple_sign.jpg",
+      imgUrl: "Croup_steeple_sign.jpg",
       imgAlt: "AP neck X-ray showing steeple sign of croup — subglottic narrowing.",
       imgCredit: "Wikipedia.org",
       keyFindings: [
