@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import CalculatorTab from "./components/tabs/CalculatorTab";
 import EquipmentTab from "./components/tabs/EquipmentTab";
 import ResuscitationTab from "./components/tabs/ResuscitationTab";
+import VentilatorTab from "./components/tabs/VentilatorTab";
 import DrugsTab from "./components/tabs/DrugsTab";
 import FluidsTab from "./components/tabs/FluidsTab";
 import SyrupCalculatorTab from "./components/tabs/SyrupCalculatorTab";
@@ -32,7 +33,7 @@ import ClinicalPathwaysTab from "./components/tabs/ClinicalPathwaysTab";
 import ImagingTab from "./components/tabs/ImagingTab";
 import IAPGuidelinesTab from "./components/tabs/IAPGuidelinesTab";
 import {
-  Calculator, Wrench, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
+  Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon,
   Lock, X, BookOpen,
 } from "@phosphor-icons/react";
@@ -64,6 +65,7 @@ const ALL_TABS = [
   { id: "calculator",    label: "Calculator",           icon: Calculator,    Comp: CalculatorTab,        free: true  },
   { id: "equipment",     label: "Equipment & Tubes",    icon: Wrench,        Comp: EquipmentTab,         free: false },
   { id: "resuscitation", label: "Resuscitation",        icon: Syringe,       Comp: ResuscitationTab,     free: false },
+  { id: "ventilator",    label: "Ventilator",           icon: Wind,          Comp: VentilatorTab,        free: false },
   { id: "drugs",         label: "Drug Doses",           icon: Pill,          Comp: DrugsTab,             free: false },
   { id: "fluids",        label: "Fluids",               icon: Drop,          Comp: FluidsTab,            free: false },
   { id: "syrup",         label: "Syrup Calculator",     icon: Eyedropper,    Comp: SyrupCalculatorTab,   free: false },
