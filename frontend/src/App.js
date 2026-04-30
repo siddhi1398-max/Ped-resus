@@ -293,7 +293,7 @@ function PaywallDialog({ user, onSuccess, onClose }) {
                   className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl text-sm hover:bg-slate-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                   style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
                   {busy && <span className="w-4 h-4 border-2 border-slate-400 border-t-white rounded-full animate-spin" />}
-                  {busy ? "Opening Razorpay..." : `🔒 Pay ₹${PRICE_INR} — Unlock Everything`}
+                  {busy ? "Opening Razorpay..." : `🔒 Pay ₹${PRICE_INR} — Unlock All Tabs`}
                 </button>
                 <p className="text-center text-[10px] text-slate-400 font-mono">
                   Razorpay · UPI · Cards · NetBanking · Wallets
