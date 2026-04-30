@@ -25,7 +25,7 @@ export const ORAL_DRUGS = [
   {
     id: "paracetamol-oral",
     name: "Paracetamol (Acetaminophen)",
-    category: "analgesia",
+    category: "analgesic",
     indication: "Fever / mild-moderate pain",
     dosePerKg: 15,
     frequency: "QID",
@@ -48,7 +48,7 @@ export const ORAL_DRUGS = [
   {
     id: "ibuprofen-oral",
     name: "Ibuprofen",
-    category: "analgesia",
+    category: "analgesic",
     indication: "Fever / mild-moderate pain / inflammatory conditions",
     dosePerKg: 10,
     frequency: "TDS",
@@ -70,7 +70,7 @@ export const ORAL_DRUGS = [
   {
     id: "naproxen-oral",
     name: "Naproxen",
-    category: "analgesia",
+    category: "analgesic",
     indication: "JIA / musculoskeletal pain / dysmenorrhoea (>2 yr)",
     dosePerKg: 5,
     frequency: "BD",
