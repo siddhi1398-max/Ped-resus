@@ -589,7 +589,7 @@ export const ORAL_DRUGS = [
   },
 {
     id: "Triclofos Sodium",
-    name: "Triclofos",
+    name: "Triclofos (Pedicloryl)",
     category: "sedation",
     indication: "procedural sedation",
     dosePerKg: 50,
