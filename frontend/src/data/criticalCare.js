@@ -1,6 +1,9 @@
+// src/data/criticalCare.js
 // Intercostal drain (ICD / chest tube) insertion — pediatric
-// Mechanical ventilation initial settings & troubleshooting
 // Refs: Tintinalli ch. 30, BTS / ATS guidelines, OpenPediatrics, F&L
+//
+// NOTE: VENTILATOR_SETTINGS and WAVEFORMS have been removed from this file.
+// Waveform data and vent settings are now co-located in VentilatorTab.jsx.
 
 export const ICD_INSERTION = {
   indications: [
@@ -18,11 +21,11 @@ export const ICD_INSERTION = {
     "Absolute: none in tension pneumothorax",
   ],
   sizingTable: [
-    { weight: "Neonate (< 5 kg)", french: "8–10 Fr", pneumo: "8 Fr", fluid: "10 Fr" },
-    { weight: "Infant 5–10 kg", french: "10–12 Fr", pneumo: "10 Fr", fluid: "12 Fr" },
-    { weight: "Child 10–20 kg", french: "12–18 Fr", pneumo: "12–14 Fr", fluid: "16–18 Fr" },
-    { weight: "Child 20–40 kg", french: "20–28 Fr", pneumo: "16–20 Fr", fluid: "24–28 Fr" },
-    { weight: "Adolescent > 40 kg", french: "28–32 Fr", pneumo: "20–24 Fr", fluid: "28–32 Fr" },
+    { weight: "Neonate (< 5 kg)",    french: "8–10 Fr",  pneumo: "8 Fr",     fluid: "10 Fr" },
+    { weight: "Infant 5–10 kg",      french: "10–12 Fr", pneumo: "10 Fr",    fluid: "12 Fr" },
+    { weight: "Child 10–20 kg",      french: "12–18 Fr", pneumo: "12–14 Fr", fluid: "16–18 Fr" },
+    { weight: "Child 20–40 kg",      french: "20–28 Fr", pneumo: "16–20 Fr", fluid: "24–28 Fr" },
+    { weight: "Adolescent > 40 kg",  french: "28–32 Fr", pneumo: "20–24 Fr", fluid: "28–32 Fr" },
   ],
   equipment: [
     "Sterile drape, gown, gloves, mask, eye protection",
@@ -79,169 +82,3 @@ export const ICD_INSERTION = {
     "Persistent air leak — bronchopleural fistula",
   ],
 };
-
-export const VENTILATOR_SETTINGS = {
-  initial: [
-    {
-      param: "Mode",
-      pediatric: "Pressure-Regulated Volume Control (PRVC) or SIMV–PC + PS",
-      neonatal: "PC-AC / SIMV-PC + PS · Volume-guarantee if available",
-      note: "Pressure-targeted in neonates, volume-targeted in older children. PS 5–10 cmH₂O for spontaneous breaths.",
-    },
-    {
-      param: "Tidal Volume (Vt)",
-      pediatric: "6–8 mL/kg ideal body weight",
-      neonatal: "4–6 mL/kg",
-      note: "Use lower Vt (4–6) in ARDS or lung-protective ventilation. NEVER exceed 10 mL/kg.",
-    },
-    {
-      param: "Respiratory Rate (initial)",
-      pediatric: "Infant 25–30 · Toddler 20–25 · Child 18–22 · Adolescent 12–18 /min",
-      neonatal: "40–60 /min",
-      note: "Adjust to age-appropriate minute ventilation. Allow expiratory time ≥ 2× inspiratory.",
-    },
-    {
-      param: "PEEP",
-      pediatric: "5 cmH₂O (start) · titrate up to 10–15 in ARDS",
-      neonatal: "4–6 cmH₂O · titrate to oxygenation",
-      note: "Avoid PEEP < 4 (atelectasis risk). High PEEP improves oxygenation but reduces venous return.",
-    },
-    {
-      param: "FiO₂",
-      pediatric: "Start 1.0, titrate down to lowest maintaining SpO₂ ≥ 92%",
-      neonatal: "Term: 0.21–0.30 · Preterm: 0.21–0.30 · titrate to NRP SpO₂ targets",
-      note: "Goal: SpO₂ 92–96% (term/older child); 90–95% (preterm to limit ROP).",
-    },
-    {
-      param: "I:E ratio",
-      pediatric: "1:2 (normal) · 1:3–1:4 in obstructive disease",
-      neonatal: "1:1 to 1:2",
-      note: "Inverse ratio (I > E) in severe ARDS. Watch for auto-PEEP in obstructive disease.",
-    },
-    {
-      param: "Inspiratory Time (Ti)",
-      pediatric: "0.6–1.0 s",
-      neonatal: "0.3–0.5 s",
-      note: "Shorter Ti for high-rate neonatal ventilation; longer Ti for ARDS recruitment.",
-    },
-    {
-      param: "Peak Inspiratory Pressure (PIP)",
-      pediatric: "Aim plateau ≤ 30 cmH₂O · driving pressure < 15",
-      neonatal: "15–25 cmH₂O initially",
-      note: "Plateau > 30 increases barotrauma risk.",
-    },
-  ],
-  sedationParalysis: [
-    "Routine post-intubation sedation: midazolam 0.05–0.2 mg/kg/hr + fentanyl 1–4 mcg/kg/hr (titrate to RASS / COMFORT-B)",
-    "Add neuromuscular blockade only if ventilator dyssynchrony, severe ARDS, or to facilitate proning: rocuronium 0.6–1 mg/kg bolus then 5–10 mcg/kg/min",
-    "Daily sedation interruption / spontaneous breathing trial as tolerated",
-  ],
-  troubleshooting: [
-    {
-      problem: "High peak airway pressure",
-      causes: "Bronchospasm · ETT obstruction (mucous plug, kink, biting) · pneumothorax · main-stem intubation · pulmonary oedema · stiff lung (ARDS, pneumonia)",
-      action: "DOPE mnemonic: Displaced ETT? Obstruction? Pneumothorax? Equipment failure? Disconnect from vent + bag manually; suction; check breath sounds bilaterally; CXR if uncertain.",
-    },
-    {
-      problem: "Low tidal volume / minute ventilation",
-      causes: "Cuff leak · disconnection · circuit leak · ETT dislodgement",
-      action: "Check ETT depth, cuff pressure (target 20–25 cmH₂O), all connections; observe chest rise.",
-    },
-    {
-      problem: "Hypoxia despite ventilation",
-      causes: "FiO₂ inadequate · PEEP inadequate · main-stem · pneumothorax · pulmonary embolism · cardiac shunt · decompensated heart failure",
-      action: "Increase FiO₂ to 1.0, increase PEEP, confirm bilateral breath sounds, urgent CXR + bedside echo, ETCO₂ trend.",
-    },
-    {
-      problem: "Hypercapnia (high PaCO₂)",
-      causes: "Hypoventilation (low rate / Vt) · increased dead space · increased CO₂ production (fever, sepsis) · ETT cuff leak",
-      action: "Increase rate (preferred over Vt to limit volutrauma), check for leak. Permissive hypercapnia (pH 7.20–7.30) acceptable in lung-protective strategy.",
-    },
-    {
-      problem: "Auto-PEEP / breath stacking",
-      causes: "Obstructive disease (asthma, bronchiolitis) · inadequate expiratory time · high rate",
-      action: "Decrease rate, increase expiratory time (I:E 1:3 or 1:4), bronchodilators, check for breath-stacking on ventilator graphics.",
-    },
-    {
-      problem: "Patient–ventilator dyssynchrony",
-      causes: "Pain · agitation · inadequate sedation · inappropriate trigger sensitivity · auto-PEEP",
-      action: "Optimise sedation/analgesia, adjust trigger sensitivity (flow trigger 1–3 L/min · pressure trigger –1 to –2 cmH₂O), check for auto-PEEP.",
-    },
-  ],
-  protectiveStrategy: [
-    "ARDS: Vt 4–6 mL/kg PBW · plateau pressure ≤ 30 · driving pressure ≤ 15 · pH 7.20–7.45 (permissive hypercapnia) · PEEP–FiO₂ ladder per ARDSnet",
-    "Recruitment manoeuvres: 30–40 cmH₂O × 30–40 s if refractory hypoxia (controversial; avoid in haemodynamic instability)",
-    "Prone positioning: ≥ 12 h/day for severe paediatric ARDS (PaO₂/FiO₂ < 150)",
-    "iNO: rescue therapy for refractory hypoxaemia, PPHN of newborn, post-cardiac-surgery",
-    "ECMO: consider if oscillatory index > 40 or PaO₂/FiO₂ < 100 despite optimised conventional ventilation",
-  ],
-  weaning: [
-    "Daily readiness: stable haemodynamics, adequate oxygenation (SpO₂ ≥ 92% on FiO₂ ≤ 0.4 + PEEP ≤ 5–8), adequate cough/gag, spontaneous respiratory effort",
-    "SBT (spontaneous breathing trial): PS 5–8 + PEEP 5 × 30–120 min · monitor RR, Vt, oxygenation, work of breathing",
-    "Successful SBT → extubate. Ready criteria: cuff-leak test (audible leak when cuff deflated) to predict post-extubation stridor",
-    "Post-extubation: HFNC or NIV ready; dexamethasone 0.25 mg/kg q6h × 24 h pre-extubation if at risk of post-extubation stridor",
-  ],
-};
-
-// ─── WAVEFORM DEFINITIONS (for SVG rendering) ────────────────────────────────
-// Each entry describes the clinical scenario and SVG path data
-// for pressure-time, flow-time, and volume-time scalars
-
-export const WAVEFORMS = [
-  {
-    id: "normal-vc",
-    label: "Normal — Volume Control",
-    category: "normal",
-    description: "Square flow pattern. Pressure rises linearly to PIP. Volume rises as ascending ramp. Expiratory flow returns smoothly to zero.",
-    findings: ["PIP clearly visible", "Plateau pressure measurable on inspiratory hold", "Flow returns to baseline before next breath"],
-  },
-  {
-    id: "normal-pc",
-    label: "Normal — Pressure Control",
-    category: "normal",
-    description: "Decelerating flow (rapid then declining). Pressure rectangular with set limit. Volume rises quickly then plateaus.",
-    findings: ["Decelerating flow pattern", "Volume delivered depends on compliance and resistance", "Flow always returns to zero (no auto-PEEP)"],
-  },
-  {
-    id: "high-pip",
-    label: "↑ PIP — High Resistance (Bronchospasm / Secretions)",
-    category: "abnormal",
-    description: "Peak pressure elevated with normal plateau. Large Peak–Plateau gradient (> 10 cmH₂O). Expiratory flow may be prolonged.",
-    findings: ["PIP elevated", "Plateau normal or mildly elevated", "Peak–Plateau gap > 10 cmH₂O = AIRWAY problem"],
-  },
-  {
-    id: "low-compliance",
-    label: "↑ PIP + Plateau — Low Compliance (ARDS / Oedema)",
-    category: "abnormal",
-    description: "Both PIP and plateau elevated. Small Peak–Plateau gradient. Stiff lung requires higher pressure to deliver same Vt.",
-    findings: ["Both PIP and Plateau elevated", "Peak–Plateau gap small (< 5 cmH₂O)", "COMPLIANCE problem (ARDS, oedema, PTX, over-inflation)"],
-  },
-  {
-    id: "auto-peep",
-    label: "Auto-PEEP / Air Trapping",
-    category: "abnormal",
-    description: "Expiratory flow does not return to zero before next breath. Breath stacking. Seen in asthma, bronchiolitis, high RR.",
-    findings: ["Flow-time: expiratory curve does not reach baseline", "Each breath starts above zero flow", "Volume-time: stepped increase cycle by cycle"],
-  },
-  {
-    id: "cuff-leak",
-    label: "Cuff Leak / Circuit Leak",
-    category: "abnormal",
-    description: "Exhaled volume consistently less than inhaled volume. Inspiratory and expiratory Vt do not match. Gurgling sound audible.",
-    findings: ["Exhaled Vt < Inspired Vt on volume scalar", "Flow-time: expiratory curve smaller than inspiratory", "Volume-time: does not return fully to baseline"],
-  },
-  {
-    id: "flow-starvation",
-    label: "Flow Starvation (VC Mode)",
-    category: "abnormal",
-    description: "Pressure-time waveform shows 'scooped out' appearance mid-inspiration. Patient actively breathing in but ventilator not matching demand.",
-    findings: ["Pressure-time: concave 'scooped' mid-inspiratory dip", "Patient effort pulls pressure below expected square waveform", "Indicates inadequate flow rate for patient demand"],
-  },
-  {
-    id: "dysynchrony",
-    label: "Patient–Ventilator Dyssynchrony",
-    category: "abnormal",
-    description: "Multiple waveform irregularities: double triggering, missed triggers, premature cycling. Patient and ventilator out of sync.",
-    findings: ["Irregular pressure and flow waveforms", "Variable Vt breath to breath", "Pressure spikes or double peaks visible"],
-  },
-];
