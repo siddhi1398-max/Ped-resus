@@ -11,7 +11,7 @@ import WaveformView from "../tabs/WaveformView";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle, 
-  ArrowUp, ArrowDown, Warning, Wind, Steps, CloudSlash, 
+  ArrowUp, ArrowDown, Wind, Steps, CloudSlash, 
   Gear, Wrench, Graph, TrendDown
 } from "@phosphor-icons/react";
 
