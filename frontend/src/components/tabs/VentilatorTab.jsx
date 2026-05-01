@@ -8,6 +8,15 @@
 
 import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
+import VentilatorWaveformDashboard from "./VentilatorWaveformDashboard";
+
+export default function App() {
+  return (
+    <main style={{ padding: 24, background: "#020608", minHeight: "100vh" }}>
+      <VentilatorWaveformDashboard respiratoryRate={18} seconds={12} />
+    </main>
+  );
+}
 import {
   Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle,
   XCircle, Info, Wrench, Wind, Drop,
