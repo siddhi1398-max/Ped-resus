@@ -572,6 +572,63 @@ export default function VentilatorTab() {
               </tbody>
             </table>
           </div>
+
+          {/* Key technique points */}
+          <Section title="Safe Triangle & Technique" icon="📍" defaultOpen={true}>
+            <div className="space-y-2">
+              {[
+                { step: "1", text: "SAFE TRIANGLE: Anterior border of latissimus dorsi · Lateral border of pectoralis major · Base at 5th ICS (nipple line in males)" },
+                { step: "2", text: "Insert at 4–5th ICS in mid-axillary line. Mark ABOVE upper border of rib below (neurovascular bundle runs under each rib)" },
+                { step: "3", text: "Infiltrate lidocaine 1% with adrenaline to skin → subcut → rib periosteum → parietal pleura. Aspirate before incising to confirm space" },
+                { step: "4", text: "Blunt dissect with closed Kelly forceps over rib. 'Pop' felt on entering pleural space. Finger sweep before tube insertion" },
+                { step: "5", text: "NEVER use trocar in children — high lung perforation risk. Grasp tube tip with Kelly forceps, advance apically for PTX, basally for fluid" },
+                { step: "6", text: "Connect to underwater seal at –20 cmH₂O suction (or Heimlich valve for transport). Confirm CXR post-insertion" },
+              ].map(s => (
+                <div key={s.step} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-200">
+                  <span className="w-5 h-5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">{s.step}</span>
+                  {s.text}
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          <Section title="Removal Criteria" icon="✅">
+            <div className="space-y-1.5">
+              {[
+                "< 2 mL/kg/day drainage for 24 hours",
+                "No air leak for ≥ 12 hours",
+                "Lung re-expanded on CXR",
+                "Wean: suction → underwater seal 4–6 hr → clamp trial 4–6 hr with CXR (for PTX)",
+                "Remove during expiration / Valsalva. Tie purse-string as tube exits. Occlusive dressing × 48 hr. CXR within 4 hr",
+              ].map((c, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
+                  <CheckCircle size={13} weight="fill" className="text-emerald-500 flex-shrink-0 mt-0.5" />
+                  {c}
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          <Section title="Complications" icon="⚠️">
+            <div className="grid sm:grid-cols-2 gap-2">
+              {[
+                "Lung perforation (especially with trocar — NEVER use in children)",
+                "Diaphragmatic / liver / spleen injury (low insertion below 5th ICS)",
+                "Intercostal artery laceration (lower border of rib — avoid)",
+                "Re-expansion pulmonary oedema (rapid drainage >1.5L — limit to 1L initially)",
+                "Tube malposition: extra-pleural, intra-fissural, abdominal",
+                "Persistent air leak — bronchopleural fistula",
+                "Subcutaneous emphysema",
+                "Empyema / wound infection",
+              ].map((c, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
+                  <XCircle size={12} weight="fill" className="text-red-400 flex-shrink-0 mt-0.5" />
+                  {c}
+                </div>
+              ))}
+            </div>
+          </Section>
+        </div>
       )}
 
       {/* ════════════════════════════════════════════
