@@ -6,17 +6,6 @@
 // ═══════════════════════════════════════════════════════════════
 
 // Local anaesthetic max-safe-dose table (mg/kg)
-export const SEDATION = [
-  { name: "Midazolam", mgPerKg: 0.1, max: 5, onset: "3-5 mins", duration: "30–80 min" },
-  { name: "Fentanyl", mcgPerKg: 0.5, max: 1.5, onset: "1-2 mins", duration: "30–80 min" },
-  { name: "Ketamine (dissociative)", mgPerKg: 1.5, max: null, onset: "1–2 min", duration: "30-60 min" },
-  { name: "Ketamine (sub-dissociative)", mgPerKg: 0.3, max: null, onset: "1–2 min", duration: "60 min" },
-  { name: "Propofol", mgPerKg: 2, max: 175, concentration: "2 mg/mL", onset: "5–10 min", duration: "30-60 mins" },
-   { name: "Propofol+Ketamine", mgPerKg: 1, max: null, concentration: "2 mg/mL; 50mg/mL", onset: "5–10 min", duration: "30-60 mins" },
-  { name: "Etomidate", mgPerKg: 0.3, max: null, concentration: "2mg/mL", onset: "5–10 min", duration: "30-60mins" },
-  { name: "Dexmedetomidine", mcgPerKg:0.5 , max: 200, concentration: null, onset: "5 min", duration: "45-90 mins" },
-  { name: "Triclofos", mgPerKg: 50, max: 80, concentration: "250 mg/5mL", onset: "5–10 min", duration: "60 mins" },
- ];
 export const LOCAL_ANAESTHETICS = [
   { name: "Lidocaine (plain)", mgPerKg: 4.5, max: 300, concentration: "1% = 10 mg/mL · 2% = 20 mg/mL", onset: "1–2 min", duration: "30–60 min" },
   { name: "Lidocaine + adrenaline", mgPerKg: 7, max: 500, concentration: "1% with 1:100,000 epi", onset: "1–2 min", duration: "2–6 h" },
