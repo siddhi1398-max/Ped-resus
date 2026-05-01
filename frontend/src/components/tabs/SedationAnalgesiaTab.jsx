@@ -7,9 +7,10 @@ import {
   NERVE_BLOCKS,
   LAST_PROTOCOL,
 } from "../../data/sedationAnalgesia";
-import { Warning, ArrowSquareOut, Drop, ListChecks, Syringe, FirstAid } from "@phosphor-icons/react";
+import { Warning, ArrowSquareOut, Drop, ListChecks, Syringe, FirstAid, MoonStars } from "@phosphor-icons/react";
 
 const SECTIONS = [
+  { id: "sedation", label: "Sedation", icon: MoonStars },
   { id: "local", label: "Local Anaesthetics", icon: Drop },
   { id: "psa", label: "PSA Reference", icon: ListChecks },
   { id: "blocks", label: "Nerve Blocks", icon: Syringe },
@@ -57,6 +58,52 @@ export default function SedationAnalgesiaTab() {
     </div>
   );
 }
+
+function SedationSection() {
+   const {weight } = useWeight (); 
+    return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="font-sans font-bold text-lg mb-2">Sedative Agents</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+          </p>
+        <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="bg-slate-900 dark:bg-slate-950 text-white">
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Agent</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">mg/kg</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Max mg</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Max for {weight} kg</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Concentration</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Onset</th>
+                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              {SEDATION.map((la) => {
+                const maxMg = la.mgPerKg ? Math.min(weight * la.mgPerKg, la.max) : null;
+                return (
+                  <tr key={la.name} className="border-t border-slate-200 dark:border-slate-800 odd:bg-slate-50 dark:odd:bg-slate-900/40 align-top">
+                    <td className="p-3 font-bold">{la.name}</td>
+                    <td className="p-3 font-mono">{la.mgPerKg ?? "—"}</td>
+                    <td className="p-3 font-mono">{la.max ?? "—"}</td>
+                    <td className="p-3 font-mono font-bold text-red-600 dark:text-red-400">
+                      {maxMg !== null ? `${maxMg.toFixed(1)} mg` : "Topical"}
+                    </td>
+                    <td className="p-3 font-mono text-xs text-slate-500 dark:text-slate-400">{la.concentration}</td>
+                    <td className="p-3 font-mono text-xs">{la.onset}</td>
+                    <td className="p-3 font-mono text-xs">{la.duration}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </ul>
+        </div>
+      </div>
+  );
+  }
 
 function LocalAnaestheticsSection() {
   const { weight } = useWeight();
