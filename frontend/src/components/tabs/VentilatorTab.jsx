@@ -43,6 +43,7 @@ const TROUBLESHOOT = [
     id: "high-pip",
     problem: "↑ Peak Airway Pressure",
     severity: "urgent",
+    icon: ArrowUp 
     causes: ["Bronchospasm / secretions", "ETT obstruction, kink or biting", "Pneumothorax", "Main-stem intubation", "Pulmonary oedema / stiff ARDS lung"],
     action: "DOPE mnemonic: Disconnect from vent → bag manually. Check: D-isplaced ETT · O-bstruction (suction) · P-neumothorax (auscultate/chest US) · E-quipment failure.",
     pearl: "If Peak–Plateau pressure gradient >10 cmH₂O → airway resistance problem (secretions, bronchospasm). If both elevated → compliance problem (ARDS, oedema, PTX).",
@@ -51,6 +52,7 @@ const TROUBLESHOOT = [
     id: "low-vt",
     problem: "↓ Tidal Volume / Minute Ventilation",
     severity: "urgent",
+    icon: ArrowDown
     causes: ["Cuff leak (hear gurgling)", "Circuit disconnect", "ETT dislodgement", "Severe bronchospasm"],
     action: "Check ETT depth and position. Check cuff pressure (target 20–25 cmH₂O). Inspect all circuit connections. Observe chest rise bilaterally.",
     pearl: "In pressure-controlled ventilation, a drop in Vt with unchanged PIP = ↓ compliance. In volume-controlled, a rise in PIP with unchanged Vt = ↑ resistance or ↓ compliance.",
