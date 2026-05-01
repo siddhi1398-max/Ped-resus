@@ -40,7 +40,6 @@ const TROUBLESHOOT = [
   {
     id: "high-pip",
     problem: "↑ Peak Airway Pressure",
-    icon: "⬆️",
     severity: "urgent",
     causes: ["Bronchospasm / secretions", "ETT obstruction, kink or biting", "Pneumothorax", "Main-stem intubation", "Pulmonary oedema / stiff ARDS lung"],
     action: "DOPE mnemonic: Disconnect from vent → bag manually. Check: D-isplaced ETT · O-bstruction (suction) · P-neumothorax (auscultate/chest US) · E-quipment failure.",
