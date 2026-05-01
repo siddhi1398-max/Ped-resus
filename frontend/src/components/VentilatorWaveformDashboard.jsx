@@ -1,9 +1,20 @@
-export default function App() {
-  return (
-    <main style={{ padding: 24, background: "#020608", minHeight: "100vh" }}>
-      <VentilatorWaveformDashboard respiratoryRate={18} seconds={12} />
-    </main>
-  );
+import React, { useMemo } from "react";
+
+// all the waveform code here:
+// WAVEFORMS
+// clamp
+// smoothstep
+// waveformValue
+// makePath
+// WaveformPanel
+// VentilatorWaveformDashboard
+
+function VentilatorWaveformDashboard({
+  seconds = 12,
+  respiratoryRate = 18,
+  animated = true,
+}) {
+  // component code here
 }
 import React, { useMemo } from "react";
 
@@ -358,5 +369,14 @@ export default function VentilatorWaveformDashboard({
         ))}
       </div>
     </section>
+  );
+}
+
+
+export default function App() {
+  return (
+    <main style={{ padding: 24, background: "#020608", minHeight: "100vh" }}>
+      <VentilatorWaveformDashboard respiratoryRate={18} seconds={12} />
+    </main>
   );
 }
