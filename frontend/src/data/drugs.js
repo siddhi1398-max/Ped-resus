@@ -1,5 +1,16 @@
-// Drug categories: resuscitation, sedation, antibiotic, fluid, airway, analgesia, anticonvulsant, other
+// ═══════════════════════════════════════════════════════════════════════════════
+// DRUGS.JS — EMERGENCY / IV / PARENTERAL DRUG REFERENCE
+// Oral/syrup formulations have been moved to oralFormulations.js
+// This file retains: resuscitation, RSI, IV antibiotics, IV sedation,
+//                    anticonvulsants (IV/PR), fluids, electrolytes, infusions
+// References: Harriet Lane 22nd Ed · IAP 2024 · Piyush Gupta 18th Ed · PALS 2020
+// ═══════════════════════════════════════════════════════════════════════════════
+
 export const DRUGS = [
+
+  // ══════════════════════════════════════════════════════════════════
+  // RESUSCITATION
+  // ══════════════════════════════════════════════════════════════════
   {
     id: "adrenaline-arrest",
     name: "Adrenaline (Epinephrine)",
@@ -68,348 +79,6 @@ export const DRUGS = [
     notes: "Bolus for refractory VF/pulseless VT.",
   },
   {
-    id: "midazolam-iv",
-    name: "Midazolam",
-    indication: "Sedation / seizure",
-    category: "anticonvulsant",
-    dosePerKg: 0.1,
-    unit: "mg",
-    max: 5,
-    route: "IV",
-    notes: "Respiratory depression possible.",
-  },
-  {
-    id: "midazolam-in",
-    name: "Midazolam (IN/buccal)",
-    indication: "Seizure (no IV)",
-    category: "anticonvulsant",
-    dosePerKg: 0.2,
-    unit: "mg",
-    max: 10,
-    route: "IN / Buccal",
-    notes: "Intranasal or buccal route.",
-  },
-  {
-    id: "lorazepam",
-    name: "Lorazepam",
-    indication: "Status epilepticus",
-    category: "anticonvulsant",
-    dosePerKg: 0.1,
-    unit: "mg",
-    max: 4,
-    route: "IV",
-    notes: "First-line IV benzodiazepine.",
-  },
-  {
-    id: "levetiracetam",
-    name: "Levetiracetam",
-    indication: "Status epilepticus (2nd line)",
-    category: "anticonvulsant",
-    dosePerKg: 40,
-    unit: "mg",
-    max: 3000,
-    route: "IV over 5 min",
-    notes: "After benzodiazepines fail.",
-  },
-  {
-    id: "phenytoin",
-    name: "Phenytoin (fosphenytoin)",
-    indication: "Status epilepticus",
-    category: "anticonvulsant",
-    dosePerKg: 20,
-    unit: "mg PE",
-    max: 1500,
-    route: "IV slow",
-    notes: "Max rate 3 mg/kg/min. Monitor ECG.",
-  },
-  {
-    id: "dexamethasone",
-    name: "Dexamethasone",
-    indication: "Croup",
-    category: "other",
-    dosePerKg: 0.6,
-    unit: "mg",
-    max: 10,
-    route: "PO / IM / IV",
-    notes: "Single dose.",
-  },
-  {
-    id: "prednisolone",
-    name: "Prednisolone",
-    indication: "Asthma exacerbation",
-    category: "other",
-    dosePerKg: 1,
-    unit: "mg",
-    max: 40,
-    route: "PO",
-    notes: "3-day course typical.",
-  },
-  {
-    id: "salbutamol",
-    name: "Salbutamol nebulised",
-    indication: "Asthma / bronchospasm",
-    category: "other",
-    fixedDose: "2.5 mg (<5 yr) | 5 mg (≥5 yr)",
-    unit: "mg neb",
-    route: "Nebulised",
-    notes: "Back-to-back in severe exacerbation.",
-  },
-  {
-    id: "ketamine-sedation",
-    name: "Ketamine (sedation)",
-    indication: "Procedural sedation",
-    category: "sedation",
-    dosePerKg: 1.5,
-    unit: "mg",
-    route: "IV",
-    notes: "Preserves airway reflexes.",
-  },
-  {
-    id: "ketamine-rsi",
-    name: "Ketamine (RSI)",
-    indication: "Rapid sequence intubation",
-    category: "sedation",
-    dosePerKg: 2,
-    unit: "mg",
-    route: "IV",
-    notes: "Preferred in shock/asthma.",
-  },
-  {
-    id: "propofol",
-    name: "Propofol (RSI)",
-    indication: "RSI induction",
-    category: "sedation",
-    dosePerKg: 2,
-    unit: "mg",
-    route: "IV",
-    notes: "Hypotension risk. Avoid in shock.",
-  },
-  {
-    id: "suxamethonium",
-    name: "Suxamethonium",
-    indication: "RSI paralysis",
-    category: "airway",
-    dosePerKg: 2,
-    unit: "mg",
-    route: "IV",
-    notes: "Onset 30–60 s. Contraindicated in hyperkalemia.",
-  },
-  {
-    id: "rocuronium",
-    name: "Rocuronium",
-    indication: "RSI paralysis",
-    category: "airway",
-    dosePerKg: 1.2,
-    unit: "mg",
-    route: "IV",
-    notes: "Onset 60 s. Duration 45–60 min.",
-  },
-  {
-    id: "morphine",
-    name: "Morphine",
-    indication: "Analgesia",
-    category: "analgesia",
-    dosePerKg: 0.1,
-    unit: "mg",
-    max: 5,
-    route: "IV / IM",
-    notes: "Titrate to pain.",
-  },
-  {
-    id: "fentanyl-in",
-    name: "Fentanyl (IN)",
-    indication: "Analgesia",
-    category: "analgesia",
-    dosePerKg: 1.5,
-    unit: "mcg",
-    max: 100,
-    route: "Intranasal",
-    notes: "Rapid onset, no IV required.",
-  },
-  {
-    id: "paracetamol",
-    name: "Paracetamol",
-    indication: "Pain / fever",
-    category: "analgesia",
-    dosePerKg: 15,
-    unit: "mg",
-    max: 1000,
-    route: "PO / IV",
-    notes: "Max 60 mg/kg/day.",
-  },
-  {
-    id: "ibuprofen",
-    name: "Ibuprofen",
-    indication: "Pain / fever",
-    category: "analgesia",
-    dosePerKg: 10,
-    unit: "mg",
-    max: 400,
-    route: "PO",
-    notes: "Avoid if dehydrated or <3 mo.",
-  },
-  {
-    id: "diclofenac",
-    name: "Diclofenac",
-    indication: "Moderate pain / musculoskeletal / post-op",
-    category: "analgesia",
-    dosePerKg: 1,
-    unit: "mg",
-    max: 50,
-    route: "PO / PR / IM",
-    notes: "1 mg/kg q8h (max 50 mg/dose, 150 mg/day). Avoid < 6 mo. PR/IM preferred if vomiting. Same NSAID cautions: hydration, no active bleeding, renal function.",
-  },
-  {
-    id: "ketorolac",
-    name: "Ketorolac (Toradol)",
-    indication: "Moderate pain (post-op, renal colic)",
-    category: "analgesia",
-    dosePerKg: 0.5,
-    unit: "mg",
-    max: 30,
-    route: "IV / IM",
-    notes: "0.5 mg/kg IV q6h. Max 30 mg/dose, 120 mg/day. Avoid >5 days, renal impairment, active bleeding.",
-  },
-  {
-    id: "fentanyl-iv",
-    name: "Fentanyl (IV)",
-    indication: "Procedural / severe pain",
-    category: "analgesia",
-    dosePerKg: 1,
-    unit: "mcg",
-    max: 50,
-    route: "IV slow",
-    notes: "1–2 mcg/kg IV. Rapid onset. Risk of chest-wall rigidity with fast push.",
-  },
-  {
-    id: "hydromorphone",
-    name: "Hydromorphone (Dilaudid)",
-    indication: "Severe pain",
-    category: "analgesia",
-    dosePerKg: 0.015,
-    unit: "mg",
-    max: 1,
-    route: "IV / IM",
-    notes: "0.01–0.02 mg/kg IV q3–4h. ~7× potency of morphine.",
-  },
-  {
-    id: "oxycodone",
-    name: "Oxycodone",
-    indication: "Moderate-severe pain (PO)",
-    category: "analgesia",
-    dosePerKg: 0.1,
-    unit: "mg",
-    max: 10,
-    route: "PO",
-    notes: "0.05–0.15 mg/kg q4–6h. Not recommended <6 mo.",
-  },
-  {
-    id: "tramadol",
-    name: "Tramadol",
-    indication: "Moderate pain (PO/IV)",
-    category: "analgesia",
-    dosePerKg: 1,
-    unit: "mg",
-    max: 100,
-    route: "PO / IV",
-    notes: "1–2 mg/kg q6h. Avoid <12 yr (FDA boxed warning: respiratory depression).",
-  },
-  {
-    id: "ketamine-analgesia-iv",
-    name: "Ketamine (sub-dissociative)",
-    indication: "Acute pain / opioid-sparing",
-    category: "analgesia",
-    dosePerKg: 0.3,
-    unit: "mg",
-    max: 30,
-    route: "IV slow (over 10 min)",
-    notes: "0.2–0.5 mg/kg IV. Sub-dissociative analgesia. Lower emergence reactions vs sedation doses.",
-  },
-  {
-    id: "ketamine-in",
-    name: "Ketamine (IN analgesia)",
-    indication: "Acute pain without IV",
-    category: "analgesia",
-    dosePerKg: 1,
-    unit: "mg",
-    max: 50,
-    route: "Intranasal",
-    notes: "0.5–1 mg/kg IN. Useful for trauma analgesia pre-IV.",
-  },
-  {
-    id: "nitrous-oxide",
-    name: "Nitrous oxide / O₂ (Entonox)",
-    indication: "Procedural analgesia/sedation",
-    category: "analgesia",
-    fixedDose: "50% N₂O / 50% O₂ inhaled",
-    unit: "inhaled",
-    route: "Inhaled (self-admin)",
-    notes: "Onset 30–60 s, offset ~5 min. Avoid in pneumothorax, bowel obstruction, head injury, B12 deficiency.",
-  },
-  {
-    id: "lidocaine-local",
-    name: "Lidocaine (local, plain)",
-    indication: "Local anaesthesia",
-    category: "analgesia",
-    dosePerKg: 4.5,
-    unit: "mg",
-    max: 300,
-    route: "SC / infiltration",
-    notes: "Max 4.5 mg/kg plain. Max 7 mg/kg with epinephrine. 1% = 10 mg/mL, 2% = 20 mg/mL.",
-  },
-  {
-    id: "bupivacaine-local",
-    name: "Bupivacaine (local)",
-    indication: "Local / regional anaesthesia",
-    category: "analgesia",
-    dosePerKg: 2,
-    unit: "mg",
-    max: 175,
-    route: "SC / nerve block",
-    notes: "Max 2 mg/kg (2.5 with epi). 0.25% = 2.5 mg/mL. Cardiotoxic in overdose — intralipid rescue.",
-  },
-  {
-    id: "naltrexone",
-    name: "Naltrexone",
-    indication: "Opioid reversal (long-acting)",
-    category: "resuscitation",
-    fixedDose: "Not first-line for acute OD — use naloxone",
-    unit: "—",
-    route: "PO / IM",
-    notes: "Used for opioid use disorder. For acute overdose: naloxone preferred.",
-  },
-  {
-    id: "sucrose-24",
-    name: "Sucrose 24% (Sweet-Ease)",
-    indication: "Procedural analgesia (neonate ≤ 3 mo)",
-    category: "analgesia",
-    fixedDose: "0.5–2 mL onto tongue 2 min pre-procedure",
-    unit: "mL PO",
-    route: "Oral drops",
-    notes: "For minor procedures (venepuncture, heel-prick, IM) in neonates/young infants. Combine with non-nutritive sucking.",
-  },
-  {
-    id: "mannitol",
-    name: "Mannitol 20%",
-    indication: "Raised ICP",
-    category: "other",
-    dosePerKg: 0.5,
-    unit: "g",
-    max: 50,
-    route: "IV (20% = × 5 mL)",
-    notes: "Give over 20 min. Monitor osmolality.",
-  },
-  {
-    id: "hypertonic-saline",
-    name: "Hypertonic saline 3%",
-    indication: "Raised ICP / hyponatremia",
-    category: "fluid",
-    dosePerKg: 4,
-    unit: "mL",
-    route: "IV bolus (3% NaCl)",
-    notes: "4 mL/kg bolus over 10–20 min.",
-  },
-  {
     id: "naloxone",
     name: "Naloxone",
     indication: "Opioid overdose",
@@ -432,26 +101,62 @@ export const DRUGS = [
     notes: "Caution: may precipitate seizures.",
   },
   {
-    id: "dextrose",
-    name: "Dextrose 10%",
-    indication: "Hypoglycaemia",
-    category: "fluid",
-    dosePerKg: 2,
-    unit: "mL",
-    route: "IV (D10W)",
-    notes: "2 mL/kg = 0.2 g/kg glucose.",
+    id: "diphenhydramine",
+    name: "Diphenhydramine",
+    indication: "Anaphylaxis adjunct / allergic reaction",
+    category: "resuscitation",
+    dosePerKg: 1,
+    unit: "mg",
+    max: 50,
+    route: "IV / IM",
+    notes: "Adjunct only — never replaces adrenaline in anaphylaxis.",
   },
   {
-    id: "dextrose-25",
-    name: "Dextrose 25%",
-    indication: "Hypoglycaemia (child >1 mo)",
-    category: "fluid",
+    id: "hydrocortisone",
+    name: "Hydrocortisone",
+    indication: "Septic shock / adrenal crisis / severe asthma",
+    category: "resuscitation",
     dosePerKg: 2,
-    unit: "mL",
-    route: "IV (D25W)",
-    notes: "2 mL/kg = 0.5 g/kg glucose. Via large vein.",
+    unit: "mg",
+    max: 100,
+    route: "IV",
+    notes: "Shock 2 mg/kg; anaphylaxis 4 mg/kg; adrenal crisis 50–100 mg stat.",
   },
-  // ─── Electrolytes ─────────────────────────────────────
+  {
+    id: "methylprednisolone",
+    name: "Methylprednisolone",
+    indication: "Severe asthma / allergy / spinal cord injury",
+    category: "other",
+    dosePerKg: 2,
+    unit: "mg",
+    max: 60,
+    route: "IV",
+    notes: "1–2 mg/kg/dose IV. Spinal cord: 30 mg/kg load then 5.4 mg/kg/hr × 23 hr.",
+  },
+  {
+    id: "glucagon",
+    name: "Glucagon",
+    indication: "Hypoglycaemia / BB or CCB OD",
+    category: "resuscitation",
+    fixedDose: "0.5 mg (<20 kg) · 1 mg (≥20 kg) IM",
+    unit: "mg",
+    route: "IM / IV / SC",
+    notes: "BB overdose: 50 mcg/kg IV bolus then infusion.",
+  },
+  {
+    id: "naltrexone",
+    name: "Naltrexone",
+    indication: "Opioid reversal (long-acting)",
+    category: "resuscitation",
+    fixedDose: "Not first-line for acute OD — use naloxone",
+    unit: "—",
+    route: "PO / IM",
+    notes: "Used for opioid use disorder. For acute overdose: naloxone preferred.",
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ELECTROLYTES
+  // ══════════════════════════════════════════════════════════════════
   {
     id: "calcium-gluconate",
     name: "Calcium gluconate 10%",
@@ -497,8 +202,8 @@ export const DRUGS = [
     notes: "1 mEq/kg. Not routine in arrest. Dilute 1:1 with sterile water in neonate.",
   },
   {
-    id: "lidocaine",
-    name: "Lidocaine",
+    id: "lidocaine-antiarrhythmic",
+    name: "Lidocaine (antiarrhythmic)",
     indication: "VT / VF (alternative to amiodarone)",
     category: "resuscitation",
     dosePerKg: 1,
@@ -507,7 +212,10 @@ export const DRUGS = [
     route: "IV/IO",
     notes: "1 mg/kg bolus. Infusion 20–50 mcg/kg/min.",
   },
-  // ─── Vasoactive / Inotropes (infusions) ──────────────
+
+  // ══════════════════════════════════════════════════════════════════
+  // VASOACTIVE / INOTROPES (INFUSIONS)
+  // ══════════════════════════════════════════════════════════════════
   {
     id: "dopamine",
     name: "Dopamine infusion",
@@ -568,105 +276,385 @@ export const DRUGS = [
     route: "IV infusion",
     notes: "V1 vasoconstrictor. Second-line vasopressor.",
   },
-  // ─── Sedation / RSI ──────────────────────────────────
+
+  // ══════════════════════════════════════════════════════════════════
+  // SEDATION / RSI (IV)
+  // ══════════════════════════════════════════════════════════════════
+  {
+    id: "ketamine-sedation",
+    name: "Ketamine (procedural sedation)",
+    indication: "Procedural sedation",
+    category: "sedation",
+    dosePerKg: 1.5,
+    unit: "mg",
+    route: "IV",
+    notes: "1–2 mg/kg IV or 4–5 mg/kg IM. Preserves airway reflexes. Onset 1 min IV / 5 min IM.",
+  },
+  {
+    id: "ketamine-rsi",
+    name: "Ketamine (RSI)",
+    indication: "Rapid sequence intubation",
+    category: "sedation",
+    dosePerKg: 2,
+    unit: "mg",
+    route: "IV",
+    notes: "Preferred in shock/asthma. Bronchodilation. Haemodynamically stable.",
+  },
+  {
+    id: "propofol",
+    name: "Propofol",
+    indication: "RSI induction / procedural sedation",
+    category: "sedation",
+    dosePerKg: 2,
+    unit: "mg",
+    route: "IV",
+    notes: "Hypotension risk. Avoid in shock. No analgesia — combine with opioid.",
+  },
   {
     id: "etomidate",
     name: "Etomidate (RSI)",
-    indication: "RSI induction",
+    indication: "RSI induction — haemodynamically unstable",
     category: "sedation",
     dosePerKg: 0.3,
     unit: "mg",
     route: "IV",
-    notes: "Haemodynamically neutral. Avoid in septic shock (adrenal suppression).",
+    notes: "Haemodynamically neutral. Avoid in septic shock (adrenal suppression). Onset 30 s.",
   },
   {
-    id: "diazepam",
-    name: "Diazepam",
-    indication: "Seizure (alternative)",
+    id: "midazolam-iv",
+    name: "Midazolam (IV)",
+    indication: "IV sedation / status epilepticus / ICU sedation",
+    category: "sedation",
+    dosePerKg: 0.1,
+    unit: "mg",
+    max: 5,
+    route: "IV",
+    notes: "0.05–0.1 mg/kg IV. Respiratory depression — monitor SpO₂. Reversible with flumazenil.",
+  },
+  {
+    id: "midazolam-in",
+    name: "Midazolam (IN/buccal)",
+    indication: "Seizure / sedation without IV access",
+    category: "anticonvulsant",
+    dosePerKg: 0.2,
+    unit: "mg",
+    max: 10,
+    route: "IN / Buccal",
+    notes: "Intranasal or buccal route. Onset 5–10 min.",
+  },
+  {
+    id: "dexmedetomidine",
+    name: "Dexmedetomidine",
+    indication: "ICU sedation / procedural sedation / weaning agitation",
+    category: "sedation",
+    fixedDose: "Load 0.5–1 mcg/kg over 10 min, then 0.2–0.7 mcg/kg/hr",
+    unit: "mcg/kg/hr",
+    route: "IV infusion",
+    notes: "α2-agonist. Sedation without respiratory depression. Bradycardia and hypotension — monitor. No analgesia. Useful for MRI/procedures and weaning from mechanical ventilation.",
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // NEUROMUSCULAR BLOCKING AGENTS
+  // ══════════════════════════════════════════════════════════════════
+  {
+    id: "suxamethonium",
+    name: "Suxamethonium (Succinylcholine)",
+    indication: "RSI paralysis",
+    category: "airway",
+    dosePerKg: 2,
+    unit: "mg",
+    route: "IV",
+    notes: "Onset 30–60 s, duration 8–10 min. Depolarising. Contraindicated in hyperkalemia, burns >24h, crush injury, denervation. Malignant hyperthermia trigger.",
+  },
+  {
+    id: "rocuronium",
+    name: "Rocuronium",
+    indication: "RSI paralysis / intubation",
+    category: "airway",
+    dosePerKg: 1.2,
+    unit: "mg",
+    route: "IV",
+    notes: "Onset 60 s. Duration 45–60 min. Non-depolarising. Reversible with sugammadex 16 mg/kg.",
+  },
+  {
+    id: "vecuronium",
+    name: "Vecuronium",
+    indication: "Paralysis (non-RSI) / ICU paralysis",
+    category: "airway",
+    dosePerKg: 0.1,
+    unit: "mg",
+    route: "IV",
+    notes: "0.1 mg/kg intubation dose. Onset 2–3 min. Duration 25–40 min. Infusion: 0.05–0.1 mg/kg/hr. No cardiovascular effects.",
+  },
+  {
+    id: "cisatracurium",
+    name: "Cisatracurium",
+    indication: "ICU paralysis (renal/hepatic failure preferred)",
+    category: "airway",
+    dosePerKg: 0.15,
+    unit: "mg",
+    route: "IV",
+    notes: "0.15 mg/kg bolus. Infusion 1–3 mcg/kg/min. Hofmann elimination — safe in renal/hepatic failure. No histamine release.",
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANTICONVULSANTS (IV/PR — acute management)
+  // ══════════════════════════════════════════════════════════════════
+  {
+    id: "lorazepam",
+    name: "Lorazepam (IV)",
+    indication: "Status epilepticus — first-line IV benzodiazepine",
+    category: "anticonvulsant",
+    dosePerKg: 0.1,
+    unit: "mg",
+    max: 4,
+    route: "IV",
+    notes: "0.05–0.1 mg/kg IV (max 4 mg). First-line IV benzodiazepine for SE. Onset 2–5 min, duration 12–24 hr. Slower to inject than diazepam — dilute 1:1 with NS.",
+  },
+  {
+    id: "diazepam-iv",
+    name: "Diazepam (IV/PR)",
+    indication: "Status epilepticus / febrile convulsion",
     category: "anticonvulsant",
     dosePerKg: 0.2,
     unit: "mg",
     max: 10,
     route: "IV / PR",
-    notes: "0.2–0.3 mg/kg IV or 0.5 mg/kg PR.",
+    notes: "0.2–0.3 mg/kg IV or 0.5 mg/kg PR. PR: use IV solution rectally if suppository unavailable. Inject IV slowly (<2 mg/min). Duration shorter than lorazepam.",
   },
   {
-    id: "phenobarbital",
-    name: "Phenobarbital",
-    indication: "Neonatal seizure (1st line)",
+    id: "levetiracetam-iv",
+    name: "Levetiracetam (IV load)",
+    indication: "Status epilepticus — 2nd line after benzodiazepines",
+    category: "anticonvulsant",
+    dosePerKg: 40,
+    unit: "mg",
+    max: 3000,
+    route: "IV over 5–15 min",
+    notes: "40–60 mg/kg IV (max 3 g). After benzodiazepines fail. Dilute in NS, infuse over 5–15 min. Minimal haemodynamic effects. Same drug as oral — switch to PO maintenance when possible.",
+  },
+  {
+    id: "phenytoin",
+    name: "Phenytoin / Fosphenytoin",
+    indication: "Status epilepticus — 2nd line",
+    category: "anticonvulsant",
+    dosePerKg: 20,
+    unit: "mg PE",
+    max: 1500,
+    route: "IV slow (ECG monitoring)",
+    notes: "20 mg PE/kg IV (max 1500 mg PE). Max rate: phenytoin 1 mg/kg/min, fosphenytoin 3 mg PE/kg/min. Monitor ECG (bradycardia, QT prolongation). Extravasation risk (phenytoin) — central line preferred.",
+  },
+  {
+    id: "phenobarbital-iv",
+    name: "Phenobarbital (IV load)",
+    indication: "Status epilepticus (3rd line) / neonatal seizures",
     category: "anticonvulsant",
     dosePerKg: 20,
     unit: "mg",
     max: 600,
-    route: "IV slow",
-    notes: "Neonates: 20 mg/kg load, may repeat 10 mg/kg × 2. Monitor respiratory.",
+    route: "IV slow (1 mg/kg/min)",
+    notes: "Load 20 mg/kg IV (max 600 mg). Neonates: 20 mg/kg, may repeat 10 mg/kg × 2 doses. Max rate 1 mg/kg/min. Respiratory depression — have BVM ready.",
   },
-  // ─── Analgesia / Antiemetics ─────────────────────────
   {
-    id: "ondansetron",
-    name: "Ondansetron",
-    indication: "Vomiting",
+    id: "valproate-iv",
+    name: "Sodium Valproate (IV)",
+    indication: "Status epilepticus — 2nd/3rd line",
+    category: "anticonvulsant",
+    dosePerKg: 30,
+    unit: "mg",
+    max: 3000,
+    route: "IV over 5–10 min",
+    notes: "30–40 mg/kg IV (max 3 g). Good option when phenytoin contraindicated. Avoid in liver disease, pregnancy (teratogenic). Monitor LFTs. Indian brands: Valparin IV.",
+  },
+  {
+    id: "thiopentone-iv",
+    name: "Thiopentone (Refractory SE)",
+    indication: "Refractory status epilepticus — requires intubation",
+    category: "anticonvulsant",
+    dosePerKg: 3,
+    unit: "mg",
+    max: 500,
+    route: "IV slow (requires intubation)",
+    notes: "3–5 mg/kg IV bolus, then 1–5 mg/kg/hr infusion. Requires intubation. EEG monitoring for burst suppression. Indian brands: Pentothal.",
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // ANALGESIA (IV/IM/IN — emergency use)
+  // ══════════════════════════════════════════════════════════════════
+  {
+    id: "morphine-iv",
+    name: "Morphine (IV/IM)",
+    indication: "Severe pain / post-operative / palliative",
+    category: "analgesia",
+    dosePerKg: 0.1,
+    unit: "mg",
+    max: 5,
+    route: "IV / IM",
+    notes: "0.05–0.1 mg/kg IV q2–4h. Titrate to pain. Respiratory depression — have naloxone ready. Infusion: 10–30 mcg/kg/hr.",
+  },
+  {
+    id: "fentanyl-iv",
+    name: "Fentanyl (IV)",
+    indication: "Procedural / severe pain / RSI analgesia",
+    category: "analgesia",
+    dosePerKg: 1,
+    unit: "mcg",
+    max: 50,
+    route: "IV slow",
+    notes: "1–2 mcg/kg IV slow (over 3–5 min). Risk of chest-wall rigidity with fast push. Infusion: 1–3 mcg/kg/hr.",
+  },
+  {
+    id: "fentanyl-in",
+    name: "Fentanyl (IN)",
+    indication: "Acute analgesia without IV access",
+    category: "analgesia",
+    dosePerKg: 1.5,
+    unit: "mcg",
+    max: 100,
+    route: "Intranasal",
+    notes: "1.5 mcg/kg IN. Use atomiser — split between nostrils if >1 mL. Onset 5–10 min. Rapid onset without IV required.",
+  },
+  {
+    id: "ketamine-analgesia",
+    name: "Ketamine (sub-dissociative analgesia)",
+    indication: "Acute pain / opioid-sparing",
+    category: "analgesia",
+    dosePerKg: 0.3,
+    unit: "mg",
+    max: 30,
+    route: "IV slow (over 10 min)",
+    notes: "0.2–0.5 mg/kg IV over 10 min. Lower emergence reactions than sedation doses. IN route: 0.5–1 mg/kg (max 50 mg) for pre-IV trauma analgesia.",
+  },
+  {
+    id: "ketamine-in",
+    name: "Ketamine (IN analgesia)",
+    indication: "Acute pain without IV",
+    category: "analgesia",
+    dosePerKg: 1,
+    unit: "mg",
+    max: 50,
+    route: "Intranasal",
+    notes: "0.5–1 mg/kg IN. Useful for trauma analgesia pre-IV access. Onset 5–10 min.",
+  },
+  {
+    id: "ketorolac-iv",
+    name: "Ketorolac (IV/IM)",
+    indication: "Moderate pain / renal colic / post-op",
+    category: "analgesia",
+    dosePerKg: 0.5,
+    unit: "mg",
+    max: 30,
+    route: "IV / IM",
+    notes: "0.5 mg/kg IV q6h. Max 30 mg/dose, 120 mg/day. Avoid >5 days, renal impairment, active bleeding.",
+  },
+  {
+    id: "paracetamol-iv",
+    name: "Paracetamol (IV — Perfalgan)",
+    indication: "Pain / fever when oral route unavailable",
+    category: "analgesia",
+    dosePerKg: 15,
+    unit: "mg",
+    max: 1000,
+    route: "IV over 15 min",
+    notes: "15 mg/kg q6h IV (max 1 g/dose, 60 mg/kg/day). Indian brands: Perfalgan 100 mL (10 mg/mL). Switch to oral as soon as possible. Give over 15 min.",
+  },
+  {
+    id: "lidocaine-local",
+    name: "Lidocaine (local, plain)",
+    indication: "Local anaesthesia",
+    category: "analgesia",
+    dosePerKg: 4.5,
+    unit: "mg",
+    max: 300,
+    route: "SC / infiltration",
+    notes: "Max 4.5 mg/kg plain. Max 7 mg/kg with epinephrine. 1% = 10 mg/mL, 2% = 20 mg/mL.",
+  },
+  {
+    id: "bupivacaine-local",
+    name: "Bupivacaine (local)",
+    indication: "Local / regional anaesthesia / nerve blocks",
+    category: "analgesia",
+    dosePerKg: 2,
+    unit: "mg",
+    max: 175,
+    route: "SC / nerve block",
+    notes: "Max 2 mg/kg (2.5 mg/kg with epi). 0.25% = 2.5 mg/mL. Cardiotoxic in overdose — intralipid rescue.",
+  },
+  {
+    id: "sucrose-24",
+    name: "Sucrose 24% (Sweet-Ease)",
+    indication: "Procedural analgesia (neonate ≤ 3 mo)",
+    category: "analgesia",
+    fixedDose: "0.5–2 mL onto tongue 2 min pre-procedure",
+    unit: "mL PO",
+    route: "Oral drops",
+    notes: "For minor procedures (venepuncture, heel-prick, IM) in neonates/young infants. Combine with non-nutritive sucking.",
+  },
+  {
+    id: "nitrous-oxide",
+    name: "Nitrous oxide / O₂ (Entonox 50:50)",
+    indication: "Procedural analgesia/sedation (≥5 yr cooperative)",
+    category: "analgesia",
+    fixedDose: "50% N₂O / 50% O₂ — self-administered inhalation",
+    unit: "inhaled",
+    route: "Inhaled (self-admin)",
+    notes: "Onset 30–60 s, offset ~5 min. Avoid in pneumothorax, bowel obstruction, head injury, B12 deficiency, <4 yr.",
+  },
+  {
+    id: "ondansetron-iv",
+    name: "Ondansetron (IV)",
+    indication: "Vomiting / post-op nausea",
     category: "analgesia",
     dosePerKg: 0.15,
     unit: "mg",
     max: 8,
-    route: "IV / ODT",
-    notes: "Max 4 mg if <15 kg, 8 mg if ≥15 kg. Avoid in long QT.",
+    route: "IV over 15 min",
+    notes: "Max 4 mg if <15 kg; 8 mg if ≥15 kg. Avoid in long QT. Dilute, give over 15 min.",
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // FLUIDS / GLUCOSE
+  // ══════════════════════════════════════════════════════════════════
+  {
+    id: "dextrose",
+    name: "Dextrose 10%",
+    indication: "Hypoglycaemia",
+    category: "fluid",
+    dosePerKg: 2,
+    unit: "mL",
+    route: "IV (D10W)",
+    notes: "2 mL/kg = 0.2 g/kg glucose.",
   },
   {
-    id: "diphenhydramine",
-    name: "Diphenhydramine",
-    indication: "Anaphylaxis adjunct / allergic reaction",
-    category: "resuscitation",
-    dosePerKg: 1,
-    unit: "mg",
+    id: "dextrose-25",
+    name: "Dextrose 25%",
+    indication: "Hypoglycaemia (child >1 mo)",
+    category: "fluid",
+    dosePerKg: 2,
+    unit: "mL",
+    route: "IV (D25W)",
+    notes: "2 mL/kg = 0.5 g/kg glucose. Via large vein.",
+  },
+  {
+    id: "hypertonic-saline",
+    name: "Hypertonic saline 3%",
+    indication: "Raised ICP / hyponatremia",
+    category: "fluid",
+    dosePerKg: 4,
+    unit: "mL",
+    route: "IV bolus (3% NaCl)",
+    notes: "4 mL/kg bolus over 10–20 min.",
+  },
+  {
+    id: "mannitol",
+    name: "Mannitol 20%",
+    indication: "Raised ICP",
+    category: "other",
+    dosePerKg: 0.5,
+    unit: "g",
     max: 50,
-    route: "IV / PO / IM",
-    notes: "Adjunct only — never replaces adrenaline in anaphylaxis.",
-  },
-  {
-    id: "hydrocortisone",
-    name: "Hydrocortisone",
-    indication: "Septic shock / adrenal crisis / severe asthma",
-    category: "resuscitation",
-    dosePerKg: 2,
-    unit: "mg",
-    max: 100,
-    route: "IV",
-    notes: "Shock 2 mg/kg; anaphylaxis 4 mg/kg; adrenal crisis 50–100 mg stat.",
-  },
-  {
-    id: "methylprednisolone",
-    name: "Methylprednisolone",
-    indication: "Severe asthma / allergy",
-    category: "other",
-    dosePerKg: 2,
-    unit: "mg",
-    max: 60,
-    route: "IV",
-    notes: "1–2 mg/kg/dose.",
-  },
-  // ─── Diuretics / Endocrine ───────────────────────────
-  {
-    id: "furosemide",
-    name: "Furosemide (Lasix)",
-    indication: "Fluid overload / pulm oedema / hyperK",
-    category: "other",
-    dosePerKg: 1,
-    unit: "mg",
-    max: 40,
-    route: "IV",
-    notes: "0.5–1 mg/kg. Monitor K⁺ and volume.",
-  },
-  {
-    id: "glucagon",
-    name: "Glucagon",
-    indication: "Hypoglycaemia / BB or CCB OD",
-    category: "resuscitation",
-    fixedDose: "0.5 mg (<20 kg) · 1 mg (≥20 kg) IM",
-    unit: "mg",
-    route: "IM / IV / SC",
-    notes: "BB overdose: 50 mcg/kg IV bolus then infusion.",
+    route: "IV (20% = × 5 mL/kg)",
+    notes: "Give over 20 min. Monitor osmolality. Foley catheter essential.",
   },
   {
     id: "insulin-dka",
@@ -676,1101 +664,174 @@ export const DRUGS = [
     fixedDose: "0.05–0.1 units/kg/hr",
     unit: "U/kg/hr",
     route: "IV infusion",
-    notes: "Start ≥1 hr after fluids. No bolus.",
+    notes: "Start ≥1 hr after fluids. No bolus in DKA.",
   },
-  // ─── Antibiotics (Harriet Lane) ──────────────────────
- // ═══════════════════════════════════════════════════════════════════════════════
-// INDIA-SPECIFIC ANTIBIOTIC ADDITIONS FOR DRUGS.JS
-// References: IAP Guidelines 2024 · Piyush Gupta Pediatric Drug Doses 18th Ed
-//             NCDC India Antimicrobial Guidelines · WHO AWaRe 2022
-//             NVBDCP · RNTCP Guidelines
-//
-// SYRUP FORMULATION GUIDE (added to each drug's notes):
-//   Each entry includes:
-//   - Syrup/suspension concentration available in India
-//   - How many mL to give per dose based on weight
-//   - Common Indian brand names
-// ═══════════════════════════════════════════════════════════════════════════════
-
-  // ══════════════════════════════════════════════════════════════════
-  // PENICILLINS
-  // ══════════════════════════════════════════════════════════════════
-
   {
-    id: "amoxicillin-susp",
-    name: "Amoxicillin (oral)",
-    indication: "Pneumonia / AOM / pharyngitis / UTI / skin",
-    category: "antibiotic",
-    dosePerKg: 40,
+    id: "furosemide-iv",
+    name: "Furosemide (Lasix) IV",
+    indication: "Fluid overload / pulmonary oedema / hyperK",
+    category: "other",
+    dosePerKg: 1,
     unit: "mg",
-    max: 1500,
-    route: "PO",
-    notes: [
-      "40–50 mg/kg/day ÷ BD or TDS (IAP/WHO AWaRe 2022). High-dose (DRSP): 80–90 mg/kg/day ÷ BD.",
-      "Indian brands (125 mg/5mL): Mox-125, Novamox-125, Amoxil-125, Wymox-125.",
-      "Indian brands (250 mg/5mL): Mox-250, Novamox-250, Amoxil-250.",
-      "Dispersible tablets (500 mg): Mox-500 DT — can be dissolved in water for infants.",
-      "Give TDS; BD acceptable for pneumonia (IAP). Duration: 5–7 days RTI, 7–10 days AOM.",
-    ].join(" "),
-  },
-
-  {
-    id: "amoxiclav-susp",
-    name: "Amoxicillin-Clavulanate (Co-amoxiclav)",
-    indication: "AOM / sinusitis / LRTI / UTI / SSTI / animal bite",
-    category: "antibiotic",
-    dosePerKg: 45,
-    unit: "mg",
-    max: 1750,
-    route: "PO / IV",
-    notes: [
-      "45 mg/kg/day ÷ BD (amoxicillin component). High-dose: 80–90 mg/kg/day for DRSP or AOM failure.",
-      "SYRUP 228.5 mg/5mL (amox 200 + clav 28.5): give (dose ÷ 40) mL per dose.",
-      "SYRUP 457 mg/5mL (amox 400 + clav 57): give (dose ÷ 80) mL per dose — preferred for BD dosing.",
-      "Indian brands (228.5/5mL): Augmentin-228 DS, Moxclav-228, Clavam-228, Amoxyclav-228.",
-      "Indian brands (457/5mL): Augmentin-457 ES, Moxclav-457, Clavam-457.",
-      "IV: Augmentin 1.2 g vial (amox 1 g + clav 200 mg) — 30 mg/kg q8h IV.",
-      "Give with food to reduce GI side effects. Add probiotic if prolonged course.",
-    ].join(" "),
-  },
-
-  {
-    id: "ampicillin-cloxacillin-susp",
-    name: "Ampicillin + Cloxacillin (Combination)",
-    indication: "Respiratory / skin / soft tissue infections (mixed cover)",
-    category: "antibiotic",
-    dosePerKg: 25,
-    unit: "mg",
-    max: 1000,
-    route: "PO",
-    notes: [
-      "25 mg/kg/dose TDS (each component). Combination covers strep + staph.",
-      "Indian brands: Ampicloxa-250 suspension, Clampicil-DS, Biocilin-CX syrup.",
-      "Give on empty stomach (30 min before food). Shake well before use.",
-      "Note: Limited evidence for combination vs monotherapy — use when both organisms suspected.",
-    ].join(" "),
-  },
-
-  {
-    id: "cloxacillin-oral",
-    name: "Cloxacillin (oral)",
-    indication: "MSSA / impetigo / cellulitis / osteomyelitis (step-down)",
-    category: "antibiotic",
-    dosePerKg: 25,
-    unit: "mg",
-    max: 1000,
-    route: "PO / IV",
-    notes: [
-      "25 mg/kg/dose QID PO (mild-mod). IV: 50 mg/kg/dose q6h (max 2 g/dose).",
-      "Indian brands (syrup): Klox-125 DS, Bioclox-125, Cloxin-125 suspension.",
-      "IV brands: Klox 250/500 mg vials, Bioclox injection.",
-      "MUST give on empty stomach — food reduces absorption by 50%. IAP first-line for MSSA.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // CEPHALOSPORINS — ORAL (with syrup guide)
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "cefixime-susp",
-    name: "Cefixime (oral)",
-    indication: "UTI / typhoid / AOM / LRTI / shigellosis",
-    category: "antibiotic",
-    dosePerKg: 8,
-    unit: "mg",
-    max: 400,
-    route: "PO",
-    notes: [
-      "8 mg/kg/day OD or BD (max 400 mg/day). Typhoid (IAP): 10–15 mg/kg/day × 14 days.",
-      "Indian brands (50 mg/5mL): Taxim-O 50, Zifi-50, Cefix-50, Mahacef-50, Topcef-50.",
-      "Indian brands (100 mg/5mL): Taxim-O 100, Zifi-100, Cefix-100, Mahacef-100.",
-      "Pineapple/mango flavour available (Taxim-O). Shake well, reconstitute with water.",
-      "AMR note (IAP/IJP 2022): Shigella — use cefixime or azithromycin (fluoroquinolone resistance high in India).",
-    ].join(" "),
-  },
-
-  {
-    id: "cefpodoxime-susp",
-    name: "Cefpodoxime (oral)",
-    indication: "AOM / sinusitis / pharyngitis / UTI / LRTI",
-    category: "antibiotic",
-    dosePerKg: 5,
-    unit: "mg",
-    max: 200,
-    route: "PO",
-    notes: [
-      "5 mg/kg/dose BD (max 200 mg/dose). Take with food (↑absorption 30%).",
-      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose BD.",
-      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose BD.",
-      "Indian brands (50 mg/5mL): Cepodem-50, Cefoprox-50, Topcef-50, Vantin-50, Pedocef-50.",
-      "Indian brands (100 mg/5mL): Cepodem-100, Cefoprox-100.",
-      "Good palatability; better S. pneumoniae cover than cefixime. AOM: 5 days course.",
-    ].join(" "),
-  },
-
-  {
-    id: "cefuroxime-susp",
-    name: "Cefuroxime Axetil (oral)",
-    indication: "AOM / sinusitis / pneumonia / UTI / skin / animal bite",
-    category: "antibiotic",
-    dosePerKg: 15,
-    unit: "mg",
-    max: 500,
-    route: "PO",
-    notes: [
-      "15 mg/kg/dose BD (max 500 mg/dose). Must give with food.",
-      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose BD.",
-      "Indian brands: Ceftin-125 DS, Supacef-125, Zocef-125, Altacef-125 suspension.",
-      "IV form: Zinacef, Ceftum, Supacef 250/750 mg vials. IV dose: 50–100 mg/kg/day ÷ q8h.",
-      "2nd generation; good H. influenzae and Moraxella cover. Bitter aftertaste — give with juice.",
-      "Animal bites: 15 mg/kg BD × 5 days (IAP). Step-down from IV for pneumonia.",
-    ].join(" "),
-  },
-
-  {
-    id: "cefdinir-susp",
-    name: "Cefdinir (oral)",
-    indication: "AOM / sinusitis / pharyngitis / skin / mild pneumonia",
-    category: "antibiotic",
-    dosePerKg: 7,
-    unit: "mg",
-    max: 300,
-    route: "PO",
-    notes: [
-      "7 mg/kg/dose BD or 14 mg/kg OD (max 300 mg BD or 600 mg OD). AOM: OD acceptable.",
-      "Indian brands: Adcef-125, Cednir-125, Omnicef-125 suspension.",
-      "Excellent palatability (cherry/strawberry flavour). Good for otitis-prone children.",
-      "Avoid within 2 hr of iron/antacids. Stools may turn red (harmless — warn parents).",
-    ].join(" "),
-  },
-
-  {
-    id: "cefadroxil-susp",
-    name: "Cefadroxil (oral)",
-    indication: "Strep pharyngitis / skin / UTI / step-down osteomyelitis",
-    category: "antibiotic",
-    dosePerKg: 15,
-    unit: "mg",
-    max: 1000,
-    route: "PO",
-    notes: [
-      "15 mg/kg/dose BD (max 500 mg/dose) or 30 mg/kg OD. Strep throat: OD × 10 days.",
-      "Indian brands: Droxyl-125/250 DS, Cefastar-125, Bioxyl-125 suspension.",
-      "1st gen oral cephalosporin. OD dosing improves compliance for GAS pharyngitis.",
-      "Can be given with or without food. Good palatability.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // CEPHALOSPORINS — IV
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "cefazolin-iv",
-    name: "Cefazolin (IV/IM)",
-    indication: "MSSA / surgical prophylaxis / mild-moderate SSTIs",
-    category: "antibiotic",
-    dosePerKg: 25,
-    unit: "mg",
-    max: 1000,
-    route: "IV / IM",
-    notes: [
-      "25–50 mg/kg/day ÷ q8h. Surgical prophylaxis: 30 mg/kg 30–60 min pre-op (max 2 g).",
-      "No oral/syrup form. IV only.",
-      "Indian brands: Reflin 250/500 mg, Cefazol 1g, Stazolin vials.",
-      "1st gen IV cephalosporin — excellent MSSA cover. Does not cross BBB.",
-    ].join(" "),
-  },
-
-  {
-    id: "cefotaxime-iv",
-    name: "Cefotaxime (IV/IM)",
-    indication: "Sepsis / meningitis / enteric fever / neonatal infection",
-    category: "antibiotic",
-    dosePerKg: 50,
-    unit: "mg",
-    max: 2000,
-    route: "IV / IM",
-    notes: [
-      "Sepsis: 50 mg/kg q8h. Meningitis: 75 mg/kg q6h (max 3 g/dose). Neonates: 50 mg/kg q12h (≤7d), q8h (>7d).",
-      "No oral form. IV/IM only.",
-      "Indian brands: Claforan, Taxim, Omnatax 250/500 mg/1g/2g vials.",
-      "Preferred over ceftriaxone in neonates (avoids bilirubin displacement). Excellent CSF penetration.",
-    ].join(" "),
-  },
-
-  {
-    id: "ceftazidime-iv",
-    name: "Ceftazidime (IV)",
-    indication: "Pseudomonas / nosocomial / febrile neutropenia / CF",
-    category: "antibiotic",
-    dosePerKg: 50,
-    unit: "mg",
-    max: 2000,
+    max: 40,
     route: "IV",
-    notes: [
-      "50 mg/kg q8h (max 2 g/dose). Febrile neutropenia: 50 mg/kg q8h. CF: 50–75 mg/kg q8h.",
-      "No oral/syrup form.",
-      "Indian brands: Fortum, Ceftum, Ceftazid 500 mg/1g/2g vials.",
-      "Only 3rd-gen cephalosporin with reliable Pseudomonas coverage. Often combined with amikacin.",
-    ].join(" "),
+    notes: "0.5–1 mg/kg IV (max 40 mg). Monitor K⁺ and volume. IV twice as potent as oral.",
   },
 
   // ══════════════════════════════════════════════════════════════════
-  // MACROLIDES (with syrup guide)
+  // IV ANTIBIOTICS (parenteral only — oral versions in oralFormulations.js)
   // ══════════════════════════════════════════════════════════════════
-
   {
-    id: "azithromycin-susp",
-    name: "Azithromycin (oral)",
-    indication: "Atypical pneumonia / pertussis / typhoid / scrub typhus (<8yr) / chlamydia",
-    category: "antibiotic",
-    dosePerKg: 10,
-    unit: "mg",
-    max: 500,
-    route: "PO",
-    notes: [
-      "Standard: 10 mg/kg day 1 (max 500 mg), then 5 mg/kg days 2–5 (max 250 mg).",
-      "Typhoid (IAP): 20 mg/kg OD × 7 days (max 1 g/day). Pertussis: 10 mg/kg OD × 5 days.",
-      "Scrub typhus <8 yr (IAP): 10 mg/kg OD × 5 days.",
-      "Indian brands (100 mg/5mL): Azithral-100, Azee-100, Zithromax-100, Zady-100.",
-      "Indian brands (200 mg/5mL): Azithral-200, Azee-200, Zithromax-200.",
-      "Give 1 hr before or 2 hr after food. Avoid antacids. QT prolongation — check ECG in neonates.",
-    ].join(" "),
-  },
-
-  {
-    id: "clarithromycin-susp",
-    name: "Clarithromycin (oral)",
-    indication: "Atypical pneumonia / H. pylori / pertussis / MAC / sinusitis",
-    category: "antibiotic",
-    dosePerKg: 7.5,
-    unit: "mg",
-    max: 500,
-    route: "PO / IV",
-    notes: [
-      "7.5 mg/kg/dose BD (max 500 mg/dose). H. pylori triple therapy: 7.5 mg/kg BD × 14 days.",
-      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose BD.",
-      "SYRUP 250 mg/5mL: give (dose ÷ 50) mL per dose BD.",
-      "Indian brands (125 mg/5mL): Claribid-125, Klaricid-125, Crixan-125, Biaxin-125 suspension.",
-      "Bitter taste despite flavouring — mix with juice or give after food. Refrigerate suspension.",
-      "Strong CYP3A4 inhibitor — check interactions (carbamazepine, statins).",
-    ].join(" "),
-  },
-
-  {
-    id: "erythromycin-susp",
-    name: "Erythromycin (oral)",
-    indication: "Pertussis / atypical pneumonia / chlamydia / GAS pharyngitis (penicillin allergy)",
-    category: "antibiotic",
-    dosePerKg: 12.5,
-    unit: "mg",
-    max: 500,
-    route: "PO / IV",
-    notes: [
-      "12.5 mg/kg/dose QID (max 500 mg/dose). Pertussis: 10 mg/kg TDS × 14 days (IAP).",
-      "Prokinetic (low dose for gastroparesis): 3 mg/kg TDS before feeds.",
-      "Indian brands (125 mg/5mL): Erythrocin-125, Eryped-125, E-Mycin-125.",
-      "Indian brands (200 mg/5mL EES): Erythrocin-200 EES.",
-      "QT prolongation — avoid in cardiac patients, neonates. Give before food for better absorption.",
-      "Now largely replaced by azithromycin but still available and affordable.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // COTRIMOXAZOLE (TMP-SMX) — very commonly used in India
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "cotrimoxazole-susp",
-    name: "Co-trimoxazole (TMP-SMX)",
-    indication: "UTI / PCP prophylaxis / shigellosis / nocardia / stepdown typhoid",
-    category: "antibiotic",
-    dosePerKg: 4,
-    unit: "mg",
-    max: 320,
-    route: "PO / IV",
-    notes: [
-      "Dose as TMP component: 4–6 mg/kg TMP/dose BD. PCP treatment: 5 mg/kg TMP q6–8h.",
-      "PCP prophylaxis: 5 mg/kg TMP OD 3×/week (or daily in high-risk).",
-      "SYRUP 40 mg TMP + 200 mg SMX per 5mL (Paediatric suspension):",
-      "Give (TMP dose ÷ 8) mL per dose. Example 10 kg: 40 mg TMP → 5 mL BD.",
-      "Indian brands (suspension): Bactrim Paed suspension, Septran Paed suspension, Oriprim-DS susp.",
-      "Tablet (80 mg TMP + 400 mg SMX): half tab per 10 kg BD for UTI.",
-      "DS tablet (160 mg TMP + 800 mg SMX): 1 tab BD for >30 kg.",
-      "High resistance in India for Shigella and E. coli UTIs — culture before use.",
-      "Avoid in G6PD deficiency, sulfa allergy, <6 weeks age. Monitor CBC and renal function.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // FLUOROQUINOLONES
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "ciprofloxacin-susp",
-    name: "Ciprofloxacin (oral/IV)",
-    indication: "Typhoid (resistant) / complicated UTI / cholera / Pseudomonas (>5 yr)",
-    category: "antibiotic",
-    dosePerKg: 10,
-    unit: "mg",
-    max: 500,
-    route: "PO / IV",
-    notes: [
-      "PO: 10–15 mg/kg BD (max 750 mg). IV: 10 mg/kg q12h (max 400 mg). Typhoid: 15 mg/kg BD × 7–10 days.",
-      "SYRUP 250 mg/5mL: give (dose ÷ 50) mL per dose BD.",
-      "Indian brands (250 mg/5mL suspension): Cifran-250 suspension, Ciplox-250 susp, Zoxan-250.",
-      "IV brands: Ciprobid 100/200 mg IV, Ciplox IV.",
-      "Reserve for specific indications (fluoroquinolone resistance rising in India).",
-      "Avoid antacids, dairy within 2 hr. Avoid if cartilage concerns — use only when no alternative.",
-    ].join(" "),
-  },
-
-  {
-    id: "ofloxacin-susp",
-    name: "Ofloxacin (oral)",
-    indication: "Typhoid / complicated UTI / MDR TB adjunct (>5 yr, no alternative)",
-    category: "antibiotic",
-    dosePerKg: 7.5,
-    unit: "mg",
-    max: 400,
-    route: "PO",
-    notes: [
-      "7.5 mg/kg BD (max 400 mg/dose). Typhoid (resistant): 10 mg/kg BD × 7 days.",
-      "SYRUP 50 mg/5mL: give (dose ÷ 10) mL per dose BD.",
-      "Indian brands: Zanocin-50 susp, Oflox-50 susp, Zenflox-50 oral suspension.",
-      "Also available as ofloxacin + metronidazole suspension (Oflomac-M, Norflox-M) for diarrhoea.",
-      "Note: Ofloxacin+metronidazole combinations widely used in India for GI infections — questionable evidence.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // ANTI-ANAEROBIC / ANTI-PROTOZOAL
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "metronidazole-susp",
-    name: "Metronidazole (oral/IV)",
-    indication: "Amoebiasis / giardiasis / anaerobic infections / C. difficile",
-    category: "antibiotic",
-    dosePerKg: 7.5,
-    unit: "mg",
-    max: 400,
-    route: "PO / IV / PR",
-    notes: [
-      "7.5 mg/kg TDS PO (max 400 mg/dose). Amoebiasis (IAP): 10 mg/kg TDS × 10 days.",
-      "Giardia: 5 mg/kg TDS × 5 days. IV: 7.5 mg/kg q8h.",
-      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose TDS.",
-      "Indian brands (200 mg/5mL): Flagyl-200 susp, Metrogyl-200 susp, Aldezole susp, Metronid susp.",
-      "IV: Metrogyl IV 500 mg/100 mL, Flagyl IV.",
-      "PR: Metronidazole suppositories 500 mg (Flagyl suppositories) — for vomiting children.",
-      "Avoid alcohol. Give after food to reduce nausea. Metallic taste is common.",
-    ].join(" "),
-  },
-
-  {
-    id: "tinidazole-susp",
-    name: "Tinidazole (oral)",
-    indication: "Amoebiasis / giardiasis / trichomoniasis (better compliance than metronidazole)",
+    id: "ceftriaxone",
+    name: "Ceftriaxone",
+    indication: "Sepsis / meningitis / enteric fever",
     category: "antibiotic",
     dosePerKg: 50,
     unit: "mg",
     max: 2000,
-    route: "PO",
-    notes: [
-      "Amoebiasis: 50 mg/kg OD × 3 days (max 2 g). Giardia: 50 mg/kg single dose (max 2 g).",
-      "No standard syrup — tablets can be crushed and given with food/jam.",
-      "Tablet: 300 mg, 500 mg. Crush 300 mg tab, mix with jam for young children.",
-      "Indian brands: Tiniba-300/500, Fasigyn-500, Tinvista, Topper-300.",
-      "OD dosing — better compliance than metronidazole TDS. Less bitter taste. Give with food.",
-    ].join(" "),
-  },
-
-  {
-    id: "secnidazole-granules",
-    name: "Secnidazole (oral)",
-    indication: "Amoebiasis / giardiasis (single dose convenience)",
-    category: "antibiotic",
-    dosePerKg: 30,
-    unit: "mg",
-    max: 2000,
-    route: "PO",
-    notes: [
-      "30 mg/kg single dose (max 2 g). IAP-recommended for amoebiasis.",
-      "Available as granules sachet (1 g) — mix with water/applesauce just before use.",
-      "Tablet: 1 g, 1.5 g. Indian brands: Secnil-1g sachet, Seczole, Flagentyl-1.5g.",
-      "Granule sachet (Secnil Forte 2g) for adults — use 1g sachet for children.",
-      "Single-dose compliance advantage — ideal for outpatient treatment.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // ANTI-TYPHOIDAL (India-specific doses)
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "azithromycin-typhoid",
-    name: "Azithromycin (enteric fever — high dose)",
-    indication: "Uncomplicated typhoid / drug-resistant Salmonella typhi (IAP first-line)",
-    category: "antibiotic",
-    dosePerKg: 20,
-    unit: "mg",
-    max: 1000,
-    route: "PO",
-    notes: [
-      "20 mg/kg OD × 7 days (max 1 g/day). IAP 2024 first-line for uncomplicated enteric fever.",
-      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose OD.",
-      "Indian brands: Azithral-200, Azee-200, Zithromax-200 susp.",
-      "Effective against ESBL Salmonella. Outpatient treatment possible for uncomplicated cases.",
-      "Switch to ceftriaxone 100 mg/kg IV if complicated (perforated/toxic/high fever >5 days).",
-    ].join(" "),
-  },
-
-  {
-    id: "ceftriaxone-typhoid",
-    name: "Ceftriaxone (complicated typhoid / inpatient)",
-    indication: "Complicated enteric fever / typhoid with complications",
-    category: "antibiotic",
-    dosePerKg: 75,
-    unit: "mg",
-    max: 3000,
     route: "IV / IM",
-    notes: [
-      "75–100 mg/kg/day OD IV × 7–14 days (IAP). Severe/complicated: 14 days minimum.",
-      "No syrup form — IV/IM only.",
-      "Indian brands: Monocef, Oframax, Rocephin, Cefaxone 250 mg/500 mg/1 g/2 g vials.",
-      "IM: reconstitute with 1% lignocaine to reduce injection pain.",
-      "Step down to oral azithromycin or cefixime when afebrile × 48 hr and able to take orally.",
-    ].join(" "),
+    notes: "Sepsis: 50 mg/kg OD. Meningitis: 100 mg/kg OD (max 4 g). Enteric fever: 75–100 mg/kg OD × 7–14 days. IM: reconstitute with 1% lignocaine. Avoid in neonates <28 days (bilirubin displacement).",
   },
-
   {
-    id: "chloramphenicol-oral",
-    name: "Chloramphenicol (oral — resource-limited settings)",
-    indication: "Typhoid (susceptible isolate) / meningitis (penicillin allergy) / rickettsial",
+    id: "gentamicin",
+    name: "Gentamicin",
+    indication: "Gram-negative sepsis / neonatal sepsis (with ampicillin)",
     category: "antibiotic",
-    dosePerKg: 25,
+    dosePerKg: 7.5,
     unit: "mg",
-    max: 1000,
-    route: "PO / IV",
-    notes: [
-      "50–75 mg/kg/day ÷ QID (max 3–4 g/day). Typhoid: 75 mg/kg/day × 14 days.",
-      "SYRUP 125 mg/5mL: give (dose ÷ 25) mL per dose QID.",
-      "Indian brands (125 mg/5mL): Paraxin-125 suspension, Kemicetine palmitate susp.",
-      "Still used in resource-limited India — cheap and widely available. Piyush Gupta recommends for susceptible typhoid.",
-      "AVOID in neonates (Grey Baby Syndrome). Monitor CBC weekly (aplastic anaemia risk — rare but fatal).",
-      "Do not use if resistant (most Indian strains now resistant — confirm sensitivity).",
-    ].join(" "),
+    max: 400,
+    route: "IV over 30 min",
+    notes: "Children >1 mo: 7.5 mg/kg OD. Neonates: 4–5 mg/kg q24–48h (GA-dependent). Monitor levels: trough <1 mcg/mL, peak 5–10 mcg/mL. Avoid concurrent furosemide.",
   },
-
-  // ══════════════════════════════════════════════════════════════════
-  // ANTI-RICKETTSIAL (Scrub Typhus — common in India)
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "doxycycline-scrub",
-    name: "Doxycycline (scrub typhus / rickettsia — >8 yr)",
-    indication: "Scrub typhus / spotted fever / brucellosis / atypical pneumonia (>8 yr)",
-    category: "antibiotic",
-    dosePerKg: 2.2,
-    unit: "mg",
-    max: 100,
-    route: "PO / IV",
-    notes: [
-      "2.2 mg/kg BD (max 100 mg/dose). Scrub typhus (IAP): 2.2 mg/kg OD × 7–14 days.",
-      "Only use in >8 years (permanent teeth staining in younger children).",
-      "No standard paediatric syrup in India — tablet/capsule only. Capsule can be opened, mixed with food.",
-      "Tablet: 100 mg. Indian brands: Doxybid-100, Tetradox-100, Biodoxi-100, Doxt-100.",
-      "Take with full glass of water, remain upright 30 min after (oesophageal ulcer risk).",
-      "Give with food to reduce nausea but avoid dairy/antacids within 2 hr.",
-      "For <8 yr: use azithromycin (10 mg/kg OD × 5 days) — IAP endorsed alternative.",
-    ].join(" "),
-  },
-
-  {
-    id: "azithromycin-scrub",
-    name: "Azithromycin (scrub typhus — <8 yr)",
-    indication: "Scrub typhus in children <8 years (doxycycline alternative)",
-    category: "antibiotic",
-    dosePerKg: 10,
-    unit: "mg",
-    max: 500,
-    route: "PO",
-    notes: [
-      "10 mg/kg OD × 5 days (max 500 mg). IAP endorsed alternative to doxycycline for <8 yr.",
-      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose OD.",
-      "SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose OD.",
-      "Indian brands: Azithral-100/200, Azee-100/200 suspension.",
-      "Monitor fever defervescence — if no improvement in 48 hr, reconsider diagnosis.",
-      "CSF penetration adequate for scrub typhus meningitis cases.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // AMINOGLYCOSIDES (IV — with monitoring guide)
-  // ══════════════════════════════════════════════════════════════════
-
   {
     id: "amikacin-iv",
-    name: "Amikacin (IV/IM)",
-    indication: "Gram-negative sepsis / MDR organisms / neonatal sepsis (gentamicin resistant)",
+    name: "Amikacin (IV)",
+    indication: "MDR Gram-negative / gentamicin-resistant / neonatal sepsis",
     category: "antibiotic",
     dosePerKg: 15,
     unit: "mg",
     max: 1500,
-    route: "IV / IM",
-    notes: [
-      "Children >1 mo: 15–20 mg/kg OD IV over 30 min. Neonates: 15 mg/kg q24–48h (based on GA).",
-      "No oral/syrup form. IV/IM only.",
-      "Indian brands: Amikin 100/500 mg, Mikacin 100/250/500 mg, Amicin, Biklin.",
-      "Monitor levels: trough <5 mcg/mL (before dose), peak 20–30 mcg/mL (1 hr after dose).",
-      "Renal function daily in PICU. Avoid concurrent furosemide (↑ nephrotoxicity).",
-      "IAP: preferred over gentamicin when MDR GNB or prior gentamicin failure suspected.",
-    ].join(" "),
+    route: "IV over 30 min",
+    notes: "15–20 mg/kg OD. Neonates: 15 mg/kg q24–48h (GA-based). Monitor levels: trough <5 mcg/mL, peak 20–30 mcg/mL. Indian brands: Amikin, Mikacin.",
   },
-
-  {
-    id: "netilmicin-iv",
-    name: "Netilmicin (IV/IM)",
-    indication: "Gram-negative sepsis (less nephrotoxic than gentamicin) / neonatal sepsis",
-    category: "antibiotic",
-    dosePerKg: 6,
-    unit: "mg",
-    max: 300,
-    route: "IV / IM",
-    notes: [
-      "Children: 6 mg/kg OD. Neonates: 3 mg/kg q12–24h depending on GA.",
-      "No oral form.",
-      "Indian brands: Netilin, Netromycin 25/100/150/200 mg vials.",
-      "Less nephrotoxic and ototoxic than gentamicin. Used widely in Indian NICUs.",
-      "Monitor renal function, trough levels (<2 mcg/mL).",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // ANTI-MRSA / RESISTANT GRAM-POSITIVES
-  // ══════════════════════════════════════════════════════════════════
-
   {
     id: "vancomycin-iv",
     name: "Vancomycin (IV)",
-    indication: "MRSA / resistant gram-positive sepsis / meningitis / endocarditis",
+    indication: "MRSA / resistant Gram-positive / meningitis / endocarditis",
     category: "antibiotic",
     dosePerKg: 15,
     unit: "mg",
     max: 750,
     route: "IV over 60 min",
-    notes: [
-      "15 mg/kg q6h (severe MRSA/meningitis) or 15–20 mg/kg q8h. Infuse over ≥60 min.",
-      "No syrup. IV only. Oral vancomycin (for C. diff): 10 mg/kg QID PO (not absorbed systemically).",
-      "Indian brands: Vancorid, Vancocin 500 mg/1g vials.",
-      "Target trough 15–20 mcg/mL for severe infections (CNS, endocarditis, osteomyelitis).",
-      "Red man syndrome if infused fast — slow rate, premedicate with antihistamine.",
-      "Monitor renal function and audiology with prolonged use.",
-    ].join(" "),
+    notes: "15 mg/kg q6–8h. Target trough 15–20 mcg/mL (severe). Red man syndrome if infused fast — slow rate. Indian brands: Vancorid, Vancocin.",
   },
-
-  {
-    id: "teicoplanin-iv",
-    name: "Teicoplanin (IV/IM)",
-    indication: "MRSA / resistant gram-positive / endocarditis (preferred in Indian ICUs)",
-    category: "antibiotic",
-    dosePerKg: 10,
-    unit: "mg",
-    max: 400,
-    route: "IV / IM",
-    notes: [
-      "Loading: 10 mg/kg q12h × 3 doses, then 6–10 mg/kg OD. Serious: 10 mg/kg OD maintenance.",
-      "No syrup. IV/IM only.",
-      "Indian brands: Targocid 200/400 mg, Teicoblast, Teicomycin.",
-      "Preferred over vancomycin in many Indian PICUs: OD dosing, less nephrotoxic, IM possible.",
-      "Target trough >10 mcg/mL (routine), >15–20 mcg/mL (endocarditis/deep infection).",
-    ].join(" "),
-  },
-
-  {
-    id: "linezolid-oral",
-    name: "Linezolid (oral/IV)",
-    indication: "MRSA / VRE / MDR-TB adjunct / bone and joint MRSA (oral step-down)",
-    category: "antibiotic",
-    dosePerKg: 10,
-    unit: "mg",
-    max: 600,
-    route: "PO / IV",
-    notes: [
-      "<12 yr: 10 mg/kg q8h (max 600 mg/dose). ≥12 yr: 600 mg q12h.",
-      "SYRUP 100 mg/5mL: give (dose ÷ 20) mL per dose TDS.",
-      "Indian brands (100 mg/5mL): Lizolid-100 susp, Linox-100 susp, Linospan-100 susp, Zyvox-100.",
-      "100% oral bioavailability — switch IV to PO early (same efficacy, much cheaper).",
-      "Monitor CBC weekly: thrombocytopenia, anaemia common with >2 weeks use.",
-      "Avoid tyramine-rich foods (cheese, soy sauce) — mild MAOI activity.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // CARBAPENEMS / RESERVE ANTIBIOTICS
-  // ══════════════════════════════════════════════════════════════════
-
   {
     id: "meropenem-iv",
     name: "Meropenem (IV)",
-    indication: "Severe sepsis / meningitis / MDR gram-negative / febrile neutropenia",
+    indication: "Severe sepsis / meningitis / MDR Gram-negative",
     category: "antibiotic",
     dosePerKg: 20,
     unit: "mg",
     max: 1000,
     route: "IV over 30 min",
-    notes: [
-      "Sepsis: 20 mg/kg q8h (max 1 g). Meningitis: 40 mg/kg q8h (max 2 g). Neonates: 20 mg/kg q12h.",
-      "MDR/ESBL: consider extended infusion over 3–4 hr for better PK/PD.",
-      "No oral form.",
-      "Indian brands: Meronem, Meromer, Merotrol 500 mg/1g vials.",
-      "Preferred carbapenem for CNS infections (no seizure risk unlike imipenem). WHO Watch group.",
-      "Reserve for MDR/ESBL organisms — culture guidance essential.",
-    ].join(" "),
+    notes: "Sepsis: 20 mg/kg q8h. Meningitis: 40 mg/kg q8h (max 2 g). Extended infusion (3–4 hr) for MDR. Indian brands: Meronem, Meromer.",
   },
-
   {
     id: "piptaz-iv",
     name: "Piperacillin-Tazobactam (Pip-Taz)",
-    indication: "Nosocomial sepsis / Pseudomonas / polymicrobial / febrile neutropenia",
+    indication: "Nosocomial sepsis / Pseudomonas / febrile neutropenia",
     category: "antibiotic",
     dosePerKg: 100,
     unit: "mg",
     max: 4000,
     route: "IV over 30 min",
-    notes: [
-      "100 mg/kg q8h (piperacillin component; max 4 g piperacillin/dose). Severe/neutropenia: q6h.",
-      "Extended infusion (over 4 hr) for MDR organisms improves PK/PD target attainment.",
-      "No oral form.",
-      "Indian brands: Tazocin 2.25g/4.5g, Piptaz, Pipzo, Tacicin.",
-      "Often combined with amikacin for double cover in PICU. Good biliary penetration.",
-      "WHO Watch group — use with culture guidance.",
-    ].join(" "),
+    notes: "100 mg/kg q8h (piperacillin component). Severe: q6h. Extended infusion (4 hr) for MDR. Indian brands: Tazocin, Piptaz.",
   },
-
   {
-    id: "cefoperazone-sulbactam-iv",
+    id: "cefoperazone-sulbactam",
     name: "Cefoperazone-Sulbactam",
-    indication: "MDR gram-negative / Acinetobacter / nosocomial / biliary sepsis",
+    indication: "MDR Gram-negative / Acinetobacter / biliary sepsis",
     category: "antibiotic",
     dosePerKg: 40,
     unit: "mg",
     max: 2000,
     route: "IV over 30 min",
-    notes: [
-      "40–80 mg/kg q12h (max 2 g/dose). Severe MDR: 40 mg/kg q8h or q6h.",
-      "Ratio 1:1 (cefoperazone:sulbactam). Sulbactam has intrinsic Acinetobacter activity.",
-      "No oral form.",
-      "Indian brands: Magnamycin 1.5g/3g, Sulperazone 1.5g/3g, Cefobid-S, Bacperazone-S.",
-      "Very widely used in Indian PICUs — good availability and cost. Monitor PT/INR (vitamin K antagonism).",
-      "Give vitamin K 10 mg IM weekly with prolonged courses.",
-    ].join(" "),
+    notes: "40–80 mg/kg q12h. Severe MDR: q8–6h. Monitor PT/INR (vitamin K antagonism). Indian brands: Magnamycin, Sulperazone, Cefobid-S.",
   },
-
+  {
+    id: "teicoplanin-iv",
+    name: "Teicoplanin (IV/IM)",
+    indication: "MRSA / resistant Gram-positive (preferred in Indian ICUs)",
+    category: "antibiotic",
+    dosePerKg: 10,
+    unit: "mg",
+    max: 400,
+    route: "IV / IM",
+    notes: "Loading: 10 mg/kg q12h × 3 doses, then 6–10 mg/kg OD. OD dosing, less nephrotoxic than vancomycin, IM possible. Indian brands: Targocid, Teicoblast.",
+  },
   {
     id: "colistin-iv",
-    name: "Colistin (Polymyxin E) — LAST RESORT",
-    indication: "XDR/PDR Acinetobacter baumannii / Pseudomonas / Klebsiella — last resort only",
+    name: "Colistin — LAST RESORT",
+    indication: "XDR/PDR Acinetobacter / Pseudomonas / Klebsiella",
     category: "antibiotic",
     dosePerKg: 2.5,
     unit: "mg",
     max: 150,
     route: "IV over 60 min",
-    notes: [
-      "Loading: 5 mg/kg colistin base activity (CBA) IV once. Maintenance: 2.5 mg/kg q12h.",
-      "Adjust for renal impairment. Nebulised colistin adjunct for VAP.",
-      "No oral form (poorly absorbed — PO only for bowel decontamination).",
-      "Indian brands: Colistin sulphate for injection (various generic), Coly-Mycin.",
-      "LAST RESORT — use ONLY for culture-confirmed XDR/PDR organisms.",
-      "Nephrotoxic (30–50%) and neurotoxic — monitor creatinine daily, watch for neuromuscular blockade.",
-      "Combine with meropenem or rifampicin for synergy against carbapenem-resistant organisms.",
-    ].join(" "),
+    notes: "Loading: 5 mg/kg CBA IV once. Maintenance: 2.5 mg/kg q12h. LAST RESORT — XDR/PDR only. Nephrotoxic (30–50%). Monitor creatinine daily. Combine with meropenem for synergy.",
   },
-
-  // ══════════════════════════════════════════════════════════════════
-  // ANTI-TB (IAP / RNTCP / Piyush Gupta doses)
-  // ══════════════════════════════════════════════════════════════════
-
   {
-    id: "isoniazid-susp",
-    name: "Isoniazid (INH)",
-    indication: "TB treatment / LTBI prophylaxis",
+    id: "cefotaxime-iv",
+    name: "Cefotaxime (IV/IM)",
+    indication: "Sepsis / meningitis / neonatal infection",
     category: "antibiotic",
-    dosePerKg: 10,
-    unit: "mg",
-    max: 300,
-    route: "PO",
-    notes: [
-      "Treatment: 10 mg/kg OD (max 300 mg). LTBI prophylaxis: 10 mg/kg OD × 6 months.",
-      "Indian brands: Isokin-100 syrup, INH suspension (various). Tablet: 100 mg, 300 mg.",
-      "Combination tablets: Rifater (INH+R+PZA), Rimactazid (INH+R) widely used in India.",
-      "Give with pyridoxine (vitamin B6) 5–10 mg/day to prevent peripheral neuropathy.",
-      "Monitor LFTs monthly. Give 30 min before food for best absorption.",
-    ].join(" "),
-  },
-
-  {
-    id: "rifampicin-oral",
-    name: "Rifampicin",
-    indication: "TB treatment / meningococcal prophylaxis / H. influenzae prophylaxis",
-    category: "antibiotic",
-    dosePerKg: 15,
-    unit: "mg",
-    max: 600,
-    route: "PO",
-    notes: [
-      "TB: 15 mg/kg OD (max 600 mg). Meningococcal prophylaxis: 10 mg/kg q12h × 2 days (max 600 mg/dose).",
-      "SYRUP: No standard commercial syrup in India — extemporaneous preparation 20 mg/mL.",
-      "Capsule (150/300/450/600 mg) can be opened and mixed with jam/honey for young children.",
-      "Indian brands: Rimactane, R-Cin, Rifadin 150/300/450/600 mg capsules.",
-      "Combination: Rimactazid (R+H), Akurit (R+H+PZA+E) 4-drug fixed dose combination.",
-      "Orange-red urine, sweat, tears — warn parents (harmless but alarming). Enzyme inducer.",
-      "Do NOT give alone (rapid resistance). Always part of combination TB therapy.",
-    ].join(" "),
-  },
-
-  {
-    id: "pyrazinamide-susp",
-    name: "Pyrazinamide (PZA)",
-    indication: "TB treatment (intensive phase — first 2 months)",
-    category: "antibiotic",
-    dosePerKg: 35,
+    dosePerKg: 50,
     unit: "mg",
     max: 2000,
-    route: "PO",
-    notes: [
-      "35 mg/kg OD (max 2 g). IAP/RNTCP: first 2 months of standard TB regimen (2HRZE/4HR).",
-      "SYRUP: extemporaneous 100 mg/mL preparation at some pharmacies.",
-      "Tablet: 500 mg, 750 mg. Crush tablet, mix with water/jam for children.",
-      "Indian brands: Pyrafat-500, PZA-Ciba-500, Pyzina-500. Fixed dose: Akurit-4, Rimstar-4.",
-      "Monitor uric acid (gout risk — less common in children). Monitor LFTs.",
-      "Arthralgia common — treatable with NSAIDs.",
-    ].join(" "),
-  },
-
-  {
-    id: "ethambutol-tab",
-    name: "Ethambutol (EMB)",
-    indication: "TB treatment (intensive phase — >5 years; caution <5 yr)",
-    category: "antibiotic",
-    dosePerKg: 20,
-    unit: "mg",
-    max: 1000,
-    route: "PO",
-    notes: [
-      "20 mg/kg OD (max 1 g). Part of 4-drug intensive phase (HRZE) per RNTCP/IAP.",
-      "CAUTION <5 yr — cannot reliably report visual changes (colour vision loss).",
-      "No commercial syrup in India. Tablet: 400 mg, 800 mg. Crush for young children.",
-      "Indian brands: Myambutol-400/800, Combutol-400/800.",
-      "Monitor colour vision and visual acuity monthly. Refer ophthalmology if any visual complaint.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // ANTI-MALARIALS (NVBDCP India guidelines)
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "artesunate-severe",
-    name: "Artesunate IV/IM (severe malaria)",
-    indication: "Severe/complicated P. falciparum malaria — IAP/NVBDCP first-line",
-    category: "antibiotic",
-    dosePerKg: 2.4,
-    unit: "mg",
-    max: 240,
     route: "IV / IM",
-    notes: [
-      "2.4 mg/kg at 0, 12, 24 hr — then OD until able to take orally (minimum 3 days).",
-      "No syrup. IV/IM only.",
-      "Indian brands: Falcigo-60 mg vial, Larinate-60 mg, Artesun IV.",
-      "Reconstitute with 1 mL 5% sodium bicarbonate, then dilute with 5% dextrose.",
-      "Monitor for delayed haemolytic anaemia (up to 4 weeks post-treatment — check Hb).",
-      "Follow with full course oral ACT (artemether-lumefantrine) on recovery.",
-    ].join(" "),
+    notes: "Sepsis: 50 mg/kg q8h. Meningitis: 75 mg/kg q6h (max 3 g/dose). Neonates: 50 mg/kg q12h (≤7d), q8h (>7d). Preferred over ceftriaxone in neonates. Indian brands: Claforan, Taxim.",
   },
-
-  {
-    id: "artemether-lumefantrine-tab",
-    name: "Artemether-Lumefantrine (Coartem / AL)",
-    indication: "Uncomplicated P. falciparum malaria — NVBDCP/IAP first-line oral",
-    category: "antibiotic",
-    fixedDose: "5–14 kg: 1 tab | 15–24 kg: 2 tabs | 25–34 kg: 3 tabs | >34 kg: 4 tabs — BD × 3 days",
-    unit: "tabs",
-    route: "PO with fatty food",
-    notes: [
-      "Each tab: artemether 20 mg + lumefantrine 120 mg. 6 doses over 3 days (0, 8, 24, 36, 48, 60 hr).",
-      "MUST give with fatty food (milk, biscuit, coconut water) — lumefantrine absorption increases 16-fold.",
-      "Indian brands: Coartem, Lumether, ALU, Artemether-L (various generics).",
-      "Dispersible paediatric tablet available (Coartem Dispersible) — dissolve in water for infants.",
-      "Avoid in first trimester. Monitor for QT prolongation in patients on other QT-prolonging drugs.",
-    ].join(" "),
-  },
-
-  {
-    id: "chloroquine-syrup",
-    name: "Chloroquine (P. vivax / P. malariae)",
-    indication: "Uncomplicated P. vivax / P. malariae (chloroquine-sensitive) — NVBDCP",
-    category: "antibiotic",
-    dosePerKg: 10,
-    unit: "mg",
-    max: 600,
-    route: "PO",
-    notes: [
-      "10 mg base/kg day 1 & 2, then 5 mg base/kg day 3 (max 600 mg/dose days 1–2, 300 mg day 3).",
-      "Indian brands (50 mg/5mL): Lariago syrup, Malarex syrup, Resochin syrup.",
-      "P. vivax still largely chloroquine-sensitive in India (NVBDCP 2023).",
-      "Follow with primaquine for radical cure (check G6PD first — MANDATORY).",
-      "Bitter taste — mix with juice. Give after food. Take at same time daily.",
-    ].join(" "),
-  },
-
-  {
-    id: "primaquine-tab",
-    name: "Primaquine (P. vivax radical cure / transmission block)",
-    indication: "P. vivax radical cure / P. ovale / P. falciparum transmission blocking",
-    category: "antibiotic",
-    dosePerKg: 0.25,
-    unit: "mg",
-    max: 15,
-    route: "PO",
-    notes: [
-      "P. vivax radical cure: 0.25 mg/kg/day × 14 days (max 15 mg/day). P. falciparum gametocyte: 0.25 mg/kg single dose.",
-      "NO SYRUP in India. Tablet: 2.5 mg, 7.5 mg. Half/quarter tablet for young children.",
-      "Indian brands: Primaquine-2.5 mg, Malanil, Primaquin-7.5 mg.",
-      "MANDATORY G6PD SCREENING before use — causes severe haemolysis in G6PD deficiency.",
-      "Avoid <6 months, pregnancy. Give with food to reduce GI side effects.",
-      "Monitor Hb and urine colour (dark urine = haemolysis — STOP immediately).",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // ANTI-FUNGAL
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "fluconazole-susp",
-    name: "Fluconazole (oral/IV)",
-    indication: "Invasive candidiasis / oropharyngeal thrush / cryptococcal / tinea / prophylaxis",
-    category: "antibiotic",
-    dosePerKg: 6,
-    unit: "mg",
-    max: 400,
-    route: "PO / IV",
-    notes: [
-      "Invasive candida: 6–12 mg/kg/day OD (max 400 mg/day; loading 12 mg/kg day 1).",
-      "Oropharyngeal thrush: 3 mg/kg OD × 7 days. Prophylaxis (immunocompromised): 3–6 mg/kg OD.",
-      "Indian brands (50 mg/5mL): Forcan-50 susp, Syscan-50 susp, Zocon-50 susp, Flucos-50.",
-      "IV: Forcan-100/200 mg IV, Syscan IV. Same dose IV as PO.",
-      "CYP3A4 inhibitor — check interactions (cyclosporine, tacrolimus, warfarin).",
-    ].join(" "),
-  },
-
-  {
-    id: "nystatin-oral",
-    name: "Nystatin (oral suspension)",
-    indication: "Oral candidiasis (thrush) / GI candida prophylaxis in neonates",
-    category: "antibiotic",
-    fixedDose: "Neonates: 1 mL (100,000 u) QID | Infants: 2 mL (200,000 u) QID | Children: 5 mL (500,000 u) QID",
-    unit: "mL",
-    route: "PO (swish and swallow)",
-    notes: [
-      "SUSPENSION 100,000 units/mL. Apply half dose to each side of mouth. Swish, then swallow.",
-      "Not absorbed systemically — acts locally. Continue 48 hr after symptoms resolve.",
-      "Indian brands: Candid oral drops (nystatin 100,000 u/mL), Nystatin suspension.",
-      "Alternative for oral thrush: Clotrimazole 1% oral gel (Clotrimox gel, Canesten oral gel).",
-      "Give after feeds, not before.",
-    ].join(" "),
-  },
-
   {
     id: "amphotericin-b-iv",
-    name: "Amphotericin B (conventional / liposomal)",
-    indication: "Invasive fungal infections / visceral leishmaniasis (kala-azar)",
+    name: "Amphotericin B (IV)",
+    indication: "Invasive fungal / visceral leishmaniasis (kala-azar)",
     category: "antibiotic",
     dosePerKg: 0.5,
     unit: "mg",
     max: 50,
     route: "IV over 4–6 hr",
-    notes: [
-      "Conventional: 0.5–1 mg/kg/day (start 0.25, escalate). Test dose 0.1 mg/kg over 30 min first.",
-      "Liposomal (AmBisome): 3–5 mg/kg/day — less nephrotoxic, preferred if available.",
-      "Kala-azar (NVBDCP): Liposomal 3 mg/kg days 1–5 and 14 (total 15 mg/kg) OR conventional 1 mg/kg alternate days × 15 doses.",
-      "No oral form.",
-      "Indian brands: Fungizone (conventional). Liposomal: AmBisome, Amphomul.",
-      "Premedicate: paracetamol 15 mg/kg + diphenhydramine 1 mg/kg 30 min pre-infusion.",
-      "Monitor: creatinine, K⁺, Mg²⁺ daily; CBC twice weekly. Supplement K⁺ and Mg²⁺ prophylactically.",
-    ].join(" "),
+    notes: "Conventional: 0.5–1 mg/kg/day. Test dose 0.1 mg/kg first. Liposomal (AmBisome): 3–5 mg/kg/day. Kala-azar: 3 mg/kg liposomal days 1–5 and 14. Premedicate. Monitor K⁺, Mg²⁺, creatinine daily.",
   },
-
-  // ══════════════════════════════════════════════════════════════════
-  // ANTIPARASITIC (India-relevant)
-  // ══════════════════════════════════════════════════════════════════
-
   {
-    id: "albendazole-susp",
-    name: "Albendazole",
-    indication: "Intestinal helminths / neurocysticercosis / giardia / hydatid",
+    id: "artesunate-iv",
+    name: "Artesunate (IV/IM)",
+    indication: "Severe/complicated P. falciparum malaria",
     category: "antibiotic",
-    dosePerKg: 7.5,
+    dosePerKg: 2.4,
     unit: "mg",
-    max: 400,
-    route: "PO with fatty food",
-    notes: [
-      "Helminths (>2 yr): 400 mg single dose (>10 kg). <10 kg or 1–2 yr: 200 mg single dose.",
-      "NCC (neurocysticercosis): 15 mg/kg/day BD × 4 weeks + dexamethasone (IAP).",
-      "Giardia: 400 mg OD × 5 days.",
-      "Indian brands (200 mg/5mL): Zentel-200 suspension, Bandy-Plus susp, Noworm susp.",
-      "Take with fatty food (↑absorption for tissue infections). MDA programme drug.",
-    ].join(" "),
+    max: 240,
+    route: "IV / IM",
+    notes: "2.4 mg/kg at 0, 12, 24 hr then OD (min 3 days). Reconstitute with 1 mL 5% NaHCO₃ then dilute in 5% dextrose. Monitor for delayed haemolysis (up to 4 weeks). Indian brands: Falcigo, Larinate.",
   },
-
   {
-    id: "ivermectin-tab",
-    name: "Ivermectin (oral)",
-    indication: "Scabies / strongyloidiasis / head lice / filariasis (>15 kg / >5 yr)",
-    category: "antibiotic",
-    dosePerKg: 0.2,
-    unit: "mg",
-    max: 12,
-    route: "PO fasting",
-    notes: [
-      "200 mcg/kg single dose (>15 kg). Scabies: repeat day 14. Strongyloides: 200 mcg/kg OD × 2 days.",
-      "No syrup in India. Tablet: 3 mg, 6 mg, 12 mg. Crush and mix with water for young children.",
-      "Indian brands: Ivecop-3/6/12, Scabo-6, Ivermectol-12.",
-      "Give on empty stomach with water. Avoid antacids.",
-      "Avoid <15 kg (insufficient safety data). MDA programme drug for filariasis.",
-      "For crusted/Norwegian scabies: 200 mcg/kg days 1, 2, 8, 9, 15 + topical permethrin.",
-    ].join(" "),
-  },
-
-  {
-    id: "mebendazole-susp",
-    name: "Mebendazole",
-    indication: "Intestinal worms / pinworm / hookworm (alternative to albendazole)",
-    category: "antibiotic",
-    fixedDose: "Pinworm: 100 mg single dose, repeat in 2 weeks | Others: 100 mg BD × 3 days",
-    unit: "mg",
-    route: "PO",
-    notes: [
-      "Pinworm (Enterobius): 100 mg single dose, repeat after 2 weeks. Treat whole family.",
-      "Hookworm/roundworm/whipworm: 100 mg BD × 3 days or 500 mg single dose.",
-      "SYRUP 100 mg/5mL: 5 mL per dose (regardless of weight for >2 yr).",
-      "Indian brands: Mebex-100 suspension, Vermox-100, Wormin suspension.",
-      "Poorly absorbed — acts locally in gut. Safe in >2 yr. Avoid in pregnancy.",
-      "Can be given with or without food. Tablet can be chewed, swallowed, or mixed with food.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // ANTI-LEISHMANIA (Kala-Azar — endemic in Bihar, UP, Jharkhand, WB)
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "miltefosine-oral",
-    name: "Miltefosine (oral)",
-    indication: "Visceral leishmaniasis (kala-azar) — oral option (NVBDCP)",
-    category: "antibiotic",
-    dosePerKg: 2.5,
-    unit: "mg",
-    max: 100,
-    route: "PO with food",
-    notes: [
-      "2.5 mg/kg/day OD (max 100 mg) × 28 days. Weight-based: 2–11 kg: 10 mg/day; 12–25 kg: 20 mg/day; >25 kg: 50 mg/day.",
-      "Capsule: 10 mg, 50 mg. No syrup — open 10 mg capsule, mix with food for small children.",
-      "Indian brands: Impavido, Miltefos. Available through NVBDCP programme.",
-      "Avoid in pregnancy (teratogenic) — contraception required for 3 months after treatment.",
-      "GI side effects common (nausea, vomiting) — give with food. Monitor renal and liver function.",
-    ].join(" "),
-  },
-
-  // ══════════════════════════════════════════════════════════════════
-  // ANTIVIRAL (HSV / Varicella — commonly needed in paeds)
-  // ══════════════════════════════════════════════════════════════════
-
-  {
-    id: "acyclovir-susp",
-    name: "Acyclovir (oral/IV)",
-    indication: "Herpes encephalitis / neonatal HSV / severe varicella / zoster",
+    id: "acyclovir-iv",
+    name: "Acyclovir (IV)",
+    indication: "HSV encephalitis / neonatal HSV / severe varicella",
     category: "antibiotic",
     dosePerKg: 20,
     unit: "mg",
     max: 800,
-    route: "PO / IV",
-    notes: [
-      "HSV encephalitis/neonatal: 20 mg/kg q8h IV × 14–21 days.",
-      "Severe varicella: 10 mg/kg q8h IV × 5–7 days. Oral varicella: 20 mg/kg QID × 5 days (max 800 mg/dose).",
-      "Indian brands (200 mg/5mL): Zovirax-200 suspension, Acivir-200 susp, Herpex-200 susp.",
-      "IV: Zovirax, Acivir, Vacilovir 250/500 mg vials.",
-      "Ensure adequate hydration during IV therapy (nephrotoxic if dehydrated). Infuse over 1 hr.",
-    ].join(" "),
+    route: "IV over 60 min",
+    notes: "HSV encephalitis/neonatal: 20 mg/kg q8h × 14–21 days. Severe varicella: 10 mg/kg q8h × 5–7 days. Adequate hydration essential (nephrotoxic). Indian brands: Zovirax IV, Acivir IV.",
   },
-  
-// ═══════════════════════════════════════════════════════════════════════════════
-// QUICK SYRUP DOSE REFERENCE TABLE
-// ═══════════════════════════════════════════════════════════════════════════════
-// HOW TO CALCULATE mL FROM SYRUP CONCENTRATION:
-// mL per dose = (dose in mg) ÷ (concentration in mg/mL)
-// Concentration (mg/mL) = strength/5
-// SYRUP: 50 mg/5mL: give (dose ÷ 10) mL per dose.
-// SYRUP: 100 mg/5mL: give (dose ÷ 20) mL per dose.
-// SYRUP: 125 mg/5 mL → give (dose ÷ 25) mL per dose.
-// SYRUP 200 mg/5mL: give (dose ÷ 40) mL per dose.
-  
-// COMMON CONCENTRATIONS AVAILABLE IN INDIA:
-//   Amoxicillin:           125 mg/5mL | 250 mg/5mL
-//   Co-amoxiclav:          228.5 mg/5mL | 457 mg/5mL
-//   Cefixime:              50 mg/5mL | 100 mg/5mL
-//   Cefpodoxime:           50 mg/5mL | 100 mg/5mL
-//   Cefuroxime:            125 mg/5mL
-//   Cefdinir:              125 mg/5mL
-//   Cefadroxil:            125 mg/5mL | 250 mg/5mL
-//   Azithromycin:          100 mg/5mL | 200 mg/5mL
-//   Clarithromycin:        125 mg/5mL | 250 mg/5mL
-//   Erythromycin:          125 mg/5mL | 200 mg/5mL (EES)
-//   Co-trimoxazole (paed): 40 mg TMP + 200 mg SMX per 5mL
-//   Metronidazole:         200 mg/5mL
-//   Ciprofloxacin:         250 mg/5mL
-//   Ofloxacin:             50 mg/5mL
-//   Chloramphenicol:       125 mg/5mL
-//   Fluconazole:           50 mg/5mL
-//   Albendazole:           200 mg/5mL
-//   Mebendazole:           100 mg/5mL
-//   Acyclovir:             200 mg/5mL
-//   Nystatin:              100,000 units/mL
-//   Linezolid:             100 mg/5mL
-//   Isoniazid:             50 mg/5mL | 100 mg/5mL
-//   Chloroquine:           50 mg base/5mL
-//
-// ═══════════════════════════════════════════════════════════════════════════════
-  // ─── Respiratory ─────────────────────────────────────
-  {
-    id: "racemic-epi",
-    name: "Racemic epinephrine",
-    indication: "Croup (stridor at rest)",
-    category: "resuscitation",
-    fixedDose: "0.05 mL/kg of 2.25% neb (max 0.5 mL)",
-    unit: "mL neb",
-    route: "Nebulised",
-    notes: "Observe ≥ 2–4 hr post-dose for rebound.",
-  },
-  {
-    id: "terbutaline",
-    name: "Terbutaline",
-    indication: "Severe asthma (IV/SC)",
-    category: "other",
-    dosePerKg: 0.01,
-    unit: "mg",
-    max: 0.4,
-    route: "SC / IV",
-    notes: "0.01 mg/kg SC (max 0.4 mg). IV load 10 mcg/kg over 10 min then 0.1–10 mcg/kg/min.",
-  },
-  // ─── Neonatal-specific (Harriet Lane) ────────────────
+
+  // ══════════════════════════════════════════════════════════════════
+  // NEONATAL SPECIFIC
+  // ══════════════════════════════════════════════════════════════════
   {
     id: "adrenaline-neonatal",
-    name: "Adrenaline (NEONATAL)",
-    indication: "NRP — HR <60 despite 30s effective PPV",
+    name: "Adrenaline (NEONATAL NRP)",
+    indication: "NRP — HR <60 despite 30 s effective PPV",
     category: "resuscitation",
     dosePerKg: 0.02,
     unit: "mg",
@@ -1796,7 +857,7 @@ export const DRUGS = [
     fixedDose: "0.05–0.1 mcg/kg/min",
     unit: "mcg/kg/min",
     route: "IV infusion",
-    notes: "Keep ductus arteriosus patent. Start low to avoid apnoea. Intubate if ≥0.05.",
+    notes: "Keep ductus arteriosus patent. Start low to avoid apnoea. Intubate if ≥0.05 mcg/kg/min.",
   },
   {
     id: "caffeine-citrate",
@@ -1807,7 +868,7 @@ export const DRUGS = [
     unit: "mg",
     max: 40,
     route: "IV / PO",
-    notes: "Load 20 mg/kg, maintenance 5–10 mg/kg/day. As citrate salt.",
+    notes: "Load 20 mg/kg IV/PO, maintenance 5–10 mg/kg/day. As citrate salt (note: caffeine base = half citrate dose).",
   },
   {
     id: "surfactant",
@@ -1817,10 +878,10 @@ export const DRUGS = [
     fixedDose: "Poractant 200 mg/kg ET · Beractant 100 mg/kg ET",
     unit: "mg/kg ET",
     route: "Endotracheal",
-    notes: "Given via ETT. Poractant (Curosurf) or Beractant (Survanta). May repeat q6–12h.",
+    notes: "Via ETT. Poractant (Curosurf) or Beractant (Survanta). May repeat q6–12 h.",
   },
   {
-    id: "vitamin-k",
+    id: "vitamin-k-neonatal",
     name: "Vitamin K (Phytomenadione)",
     indication: "Neonatal prophylaxis (VKDB)",
     category: "other",
@@ -1840,19 +901,81 @@ export const DRUGS = [
     route: "IV / IM",
     notes: "Not first-line in NRP. Focus on ventilation first. Avoid if mother on chronic opioids.",
   },
+
+  // ══════════════════════════════════════════════════════════════════
+  // RESPIRATORY
+  // ══════════════════════════════════════════════════════════════════
+  {
+    id: "salbutamol-neb",
+    name: "Salbutamol (nebulised)",
+    indication: "Asthma / bronchospasm",
+    category: "other",
+    fixedDose: "2.5 mg (<5 yr) | 5 mg (≥5 yr)",
+    unit: "mg neb",
+    route: "Nebulised",
+    notes: "Back-to-back in severe exacerbation. MDI + spacer equivalent. IV salbutamol: 5 mcg/kg over 15 min then 1–5 mcg/kg/min.",
+  },
+  {
+    id: "racemic-epi",
+    name: "Racemic epinephrine",
+    indication: "Croup (stridor at rest)",
+    category: "resuscitation",
+    fixedDose: "0.05 mL/kg of 2.25% neb (max 0.5 mL)",
+    unit: "mL neb",
+    route: "Nebulised",
+    notes: "Observe ≥2–4 hr post-dose for rebound. Adrenaline 1:1000 (1 mg/mL) 0.5 mL/kg (max 5 mL) is acceptable alternative.",
+  },
+  {
+    id: "ipratropium-neb",
+    name: "Ipratropium (nebulised)",
+    indication: "Severe asthma (add-on to salbutamol)",
+    category: "other",
+    fixedDose: "<12 yr: 250 mcg q20 min × 3 | ≥12 yr: 500 mcg q20 min × 3",
+    unit: "mcg neb",
+    route: "Nebulised",
+    notes: "Add to salbutamol in severe/life-threatening asthma for first 1–2 hr. Indian brands: Ipravent, Duolin (combined with salbutamol).",
+  },
+  {
+    id: "terbutaline-sc",
+    name: "Terbutaline (SC/IV)",
+    indication: "Severe asthma (when nebulisation not possible)",
+    category: "other",
+    dosePerKg: 0.01,
+    unit: "mg",
+    max: 0.4,
+    route: "SC / IV",
+    notes: "0.01 mg/kg SC (max 0.4 mg). IV load 10 mcg/kg over 10 min then 0.1–10 mcg/kg/min infusion.",
+  },
+  {
+    id: "dexamethasone-croup",
+    name: "Dexamethasone (croup)",
+    indication: "Croup",
+    category: "other",
+    dosePerKg: 0.6,
+    unit: "mg",
+    max: 10,
+    route: "PO / IM / IV",
+    notes: "Single dose. PO as effective as IM/IV (Piyush Gupta). Injection solution can be given orally.",
+  },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DRUG CATEGORIES
+// ─────────────────────────────────────────────────────────────────────────────
 export const DRUG_CATEGORIES = [
-  { id: "all", label: "All", matches: null },
-  { id: "resuscitation", label: "Resuscitation", matches: ["resuscitation"] },
-  { id: "rsi-sedation", label: "RSI / Sedation", matches: ["sedation", "airway"] },
-  { id: "anticonvulsant", label: "Anticonvulsant", matches: ["anticonvulsant"] },
-  { id: "analgesia", label: "Analgesia", matches: ["analgesia"] },
-  { id: "antibiotic", label: "Antibiotic", matches: ["antibiotic"] },
-  { id: "fluid", label: "Fluid / Electrolyte", matches: ["fluid"] },
-  { id: "other", label: "Other", matches: ["other"] },
+  { id: "all",           label: "All",               matches: null },
+  { id: "resuscitation", label: "Resuscitation",     matches: ["resuscitation"] },
+  { id: "rsi-sedation",  label: "RSI / Sedation",    matches: ["sedation", "airway"] },
+  { id: "anticonvulsant",label: "Anticonvulsant",    matches: ["anticonvulsant"] },
+  { id: "analgesia",     label: "Analgesia",         matches: ["analgesia"] },
+  { id: "antibiotic",    label: "Antibiotic (IV)",   matches: ["antibiotic"] },
+  { id: "fluid",         label: "Fluid / Electrolyte", matches: ["fluid"] },
+  { id: "other",         label: "Other",             matches: ["other"] },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DOSE CALCULATOR
+// ─────────────────────────────────────────────────────────────────────────────
 export function computeDrugDose(drug, weight) {
   if (drug.fixedDose) return drug.fixedDose;
   if (drug.dosePerKg == null) return "—";
