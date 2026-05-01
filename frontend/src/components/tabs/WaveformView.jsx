@@ -298,6 +298,7 @@ export default function WaveformView() {
       cancelAnimationFrame(animRef.current);
       ro.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const modeList = [
