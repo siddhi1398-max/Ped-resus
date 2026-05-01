@@ -280,7 +280,7 @@ function WaveformSVG({ paths, label, isDark }) {
 }
 
 // ─── WAVEFORM VIEW ────────────────────────────────────────────────────────────
-function WaveformsView() {
+function WaveformView() {
   const [selected, setSelected] = useState("normal-vc");
   const waveform = WAVEFORMS.find(w => w.id === selected);
 
