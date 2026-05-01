@@ -17,6 +17,9 @@ import {
   Warning, Lightbulb, CaretDown, ArrowSquareOut, CheckCircle,
   Syringe, FirstAid, Wind,
 } from "@phosphor-icons/react";
+import {
+  LOCAL_ANAESTHETICS, PSA_PRINCIPLES, PSA_REGIMENS, NERVE_BLOCKS, LAST_PROTOCOL,
+} from "../../data/sedationAnalgesia";
 
 // ─── PSA AGENTS — derived from drugs.js (embedded here for self-contained tab) ─
 const PSA_AGENTS = [
