@@ -1,6 +1,6 @@
 import { useWeight } from "../../context/WeightContext";
 import { RSI_PRE_MEDICATION, RSI_INDUCTION, RSI_PARALYSIS, RSI_POST, RSI_CHECKLIST } from "../../data/infusions";
-import { ICD_INSERTION, VENTILATOR_SETTINGS, WAVEFORMS } from "../../data/criticalCare";
+import { ICD_INSERTION } from "../../data/criticalCare";
 import InfusionCalculator from "../InfusionCalculator";
 import RuleOfSixs from "../RuleOfSixs";
 import { useState } from "react";
@@ -8,18 +8,17 @@ import { Warning } from "@phosphor-icons/react";
 
 const TONE_CARD = {
   emerald: "border-l-emerald-500 dark:border-l-emerald-400",
-  amber: "border-l-amber-500 dark:border-l-amber-400",
-  red: "border-l-red-500 dark:border-l-red-400",
-  sedation: "border-l-purple-500 dark:border-l-purple-400",
+  amber:   "border-l-amber-500 dark:border-l-amber-400",
+  red:     "border-l-red-500 dark:border-l-red-400",
+  sedation:"border-l-purple-500 dark:border-l-purple-400",
 };
 
 const SECTIONS = [
   { id: "quickstart", label: "RSI Quickstart" },
-  { id: "infusions", label: "Infusions (mL/hr)" },
-  { id: "rule6", label: "Rule of 6s" },
-  { id: "checklist", label: "7 Ps Checklist" },
-  { id: "icd", label: "ICD Insertion" },
-  { id: "vent", label: "Ventilator Settings" },
+  { id: "infusions",  label: "Infusions (mL/hr)" },
+  { id: "rule6",      label: "Rule of 6s" },
+  { id: "checklist",  label: "7 Ps Checklist" },
+  { id: "icd",        label: "ICD Insertion" },
 ];
 
 export default function ResuscitationTab() {
@@ -54,11 +53,10 @@ export default function ResuscitationTab() {
       </div>
 
       {sec === "quickstart" && <Quickstart weight={weight} />}
-      {sec === "infusions" && <InfusionCalculator />}
-      {sec === "rule6" && <RuleOfSixs />}
-      {sec === "checklist" && <Checklist />}
-      {sec === "icd" && <IcdSection weight={weight} />}
-      {sec === "vent" && <VentSection />}
+      {sec === "infusions"  && <InfusionCalculator />}
+      {sec === "rule6"      && <RuleOfSixs />}
+      {sec === "checklist"  && <Checklist />}
+      {sec === "icd"        && <IcdSection weight={weight} />}
     </div>
   );
 }
@@ -84,7 +82,9 @@ function RsiCard({ drug, weight, testid }) {
             {drug.dosePerKg} {drug.unit}/kg · {drug.route}
           </div>
         </div>
-        <div className="font-mono font-black text-xl text-red-600 dark:text-red-400">{dose} <span className="font-normal text-xs text-slate-500">{drug.unit}</span></div>
+        <div className="font-mono font-black text-xl text-red-600 dark:text-red-400">
+          {dose} <span className="font-normal text-xs text-slate-500">{drug.unit}</span>
+        </div>
       </div>
       {drug.note && <div className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-snug">{drug.note}</div>}
     </div>
@@ -134,9 +134,7 @@ function Quickstart({ weight }) {
       </section>
 
       <div className="rounded-md border border-slate-200 dark:border-slate-800 p-4 bg-slate-50 dark:bg-slate-900/50 text-xs text-slate-600 dark:text-slate-300">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-1">
-          Reversal
-        </div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-1">Reversal</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>Sugammadex (rocuronium) — 16 mg/kg IV: <span className="font-mono font-bold">{Math.min(weight * 16, 1200).toFixed(0)} mg</span></div>
           <div>Naloxone (opioid) 0.1 mg/kg — <span className="font-mono font-bold">{Math.min(weight * 0.1, 2).toFixed(2)} mg IV/IM/IN</span></div>
@@ -222,61 +220,6 @@ function IcdSection({ weight }) {
 
       <div className="text-xs text-slate-500 dark:text-slate-400 italic">
         References: Tintinalli ch. 30 · BTS Pleural Disease Guideline · APLS · Open Pediatrics chest tube module.
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════ Ventilator Settings ═══════════════════════════
-function VentSection() {
-  return (
-    <div className="space-y-5" data-testid="vent-section">
-      <div>
-        <h4 className="font-sans font-bold text-base mb-3">Initial Settings</h4>
-        <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="bg-slate-900 dark:bg-slate-950 text-white">
-                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Parameter</th>
-                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Pediatric</th>
-                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Neonatal</th>
-                <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Pearls</th>
-              </tr>
-            </thead>
-            <tbody>
-              {VENTILATOR_SETTINGS.initial.map((r) => (
-                <tr key={r.param} className="border-t border-slate-200 dark:border-slate-800 odd:bg-slate-50 dark:odd:bg-slate-900/40 align-top">
-                  <td className="p-3 font-bold whitespace-nowrap">{r.param}</td>
-                  <td className="p-3 font-mono text-xs">{r.pediatric}</td>
-                  <td className="p-3 font-mono text-xs text-cyan-700 dark:text-cyan-400">{r.neonatal}</td>
-                  <td className="p-3 text-xs text-slate-600 dark:text-slate-300 max-w-sm">{r.note}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <BulletBlock title="Sedation & paralysis" items={VENTILATOR_SETTINGS.sedationParalysis} />
-
-      <div>
-        <h4 className="font-sans font-bold text-base mb-2">Troubleshooting (DOPE)</h4>
-        <div className="space-y-2">
-          {VENTILATOR_SETTINGS.troubleshooting.map((t) => (
-            <div key={t.problem} className="rounded-md border border-l-4 border-l-red-500 dark:border-l-red-400 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-3">
-              <div className="font-bold text-sm">{t.problem}</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1"><span className="font-mono uppercase tracking-widest text-[9px]">Causes</span> · {t.causes}</div>
-              <div className="text-sm text-slate-700 dark:text-slate-200 mt-1.5"><span className="font-mono uppercase tracking-widest text-[9px] text-red-600 dark:text-red-400">Action</span> · {t.action}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <BulletBlock title="Lung-protective / rescue strategies" items={VENTILATOR_SETTINGS.protectiveStrategy} tone="amber" />
-      <BulletBlock title="Weaning & extubation" items={VENTILATOR_SETTINGS.weaning} tone="emerald" />
-
-      <div className="text-xs text-slate-500 dark:text-slate-400 italic">
-        References: PALICC pediatric ARDS guidelines · Open Pediatrics ventilation modules · F&L ch. 8 · Tintinalli ch. 31.
       </div>
     </div>
   );
