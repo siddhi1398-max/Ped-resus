@@ -10,7 +10,9 @@ import { useState, useMemo } from "react";
 import WaveformView from "../tabs/WaveformView";
 import { useWeight } from "../../context/WeightContext";
 import {
-  Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle,
+  Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle, 
+  ArrowUp, ArrowDown, Warning, Wind, Steps, CloudSlash, 
+  Gear, Wrench, Graph, TrendDown
 } from "@phosphor-icons/react";
 
 // ─── CLINICAL CONDITION PRESETS ───────────────────────────────────────────────
@@ -40,7 +42,7 @@ const TROUBLESHOOT = [
   {
     id: "high-pip",
     problem: "↑ Peak Airway Pressure",
-    icon: "⬆️",
+    icon: "ArrowDown",
     severity: "urgent",
     causes: ["Bronchospasm / secretions", "ETT obstruction, kink or biting", "Pneumothorax", "Main-stem intubation", "Pulmonary oedema / stiff ARDS lung"],
     action: "DOPE mnemonic: Disconnect from vent → bag manually. Check: D-isplaced ETT · O-bstruction (suction) · P-neumothorax (auscultate/chest US) · E-quipment failure.",
@@ -49,7 +51,7 @@ const TROUBLESHOOT = [
   {
     id: "low-vt",
     problem: "↓ Tidal Volume / Minute Ventilation",
-    icon: "⬇️",
+    icon: "ArrowUp",
     severity: "urgent",
     causes: ["Cuff leak (hear gurgling)", "Circuit disconnect", "ETT dislodgement", "Severe bronchospasm"],
     action: "Check ETT depth and position. Check cuff pressure (target 20–25 cmH₂O). Inspect all circuit connections. Observe chest rise bilaterally.",
@@ -58,7 +60,7 @@ const TROUBLESHOOT = [
   {
     id: "hypoxia",
     problem: "Refractory Hypoxia (SpO₂ < 88%)",
-    icon: "🔴",
+    icon: "Warning",
     severity: "critical",
     causes: ["FiO₂ / PEEP inadequate", "Main-stem intubation", "Pneumothorax", "Pulmonary embolism", "Cardiac R→L shunt", "Decompensated heart failure"],
     action: "Step 1: Increase FiO₂ to 1.0 immediately. Step 2: Confirm bilateral breath sounds. Step 3: Bedside echo (effusion, tamponade, RV failure). Step 4: CXR. Step 5: Consider recruitment manoeuvre if ARDS (30 cmH₂O × 30 s).",
@@ -67,7 +69,7 @@ const TROUBLESHOOT = [
   {
     id: "hypercapnia",
     problem: "Hypercapnia (PaCO₂ > 55 mmHg)",
-    icon: "💨",
+    icon: "Wind",
     severity: "moderate",
     causes: ["Low rate or Vt", "Large dead space (↑ PEEP, ↓ CO)", "Increased CO₂ production (fever, sepsis, agitation)", "ETT cuff leak"],
     action: "Increase RR first (preferred over Vt to limit volutrauma). Accept permissive hypercapnia (pH 7.20–7.30) in lung-protective strategy for ARDS. Treat fever. Check for cuff leak.",
@@ -76,7 +78,7 @@ const TROUBLESHOOT = [
   {
     id: "auto-peep",
     problem: "Auto-PEEP / Breath Stacking",
-    icon: "🌊",
+    icon: "Steps",
     severity: "moderate",
     causes: ["Obstructive disease (asthma, bronchiolitis)", "Inadequate expiratory time", "High respiratory rate"],
     action: "Reduce RR (allow more expiratory time). Extend I:E to 1:3 or 1:4. Bronchodilators via in-line nebuliser. Confirm on vent flow-time waveform (flow not returning to zero before next breath).",
@@ -85,7 +87,7 @@ const TROUBLESHOOT = [
   {
     id: "dysynchrony",
     problem: "Patient–Ventilator Dyssynchrony",
-    icon: "⚡",
+    icon: "CloudSlash",
     severity: "moderate",
     causes: ["Pain or agitation (inadequate sedation)", "Inappropriate trigger sensitivity", "Auto-PEEP (patient triggering against stacked breaths)", "Inappropriate flow or inspiratory time"],
     action: "Optimise analgesia (fentanyl) + sedation (midazolam). Adjust flow trigger to 1–3 L/min (or pressure trigger –1 to –2 cmH₂O). Check for auto-PEEP. Consider PRVC or pressure support if fighting VC mode.",
@@ -162,10 +164,10 @@ export default function VentilatorTab() {
   }, [weight, condition, cond]);
 
   const views = [
-    { id: "settings",     label: "Vent Settings",  emoji: "🫁" },
-    { id: "troubleshoot", label: "Troubleshoot",   emoji: "⚡" },
-    { id: "waveforms",    label: "Waveforms",      emoji: "📈" },
-    { id: "weaning",      label: "Weaning & SBT",  emoji: "📉" },
+    { id: "settings",     label: "Vent Settings",  icon: "Gear" },
+    { id: "troubleshoot", label: "Troubleshoot",   icon: "Wrench" },
+    { id: "waveforms",    label: "Waveforms",      icon: "Graph" },
+    { id: "weaning",      label: "Weaning & SBT",  icon: "TrendDown"},
   ];
 
   return (
@@ -370,7 +372,7 @@ export default function VentilatorTab() {
                     <div className="text-left">
                       <div className="font-bold text-sm text-slate-900 dark:text-white">{t.problem}</div>
                       <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mt-0.5">
-                        {t.severity === "critical" ? "🔴 CRITICAL" : t.severity === "urgent" ? "🟡 URGENT" : "🔵 ASSESS"}
+                        {t.severity === "critical" ? "CRITICAL" : t.severity === "urgent" ? "URGENT" : "ASSESS"}
                       </div>
                     </div>
                   </div>
