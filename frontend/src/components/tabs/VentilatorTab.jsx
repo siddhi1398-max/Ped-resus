@@ -10,8 +10,8 @@ import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
 import { Waveformview } from "../../components/Waveformview";
 import {
-  Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle,XCircle, info, 
-  wrench, gear, arrowcirleup, arrowncircledown, warning, pluscircle, steps, cloudslash, chartlineup, trenddown
+  Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle,XCircle, Info, 
+  Wrench, Gear, ArrowCirleUp, ArrownCircleDown, Warning, PlusCircle, Steps, CloudSlash, ChartLineUp, TrendDown
 } from "@phosphor-icons/react";
 
 // ─── CLINICAL CONDITION PRESETS ───────────────────────────────────────────────
