@@ -1,29 +1,44 @@
 // frontend/src/components/tabs/VentilatorTab.jsx
-// ─────────────────────────────────────────────────────────────────────────────
-// Pediatric Ventilator Settings Dashboard
-// Weight-based parameter calculator + troubleshooting guide + waveforms
-// References: Tintinalli · BTS/ATS · OpenPediatrics · PaediatricEmergencies.com
-//             PEMVECC 2017 · ARDSnet · Fleischer & Ludwig
-// ─────────────────────────────────────────────────────────────────────────────
+// References: Tintinalli · BTS/ATS · OpenPediatrics · PEMVECC 2017 · ARDSnet · Fleischer & Ludwig
 
 import { useState, useMemo } from "react";
 import WaveformView from "../tabs/WaveformView";
 import { useWeight } from "../../context/WeightContext";
 import {
-  Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle, 
-  ArrowUp, ArrowDown, Wind, Steps, CloudSlash, 
-  Gear, Wrench, Graph, TrendDown
+  Warning,
+  Lightbulb,
+  ArrowRight,
+  CaretDown,
+  CheckCircle,
+  Gear,
+  Wrench,
+  ChartLine,
+  ArrowLineDown,
+  Wind,
+  Thermometer,
+  Drop,
+  FirstAid,
+  ArrowUp,
+  ArrowDown,
+  Waves,
+  Lightning,
+  Stethoscope,
+  SmileyXEyes,
+  Prohibit,
+  Pulse,
+  ArrowsOut,
+  ShieldWarning,
 } from "@phosphor-icons/react";
 
 // ─── CLINICAL CONDITION PRESETS ───────────────────────────────────────────────
 const CONDITIONS = [
-  { id: "normal",       label: "Normal Lungs",       color: "emerald", peep: 5,  fio2: 0.40, vtFactor: 7,  rateAdj: 1.0, note: "Standard post-intubation settings" },
-  { id: "ards",         label: "ARDS",                color: "red",     peep: 10, fio2: 0.80, vtFactor: 5,  rateAdj: 1.3, note: "Lung-protective: Vt 4–6 mL/kg, high PEEP, permissive hypercapnia" },
-  { id: "asthma",       label: "Asthma / BPD",        color: "amber",   peep: 5,  fio2: 0.50, vtFactor: 7,  rateAdj: 0.7, note: "Low rate, long expiratory time (I:E 1:3–4), avoid auto-PEEP" },
-  { id: "pneumonia",    label: "Pneumonia",            color: "orange",  peep: 6,  fio2: 0.60, vtFactor: 6,  rateAdj: 1.1, note: "Moderate PEEP, standard Vt. Watch for consolidation worsening" },
-  { id: "cardiac",      label: "Post-Cardiac Surgery", color: "violet",  peep: 5,  fio2: 0.40, vtFactor: 6,  rateAdj: 1.0, note: "Aim early extubation. Avoid high PEEP (↓venous return)" },
-  { id: "pphn",         label: "PPHN (Neonatal)",      color: "rose",    peep: 5,  fio2: 1.0,  vtFactor: 5,  rateAdj: 1.5, note: "High FiO₂, consider iNO. Avoid hypocarbia. Alkalosis helps (pH 7.45–7.55)" },
-  { id: "bronchiolitis",label: "Bronchiolitis",        color: "sky",     peep: 5,  fio2: 0.50, vtFactor: 6,  rateAdj: 0.8, note: "HFNC / NIV preferred. If intubated: low rate, long Te, avoid PEEP stacking" },
+  { id: "normal",        label: "Normal Lungs",        color: "emerald", peep: 5,  fio2: 0.40, vtFactor: 7, rateAdj: 1.0, note: "Standard post-intubation settings" },
+  { id: "ards",          label: "ARDS",                 color: "red",     peep: 10, fio2: 0.80, vtFactor: 5, rateAdj: 1.3, note: "Lung-protective: Vt 4–6 mL/kg, high PEEP, permissive hypercapnia" },
+  { id: "asthma",        label: "Asthma / BPD",         color: "amber",   peep: 5,  fio2: 0.50, vtFactor: 7, rateAdj: 0.7, note: "Low rate, long expiratory time (I:E 1:3–4), avoid auto-PEEP" },
+  { id: "pneumonia",     label: "Pneumonia",             color: "orange",  peep: 6,  fio2: 0.60, vtFactor: 6, rateAdj: 1.1, note: "Moderate PEEP, standard Vt. Watch for consolidation worsening" },
+  { id: "cardiac",       label: "Post-Cardiac Surgery",  color: "violet",  peep: 5,  fio2: 0.40, vtFactor: 6, rateAdj: 1.0, note: "Aim early extubation. Avoid high PEEP (↓venous return)" },
+  { id: "pphn",          label: "PPHN (Neonatal)",       color: "rose",    peep: 5,  fio2: 1.0,  vtFactor: 5, rateAdj: 1.5, note: "High FiO₂, consider iNO. Avoid hypocarbia. Alkalosis helps (pH 7.45–7.55)" },
+  { id: "bronchiolitis", label: "Bronchiolitis",         color: "sky",     peep: 5,  fio2: 0.50, vtFactor: 6, rateAdj: 0.8, note: "HFNC / NIV preferred. If intubated: low rate, long Te, avoid PEEP stacking" },
 ];
 
 // ─── COLOUR MAP ───────────────────────────────────────────────────────────────
@@ -42,15 +57,17 @@ const TROUBLESHOOT = [
   {
     id: "high-pip",
     problem: "↑ Peak Airway Pressure",
-    severity: "urgent", 
+    Icon: ArrowUp,
+    severity: "urgent",
     causes: ["Bronchospasm / secretions", "ETT obstruction, kink or biting", "Pneumothorax", "Main-stem intubation", "Pulmonary oedema / stiff ARDS lung"],
-    action: "DOPE mnemonic: Disconnect from vent → bag manually. Check: D-isplaced ETT · O-bstruction (suction) · P-neumothorax (auscultate/chest US) · E-quipment failure.",
-    pearl: "If Peak–Plateau pressure gradient >10 cmH₂O → airway resistance problem (secretions, bronchospasm). If both elevated → compliance problem (ARDS, oedema, PTX).",
+    action: "DOPES mnemonic: Disconnect from vent → bag manually. Check: D-isplaced ETT · O-bstruction (suction) · P-neumothorax (auscultate/chest US) · E-quipment failure · S-tacked breaths.",
+    pearl: "Peak–Plateau pressure gradient >10 cmH₂O → airway resistance problem (secretions, bronchospasm). If both elevated → compliance problem (ARDS, oedema, PTX).",
   },
   {
     id: "low-vt",
     problem: "↓ Tidal Volume / Minute Ventilation",
-    severity: "urgent", 
+    Icon: ArrowDown,
+    severity: "urgent",
     causes: ["Cuff leak (hear gurgling)", "Circuit disconnect", "ETT dislodgement", "Severe bronchospasm"],
     action: "Check ETT depth and position. Check cuff pressure (target 20–25 cmH₂O). Inspect all circuit connections. Observe chest rise bilaterally.",
     pearl: "In pressure-controlled ventilation, a drop in Vt with unchanged PIP = ↓ compliance. In volume-controlled, a rise in PIP with unchanged Vt = ↑ resistance or ↓ compliance.",
@@ -58,6 +75,7 @@ const TROUBLESHOOT = [
   {
     id: "hypoxia",
     problem: "Refractory Hypoxia (SpO₂ < 88%)",
+    Icon: Prohibit,
     severity: "critical",
     causes: ["FiO₂ / PEEP inadequate", "Main-stem intubation", "Pneumothorax", "Pulmonary embolism", "Cardiac R→L shunt", "Decompensated heart failure"],
     action: "Step 1: Increase FiO₂ to 1.0 immediately. Step 2: Confirm bilateral breath sounds. Step 3: Bedside echo (effusion, tamponade, RV failure). Step 4: CXR. Step 5: Consider recruitment manoeuvre if ARDS (30 cmH₂O × 30 s).",
@@ -66,7 +84,8 @@ const TROUBLESHOOT = [
   {
     id: "hypercapnia",
     problem: "Hypercapnia (PaCO₂ > 55 mmHg)",
-    severity: "moderate", 
+    Icon: Wind,
+    severity: "moderate",
     causes: ["Low rate or Vt", "Large dead space (↑ PEEP, ↓ CO)", "Increased CO₂ production (fever, sepsis, agitation)", "ETT cuff leak"],
     action: "Increase RR first (preferred over Vt to limit volutrauma). Accept permissive hypercapnia (pH 7.20–7.30) in lung-protective strategy for ARDS. Treat fever. Check for cuff leak.",
     pearl: "PaCO₂ = VCO₂ / (VA). Increasing RR raises VA more safely than increasing Vt. ETCO₂ < PaCO₂ by 5–10 mmHg in normal physiology — widening gap = ↑ dead space.",
@@ -74,6 +93,7 @@ const TROUBLESHOOT = [
   {
     id: "auto-peep",
     problem: "Auto-PEEP / Breath Stacking",
+    Icon: Waves,
     severity: "moderate",
     causes: ["Obstructive disease (asthma, bronchiolitis)", "Inadequate expiratory time", "High respiratory rate"],
     action: "Reduce RR (allow more expiratory time). Extend I:E to 1:3 or 1:4. Bronchodilators via in-line nebuliser. Confirm on vent flow-time waveform (flow not returning to zero before next breath).",
@@ -82,6 +102,7 @@ const TROUBLESHOOT = [
   {
     id: "dysynchrony",
     problem: "Patient–Ventilator Dyssynchrony",
+    Icon: Lightning,
     severity: "moderate",
     causes: ["Pain or agitation (inadequate sedation)", "Inappropriate trigger sensitivity", "Auto-PEEP (patient triggering against stacked breaths)", "Inappropriate flow or inspiratory time"],
     action: "Optimise analgesia (fentanyl) + sedation (midazolam). Adjust flow trigger to 1–3 L/min (or pressure trigger –1 to –2 cmH₂O). Check for auto-PEEP. Consider PRVC or pressure support if fighting VC mode.",
@@ -100,13 +121,13 @@ function ParamCard({ label, value, unit, range, alert, info }) {
         <span className="text-sm font-normal text-slate-400 ml-1">{unit}</span>
       </div>
       {range && <div className="text-[10px] text-slate-400 font-mono mt-0.5">Range: {range}</div>}
-      {info && <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">{info}</div>}
+      {info  && <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">{info}</div>}
     </div>
   );
 }
 
-// ─── SECTION TOGGLE ──────────────────────────────────────────────────────────
-function Section({ title, icon, children, defaultOpen = false }) {
+// ─── SECTION TOGGLE ───────────────────────────────────────────────────────────
+function Section({ title, IconComp, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
@@ -115,10 +136,9 @@ function Section({ title, icon, children, defaultOpen = false }) {
         className="w-full flex items-center justify-between px-5 py-4 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <span className="text-lg">{icon}</span>
-          <span className="font-bold text-sm text-slate-900 dark:text-white" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-            {title}
-          </span>
+          {IconComp && <IconComp size={16} weight="bold" className="text-slate-500 dark:text-slate-400 flex-shrink-0" />}
+          <span className="font-bold text-sm text-slate-900 dark:text-white"
+                style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{title}</span>
         </div>
         <CaretDown size={14} weight="bold" className={`text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
@@ -127,84 +147,100 @@ function Section({ title, icon, children, defaultOpen = false }) {
   );
 }
 
+// ─── MNEMONIC CARD ────────────────────────────────────────────────────────────
+function MnemonicCard({ title, items }) {
+  return (
+    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+      <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-3">{title}</div>
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {items.map(d => (
+          <div key={d.letter + d.word} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+            <div className="text-3xl font-black text-slate-900 dark:text-white mb-1"
+                 style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{d.letter}</div>
+            <div className="font-bold text-xs text-slate-700 dark:text-slate-200 mb-1">{d.word}</div>
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">{d.detail}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function VentilatorTab() {
   const { weight } = useWeight();
-  const [condition, setCondition] = useState("normal");
+  const [condition, setCondition]     = useState("normal");
   const [openTrouble, setOpenTrouble] = useState(null);
-  const [activeView, setActiveView] = useState("settings");
+  const [activeView, setActiveView]   = useState("settings");
 
   const cond = CONDITIONS.find(c => c.id === condition);
-  const c = CMAP[cond.color];
+  const c    = CMAP[cond.color];
 
-  // ── Calculated parameters ─────────────────────────────────────────────────
   const params = useMemo(() => {
-    const wt = Math.max(weight, 0.5);
+    const wt       = Math.max(weight, 0.5);
     const baseRate = wt < 3 ? 50 : wt < 10 ? 30 : wt < 20 ? 25 : wt < 35 ? 20 : 16;
-    const rate = Math.round(baseRate * cond.rateAdj);
-    const vtLow  = +(wt * (cond.vtFactor - 1)).toFixed(1);
-    const vtHigh = +(wt * cond.vtFactor).toFixed(1);
-    const peep = cond.peep;
-    const mvLow  = +((vtLow / 1000) * rate).toFixed(2);
-    const mvHigh = +((vtHigh / 1000) * rate).toFixed(2);
-    const ti = wt < 5 ? "0.3–0.5" : wt < 10 ? "0.5–0.7" : wt < 20 ? "0.7–0.9" : wt < 40 ? "0.9–1.1" : "1.2–1.5";
-    const ie = condition === "asthma" || condition === "bronchiolitis" ? "1:3 to 1:4" : wt < 5 ? "1:1 to 1:2" : "1:2";
-    const pipMax = condition === "ards" ? 28 : 30;
-    const midaz  = +(wt * 0.05).toFixed(2);
-    const midazH = +(wt * 0.2).toFixed(2);
-    const fentL  = wt * 1;
-    const fentH  = wt * 4;
+    const rate     = Math.round(baseRate * cond.rateAdj);
+    const vtLow    = +(wt * (cond.vtFactor - 1)).toFixed(1);
+    const vtHigh   = +(wt * cond.vtFactor).toFixed(1);
+    const peep     = cond.peep;
+    const mvLow    = +((vtLow  / 1000) * rate).toFixed(2);
+    const mvHigh   = +((vtHigh / 1000) * rate).toFixed(2);
+    const ti       = wt < 5 ? "0.3–0.5" : wt < 10 ? "0.5–0.7" : wt < 20 ? "0.7–0.9" : wt < 40 ? "0.9–1.1" : "1.2–1.5";
+    const ie       = condition === "asthma" || condition === "bronchiolitis" ? "1:3 to 1:4" : wt < 5 ? "1:1 to 1:2" : "1:2";
+    const pipMax   = condition === "ards" ? 28 : 30;
+    const midaz    = +(wt * 0.05).toFixed(2);
+    const midazH   = +(wt * 0.2).toFixed(2);
+    const fentL    = wt * 1;
+    const fentH    = wt * 4;
     return { wt, rate, vtLow, vtHigh, peep, mvLow, mvHigh, ti, ie, pipMax, midaz, midazH, fentL, fentH };
   }, [weight, condition, cond]);
 
+  // ── View tab config ──────────────────────────────────────────────────────
   const views = [
-    { id: "settings",     label: "Vent Settings",  icon: "Gear" },
-    { id: "troubleshoot", label: "Troubleshoot",   icon: "Wrench" },
-    { id: "waveforms",    label: "Waveforms",      icon: "Graph" },
-    { id: "weaning",      label: "Weaning & SBT",  icon: "TrendDown"},
+    { id: "settings",     label: "Vent Settings", Icon: Gear       },
+    { id: "troubleshoot", label: "Troubleshoot",  Icon: Wrench     },
+    { id: "waveforms",    label: "Waveforms",     Icon: ChartLine  },
+    { id: "weaning",      label: "Weaning & SBT", Icon: ArrowLineDown },
   ];
 
   return (
     <div className="space-y-5">
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div>
         <h2 className="font-bold text-2xl text-slate-900 dark:text-white mb-1"
             style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
           Ventilator Dashboard
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-          Weight-based settings for <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span> patient ·
+          Weight-based settings for{" "}
+          <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span> patient ·
           Tintinalli · BTS/ATS · PEMVECC 2017 · OpenPediatrics
         </p>
       </div>
 
-      {/* ── Disclaimer ── */}
+      {/* Disclaimer */}
       <div className="flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-800 dark:text-amber-200">
         <Warning size={13} weight="fill" className="flex-shrink-0 mt-0.5 text-amber-500" />
         <span>Educational reference only. All ventilator settings must be individualised by a qualified intensivist based on clinical response, blood gases, and vent waveforms.</span>
       </div>
 
-      {/* ── View tabs ── */}
+      {/* View tabs */}
       <div className="flex flex-wrap gap-2">
         {views.map(v => (
-          <button
-            key={v.id}
-            onClick={() => setActiveView(v.id)}
+          <button key={v.id} onClick={() => setActiveView(v.id)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider border transition-all ${
               activeView === v.id
                 ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
                 : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
-            }`}
-          >
-            <span>{v.emoji}</span> {v.label}
+            }`}>
+            <v.Icon size={13} weight="bold" />
+            {v.label}
           </button>
         ))}
       </div>
 
-      {/* ════════════════════════════════════════════
-          VIEW 1: VENTILATOR SETTINGS
-      ════════════════════════════════════════════ */}
+      {/* ════════════════════════ VIEW 1: SETTINGS ════════════════════════ */}
       {activeView === "settings" && (
         <div className="space-y-5">
 
@@ -234,29 +270,14 @@ export default function VentilatorTab() {
 
           {/* Settings grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            <ParamCard label="Tidal Volume" value={`${params.vtLow}–${params.vtHigh}`} unit="mL"
-              range={`${cond.vtFactor - 1}–${cond.vtFactor} mL/kg`} alert={condition === "ards"}
-              info="Use IBW not actual weight for obese patients" />
-            <ParamCard label="Rate (RR)" value={`${Math.max(params.rate - 2, 10)}–${params.rate + 2}`} unit="/min"
-              range="Age-adjusted"
-              info={params.wt < 5 ? "Neonate: 40–60/min" : params.wt < 10 ? "Infant: 25–35/min" : params.wt < 20 ? "Toddler: 20–28/min" : "Child: 16–24/min"} />
-            <ParamCard label="PEEP" value={params.peep} unit="cmH₂O"
-              range={condition === "ards" ? "8–15" : "4–6"}
-              info="↑ PEEP = ↑ oxygenation but ↓ venous return" />
-            <ParamCard label="FiO₂ (start)" value={`${Math.round(cond.fio2 * 100)}%`} unit=""
-              range="Titrate to SpO₂ ≥ 92%"
-              info="Reduce FiO₂ to < 60% as soon as safe (O₂ toxicity)"
-              alert={cond.fio2 >= 0.8} />
-            <ParamCard label="Minute Ventilation" value={`${params.mvLow}–${params.mvHigh}`} unit="L/min"
-              range="Normal 100–150 mL/kg/min" info="MV = Vt × RR" />
-            <ParamCard label="Inspiratory Time" value={params.ti} unit="sec" range="Age-adjusted"
-              info={params.wt < 5 ? "Neonates: 0.3–0.5 s" : params.wt < 10 ? "Infant: 0.5–0.7 s" : params.wt < 20 ? "Toddler: 0.7–0.9 s" : params.wt < 40 ? "Child: 0.9–1.1 s" : "Adolescent: 1.2–1.5 s"} />
-            <ParamCard label="I:E Ratio" value={params.ie} unit=""
-              range={condition === "asthma" ? "Extend to 1:4" : "Standard 1:2"}
-              info={condition === "asthma" ? "Allow full expiration to prevent air trapping" : "Increase E time in obstructive disease"} />
-            <ParamCard label="Max PIP / Plateau" value={`≤ ${params.pipMax}`} unit="cmH₂O"
-              range="Plateau ≤ 30" alert={condition === "ards"}
-              info="Driving pressure = Plateau – PEEP. Target < 15 cmH₂O" />
+            <ParamCard label="Tidal Volume"      value={`${params.vtLow}–${params.vtHigh}`}                    unit="mL"     range={`${cond.vtFactor - 1}–${cond.vtFactor} mL/kg`} alert={condition === "ards"} info="Use IBW not actual weight for obese patients" />
+            <ParamCard label="Rate (RR)"          value={`${Math.max(params.rate - 2, 10)}–${params.rate + 2}`} unit="/min"   range="Age-adjusted" info={params.wt < 5 ? "Neonate: 40–60/min" : params.wt < 10 ? "Infant: 25–35/min" : params.wt < 20 ? "Toddler: 20–28/min" : "Child: 16–24/min"} />
+            <ParamCard label="PEEP"               value={params.peep}                                            unit="cmH₂O" range={condition === "ards" ? "8–15" : "4–6"} info="↑ PEEP = ↑ oxygenation but ↓ venous return" />
+            <ParamCard label="FiO₂ (start)"       value={`${Math.round(cond.fio2 * 100)}%`}                     unit=""       range="Titrate to SpO₂ ≥ 92%" info="Reduce FiO₂ to < 60% as soon as safe (O₂ toxicity)" alert={cond.fio2 >= 0.8} />
+            <ParamCard label="Minute Ventilation" value={`${params.mvLow}–${params.mvHigh}`}                    unit="L/min"  range="Normal 100–150 mL/kg/min" info="MV = Vt × RR" />
+            <ParamCard label="Inspiratory Time"   value={params.ti}                                              unit="sec"    range="Age-adjusted" info={params.wt < 5 ? "Neonates: 0.3–0.5 s" : params.wt < 10 ? "Infant: 0.5–0.7 s" : params.wt < 20 ? "Toddler: 0.7–0.9 s" : params.wt < 40 ? "Child: 0.9–1.1 s" : "Adolescent: 1.2–1.5 s"} />
+            <ParamCard label="I:E Ratio"           value={params.ie}                                              unit=""       range={condition === "asthma" ? "Extend to 1:4" : "Standard 1:2"} info={condition === "asthma" ? "Allow full expiration to prevent air trapping" : "Increase E time in obstructive disease"} />
+            <ParamCard label="Max PIP / Plateau"  value={`≤ ${params.pipMax}`}                                  unit="cmH₂O" range="Plateau ≤ 30" alert={condition === "ards"} info="Driving pressure = Plateau – PEEP. Target < 15 cmH₂O" />
           </div>
 
           {/* Mode recommendation */}
@@ -266,9 +287,9 @@ export default function VentilatorTab() {
               <div>
                 <div className="text-[10px] font-mono text-slate-400 mb-1">PEDIATRIC (&gt; 5 kg)</div>
                 <div className="font-bold text-sm text-slate-900 dark:text-white">
-                  {condition === "ards" ? "PRVC (Pressure-Regulated Volume Control)" :
+                  {condition === "ards"         ? "PRVC (Pressure-Regulated Volume Control)"    :
                    condition === "asthma" || condition === "bronchiolitis" ? "SIMV-PC + PS (low rate, long Te)" :
-                   condition === "pphn" ? "PC-AC (optimise oxygenation)" :
+                   condition === "pphn"          ? "PC-AC (optimise oxygenation)"                :
                    "PRVC or SIMV-PC + PS"}
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">PS 5–10 cmH₂O for spontaneous breaths</div>
@@ -287,27 +308,21 @@ export default function VentilatorTab() {
           <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 p-4">
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-violet-600 dark:text-violet-400 mb-3">Post-Intubation Sedation / Analgesia</div>
             <div className="grid sm:grid-cols-3 gap-3">
-              <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-violet-100 dark:border-violet-900">
-                <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Midazolam</div>
-                <div className="font-black text-lg text-violet-600 dark:text-violet-400" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-                  {params.midaz}–{params.midazH}
-                  <span className="text-xs font-normal text-slate-400 ml-1">mg/hr</span>
+              {[
+                { label: "Midazolam",  val: `${params.midaz}–${params.midazH}`, unit: "mg/hr",  sub: "0.05–0.2 mg/kg/hr" },
+                { label: "Fentanyl",   val: `${params.fentL}–${params.fentH}`,  unit: "mcg/hr", sub: "1–4 mcg/kg/hr" },
+                { label: "NMB (if needed)", val: "Rocuronium", unit: "",         sub: "5–10 mcg/kg/min infusion. Only for severe dyssynchrony / prone / severe ARDS" },
+              ].map(drug => (
+                <div key={drug.label} className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-violet-100 dark:border-violet-900">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">{drug.label}</div>
+                  <div className="font-black text-lg text-violet-600 dark:text-violet-400"
+                       style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                    {drug.val}
+                    {drug.unit && <span className="text-xs font-normal text-slate-400 ml-1">{drug.unit}</span>}
+                  </div>
+                  <div className="text-[10px] text-slate-400">{drug.sub}</div>
                 </div>
-                <div className="text-[10px] text-slate-400">0.05–0.2 mg/kg/hr</div>
-              </div>
-              <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-violet-100 dark:border-violet-900">
-                <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Fentanyl</div>
-                <div className="font-black text-lg text-violet-600 dark:text-violet-400" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-                  {params.fentL}–{params.fentH}
-                  <span className="text-xs font-normal text-slate-400 ml-1">mcg/hr</span>
-                </div>
-                <div className="text-[10px] text-slate-400">1–4 mcg/kg/hr</div>
-              </div>
-              <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-violet-100 dark:border-violet-900">
-                <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">NMB (if needed)</div>
-                <div className="font-bold text-sm text-slate-900 dark:text-white">Rocuronium</div>
-                <div className="text-[10px] text-slate-400">5–10 mcg/kg/min infusion. Only for severe dyssynchrony / prone / severe ARDS</div>
-              </div>
+              ))}
             </div>
             <div className="text-[10px] text-violet-600 dark:text-violet-400 mt-2">
               Target: COMFORT-B score 11–17 · Daily sedation interruption + SBT as tolerated
@@ -327,7 +342,9 @@ export default function VentilatorTab() {
                     </tr>
                     <tr className="border-t border-red-200 dark:border-red-800">
                       <th className="text-left px-2 py-1.5 font-mono text-[9px] uppercase tracking-widest text-red-600 dark:text-red-400">PEEP</th>
-                      {[5,5,8,10,10,10,14,18].map((p, i) => <td key={i} className="px-2 py-1.5 text-center font-mono font-bold text-red-600 dark:text-red-400 text-xs">{p}</td>)}
+                      {[5,5,8,10,10,10,14,18].map((p, i) => (
+                        <td key={i} className="px-2 py-1.5 text-center font-mono font-bold text-red-600 dark:text-red-400 text-xs">{p}</td>
+                      ))}
                     </tr>
                   </thead>
                 </table>
@@ -340,33 +357,37 @@ export default function VentilatorTab() {
         </div>
       )}
 
-      {/* ════════════════════════════════════════════
-          VIEW 2: TROUBLESHOOTING
-      ════════════════════════════════════════════ */}
+      {/* ════════════════════════ VIEW 2: TROUBLESHOOT ════════════════════════ */}
       {activeView === "troubleshoot" && (
         <div className="space-y-3">
-          <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-            Click any problem to expand causes and immediate actions.
-          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+            Tap any problem to expand causes and immediate actions.
+          </p>
 
           {TROUBLESHOOT.map(t => {
             const isOpen = openTrouble === t.id;
-            const severityColor = t.severity === "critical"
-              ? "border-l-red-500 bg-red-50 dark:bg-red-950/20"
-              : t.severity === "urgent"
-              ? "border-l-amber-500 bg-amber-50 dark:bg-amber-950/20"
-              : "border-l-blue-500 bg-blue-50 dark:bg-blue-950/20";
+            const severityStyle =
+              t.severity === "critical" ? "border-l-red-500 bg-red-50 dark:bg-red-950/20"    :
+              t.severity === "urgent"   ? "border-l-amber-500 bg-amber-50 dark:bg-amber-950/20" :
+                                          "border-l-blue-500 bg-blue-50 dark:bg-blue-950/20";
+            const severityLabel =
+              t.severity === "critical" ? "CRITICAL" :
+              t.severity === "urgent"   ? "URGENT"   : "ASSESS";
+            const severityColor =
+              t.severity === "critical" ? "text-red-500"   :
+              t.severity === "urgent"   ? "text-amber-500" : "text-blue-500";
+
             return (
-              <div key={t.id} className={`border-l-4 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden ${severityColor}`}>
+              <div key={t.id} className={`border-l-4 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden ${severityStyle}`}>
                 <button
                   onClick={() => setOpenTrouble(isOpen ? null : t.id)}
                   className="w-full flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                   <div className="flex items-center gap-3">
-                    <span className="text-xl">{t.icon}</span>
+                    <t.Icon size={18} weight="bold" className={`${severityColor} flex-shrink-0`} />
                     <div className="text-left">
                       <div className="font-bold text-sm text-slate-900 dark:text-white">{t.problem}</div>
-                      <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mt-0.5">
-                        {t.severity === "critical" ? "CRITICAL" : t.severity === "urgent" ? "URGENT" : "ASSESS"}
+                      <div className={`text-[10px] font-mono uppercase tracking-widest mt-0.5 ${severityColor}`}>
+                        {severityLabel}
                       </div>
                     </div>
                   </div>
@@ -380,7 +401,7 @@ export default function VentilatorTab() {
                       <div className="space-y-1">
                         {t.causes.map((cause, i) => (
                           <div key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
-                            <span className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold flex-shrink-0 mt-0.5">{i+1}</span>
+                            <span className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold flex-shrink-0 mt-0.5">{i + 1}</span>
                             {cause}
                           </div>
                         ))}
@@ -403,59 +424,40 @@ export default function VentilatorTab() {
             );
           })}
 
-          {/* DOPES card */}
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 mt-2">
-            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-3">DOPES Mnemonic — Acute Deterioration on Ventilator</div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { letter: "D", word: "Displaced",    detail: "ETT moved up/down. Check depth at lips." },
-                { letter: "O", word: "Obstructed",   detail: "Mucus plug, kink, biting tube. Suction + check." },
-                { letter: "P", word: "Pneumothorax", detail: "Auscultate + bedside US. Needle decompress if tension." },
-                { letter: "E", word: "Equipment",    detail: "Circuit disconnect, vent failure. Bag manually." },
-                { letter: "S", word: "Stacked Breaths",   detail: "Auto PEEP from inadequate expiration" },
-              ].map(d => (
-                <div key={d.letter} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
-                  <div className="text-3xl font-black text-slate-900 dark:text-white" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{d.letter}</div>
-                  <div className="font-bold text-xs text-slate-700 dark:text-slate-200 mb-1">{d.word}</div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">{d.detail}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* DOPES mnemonic */}
+          <MnemonicCard
+            title="DOPES Mnemonic — Acute Deterioration on Ventilator"
+            items={[
+              { letter: "D", word: "Displaced",      detail: "ETT moved up/down. Check depth at lips." },
+              { letter: "O", word: "Obstructed",     detail: "Mucus plug, kink, biting tube. Suction + check." },
+              { letter: "P", word: "Pneumothorax",   detail: "Auscultate + bedside US. Needle decompress if tension." },
+              { letter: "E", word: "Equipment",      detail: "Circuit disconnect, vent failure. Bag manually." },
+              { letter: "S", word: "Stacked Breaths",detail: "Auto-PEEP from inadequate expiratory time." },
+            ]}
+          />
+
+          {/* DOTTS mnemonic */}
+          <MnemonicCard
+            title="DOTTS Mnemonic — Systematic Vent Check"
+            items={[
+              { letter: "D", word: "Disconnect",       detail: "Disconnect patient from vent. Bag manually — assess resistance." },
+              { letter: "O", word: "Oxygen",           detail: "Oxygenate with bag-mask. Note resistance and compliance." },
+              { letter: "T", word: "Tube Position",    detail: "Check ETT depth, migration, kinking, or mucus plug obstruction." },
+              { letter: "T", word: "Tweak the Vent",   detail: "Review if settings are appropriate for current patient state." },
+              { letter: "S", word: "Sonography",       detail: "Lung ultrasound: bilateral lung sliding, rule out PTX / effusion." },
+            ]}
+          />
         </div>
       )}
-          {/* DOTTS card */}
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 mt-2">
-            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-3">DOPE Mnemonic — Acute Deterioration on Ventilator</div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { letter: "D", word: "Disconnect",   detail: "Disconnect the patient from Ventilator." },
-                { letter: "O", word: "Oxygen",   detail: "Oxygenate patientwith Bag Mask, feel for resistance." },
-                { letter: "T", word: "Tube Position", detail: "Check for migration/kinking/obstruction with mucus plug." },
-                { letter: "T", word: "Tweak the Ventilator",    detail: "Check if Ventilator settings are appropriate for patient." },
-                { letter: "S", word: "Sonography",    detail: "Lung Ultrasound: check lung sliding." },
-              ].map(d => (
-                <div key={d.letter} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
-                  <div className="text-3xl font-black text-slate-900 dark:text-white" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{d.letter}</div>
-                  <div className="font-bold text-xs text-slate-700 dark:text-slate-200 mb-1">{d.word}</div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">{d.detail}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-      {/* ════════════════════════════════════════════
-          VIEW 3: WAVEFORMS
-      ════════════════════════════════════════════ */}
+
+      {/* ════════════════════════ VIEW 3: WAVEFORMS ════════════════════════ */}
       {activeView === "waveforms" && <WaveformView />}
 
-      {/* ════════════════════════════════════════════
-          VIEW 4: WEANING & SBT
-      ════════════════════════════════════════════ */}
+      {/* ════════════════════════ VIEW 4: WEANING ════════════════════════ */}
       {activeView === "weaning" && (
         <div className="space-y-5">
 
+          {/* Readiness checklist */}
           <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-4">
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400 mb-3">Daily Readiness Assessment</div>
             <div className="space-y-2">
@@ -476,7 +478,7 @@ export default function VentilatorTab() {
             </div>
           </div>
 
-          <Section title="Spontaneous Breathing Trial (SBT)" icon="🌬️" defaultOpen={true}>
+          <Section title="Spontaneous Breathing Trial (SBT)" IconComp={Wind} defaultOpen={true}>
             <div className="space-y-3">
               <div className="grid sm:grid-cols-2 gap-3">
                 <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
@@ -487,36 +489,43 @@ export default function VentilatorTab() {
                 <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
                   <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Monitor During SBT</div>
                   <div className="text-xs text-slate-600 dark:text-slate-300 space-y-0.5">
-                    <div>• RR, SpO₂, HR, BP every 15 min</div>
-                    <div>• Increased work of breathing</div>
-                    <div>• Diaphoresis / agitation</div>
-                    <div>• SpO₂ &lt; 90% → STOP SBT</div>
+                    <div>· RR, SpO₂, HR, BP every 15 min</div>
+                    <div>· Increased work of breathing</div>
+                    <div>· Diaphoresis / agitation</div>
+                    <div>· SpO₂ &lt; 90% → STOP SBT</div>
                   </div>
                 </div>
               </div>
               <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-3">
-                <div className="text-[9px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-2">Cuff Leak Test (pre-extubation)</div>
-                <div className="text-xs text-amber-800 dark:text-amber-200">
-                  Deflate ETT cuff → listen for air leak around tube on inspiration. <strong>Audible leak = lower risk of post-extubation stridor.</strong> No leak in child &lt; 7 yr → consider dexamethasone pre-extubation.
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <Stethoscope size={11} weight="bold" className="text-amber-600 dark:text-amber-400" />
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400">Cuff Leak Test (pre-extubation)</span>
                 </div>
+                <p className="text-xs text-amber-800 dark:text-amber-200">
+                  Deflate ETT cuff → listen for air leak on inspiration.{" "}
+                  <strong>Audible leak = lower risk of post-extubation stridor.</strong> No leak in child &lt; 7 yr → consider dexamethasone pre-extubation.
+                </p>
               </div>
               <div className="rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 p-3">
-                <div className="text-[9px] font-mono uppercase tracking-widest text-violet-600 dark:text-violet-400 mb-1">Pre-Extubation Dexamethasone</div>
-                <div className="text-xs text-violet-800 dark:text-violet-200">
-                  If at risk of post-extubation stridor (prolonged intubation &gt; 5 days, &lt; 7 yr, previous stridor, no cuff leak):
-                  <strong> Dexamethasone 0.25 mg/kg IV q6h × 4 doses</strong> (first dose 12 hr before extubation). Max 10 mg.
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <FirstAid size={11} weight="bold" className="text-violet-600 dark:text-violet-400" />
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-violet-600 dark:text-violet-400">Pre-Extubation Dexamethasone</span>
                 </div>
+                <p className="text-xs text-violet-800 dark:text-violet-200">
+                  If at risk of post-extubation stridor (prolonged intubation &gt; 5 days, &lt; 7 yr, previous stridor, no cuff leak):{" "}
+                  <strong>Dexamethasone 0.25 mg/kg IV q6h × 4 doses</strong> (first dose 12 hr before extubation). Max 10 mg.
+                </p>
               </div>
             </div>
           </Section>
 
-          <Section title="Post-Extubation Support" icon="🫁">
+          <Section title="Post-Extubation Support" IconComp={ArrowsOut}>
             <div className="space-y-2">
               {[
                 { label: "HFNC (High Flow Nasal Cannula)", detail: `Flow: ${Math.round(weight * 2)}–${Math.round(weight * 3)} L/min (2–3 L/kg/min). FiO₂ titrate to SpO₂. Reduces work of breathing post-extubation.` },
-                { label: "NIV (CPAP/BiPAP)", detail: "CPAP 5–8 cmH₂O or BiPAP IPAP 10–14 / EPAP 5. If HFNC failing or high risk of re-intubation." },
-                { label: "Heliox 70:30", detail: "If post-extubation stridor — reduces turbulent flow. Give via tight-fitting mask. Buys time before re-intubation." },
-                { label: "Nebulised adrenaline", detail: `${weight < 20 ? "2.5 mL of 1:1000" : "5 mL of 1:1000"} nebulised for post-extubation stridor. Observe ≥ 2 hr for rebound.` },
+                { label: "NIV (CPAP/BiPAP)",               detail: "CPAP 5–8 cmH₂O or BiPAP IPAP 10–14 / EPAP 5. If HFNC failing or high risk of re-intubation." },
+                { label: "Heliox 70:30",                   detail: "If post-extubation stridor — reduces turbulent flow. Give via tight-fitting mask. Buys time before re-intubation." },
+                { label: "Nebulised adrenaline",           detail: `${weight < 20 ? "2.5 mL of 1:1000" : "5 mL of 1:1000"} nebulised for post-extubation stridor. Observe ≥ 2 hr for rebound.` },
               ].map((item, i) => (
                 <div key={i} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
                   <div className="font-semibold text-xs text-slate-900 dark:text-white mb-0.5">{item.label}</div>
@@ -526,8 +535,8 @@ export default function VentilatorTab() {
             </div>
           </Section>
 
-          <Section title="Lung Protective Strategy (ARDS)" icon="🛡️">
-            <div className="space-y-2">
+          <Section title="Lung Protective Strategy (ARDS)" IconComp={ShieldWarning}>
+            <div className="space-y-1.5">
               {[
                 "Vt 4–6 mL/kg PBW · Plateau pressure ≤ 30 cmH₂O · Driving pressure ≤ 15 cmH₂O",
                 "Permissive hypercapnia: pH 7.20–7.45 acceptable to achieve low Vt/pressure targets",
