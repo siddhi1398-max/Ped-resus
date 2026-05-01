@@ -8,7 +8,6 @@
 
 import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
-import { ICD_INSERTION, complications } from "../../data/criticalCare";
 import {
   Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle,
   XCircle, Info, Wrench, Wind, Drop,
