@@ -8,6 +8,7 @@
 
 import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
+import { Waveformview } from "../../components/Waveformview";
 import {
   Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle,XCircle, info, 
   wrench, gear, arrowcirleup, arrowncircledown, warning, pluscircle, steps, cloudslash, chartlineup, trenddown
