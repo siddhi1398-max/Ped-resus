@@ -227,50 +227,8 @@ function Section({ title, icon, children, defaultOpen = false }) {
 }
 
 // ─── WAVEFORM SVG ─────────────────────────────────────────────────────────────
-function WaveformSVG({ paths, label, isDark }) {
-  const traces = [
-    { key: "pressure", color: "#ef4444", label: "Pressure (cmH₂O)", yLabel: "P" },
-    { key: "flow",     color: "#3b82f6", label: "Flow (L/min)",      yLabel: "F" },
-    { key: "volume",   color: "#10b981", label: "Volume (mL)",       yLabel: "V" },
-  ];
-
-  return (
-    <div className="space-y-1">
-      {traces.map(t => (
-        <div key={t.key} className="flex items-center gap-2">
-          <span className="text-[9px] font-mono w-4 text-right shrink-0" style={{ color: t.color }}>{t.yLabel}</span>
-          <svg viewBox="0 0 220 100" className="flex-1 h-14 rounded-md bg-slate-950 dark:bg-slate-950" style={{ border: "1px solid #1e293b" }}>
-            {/* Grid lines */}
-            {[25,50,75].map(y => (
-              <line key={y} x1="10" y1={y} x2="210" y2={y} stroke="#1e293b" strokeWidth="1" />
-            ))}
-            <line x1="110" y1="5" x2="110" y2="95" stroke="#1e293b" strokeWidth="1" strokeDasharray="3,3" />
-            {/* Baseline */}
-            <line x1="10" y1="60" x2="210" y2="60" stroke="#334155" strokeWidth="0.5" />
-            {/* Waveform */}
-            <path
-              d={paths[t.key]}
-              fill="none"
-              stroke={t.color}
-              strokeWidth="2"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-      ))}
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 pt-1">
-        {traces.map(t => (
-          <div key={t.key} className="flex items-center gap-1">
-            <div className="w-3 h-0.5 rounded-full" style={{ backgroundColor: t.color }} />
-            <span className="text-[9px] font-mono text-slate-400">{t.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Waveformview } from "../../components/Waveformview";
 
 // ─── WAVEFORM VIEW ────────────────────────────────────────────────────────────
 function WaveformsView() {
