@@ -1,6 +1,7 @@
 import { useWeight } from "../../context/WeightContext";
 import { RSI_PRE_MEDICATION, RSI_INDUCTION, RSI_PARALYSIS, RSI_POST, RSI_CHECKLIST } from "../../data/infusions";
 import { ICD_INSERTION, VENTILATOR_SETTINGS, WAVEFORMS } from "../../data/criticalCare";
+import { VentilatorWaveformDashboard } from ".coponents/VentilatorWaveformDashboard";
 import InfusionCalculator from "../InfusionCalculator";
 import RuleOfSixs from "../RuleOfSixs";
 import { useState } from "react";
