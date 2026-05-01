@@ -4,7 +4,7 @@
 
 // ─── ICD / CHEST TUBE ────────────────────────────────────────────────────────
 
-export const ICD = {
+export const ICD_INSERTION = {
   indications: [
     "Tension pneumothorax (after needle decompression)",
     "Simple / persistent pneumothorax",
