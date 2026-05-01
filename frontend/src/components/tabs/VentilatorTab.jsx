@@ -11,7 +11,6 @@ import WaveformView from "./WaveformView";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle,
-  XCircle,
 } from "@phosphor-icons/react";
 
 // ─── CLINICAL CONDITION PRESETS ───────────────────────────────────────────────
@@ -94,107 +93,6 @@ const TROUBLESHOOT = [
   },
 ];
 
-// ─── WAVEFORM DATA ────────────────────────────────────────────────────────────
-const WAVEFORMS = [
-  {
-    id: "normal-vc",
-    label: "Normal — Volume Control",
-    category: "normal",
-    description: "Square flow pattern. Pressure rises linearly to PIP. Volume rises as ascending ramp. Expiratory flow returns smoothly to zero.",
-    findings: ["PIP clearly visible", "Plateau pressure measurable on inspiratory hold", "Flow returns to baseline before next breath"],
-    // SVG path data for pressure, flow, volume traces (2 breath cycles shown)
-    svgPaths: {
-      pressure: "M10,80 L10,80 L10,30 L60,30 L60,60 L60,60 L110,30 L160,30 L160,60 L160,60 L210,60",
-      flow:     "M10,60 L10,20 L60,20 L60,80 L60,80 L110,20 L160,20 L160,80 L160,80 L210,60",
-      volume:   "M10,80 L60,20 L60,80 L110,20 L160,20 L160,80 L210,80",
-    },
-  },
-  {
-    id: "normal-pc",
-    label: "Normal — Pressure Control",
-    category: "normal",
-    description: "Decelerating flow (rapid then declining). Pressure rectangular with set limit. Volume rises quickly then plateaus.",
-    findings: ["Decelerating flow pattern", "Volume delivered depends on compliance and resistance", "Flow always returns to zero (no auto-PEEP)"],
-    svgPaths: {
-      pressure: "M10,80 L10,30 L60,30 L60,60 L110,30 L160,30 L160,60 L210,60",
-      flow:     "M10,60 L10,15 Q40,50 60,80 L110,15 Q140,50 160,80 L210,60",
-      volume:   "M10,80 Q35,25 60,22 L60,80 Q85,25 110,22 Q135,22 160,22 L160,80 L210,80",
-    },
-  },
-  {
-    id: "high-pip",
-    label: "↑ PIP — High Resistance",
-    category: "abnormal",
-    description: "Peak pressure elevated with normal plateau. Large Peak–Plateau gradient (>10 cmH₂O). Seen in bronchospasm or secretions.",
-    findings: ["PIP elevated", "Plateau normal or mildly elevated", "Peak–Plateau gap >10 cmH₂O = AIRWAY problem"],
-    svgPaths: {
-      pressure: "M10,80 L10,15 L60,25 L60,65 L110,15 L160,25 L160,65 L210,65",
-      flow:     "M10,60 L10,18 L60,18 L60,85 L110,18 L160,18 L160,85 L210,60",
-      volume:   "M10,80 L60,20 L60,80 L110,20 L160,20 L160,80 L210,80",
-    },
-  },
-  {
-    id: "low-compliance",
-    label: "↑ PIP + Plateau — Low Compliance",
-    category: "abnormal",
-    description: "Both PIP and plateau elevated. Small Peak–Plateau gradient. Stiff lung (ARDS / oedema) requires higher pressure for same Vt.",
-    findings: ["Both PIP and Plateau elevated", "Peak–Plateau gap small (<5 cmH₂O)", "COMPLIANCE problem (ARDS, oedema, PTX)"],
-    svgPaths: {
-      pressure: "M10,80 L10,12 L30,12 L60,12 L60,65 L110,12 L130,12 L160,12 L160,65 L210,65",
-      flow:     "M10,60 L10,20 L60,20 L60,80 L110,20 L160,20 L160,80 L210,60",
-      volume:   "M10,80 L60,28 L60,80 L110,28 L160,28 L160,80 L210,80",
-    },
-  },
-  {
-    id: "auto-peep",
-    label: "Auto-PEEP / Air Trapping",
-    category: "abnormal",
-    description: "Expiratory flow does not return to zero before next breath. Breath stacking. Seen in asthma, bronchiolitis, high RR.",
-    findings: ["Flow-time: expiratory curve does not reach baseline", "Each breath starts above zero flow", "Volume-time: stepped increase cycle by cycle"],
-    svgPaths: {
-      pressure: "M10,80 L10,30 L60,30 L60,55 L110,25 L160,25 L160,50 L210,50",
-      flow:     "M10,60 L10,20 L60,20 L60,55 L110,20 L160,20 L160,52 L210,52",
-      volume:   "M10,80 L60,22 L60,60 L110,18 L160,18 L160,48 L210,48",
-    },
-  },
-  {
-    id: "cuff-leak",
-    label: "Cuff Leak / Circuit Leak",
-    category: "abnormal",
-    description: "Exhaled volume consistently less than inhaled. Inspiratory and expiratory Vt do not match. Audible gurgling.",
-    findings: ["Exhaled Vt < Inspired Vt on volume scalar", "Flow-time: expiratory curve smaller than inspiratory", "Volume-time: does not return fully to baseline"],
-    svgPaths: {
-      pressure: "M10,80 L10,30 L60,30 L60,65 L110,30 L160,30 L160,65 L210,65",
-      flow:     "M10,60 L10,20 L60,20 L60,70 L110,20 L160,20 L160,70 L210,60",
-      volume:   "M10,80 L60,22 L60,55 L110,22 L160,22 L160,55 L210,55",
-    },
-  },
-  {
-    id: "flow-starvation",
-    label: "Flow Starvation (VC Mode)",
-    category: "abnormal",
-    description: "Pressure-time waveform shows 'scooped out' appearance mid-inspiration. Patient demand exceeds ventilator flow delivery.",
-    findings: ["Pressure-time: concave 'scooped' mid-inspiratory dip", "Patient effort pulls pressure below square waveform", "Indicates inadequate flow rate for patient demand"],
-    svgPaths: {
-      pressure: "M10,80 L10,30 Q35,45 60,30 L60,65 L110,30 Q135,45 160,30 L160,65 L210,65",
-      flow:     "M10,60 L10,20 L60,20 L60,80 L110,20 L160,20 L160,80 L210,60",
-      volume:   "M10,80 L60,22 L60,80 L110,22 L160,22 L160,80 L210,80",
-    },
-  },
-  {
-    id: "dysynchrony",
-    label: "Patient–Ventilator Dyssynchrony",
-    category: "abnormal",
-    description: "Multiple waveform irregularities: double triggering, missed triggers, premature cycling.",
-    findings: ["Irregular pressure and flow waveforms", "Variable Vt breath to breath", "Pressure spikes or double peaks visible"],
-    svgPaths: {
-      pressure: "M10,80 L10,30 L40,30 L50,20 L60,30 L60,65 L100,65 L110,25 L125,25 L160,30 L160,65 L210,65",
-      flow:     "M10,60 L10,20 L60,20 L60,80 L100,80 L110,15 L160,20 L160,80 L210,60",
-      volume:   "M10,80 L60,22 L60,80 L110,18 L160,22 L160,80 L210,80",
-    },
-  },
-];
-
 // ─── PARAM DISPLAY CARD ───────────────────────────────────────────────────────
 function ParamCard({ label, value, unit, range, alert, info }) {
   return (
@@ -229,144 +127,6 @@ function Section({ title, icon, children, defaultOpen = false }) {
         <CaretDown size={14} weight="bold" className={`text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
       {open && <div className="px-5 py-4 bg-white dark:bg-slate-900/50">{children}</div>}
-    </div>
-  );
-}
-
-// ─── WAVEFORM SVG ─────────────────────────────────────────────────────────────
-function WaveformSVG({ paths, label, isDark }) {
-  const traces = [
-    { key: "pressure", color: "#ef4444", label: "Pressure (cmH₂O)", yLabel: "P" },
-    { key: "flow",     color: "#3b82f6", label: "Flow (L/min)",      yLabel: "F" },
-    { key: "volume",   color: "#10b981", label: "Volume (mL)",       yLabel: "V" },
-  ];
-
-  return (
-    <div className="space-y-1">
-      {traces.map(t => (
-        <div key={t.key} className="flex items-center gap-2">
-          <span className="text-[9px] font-mono w-4 text-right shrink-0" style={{ color: t.color }}>{t.yLabel}</span>
-          <svg viewBox="0 0 220 100" className="flex-1 h-14 rounded-md bg-slate-950 dark:bg-slate-950" style={{ border: "1px solid #1e293b" }}>
-            {/* Grid lines */}
-            {[25,50,75].map(y => (
-              <line key={y} x1="10" y1={y} x2="210" y2={y} stroke="#1e293b" strokeWidth="1" />
-            ))}
-            <line x1="110" y1="5" x2="110" y2="95" stroke="#1e293b" strokeWidth="1" strokeDasharray="3,3" />
-            {/* Baseline */}
-            <line x1="10" y1="60" x2="210" y2="60" stroke="#334155" strokeWidth="0.5" />
-            {/* Waveform */}
-            <path
-              d={paths[t.key]}
-              fill="none"
-              stroke={t.color}
-              strokeWidth="2"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-      ))}
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 pt-1">
-        {traces.map(t => (
-          <div key={t.key} className="flex items-center gap-1">
-            <div className="w-3 h-0.5 rounded-full" style={{ backgroundColor: t.color }} />
-            <span className="text-[9px] font-mono text-slate-400">{t.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── WAVEFORM VIEW ────────────────────────────────────────────────────────────
-function WaveformsView() {
-  const [selected, setSelected] = useState("normal-vc");
-  const waveform = WAVEFORMS.find(w => w.id === selected);
-
-  const normal   = WAVEFORMS.filter(w => w.category === "normal");
-  const abnormal = WAVEFORMS.filter(w => w.category === "abnormal");
-
-  return (
-    <div className="space-y-5">
-      <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-        Select a pattern to view pressure–flow–volume scalars and clinical interpretation.
-      </div>
-
-      {/* Selector */}
-      <div className="space-y-2">
-        <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400">Normal Patterns</div>
-        <div className="flex flex-wrap gap-2">
-          {normal.map(w => (
-            <button key={w.id} onClick={() => setSelected(w.id)}
-              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
-                selected === w.id
-                  ? "bg-emerald-600 text-white border-transparent"
-                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-emerald-400"
-              }`}>
-              {w.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-red-500 dark:text-red-400 mt-3">Abnormal Patterns</div>
-        <div className="flex flex-wrap gap-2">
-          {abnormal.map(w => (
-            <button key={w.id} onClick={() => setSelected(w.id)}
-              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
-                selected === w.id
-                  ? "bg-red-600 text-white border-transparent"
-                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-red-400"
-              }`}>
-              {w.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Waveform display */}
-      {waveform && (
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-          {/* Header */}
-          <div className={`px-4 py-3 ${waveform.category === "normal" ? "bg-emerald-900/20 border-b border-emerald-800/30" : "bg-red-900/20 border-b border-red-800/30"}`}>
-            <div className="font-bold text-sm text-white">{waveform.label}</div>
-            <div className="text-[10px] font-mono uppercase tracking-widest mt-0.5"
-              style={{ color: waveform.category === "normal" ? "#34d399" : "#f87171" }}>
-              {waveform.category === "normal" ? "✓ Normal" : "⚠ Abnormal"}
-            </div>
-          </div>
-
-          <div className="p-4 bg-slate-900 space-y-4">
-            {/* SVG Waveforms */}
-            <WaveformSVG paths={waveform.svgPaths} label={waveform.label} />
-
-            {/* Description */}
-            <div className="rounded-lg bg-slate-800 border border-slate-700 p-3">
-              <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1.5">Description</div>
-              <p className="text-xs text-slate-200 leading-relaxed">{waveform.description}</p>
-            </div>
-
-            {/* Key findings */}
-            <div className="rounded-lg bg-slate-800 border border-slate-700 p-3">
-              <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1.5">Key Findings</div>
-              <div className="space-y-1">
-                {waveform.findings.map((f, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs text-slate-200">
-                    <span className={`font-bold mt-0.5 ${waveform.category === "normal" ? "text-emerald-400" : "text-red-400"}`}>→</span>
-                    {f}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reference note */}
-      <div className="flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-800 dark:text-amber-200">
-        <Lightbulb size={12} weight="fill" className="flex-shrink-0 mt-0.5 text-amber-500" />
-        <span>Waveforms are schematic illustrations for teaching. Real ventilator graphics vary by manufacturer and clinical context. Always correlate with patient exam and blood gases.</span>
-      </div>
     </div>
   );
 }
@@ -652,10 +412,10 @@ export default function VentilatorTab() {
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-3">DOPE Mnemonic — Acute Deterioration on Ventilator</div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { letter: "D", word: "Displaced",   detail: "ETT moved up/down. Check depth at lips." },
-                { letter: "O", word: "Obstructed",  detail: "Mucus plug, kink, biting tube. Suction + check." },
-                { letter: "P", word: "Pneumothorax",detail: "Auscultate + bedside US. Needle decompress if tension." },
-                { letter: "E", word: "Equipment",   detail: "Circuit disconnect, vent failure. Bag manually." },
+                { letter: "D", word: "Displaced",    detail: "ETT moved up/down. Check depth at lips." },
+                { letter: "O", word: "Obstructed",   detail: "Mucus plug, kink, biting tube. Suction + check." },
+                { letter: "P", word: "Pneumothorax", detail: "Auscultate + bedside US. Needle decompress if tension." },
+                { letter: "E", word: "Equipment",    detail: "Circuit disconnect, vent failure. Bag manually." },
               ].map(d => (
                 <div key={d.letter} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
                   <div className="text-3xl font-black text-slate-900 dark:text-white" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{d.letter}</div>
