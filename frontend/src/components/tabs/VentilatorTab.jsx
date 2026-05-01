@@ -7,6 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useMemo } from "react";
+import WaveformView from "./WaveformView";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle,
@@ -670,7 +671,7 @@ export default function VentilatorTab() {
       {/* ════════════════════════════════════════════
           VIEW 3: WAVEFORMS
       ════════════════════════════════════════════ */}
-      {activeView === "waveforms" && <WaveformsView />}
+      {activeView === "waveforms" && <WaveformView />}
 
       {/* ════════════════════════════════════════════
           VIEW 4: WEANING & SBT
