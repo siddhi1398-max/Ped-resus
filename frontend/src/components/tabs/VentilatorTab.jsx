@@ -403,15 +403,16 @@ export default function VentilatorTab() {
             );
           })}
 
-          {/* DOPE card */}
+          {/* DOPES card */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 mt-2">
-            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-3">DOPE Mnemonic — Acute Deterioration on Ventilator</div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-3">DOPES Mnemonic — Acute Deterioration on Ventilator</div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { letter: "D", word: "Displaced",    detail: "ETT moved up/down. Check depth at lips." },
                 { letter: "O", word: "Obstructed",   detail: "Mucus plug, kink, biting tube. Suction + check." },
                 { letter: "P", word: "Pneumothorax", detail: "Auscultate + bedside US. Needle decompress if tension." },
                 { letter: "E", word: "Equipment",    detail: "Circuit disconnect, vent failure. Bag manually." },
+                { letter: "S", word: "Stacked Breaths",   detail: "Auto PEEP from inadequate expiration" },
               ].map(d => (
                 <div key={d.letter} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
                   <div className="text-3xl font-black text-slate-900 dark:text-white" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{d.letter}</div>
@@ -423,7 +424,27 @@ export default function VentilatorTab() {
           </div>
         </div>
       )}
-
+          {/* DOTTS card */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 mt-2">
+            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-3">DOPE Mnemonic — Acute Deterioration on Ventilator</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { letter: "D", word: "Disconnect",   detail: "Disconnect the patient from Ventilator." },
+                { letter: "O", word: "Oxygen",   detail: "Oxygenate patientwith Bag Mask, feel for resistance." },
+                { letter: "T", word: "Tube Position", detail: "Check for migration/kinking/obstruction with mucus plug." },
+                { letter: "T", word: "Tweak the Ventilator",    detail: "Check if Ventilator settings are appropriate for patient." },
+                { letter: "S", word: "Sonography",    detail: "Lung Ultrasound: check lung sliding." },
+              ].map(d => (
+                <div key={d.letter} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                  <div className="text-3xl font-black text-slate-900 dark:text-white" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{d.letter}</div>
+                  <div className="font-bold text-xs text-slate-700 dark:text-slate-200 mb-1">{d.word}</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">{d.detail}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       {/* ════════════════════════════════════════════
           VIEW 3: WAVEFORMS
       ════════════════════════════════════════════ */}
