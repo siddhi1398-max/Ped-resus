@@ -7,7 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useMemo } from "react";
-import WaveformView from "./WaveformView";
+import WaveformView from "../tabs/WaveformView";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle,
