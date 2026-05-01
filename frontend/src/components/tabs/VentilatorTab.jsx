@@ -1,7 +1,7 @@
 // frontend/src/components/tabs/VentilatorTab.jsx
 // ─────────────────────────────────────────────────────────────────────────────
 // Pediatric Ventilator Settings Dashboard
-// Weight-based parameter calculator + troubleshooting guide + ICD sizing
+// Weight-based parameter calculator + troubleshooting guide + waveforms
 // References: Tintinalli · BTS/ATS · OpenPediatrics · PaediatricEmergencies.com
 //             PEMVECC 2017 · ARDSnet · Fleischer & Ludwig
 // ─────────────────────────────────────────────────────────────────────────────
@@ -10,18 +10,18 @@ import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning, Lightbulb, ArrowRight, CaretDown, CheckCircle,
-  XCircle, Info, Wrench, Wind, Drop,
+  XCircle,
 } from "@phosphor-icons/react";
 
 // ─── CLINICAL CONDITION PRESETS ───────────────────────────────────────────────
 const CONDITIONS = [
-  { id: "normal",      label: "Normal Lungs",      color: "emerald", peep: 5,  fio2: 0.40, vtFactor: 7,  rateAdj: 1.0, note: "Standard post-intubation settings" },
-  { id: "ards",        label: "ARDS",               color: "red",     peep: 10, fio2: 0.80, vtFactor: 5,  rateAdj: 1.3, note: "Lung-protective: Vt 4–6 mL/kg, high PEEP, permissive hypercapnia" },
-  { id: "asthma",      label: "Asthma / BPD",       color: "amber",   peep: 5,  fio2: 0.50, vtFactor: 7,  rateAdj: 0.7, note: "Low rate, long expiratory time (I:E 1:3–4), avoid auto-PEEP" },
-  { id: "pneumonia",   label: "Pneumonia",           color: "orange",  peep: 6,  fio2: 0.60, vtFactor: 6,  rateAdj: 1.1, note: "Moderate PEEP, standard Vt. Watch for consolidation worsening" },
-  { id: "cardiac",     label: "Post-Cardiac Surgery",color: "violet",  peep: 5,  fio2: 0.40, vtFactor: 6,  rateAdj: 1.0, note: "Aim early extubation. Avoid high PEEP (↓venous return)" },
-  { id: "pphn",        label: "PPHN (Neonatal)",     color: "rose",    peep: 5,  fio2: 1.0,  vtFactor: 5,  rateAdj: 1.5, note: "High FiO₂, consider iNO. Avoid hypocarbia. Alkalosis helps (pH 7.45–7.55)" },
-  { id: "bronchiolitis",label: "Bronchiolitis",      color: "sky",     peep: 5,  fio2: 0.50, vtFactor: 6,  rateAdj: 0.8, note: "HFNC / NIV preferred. If intubated: low rate, long Te, avoid PEEP stacking" },
+  { id: "normal",       label: "Normal Lungs",       color: "emerald", peep: 5,  fio2: 0.40, vtFactor: 7,  rateAdj: 1.0, note: "Standard post-intubation settings" },
+  { id: "ards",         label: "ARDS",                color: "red",     peep: 10, fio2: 0.80, vtFactor: 5,  rateAdj: 1.3, note: "Lung-protective: Vt 4–6 mL/kg, high PEEP, permissive hypercapnia" },
+  { id: "asthma",       label: "Asthma / BPD",        color: "amber",   peep: 5,  fio2: 0.50, vtFactor: 7,  rateAdj: 0.7, note: "Low rate, long expiratory time (I:E 1:3–4), avoid auto-PEEP" },
+  { id: "pneumonia",    label: "Pneumonia",            color: "orange",  peep: 6,  fio2: 0.60, vtFactor: 6,  rateAdj: 1.1, note: "Moderate PEEP, standard Vt. Watch for consolidation worsening" },
+  { id: "cardiac",      label: "Post-Cardiac Surgery", color: "violet",  peep: 5,  fio2: 0.40, vtFactor: 6,  rateAdj: 1.0, note: "Aim early extubation. Avoid high PEEP (↓venous return)" },
+  { id: "pphn",         label: "PPHN (Neonatal)",      color: "rose",    peep: 5,  fio2: 1.0,  vtFactor: 5,  rateAdj: 1.5, note: "High FiO₂, consider iNO. Avoid hypocarbia. Alkalosis helps (pH 7.45–7.55)" },
+  { id: "bronchiolitis",label: "Bronchiolitis",        color: "sky",     peep: 5,  fio2: 0.50, vtFactor: 6,  rateAdj: 0.8, note: "HFNC / NIV preferred. If intubated: low rate, long Te, avoid PEEP stacking" },
 ];
 
 // ─── COLOUR MAP ───────────────────────────────────────────────────────────────
@@ -93,22 +93,113 @@ const TROUBLESHOOT = [
   },
 ];
 
-// ─── ICD SIZE TABLE ───────────────────────────────────────────────────────────
-const ICD_TABLE = [
-  { weight: "Neonate < 5 kg",   range: "8–10 Fr",  pneumo: "8 Fr",   fluid: "10 Fr" },
-  { weight: "Infant 5–10 kg",   range: "10–12 Fr", pneumo: "10 Fr",  fluid: "12 Fr" },
-  { weight: "Child 10–20 kg",   range: "12–18 Fr", pneumo: "12–14 Fr", fluid: "16–18 Fr" },
-  { weight: "Child 20–40 kg",   range: "20–28 Fr", pneumo: "16–20 Fr", fluid: "24–28 Fr" },
-  { weight: "Adolescent >40 kg",range: "28–32 Fr", pneumo: "20–24 Fr", fluid: "28–32 Fr" },
+// ─── WAVEFORM DATA ────────────────────────────────────────────────────────────
+const WAVEFORMS = [
+  {
+    id: "normal-vc",
+    label: "Normal — Volume Control",
+    category: "normal",
+    description: "Square flow pattern. Pressure rises linearly to PIP. Volume rises as ascending ramp. Expiratory flow returns smoothly to zero.",
+    findings: ["PIP clearly visible", "Plateau pressure measurable on inspiratory hold", "Flow returns to baseline before next breath"],
+    // SVG path data for pressure, flow, volume traces (2 breath cycles shown)
+    svgPaths: {
+      pressure: "M10,80 L10,80 L10,30 L60,30 L60,60 L60,60 L110,30 L160,30 L160,60 L160,60 L210,60",
+      flow:     "M10,60 L10,20 L60,20 L60,80 L60,80 L110,20 L160,20 L160,80 L160,80 L210,60",
+      volume:   "M10,80 L60,20 L60,80 L110,20 L160,20 L160,80 L210,80",
+    },
+  },
+  {
+    id: "normal-pc",
+    label: "Normal — Pressure Control",
+    category: "normal",
+    description: "Decelerating flow (rapid then declining). Pressure rectangular with set limit. Volume rises quickly then plateaus.",
+    findings: ["Decelerating flow pattern", "Volume delivered depends on compliance and resistance", "Flow always returns to zero (no auto-PEEP)"],
+    svgPaths: {
+      pressure: "M10,80 L10,30 L60,30 L60,60 L110,30 L160,30 L160,60 L210,60",
+      flow:     "M10,60 L10,15 Q40,50 60,80 L110,15 Q140,50 160,80 L210,60",
+      volume:   "M10,80 Q35,25 60,22 L60,80 Q85,25 110,22 Q135,22 160,22 L160,80 L210,80",
+    },
+  },
+  {
+    id: "high-pip",
+    label: "↑ PIP — High Resistance",
+    category: "abnormal",
+    description: "Peak pressure elevated with normal plateau. Large Peak–Plateau gradient (>10 cmH₂O). Seen in bronchospasm or secretions.",
+    findings: ["PIP elevated", "Plateau normal or mildly elevated", "Peak–Plateau gap >10 cmH₂O = AIRWAY problem"],
+    svgPaths: {
+      pressure: "M10,80 L10,15 L60,25 L60,65 L110,15 L160,25 L160,65 L210,65",
+      flow:     "M10,60 L10,18 L60,18 L60,85 L110,18 L160,18 L160,85 L210,60",
+      volume:   "M10,80 L60,20 L60,80 L110,20 L160,20 L160,80 L210,80",
+    },
+  },
+  {
+    id: "low-compliance",
+    label: "↑ PIP + Plateau — Low Compliance",
+    category: "abnormal",
+    description: "Both PIP and plateau elevated. Small Peak–Plateau gradient. Stiff lung (ARDS / oedema) requires higher pressure for same Vt.",
+    findings: ["Both PIP and Plateau elevated", "Peak–Plateau gap small (<5 cmH₂O)", "COMPLIANCE problem (ARDS, oedema, PTX)"],
+    svgPaths: {
+      pressure: "M10,80 L10,12 L30,12 L60,12 L60,65 L110,12 L130,12 L160,12 L160,65 L210,65",
+      flow:     "M10,60 L10,20 L60,20 L60,80 L110,20 L160,20 L160,80 L210,60",
+      volume:   "M10,80 L60,28 L60,80 L110,28 L160,28 L160,80 L210,80",
+    },
+  },
+  {
+    id: "auto-peep",
+    label: "Auto-PEEP / Air Trapping",
+    category: "abnormal",
+    description: "Expiratory flow does not return to zero before next breath. Breath stacking. Seen in asthma, bronchiolitis, high RR.",
+    findings: ["Flow-time: expiratory curve does not reach baseline", "Each breath starts above zero flow", "Volume-time: stepped increase cycle by cycle"],
+    svgPaths: {
+      pressure: "M10,80 L10,30 L60,30 L60,55 L110,25 L160,25 L160,50 L210,50",
+      flow:     "M10,60 L10,20 L60,20 L60,55 L110,20 L160,20 L160,52 L210,52",
+      volume:   "M10,80 L60,22 L60,60 L110,18 L160,18 L160,48 L210,48",
+    },
+  },
+  {
+    id: "cuff-leak",
+    label: "Cuff Leak / Circuit Leak",
+    category: "abnormal",
+    description: "Exhaled volume consistently less than inhaled. Inspiratory and expiratory Vt do not match. Audible gurgling.",
+    findings: ["Exhaled Vt < Inspired Vt on volume scalar", "Flow-time: expiratory curve smaller than inspiratory", "Volume-time: does not return fully to baseline"],
+    svgPaths: {
+      pressure: "M10,80 L10,30 L60,30 L60,65 L110,30 L160,30 L160,65 L210,65",
+      flow:     "M10,60 L10,20 L60,20 L60,70 L110,20 L160,20 L160,70 L210,60",
+      volume:   "M10,80 L60,22 L60,55 L110,22 L160,22 L160,55 L210,55",
+    },
+  },
+  {
+    id: "flow-starvation",
+    label: "Flow Starvation (VC Mode)",
+    category: "abnormal",
+    description: "Pressure-time waveform shows 'scooped out' appearance mid-inspiration. Patient demand exceeds ventilator flow delivery.",
+    findings: ["Pressure-time: concave 'scooped' mid-inspiratory dip", "Patient effort pulls pressure below square waveform", "Indicates inadequate flow rate for patient demand"],
+    svgPaths: {
+      pressure: "M10,80 L10,30 Q35,45 60,30 L60,65 L110,30 Q135,45 160,30 L160,65 L210,65",
+      flow:     "M10,60 L10,20 L60,20 L60,80 L110,20 L160,20 L160,80 L210,60",
+      volume:   "M10,80 L60,22 L60,80 L110,22 L160,22 L160,80 L210,80",
+    },
+  },
+  {
+    id: "dysynchrony",
+    label: "Patient–Ventilator Dyssynchrony",
+    category: "abnormal",
+    description: "Multiple waveform irregularities: double triggering, missed triggers, premature cycling.",
+    findings: ["Irregular pressure and flow waveforms", "Variable Vt breath to breath", "Pressure spikes or double peaks visible"],
+    svgPaths: {
+      pressure: "M10,80 L10,30 L40,30 L50,20 L60,30 L60,65 L100,65 L110,25 L125,25 L160,30 L160,65 L210,65",
+      flow:     "M10,60 L10,20 L60,20 L60,80 L100,80 L110,15 L160,20 L160,80 L210,60",
+      volume:   "M10,80 L60,22 L60,80 L110,18 L160,22 L160,80 L210,80",
+    },
+  },
 ];
 
 // ─── PARAM DISPLAY CARD ───────────────────────────────────────────────────────
 function ParamCard({ label, value, unit, range, alert, info }) {
-  const isAlert = alert;
   return (
-    <div className={`rounded-xl border p-4 ${isAlert ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/30" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"}`}>
+    <div className={`rounded-xl border p-4 ${alert ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/30" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"}`}>
       <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-1">{label}</div>
-      <div className={`text-2xl font-black leading-none mb-0.5 ${isAlert ? "text-red-600 dark:text-red-400" : "text-slate-900 dark:text-white"}`}
+      <div className={`text-2xl font-black leading-none mb-0.5 ${alert ? "text-red-600 dark:text-red-400" : "text-slate-900 dark:text-white"}`}
            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
         {value}
         <span className="text-sm font-normal text-slate-400 ml-1">{unit}</span>
@@ -120,7 +211,7 @@ function ParamCard({ label, value, unit, range, alert, info }) {
 }
 
 // ─── SECTION TOGGLE ──────────────────────────────────────────────────────────
-function Section({ title, icon, children, defaultOpen = false, accent = "slate" }) {
+function Section({ title, icon, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
@@ -141,12 +232,150 @@ function Section({ title, icon, children, defaultOpen = false, accent = "slate" 
   );
 }
 
+// ─── WAVEFORM SVG ─────────────────────────────────────────────────────────────
+function WaveformSVG({ paths, label, isDark }) {
+  const traces = [
+    { key: "pressure", color: "#ef4444", label: "Pressure (cmH₂O)", yLabel: "P" },
+    { key: "flow",     color: "#3b82f6", label: "Flow (L/min)",      yLabel: "F" },
+    { key: "volume",   color: "#10b981", label: "Volume (mL)",       yLabel: "V" },
+  ];
+
+  return (
+    <div className="space-y-1">
+      {traces.map(t => (
+        <div key={t.key} className="flex items-center gap-2">
+          <span className="text-[9px] font-mono w-4 text-right shrink-0" style={{ color: t.color }}>{t.yLabel}</span>
+          <svg viewBox="0 0 220 100" className="flex-1 h-14 rounded-md bg-slate-950 dark:bg-slate-950" style={{ border: "1px solid #1e293b" }}>
+            {/* Grid lines */}
+            {[25,50,75].map(y => (
+              <line key={y} x1="10" y1={y} x2="210" y2={y} stroke="#1e293b" strokeWidth="1" />
+            ))}
+            <line x1="110" y1="5" x2="110" y2="95" stroke="#1e293b" strokeWidth="1" strokeDasharray="3,3" />
+            {/* Baseline */}
+            <line x1="10" y1="60" x2="210" y2="60" stroke="#334155" strokeWidth="0.5" />
+            {/* Waveform */}
+            <path
+              d={paths[t.key]}
+              fill="none"
+              stroke={t.color}
+              strokeWidth="2"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+      ))}
+      {/* Legend */}
+      <div className="flex flex-wrap gap-3 pt-1">
+        {traces.map(t => (
+          <div key={t.key} className="flex items-center gap-1">
+            <div className="w-3 h-0.5 rounded-full" style={{ backgroundColor: t.color }} />
+            <span className="text-[9px] font-mono text-slate-400">{t.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── WAVEFORM VIEW ────────────────────────────────────────────────────────────
+function WaveformsView() {
+  const [selected, setSelected] = useState("normal-vc");
+  const waveform = WAVEFORMS.find(w => w.id === selected);
+
+  const normal   = WAVEFORMS.filter(w => w.category === "normal");
+  const abnormal = WAVEFORMS.filter(w => w.category === "abnormal");
+
+  return (
+    <div className="space-y-5">
+      <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+        Select a pattern to view pressure–flow–volume scalars and clinical interpretation.
+      </div>
+
+      {/* Selector */}
+      <div className="space-y-2">
+        <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400">Normal Patterns</div>
+        <div className="flex flex-wrap gap-2">
+          {normal.map(w => (
+            <button key={w.id} onClick={() => setSelected(w.id)}
+              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                selected === w.id
+                  ? "bg-emerald-600 text-white border-transparent"
+                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-emerald-400"
+              }`}>
+              {w.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-red-500 dark:text-red-400 mt-3">Abnormal Patterns</div>
+        <div className="flex flex-wrap gap-2">
+          {abnormal.map(w => (
+            <button key={w.id} onClick={() => setSelected(w.id)}
+              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                selected === w.id
+                  ? "bg-red-600 text-white border-transparent"
+                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-red-400"
+              }`}>
+              {w.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Waveform display */}
+      {waveform && (
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+          {/* Header */}
+          <div className={`px-4 py-3 ${waveform.category === "normal" ? "bg-emerald-900/20 border-b border-emerald-800/30" : "bg-red-900/20 border-b border-red-800/30"}`}>
+            <div className="font-bold text-sm text-white">{waveform.label}</div>
+            <div className="text-[10px] font-mono uppercase tracking-widest mt-0.5"
+              style={{ color: waveform.category === "normal" ? "#34d399" : "#f87171" }}>
+              {waveform.category === "normal" ? "✓ Normal" : "⚠ Abnormal"}
+            </div>
+          </div>
+
+          <div className="p-4 bg-slate-900 space-y-4">
+            {/* SVG Waveforms */}
+            <WaveformSVG paths={waveform.svgPaths} label={waveform.label} />
+
+            {/* Description */}
+            <div className="rounded-lg bg-slate-800 border border-slate-700 p-3">
+              <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1.5">Description</div>
+              <p className="text-xs text-slate-200 leading-relaxed">{waveform.description}</p>
+            </div>
+
+            {/* Key findings */}
+            <div className="rounded-lg bg-slate-800 border border-slate-700 p-3">
+              <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1.5">Key Findings</div>
+              <div className="space-y-1">
+                {waveform.findings.map((f, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs text-slate-200">
+                    <span className={`font-bold mt-0.5 ${waveform.category === "normal" ? "text-emerald-400" : "text-red-400"}`}>→</span>
+                    {f}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reference note */}
+      <div className="flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-800 dark:text-amber-200">
+        <Lightbulb size={12} weight="fill" className="flex-shrink-0 mt-0.5 text-amber-500" />
+        <span>Waveforms are schematic illustrations for teaching. Real ventilator graphics vary by manufacturer and clinical context. Always correlate with patient exam and blood gases.</span>
+      </div>
+    </div>
+  );
+}
+
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function VentilatorTab() {
   const { weight } = useWeight();
   const [condition, setCondition] = useState("normal");
   const [openTrouble, setOpenTrouble] = useState(null);
-  const [activeView, setActiveView] = useState("settings"); // settings | troubleshoot | icd | weaning
+  const [activeView, setActiveView] = useState("settings");
 
   const cond = CONDITIONS.find(c => c.id === condition);
   const c = CMAP[cond.color];
@@ -154,58 +383,28 @@ export default function VentilatorTab() {
   // ── Calculated parameters ─────────────────────────────────────────────────
   const params = useMemo(() => {
     const wt = Math.max(weight, 0.5);
-
-    // Age-based rate from weight approximation
     const baseRate = wt < 3 ? 50 : wt < 10 ? 30 : wt < 20 ? 25 : wt < 35 ? 20 : 16;
     const rate = Math.round(baseRate * cond.rateAdj);
-
-    // Tidal volume
     const vtLow  = +(wt * (cond.vtFactor - 1)).toFixed(1);
     const vtHigh = +(wt * cond.vtFactor).toFixed(1);
-
-    // PEEP
     const peep = cond.peep;
-
-    // Minute ventilation = Vt × RR
     const mvLow  = +((vtLow / 1000) * rate).toFixed(2);
     const mvHigh = +((vtHigh / 1000) * rate).toFixed(2);
-
-    // Inspiratory time by weight
     const ti = wt < 5 ? "0.3–0.5" : wt < 10 ? "0.5–0.7" : wt < 20 ? "0.7–0.9" : wt < 40 ? "0.9–1.1" : "1.2–1.5";
-
-    // I:E ratio
     const ie = condition === "asthma" || condition === "bronchiolitis" ? "1:3 to 1:4" : wt < 5 ? "1:1 to 1:2" : "1:2";
-
-    // Driving pressure target (plateau – PEEP) < 15
     const pipMax = condition === "ards" ? 28 : 30;
-
-    // Sedation doses
     const midaz  = +(wt * 0.05).toFixed(2);
     const midazH = +(wt * 0.2).toFixed(2);
     const fentL  = wt * 1;
     const fentH  = wt * 4;
-
-    // Suctioning frequency
-    const suction = "q2–4h or PRN (avoid routine >q2h — mucosal damage)";
-
-    return { wt, rate, vtLow, vtHigh, peep, mvLow, mvHigh, ti, ie, pipMax, midaz, midazH, fentL, fentH, suction };
+    return { wt, rate, vtLow, vtHigh, peep, mvLow, mvHigh, ti, ie, pipMax, midaz, midazH, fentL, fentH };
   }, [weight, condition, cond]);
 
-  // ── ICD sizing from weight ────────────────────────────────────────────────
-  const icdRow = useMemo(() => {
-    const wt = weight;
-    if (wt < 5)  return ICD_TABLE[0];
-    if (wt < 10) return ICD_TABLE[1];
-    if (wt < 20) return ICD_TABLE[2];
-    if (wt < 40) return ICD_TABLE[3];
-    return ICD_TABLE[4];
-  }, [weight]);
-
   const views = [
-    { id: "settings",    label: "Vent Settings",    emoji: "🫁" },
-    { id: "troubleshoot",label: "Troubleshoot",     emoji: "⚡" },
-    { id: "icd",         label: "ICD / Chest Tube", emoji: "🩺" },
-    { id: "weaning",     label: "Weaning & SBT",    emoji: "📉" },
+    { id: "settings",     label: "Vent Settings",  emoji: "🫁" },
+    { id: "troubleshoot", label: "Troubleshoot",   emoji: "⚡" },
+    { id: "waveforms",    label: "Waveforms",      emoji: "📈" },
+    { id: "weaning",      label: "Weaning & SBT",  emoji: "📉" },
   ];
 
   return (
@@ -259,21 +458,17 @@ export default function VentilatorTab() {
               {CONDITIONS.map(cond2 => {
                 const cm = CMAP[cond2.color];
                 return (
-                  <button
-                    key={cond2.id}
-                    onClick={() => setCondition(cond2.id)}
+                  <button key={cond2.id} onClick={() => setCondition(cond2.id)}
                     className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
                       condition === cond2.id
                         ? `${cm.badge} border-transparent shadow-sm`
                         : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
-                    }`}
-                  >
+                    }`}>
                     {cond2.label}
                   </button>
                 );
               })}
             </div>
-            {/* Condition note */}
             <div className={`mt-2 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs ${c.bg} ${c.border}`}>
               <Lightbulb size={12} weight="fill" className={`flex-shrink-0 mt-0.5 ${c.text}`} />
               <span className={c.text}>{cond.note}</span>
@@ -282,65 +477,29 @@ export default function VentilatorTab() {
 
           {/* Settings grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            <ParamCard
-              label="Tidal Volume"
-              value={`${params.vtLow}–${params.vtHigh}`}
-              unit="mL"
-              range={`${cond.vtFactor - 1}–${cond.vtFactor} mL/kg`}
-              alert={condition === "ards"}
-              info="Use IBW not actual weight for obese patients"
-            />
-            <ParamCard
-              label="Rate (RR)"
-              value={`${Math.max(params.rate - 2, 10)}–${params.rate + 2}`}
-              unit="/min"
+            <ParamCard label="Tidal Volume" value={`${params.vtLow}–${params.vtHigh}`} unit="mL"
+              range={`${cond.vtFactor - 1}–${cond.vtFactor} mL/kg`} alert={condition === "ards"}
+              info="Use IBW not actual weight for obese patients" />
+            <ParamCard label="Rate (RR)" value={`${Math.max(params.rate - 2, 10)}–${params.rate + 2}`} unit="/min"
               range="Age-adjusted"
-              info={params.wt < 5 ? "Neonate: 40–60/min" : params.wt < 10 ? "Infant: 25–35/min" : params.wt < 20 ? "Toddler: 20–28/min" : "Child: 16–24/min"}
-            />
-            <ParamCard
-              label="PEEP"
-              value={params.peep}
-              unit="cmH₂O"
+              info={params.wt < 5 ? "Neonate: 40–60/min" : params.wt < 10 ? "Infant: 25–35/min" : params.wt < 20 ? "Toddler: 20–28/min" : "Child: 16–24/min"} />
+            <ParamCard label="PEEP" value={params.peep} unit="cmH₂O"
               range={condition === "ards" ? "8–15" : "4–6"}
-              info="↑ PEEP = ↑ oxygenation but ↓ venous return"
-            />
-            <ParamCard
-              label="FiO₂ (start)"
-              value={`${Math.round(cond.fio2 * 100)}%`}
-              unit=""
+              info="↑ PEEP = ↑ oxygenation but ↓ venous return" />
+            <ParamCard label="FiO₂ (start)" value={`${Math.round(cond.fio2 * 100)}%`} unit=""
               range="Titrate to SpO₂ ≥ 92%"
               info="Reduce FiO₂ to < 60% as soon as safe (O₂ toxicity)"
-              alert={cond.fio2 >= 0.8}
-            />
-            <ParamCard
-              label="Minute Ventilation"
-              value={`${params.mvLow}–${params.mvHigh}`}
-              unit="L/min"
-              range="Normal 100–150 mL/kg/min"
-              info="MV = Vt × RR"
-            />
-            <ParamCard
-              label="Inspiratory Time"
-              value={params.ti}
-              unit="sec"
-              range="Age-adjusted"
-              info={params.wt < 5 ? "Neonates: 0.3–0.5 s" : params.wt < 10 ? "Infant: 0.5–0.7 s" : params.wt < 20 ? "Toddler: 0.7–0.9 s" : params.wt < 40 ? "Child: 0.9–1.1 s" : "Adolescent: 1.2–1.5 s"}
-            />
-            <ParamCard
-              label="I:E Ratio"
-              value={params.ie}
-              unit=""
+              alert={cond.fio2 >= 0.8} />
+            <ParamCard label="Minute Ventilation" value={`${params.mvLow}–${params.mvHigh}`} unit="L/min"
+              range="Normal 100–150 mL/kg/min" info="MV = Vt × RR" />
+            <ParamCard label="Inspiratory Time" value={params.ti} unit="sec" range="Age-adjusted"
+              info={params.wt < 5 ? "Neonates: 0.3–0.5 s" : params.wt < 10 ? "Infant: 0.5–0.7 s" : params.wt < 20 ? "Toddler: 0.7–0.9 s" : params.wt < 40 ? "Child: 0.9–1.1 s" : "Adolescent: 1.2–1.5 s"} />
+            <ParamCard label="I:E Ratio" value={params.ie} unit=""
               range={condition === "asthma" ? "Extend to 1:4" : "Standard 1:2"}
-              info={condition === "asthma" ? "Allow full expiration to prevent air trapping" : "Increase E time in obstructive disease"}
-            />
-            <ParamCard
-              label="Max PIP / Plateau"
-              value={`≤ ${params.pipMax}`}
-              unit="cmH₂O"
-              range="Plateau ≤ 30"
-              alert={condition === "ards"}
-              info="Driving pressure = Plateau – PEEP. Target < 15 cmH₂O"
-            />
+              info={condition === "asthma" ? "Allow full expiration to prevent air trapping" : "Increase E time in obstructive disease"} />
+            <ParamCard label="Max PIP / Plateau" value={`≤ ${params.pipMax}`} unit="cmH₂O"
+              range="Plateau ≤ 30" alert={condition === "ards"}
+              info="Driving pressure = Plateau – PEEP. Target < 15 cmH₂O" />
           </div>
 
           {/* Mode recommendation */}
@@ -348,26 +507,21 @@ export default function VentilatorTab() {
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-3">Recommended Mode</div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <div className="text-[10px] font-mono text-slate-400 mb-1">PEDIATRIC (> 5 kg)</div>
+                <div className="text-[10px] font-mono text-slate-400 mb-1">PEDIATRIC (&gt; 5 kg)</div>
                 <div className="font-bold text-sm text-slate-900 dark:text-white">
                   {condition === "ards" ? "PRVC (Pressure-Regulated Volume Control)" :
                    condition === "asthma" || condition === "bronchiolitis" ? "SIMV-PC + PS (low rate, long Te)" :
                    condition === "pphn" ? "PC-AC (optimise oxygenation)" :
                    "PRVC or SIMV-PC + PS"}
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  PS 5–10 cmH₂O for spontaneous breaths
-                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">PS 5–10 cmH₂O for spontaneous breaths</div>
               </div>
               <div>
-                <div className="text-[10px] font-mono text-slate-400 mb-1">NEONATAL ({"<"} 5 kg)</div>
+                <div className="text-[10px] font-mono text-slate-400 mb-1">NEONATAL (&lt; 5 kg)</div>
                 <div className="font-bold text-sm text-slate-900 dark:text-white">
-                  {condition === "pphn" ? "PC-AC + volume guarantee" :
-                   "PC-AC / SIMV-PC + PS with volume guarantee"}
+                  {condition === "pphn" ? "PC-AC + volume guarantee" : "PC-AC / SIMV-PC + PS with volume guarantee"}
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Volume guarantee 4–6 mL/kg if available
-                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Volume guarantee 4–6 mL/kg if available</div>
               </div>
             </div>
           </div>
@@ -378,8 +532,7 @@ export default function VentilatorTab() {
             <div className="grid sm:grid-cols-3 gap-3">
               <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-violet-100 dark:border-violet-900">
                 <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Midazolam</div>
-                <div className="font-black text-lg text-violet-600 dark:text-violet-400"
-                     style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                <div className="font-black text-lg text-violet-600 dark:text-violet-400" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
                   {params.midaz}–{params.midazH}
                   <span className="text-xs font-normal text-slate-400 ml-1">mg/hr</span>
                 </div>
@@ -387,8 +540,7 @@ export default function VentilatorTab() {
               </div>
               <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-violet-100 dark:border-violet-900">
                 <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Fentanyl</div>
-                <div className="font-black text-lg text-violet-600 dark:text-violet-400"
-                     style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                <div className="font-black text-lg text-violet-600 dark:text-violet-400" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
                   {params.fentL}–{params.fentH}
                   <span className="text-xs font-normal text-slate-400 ml-1">mcg/hr</span>
                 </div>
@@ -396,9 +548,7 @@ export default function VentilatorTab() {
               </div>
               <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-violet-100 dark:border-violet-900">
                 <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">NMB (if needed)</div>
-                <div className="font-bold text-sm text-slate-900 dark:text-white">
-                  Rocuronium
-                </div>
+                <div className="font-bold text-sm text-slate-900 dark:text-white">Rocuronium</div>
                 <div className="text-[10px] text-slate-400">5–10 mcg/kg/min infusion. Only for severe dyssynchrony / prone / severe ARDS</div>
               </div>
             </div>
@@ -407,7 +557,7 @@ export default function VentilatorTab() {
             </div>
           </div>
 
-          {/* ARDS net ladder */}
+          {/* ARDSnet ladder */}
           {condition === "ards" && (
             <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4">
               <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-red-600 dark:text-red-400 mb-3">ARDSnet PEEP–FiO₂ Ladder</div>
@@ -426,7 +576,7 @@ export default function VentilatorTab() {
                 </table>
               </div>
               <div className="text-[10px] text-red-600 dark:text-red-400 mt-2">
-                Permissive hypercapnia: accept pH 7.20–7.30 to keep plateau ≤ 30 cmH₂O. Prone ≥ 12 hr/day if PaO₂/FiO₂ {"<"} 150.
+                Permissive hypercapnia: accept pH 7.20–7.30 to keep plateau ≤ 30 cmH₂O. Prone ≥ 12 hr/day if PaO₂/FiO₂ &lt; 150.
               </div>
             </div>
           )}
@@ -444,15 +594,16 @@ export default function VentilatorTab() {
 
           {TROUBLESHOOT.map(t => {
             const isOpen = openTrouble === t.id;
-            const severityColor = t.severity === "critical" ? "border-l-red-500 bg-red-50 dark:bg-red-950/20" :
-                                  t.severity === "urgent" ? "border-l-amber-500 bg-amber-50 dark:bg-amber-950/20" :
-                                  "border-l-blue-500 bg-blue-50 dark:bg-blue-950/20";
+            const severityColor = t.severity === "critical"
+              ? "border-l-red-500 bg-red-50 dark:bg-red-950/20"
+              : t.severity === "urgent"
+              ? "border-l-amber-500 bg-amber-50 dark:bg-amber-950/20"
+              : "border-l-blue-500 bg-blue-50 dark:bg-blue-950/20";
             return (
               <div key={t.id} className={`border-l-4 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden ${severityColor}`}>
                 <button
                   onClick={() => setOpenTrouble(isOpen ? null : t.id)}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{t.icon}</span>
                     <div className="text-left">
@@ -467,20 +618,17 @@ export default function VentilatorTab() {
 
                 {isOpen && (
                   <div className="px-4 pb-4 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-3">
-                    {/* Causes */}
                     <div>
                       <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1.5">Possible Causes</div>
                       <div className="space-y-1">
                         {t.causes.map((cause, i) => (
                           <div key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
-                            <span className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold text-slate-600 dark:text-slate-300 flex-shrink-0 mt-0.5">{i+1}</span>
+                            <span className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold flex-shrink-0 mt-0.5">{i+1}</span>
                             {cause}
                           </div>
                         ))}
                       </div>
                     </div>
-
-                    {/* Action */}
                     <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
                       <div className="flex items-center gap-1.5 mb-1.5">
                         <ArrowRight size={12} weight="bold" className="text-slate-500" />
@@ -488,8 +636,6 @@ export default function VentilatorTab() {
                       </div>
                       <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{t.action}</p>
                     </div>
-
-                    {/* Pearl */}
                     <div className="flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-3 py-2">
                       <Lightbulb size={12} weight="fill" className="text-amber-500 flex-shrink-0 mt-0.5" />
                       <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">{t.pearl}</p>
@@ -500,20 +646,18 @@ export default function VentilatorTab() {
             );
           })}
 
-          {/* DOPE mnemonic card */}
+          {/* DOPE card */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 mt-2">
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-3">DOPE Mnemonic — Acute Deterioration on Ventilator</div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { letter: "D", word: "Displaced", detail: "ETT moved up/down. Check depth at lips." },
-                { letter: "O", word: "Obstructed", detail: "Mucus plug, kink, biting tube. Suction + check." },
-                { letter: "P", word: "Pneumothorax", detail: "Auscultate + bedside US. Needle decompress if tension." },
-                { letter: "E", word: "Equipment", detail: "Circuit disconnect, vent failure. Bag manually." },
+                { letter: "D", word: "Displaced",   detail: "ETT moved up/down. Check depth at lips." },
+                { letter: "O", word: "Obstructed",  detail: "Mucus plug, kink, biting tube. Suction + check." },
+                { letter: "P", word: "Pneumothorax",detail: "Auscultate + bedside US. Needle decompress if tension." },
+                { letter: "E", word: "Equipment",   detail: "Circuit disconnect, vent failure. Bag manually." },
               ].map(d => (
                 <div key={d.letter} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
-                  <div className="text-3xl font-black text-slate-900 dark:text-white" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-                    {d.letter}
-                  </div>
+                  <div className="text-3xl font-black text-slate-900 dark:text-white" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{d.letter}</div>
                   <div className="font-bold text-xs text-slate-700 dark:text-slate-200 mb-1">{d.word}</div>
                   <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">{d.detail}</div>
                 </div>
@@ -524,112 +668,9 @@ export default function VentilatorTab() {
       )}
 
       {/* ════════════════════════════════════════════
-          VIEW 3: ICD / CHEST TUBE
+          VIEW 3: WAVEFORMS
       ════════════════════════════════════════════ */}
-      {activeView === "icd" && (
-        <div className="space-y-5">
-          {/* Weight-specific recommendation */}
-          <div className="rounded-xl border-2 border-slate-900 dark:border-white bg-slate-900 dark:bg-white p-5 text-white dark:text-slate-900">
-            <div className="text-[10px] font-mono uppercase tracking-[0.2em] opacity-60 mb-2">
-              Recommended for {weight} kg ({icdRow.weight})
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <div className="text-[9px] font-mono uppercase tracking-widest opacity-50 mb-1">Overall Range</div>
-                <div className="text-2xl font-black" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{icdRow.range}</div>
-              </div>
-              <div>
-                <div className="text-[9px] font-mono uppercase tracking-widest opacity-50 mb-1">Pneumothorax</div>
-                <div className="text-2xl font-black" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{icdRow.pneumo}</div>
-              </div>
-              <div>
-                <div className="text-[9px] font-mono uppercase tracking-widest opacity-50 mb-1">Effusion / Fluid</div>
-                <div className="text-2xl font-black" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{icdRow.fluid}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Full sizing table */}
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr className="bg-slate-100 dark:bg-slate-800">
-                  <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Weight</th>
-                  <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Range</th>
-                  <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-blue-500">Pneumothorax</th>
-                  <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-emerald-500">Fluid / Empyema</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ICD_TABLE.map((row, i) => (
-                  <tr key={i} className={`border-t border-slate-100 dark:border-slate-800 ${row.weight === icdRow.weight ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900" : "odd:bg-white dark:odd:bg-slate-900/30"}`}>
-                    <td className="px-3 py-2 font-semibold">{row.weight}</td>
-                    <td className="px-3 py-2 font-mono">{row.range}</td>
-                    <td className={`px-3 py-2 font-mono font-bold ${row.weight === icdRow.weight ? "" : "text-blue-600 dark:text-blue-400"}`}>{row.pneumo}</td>
-                    <td className={`px-3 py-2 font-mono font-bold ${row.weight === icdRow.weight ? "" : "text-emerald-600 dark:text-emerald-400"}`}>{row.fluid}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Key technique points */}
-          <Section title="Safe Triangle & Technique" icon="📍" defaultOpen={true}>
-            <div className="space-y-2">
-              {[
-                { step: "1", text: "SAFE TRIANGLE: Anterior border of latissimus dorsi · Lateral border of pectoralis major · Base at 5th ICS (nipple line in males)" },
-                { step: "2", text: "Insert at 4–5th ICS in mid-axillary line. Mark ABOVE upper border of rib below (neurovascular bundle runs under each rib)" },
-                { step: "3", text: "Infiltrate lidocaine 1% with adrenaline to skin → subcut → rib periosteum → parietal pleura. Aspirate before incising to confirm space" },
-                { step: "4", text: "Blunt dissect with closed Kelly forceps over rib. 'Pop' felt on entering pleural space. Finger sweep before tube insertion" },
-                { step: "5", text: "NEVER use trocar in children — high lung perforation risk. Grasp tube tip with Kelly forceps, advance apically for PTX, basally for fluid" },
-                { step: "6", text: "Connect to underwater seal at –20 cmH₂O suction (or Heimlich valve for transport). Confirm CXR post-insertion" },
-              ].map(s => (
-                <div key={s.step} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-200">
-                  <span className="w-5 h-5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">{s.step}</span>
-                  {s.text}
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          <Section title="Removal Criteria" icon="✅">
-            <div className="space-y-1.5">
-              {[
-                "< 2 mL/kg/day drainage for 24 hours",
-                "No air leak for ≥ 12 hours",
-                "Lung re-expanded on CXR",
-                "Wean: suction → underwater seal 4–6 hr → clamp trial 4–6 hr with CXR (for PTX)",
-                "Remove during expiration / Valsalva. Tie purse-string as tube exits. Occlusive dressing × 48 hr. CXR within 4 hr",
-              ].map((c, i) => (
-                <div key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
-                  <CheckCircle size={13} weight="fill" className="text-emerald-500 flex-shrink-0 mt-0.5" />
-                  {c}
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          <Section title="Complications" icon="⚠️">
-            <div className="grid sm:grid-cols-2 gap-2">
-              {[
-                "Lung perforation (especially with trocar — NEVER use in children)",
-                "Diaphragmatic / liver / spleen injury (low insertion below 5th ICS)",
-                "Intercostal artery laceration (lower border of rib — avoid)",
-                "Re-expansion pulmonary oedema (rapid drainage >1.5L — limit to 1L initially)",
-                "Tube malposition: extra-pleural, intra-fissural, abdominal",
-                "Persistent air leak — bronchopleural fistula",
-                "Subcutaneous emphysema",
-                "Empyema / wound infection",
-              ].map((c, i) => (
-                <div key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
-                  <XCircle size={12} weight="fill" className="text-red-400 flex-shrink-0 mt-0.5" />
-                  {c}
-                </div>
-              ))}
-            </div>
-          </Section>
-        </div>
-      )}
+      {activeView === "waveforms" && <WaveformsView />}
 
       {/* ════════════════════════════════════════════
           VIEW 4: WEANING & SBT
@@ -637,13 +678,12 @@ export default function VentilatorTab() {
       {activeView === "weaning" && (
         <div className="space-y-5">
 
-          {/* Readiness checklist */}
           <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-4">
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400 mb-3">Daily Readiness Assessment</div>
             <div className="space-y-2">
               {[
                 "Haemodynamically stable (no/low vasopressors)",
-                `SpO₂ ≥ 92% on FiO₂ ≤ 0.40 + PEEP ≤ 5–8 cmH₂O`,
+                "SpO₂ ≥ 92% on FiO₂ ≤ 0.40 + PEEP ≤ 5–8 cmH₂O",
                 "Adequate cough and gag reflex",
                 "Spontaneous respiratory effort present",
                 "No significant metabolic derangement (pH ≥ 7.30)",
@@ -658,7 +698,6 @@ export default function VentilatorTab() {
             </div>
           </div>
 
-          {/* SBT protocol */}
           <Section title="Spontaneous Breathing Trial (SBT)" icon="🌬️" defaultOpen={true}>
             <div className="space-y-3">
               <div className="grid sm:grid-cols-2 gap-3">
@@ -673,29 +712,26 @@ export default function VentilatorTab() {
                     <div>• RR, SpO₂, HR, BP every 15 min</div>
                     <div>• Increased work of breathing</div>
                     <div>• Diaphoresis / agitation</div>
-                    <div>• SpO₂ {"<"} 90% → STOP SBT</div>
+                    <div>• SpO₂ &lt; 90% → STOP SBT</div>
                   </div>
                 </div>
               </div>
-
               <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-3">
                 <div className="text-[9px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-2">Cuff Leak Test (pre-extubation)</div>
                 <div className="text-xs text-amber-800 dark:text-amber-200">
-                  Deflate ETT cuff → listen for air leak around tube on inspiration. <strong>Audible leak = lower risk of post-extubation stridor.</strong> No leak in child {"<"} 7 yr → consider dexamethasone pre-extubation.
+                  Deflate ETT cuff → listen for air leak around tube on inspiration. <strong>Audible leak = lower risk of post-extubation stridor.</strong> No leak in child &lt; 7 yr → consider dexamethasone pre-extubation.
                 </div>
               </div>
-
               <div className="rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 p-3">
                 <div className="text-[9px] font-mono uppercase tracking-widest text-violet-600 dark:text-violet-400 mb-1">Pre-Extubation Dexamethasone</div>
                 <div className="text-xs text-violet-800 dark:text-violet-200">
-                  If at risk of post-extubation stridor (prolonged intubation {">"} 5 days, {"<"} 7 yr, previous stridor, no cuff leak):
+                  If at risk of post-extubation stridor (prolonged intubation &gt; 5 days, &lt; 7 yr, previous stridor, no cuff leak):
                   <strong> Dexamethasone 0.25 mg/kg IV q6h × 4 doses</strong> (first dose 12 hr before extubation). Max 10 mg.
                 </div>
               </div>
             </div>
           </Section>
 
-          {/* Post-extubation */}
           <Section title="Post-Extubation Support" icon="🫁">
             <div className="space-y-2">
               {[
@@ -712,7 +748,6 @@ export default function VentilatorTab() {
             </div>
           </Section>
 
-          {/* Protective strategy */}
           <Section title="Lung Protective Strategy (ARDS)" icon="🛡️">
             <div className="space-y-2">
               {[
