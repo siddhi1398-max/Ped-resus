@@ -19,12 +19,12 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import CalculatorTab from "./components/tabs/CalculatorTab";
 import EquipmentTab from "./components/tabs/EquipmentTab";
+import VitalsTab from "./components/tabs/VitalsTab";
 import ResuscitationTab from "./components/tabs/ResuscitationTab";
 import VentilatorTab from "./components/tabs/VentilatorTab";
-import DrugsTab from "./components/tabs/DrugsTab";
 import FluidsTab from "./components/tabs/FluidsTab";
+import DrugsTab from "./components/tabs/DrugsTab";
 import SyrupCalculatorTab from "./components/tabs/SyrupCalculatorTab";
-import VitalsTab from "./components/tabs/VitalsTab";
 import ScoresTab from "./components/tabs/ScoresTab";
 import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
@@ -63,15 +63,15 @@ const DEV_EMAIL = "dr.siddhi.em@gmail.com";
 const ALL_TABS = [
   { id: "calculator",    label: "Calculator",           icon: Calculator,    Comp: CalculatorTab,            free: true  },
   { id: "equipment",     label: "Equipment & Tubes",    icon: Wrench,        Comp: EquipmentTab,             free: false },
+  { id: "vitals",        label: "Vitals",               icon: Heartbeat,     Comp: VitalsTab,                free: false },
   { id: "resuscitation", label: "Resuscitation",        icon: Syringe,       Comp: ResuscitationTab,         free: false },
   { id: "ventilator",    label: "Ventilator",           icon: Wind,          Comp: VentilatorTab,            free: false },
-  { id: "drugs",         label: "Drug Doses",           icon: Pill,          Comp: DrugsTab,                 free: false },
   { id: "fluids",        label: "Fluids",               icon: Drop,          Comp: FluidsTab,                free: false },
+  { id: "drugs",         label: "Drug Doses",           icon: Pill,          Comp: DrugsTab,                 free: false },
   { id: "syrup",         label: "Syrup Calculator",     icon: Eyedropper,    Comp: SyrupCalculatorTab,       free: false },
-  { id: "vitals",        label: "Vitals by Age",        icon: Heartbeat,     Comp: VitalsTab,                free: false },
   { id: "scores",        label: "Severity Scores",      icon: ClipboardText, Comp: ScoresTab,                free: false },
   { id: "sedation",      label: "Sedation & Analgesia", icon: FirstAid,      Comp: SedationAnalgesiaTab,     free: false },
-  { id: "neonatal",      label: "Neonatal (NRP)",       icon: Baby,          Comp: NeonatalTab,              free: false },
+  { id: "neonatal",      label: "Neonatal",             icon: Baby,          Comp: NeonatalTab,              free: false },
   { id: "algorithms",    label: "Management Algorithms",icon: TreeStructure, Comp: ManagementAlgorithmsTab,  free: false },
   { id: "prehsopital",   label: "Prehospital",          icon: ImageIcon,     Comp: PrehospitalTab,           free: false },
   { id: "immunisation",  label: "Immunisation",         icon: Syringe,       Comp: ImmunisationTab,          free: false },
