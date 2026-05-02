@@ -28,10 +28,8 @@ import VitalsTab from "./components/tabs/VitalsTab";
 import ScoresTab from "./components/tabs/ScoresTab";
 import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
-import AlgorithmsTab from "./components/tabs/AlgorithmsTab";
-import ClinicalPathwaysTab from "./components/tabs/ClinicalPathwaysTab";
+import ManagementAlgorithmsTab from "./components/tabs/ManagementAlgorithmsTab";
 import PrehospitalTab from "./components/tabs/PrehospitalTab";
-import IAPGuidelinesTab from "./components/tabs/IAPGuidelinesTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon,
@@ -62,21 +60,19 @@ const DEV_TITLE = "Emergency Physician";
 const DEV_EMAIL = "dr.siddhi.em@gmail.com";
 
 const ALL_TABS = [
-  { id: "calculator",    label: "Calculator",           icon: Calculator,    Comp: CalculatorTab,        free: true  },
-  { id: "equipment",     label: "Equipment & Tubes",    icon: Wrench,        Comp: EquipmentTab,         free: false },
-  { id: "resuscitation", label: "Resuscitation",        icon: Syringe,       Comp: ResuscitationTab,     free: false },
-  { id: "ventilator",    label: "Ventilator",           icon: Wind,          Comp: VentilatorTab,        free: false },
-  { id: "drugs",         label: "Drug Doses",           icon: Pill,          Comp: DrugsTab,             free: false },
-  { id: "fluids",        label: "Fluids",               icon: Drop,          Comp: FluidsTab,            free: false },
-  { id: "syrup",         label: "Syrup Calculator",     icon: Eyedropper,    Comp: SyrupCalculatorTab,   free: false },
-  { id: "vitals",        label: "Vitals by Age",        icon: Heartbeat,     Comp: VitalsTab,            free: false },
-  { id: "scores",        label: "Severity Scores",      icon: ClipboardText, Comp: ScoresTab,            free: false },
-  { id: "sedation",      label: "Sedation & Analgesia", icon: FirstAid,      Comp: SedationAnalgesiaTab, free: false },
-  { id: "neonatal",      label: "Neonatal (NRP)",       icon: Baby,          Comp: NeonatalTab,          free: false },
-  { id: "algorithms",    label: "PALS Algorithms",      icon: TreeStructure, Comp: AlgorithmsTab,        free: false },
-  { id: "pathways",      label: "Clinical Pathways",    icon: Stethoscope,   Comp: ClinicalPathwaysTab,  free: false },
-  { id: "iap",           label: "IAP Guidelines",       icon: BookOpen,      Comp: IAPGuidelinesTab,     free: false },
-  { id: "prehsopital",   label: "Prehospital",          icon: ImageIcon,     Comp: PrehospitalTab,       free: false },
+  { id: "calculator",    label: "Calculator",           icon: Calculator,    Comp: CalculatorTab,            free: true  },
+  { id: "equipment",     label: "Equipment & Tubes",    icon: Wrench,        Comp: EquipmentTab,             free: false },
+  { id: "resuscitation", label: "Resuscitation",        icon: Syringe,       Comp: ResuscitationTab,         free: false },
+  { id: "ventilator",    label: "Ventilator",           icon: Wind,          Comp: VentilatorTab,            free: false },
+  { id: "drugs",         label: "Drug Doses",           icon: Pill,          Comp: DrugsTab,                 free: false },
+  { id: "fluids",        label: "Fluids",               icon: Drop,          Comp: FluidsTab,                free: false },
+  { id: "syrup",         label: "Syrup Calculator",     icon: Eyedropper,    Comp: SyrupCalculatorTab,       free: false },
+  { id: "vitals",        label: "Vitals by Age",        icon: Heartbeat,     Comp: VitalsTab,                free: false },
+  { id: "scores",        label: "Severity Scores",      icon: ClipboardText, Comp: ScoresTab,                free: false },
+  { id: "sedation",      label: "Sedation & Analgesia", icon: FirstAid,      Comp: SedationAnalgesiaTab,     free: false },
+  { id: "neonatal",      label: "Neonatal (NRP)",       icon: Baby,          Comp: NeonatalTab,              free: false },
+  { id: "algorithms",    label: "Management Algorithms",icon: TreeStructure, Comp: ManagementAlgorithmsTab,  free: false },
+  { id: "prehsopital",   label: "Prehospital",          icon: ImageIcon,     Comp: PrehospitalTab,           free: false },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
