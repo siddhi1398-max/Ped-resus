@@ -30,6 +30,7 @@ import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
 import ManagementAlgorithmsTab from "./components/tabs/ManagementAlgorithmsTab";
 import PrehospitalTab from "./components/tabs/PrehospitalTab";
+import ImmunisationTab from "./components/tabs/ImmunisationTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon,
@@ -73,6 +74,7 @@ const ALL_TABS = [
   { id: "neonatal",      label: "Neonatal (NRP)",       icon: Baby,          Comp: NeonatalTab,              free: false },
   { id: "algorithms",    label: "Management Algorithms",icon: TreeStructure, Comp: ManagementAlgorithmsTab,  free: false },
   { id: "prehsopital",   label: "Prehospital",          icon: ImageIcon,     Comp: PrehospitalTab,           free: false },
+  { id: "immunisation",  label: "Immunisation",         icon: Syringe,       Comp: ImmunisationTab,          free: false },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
