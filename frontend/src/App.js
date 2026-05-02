@@ -30,8 +30,8 @@ import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
 import AlgorithmsTab from "./components/tabs/AlgorithmsTab";
 import ClinicalPathwaysTab from "./components/tabs/ClinicalPathwaysTab";
-import Imaging from "./components/tabs/ImagingTab";
-import IAPGuidelines from "./components/tabs/IAPGuidelinesTab";
+import ImagingTab from "./components/tabs/ImagingTab";
+import IAPGuidelinesTab from "./components/tabs/IAPGuidelinesTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon,
