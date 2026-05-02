@@ -2,7 +2,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Sedation & Analgesia reference tab
 // Sections:
-//   1. PSA Agent Comparison Table (from drugs.js data)
+//   1. PSA Agent Comparison Table (weight-based doses)
 //   2. PSA Principles (pre/during/post procedure)
 //   3. Common PSA Regimens
 //   4. Local Anaesthetics Max Dose Table
@@ -15,13 +15,16 @@ import { useState } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning, Lightbulb, CaretDown, ArrowSquareOut, CheckCircle,
-  Syringe, FirstAid, Wind,
+  Syringe, FirstAid, Wind, Pill, ClipboardText, Flask,
+  Crosshair, Heartbeat, ArrowRight, X, Brain, Stethoscope,
+  NoteBlank, Lightning, CheckSquare, ShieldWarning, TestTube,
+  Target, Radioactive,
 } from "@phosphor-icons/react";
 import {
   LOCAL_ANAESTHETICS, PSA_PRINCIPLES, PSA_REGIMENS, NERVE_BLOCKS, LAST_PROTOCOL,
 } from "../../data/sedationAnalgesia";
 
-// ─── PSA AGENTS — derived from drugs.js (embedded here for self-contained tab) ─
+// ─── PSA AGENTS ───────────────────────────────────────────────────────────────
 const PSA_AGENTS = [
   {
     name: "Ketamine",
@@ -160,7 +163,7 @@ const PSA_AGENTS = [
     bpColor: "emerald",
     reversal: "None needed — offset rapid",
     bestFor: "Cooperative ≥5 yr: IV, lac repair, dressing change, minor reductions",
-    cautions: "Pneumothorax, bowel obstruction, ↑ICP, B12 deficiency, <4 yr (cooperation needed)",
+    cautions: "Pneumothorax, bowel obstruction, ↑ICP, B12 deficiency, <4 yr",
     pearl: "Child self-administers — inherent safety mechanism. No IV needed. Scavenging required. Fastest on/off of any PSA agent.",
   },
   {
@@ -180,27 +183,43 @@ const PSA_AGENTS = [
     bpColor: "emerald",
     reversal: "None",
     bestFor: "RSI induction in haemodynamically unstable patients",
-    cautions: "Adrenal suppression (single dose acceptable). Avoid in septic shock (controversial).",
+    cautions: "Adrenal suppression (single dose acceptable). Avoid in septic shock.",
     pearl: "Best haemodynamic profile for RSI in shocked patients. Myoclonus common but benign. Not for ongoing sedation.",
   },
 ];
 
 // ─── COLOUR MAP ───────────────────────────────────────────────────────────────
 const CMAP = {
-  violet: "bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-800",
-  blue:   "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800",
-  sky:    "bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800",
-  orange: "bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800",
-  emerald:"bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
-  teal:   "bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800",
-  slate:  "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700",
-  red:    "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800",
-  amber:  "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+  violet:  "bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-800",
+  blue:    "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+  sky:     "bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800",
+  orange:  "bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800",
+  emerald: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+  teal:    "bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800",
+  slate:   "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700",
+  red:     "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800",
+  amber:   "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+  purple:  "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+  cyan:    "bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800",
+  rose:    "bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+};
+
+// ─── SECTION ICON MAP — maps section titles to Phosphor icons ─────────────────
+// Used by the Section component to render a consistent icon instead of emoji
+const SECTION_ICONS = {
+  psa:     { icon: Syringe,       color: "text-violet-500" },
+  psaPrinciples: { icon: ClipboardText, color: "text-blue-500" },
+  regimens:{ icon: TestTube,      color: "text-teal-500" },
+  local:   { icon: Pill,          color: "text-orange-500" },
+  blocks:  { icon: Crosshair,     color: "text-red-500" },
+  last:    { icon: ShieldWarning, color: "text-red-600" },
 };
 
 // ─── SECTION TOGGLE ───────────────────────────────────────────────────────────
-function Section({ title, icon, children, defaultOpen = false }) {
+function Section({ title, sectionKey, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
+  const cfg = SECTION_ICONS[sectionKey] || { icon: NoteBlank, color: "text-slate-400" };
+  const Icon = cfg.icon;
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
       <button
@@ -208,14 +227,18 @@ function Section({ title, icon, children, defaultOpen = false }) {
         className="w-full flex items-center justify-between px-5 py-4 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <span className="text-lg">{icon}</span>
-          <span className="font-bold text-sm text-slate-900 dark:text-white"
-                style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+          <Icon size={16} weight="bold" className={`flex-shrink-0 ${cfg.color}`} />
+          <span
+            className="font-bold text-sm text-slate-900 dark:text-white"
+            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
+          >
             {title}
           </span>
         </div>
-        <CaretDown size={14} weight="bold"
-          className={`text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        <CaretDown
+          size={14} weight="bold"
+          className={`text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && <div className="px-5 py-4 bg-white dark:bg-slate-900/50">{children}</div>}
     </div>
@@ -226,57 +249,54 @@ function Section({ title, icon, children, defaultOpen = false }) {
 function PSAAgentTable({ weight }) {
   const [expanded, setExpanded] = useState(null);
 
+  const wDose = (doseStr) => {
+    if (!doseStr || doseStr === "—") return "—";
+    const mgKg  = doseStr.match(/([\d.]+)–?([\d.]*)\s*mg\/kg/);
+    const mcgKg = doseStr.match(/([\d.]+)–?([\d.]*)\s*mcg\/kg/);
+    if (mgKg) {
+      const lo = +(parseFloat(mgKg[1])  * weight).toFixed(1);
+      const hi = mgKg[2]  ? +(parseFloat(mgKg[2])  * weight).toFixed(1) : null;
+      return hi ? `${lo}–${hi} mg`  : `${lo} mg`;
+    }
+    if (mcgKg) {
+      const lo = +(parseFloat(mcgKg[1]) * weight).toFixed(0);
+      const hi = mcgKg[2] ? +(parseFloat(mcgKg[2]) * weight).toFixed(0) : null;
+      return hi ? `${lo}–${hi} mcg` : `${lo} mcg`;
+    }
+    return doseStr;
+  };
+
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-        Doses calculated for <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span>.
-        Click any agent to see clinical details.
+        Doses calculated for{" "}
+        <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span>.
+        Tap any agent row to see clinical details.
       </p>
 
-      {/* Scrollable table */}
       <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
         <table className="w-full text-xs border-collapse min-w-[700px]">
           <thead>
             <tr className="bg-slate-100 dark:bg-slate-800">
-              <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500 w-32">Agent</th>
-              <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">IV Dose</th>
-              <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">IN/IM Dose</th>
-              <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Onset / Duration</th>
-              <th className="text-center px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Analg.</th>
-              <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Airway</th>
-              <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">BP</th>
-              <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Reversal</th>
+              {["Agent", "IV Dose", "IN / IM Dose", "Onset / Duration", "Analg.", "Airway", "BP", "Reversal"].map(h => (
+                <th key={h} className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {PSA_AGENTS.map(a => {
               const isOpen = expanded === a.name;
-
-              // Compute weight-based dose where possible
-              const wDose = (doseStr) => {
-                if (!doseStr || doseStr === "—") return "—";
-                const mgKg = doseStr.match(/([\d.]+)–?([\d.]*)\s*mg\/kg/);
-                const mcgKg = doseStr.match(/([\d.]+)–?([\d.]*)\s*mcg\/kg/);
-                if (mgKg) {
-                  const lo = +(parseFloat(mgKg[1]) * weight).toFixed(1);
-                  const hi = mgKg[2] ? +(parseFloat(mgKg[2]) * weight).toFixed(1) : null;
-                  return hi ? `${lo}–${hi} mg` : `${lo} mg`;
-                }
-                if (mcgKg) {
-                  const lo = +(parseFloat(mcgKg[1]) * weight).toFixed(0);
-                  const hi = mcgKg[2] ? +(parseFloat(mcgKg[2]) * weight).toFixed(0) : null;
-                  return hi ? `${lo}–${hi} mcg` : `${lo} mcg`;
-                }
-                return doseStr;
-              };
-
               return (
                 <>
                   <tr
                     key={a.name}
                     onClick={() => setExpanded(isOpen ? null : a.name)}
                     className={`border-t border-slate-100 dark:border-slate-800 cursor-pointer transition-colors ${
-                      isOpen ? "bg-slate-50 dark:bg-slate-800/60" : "hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                      isOpen
+                        ? "bg-slate-50 dark:bg-slate-800/60"
+                        : "hover:bg-slate-50 dark:hover:bg-slate-800/30"
                     }`}
                   >
                     <td className="px-3 py-2.5">
@@ -300,7 +320,8 @@ function PSAAgentTable({ weight }) {
                     <td className="px-3 py-2.5 text-center">
                       {a.analgesia
                         ? <CheckCircle size={14} weight="fill" className="text-emerald-500 mx-auto" />
-                        : <span className="text-slate-300 dark:text-slate-600 font-bold text-base leading-none">—</span>}
+                        : <X size={12} weight="bold" className="text-slate-300 dark:text-slate-600 mx-auto" />
+                      }
                     </td>
                     <td className="px-3 py-2.5">
                       <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${CMAP[a.airwayColor]}`}>
@@ -317,23 +338,30 @@ function PSAAgentTable({ weight }) {
                     </td>
                   </tr>
 
-                  {/* Expanded row */}
                   {isOpen && (
                     <tr key={`${a.name}-exp`} className="border-t border-slate-100 dark:border-slate-800">
                       <td colSpan={8} className="px-4 pb-4 pt-2 bg-slate-50 dark:bg-slate-800/50">
                         <div className="grid sm:grid-cols-3 gap-3">
                           <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
-                            <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Best For</div>
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <Target size={10} weight="bold" className="text-slate-400" />
+                              <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Best For</span>
+                            </div>
                             <p className="text-xs text-slate-700 dark:text-slate-200">{a.bestFor}</p>
                           </div>
                           <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-red-200 dark:border-red-800">
-                            <div className="text-[9px] font-mono uppercase tracking-widest text-red-500 mb-1">Cautions</div>
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <Warning size={10} weight="fill" className="text-red-500" />
+                              <span className="text-[9px] font-mono uppercase tracking-widest text-red-500">Cautions</span>
+                            </div>
                             <p className="text-xs text-slate-700 dark:text-slate-200">{a.cautions}</p>
                           </div>
                           <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-3 border border-amber-200 dark:border-amber-800">
-                            <div className="flex items-center gap-1 mb-1">
+                            <div className="flex items-center gap-1.5 mb-1.5">
                               <Lightbulb size={10} weight="fill" className="text-amber-500" />
-                              <span className="text-[9px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400">Clinical Pearl</span>
+                              <span className="text-[9px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                                Clinical Pearl
+                              </span>
                             </div>
                             <p className="text-xs text-amber-800 dark:text-amber-200">{a.pearl}</p>
                           </div>
@@ -358,19 +386,18 @@ function LocalAnaestheticTable({ weight }) {
       <table className="w-full text-xs border-collapse">
         <thead>
           <tr className="bg-slate-100 dark:bg-slate-800">
-            <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Agent</th>
-            <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Max mg/kg</th>
-            <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-blue-500">Max dose ({weight} kg)</th>
-            <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Concentration</th>
-            <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Onset</th>
-            <th className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">Duration</th>
+            {["Agent", "Max mg/kg", `Max dose (${weight} kg)`, "Concentration", "Onset", "Duration"].map(h => (
+              <th key={h} className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">
+                {h}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
           {LOCAL_ANAESTHETICS.map((la, i) => {
-            const maxDose = la.mgPerKg && weight
-              ? Math.min(+(la.mgPerKg * weight).toFixed(0), la.max || 9999)
-              : "—";
+            const raw     = la.mgPerKg ? la.mgPerKg * weight : null;
+            const maxDose = raw ? Math.min(+raw.toFixed(0), la.max || 9999) : null;
+            const capped  = raw && la.max && raw >= la.max;
             return (
               <tr key={i} className="border-t border-slate-100 dark:border-slate-800 odd:bg-white dark:odd:bg-slate-900/30">
                 <td className="px-3 py-2.5 font-semibold text-slate-900 dark:text-white">{la.name}</td>
@@ -378,8 +405,8 @@ function LocalAnaestheticTable({ weight }) {
                   {la.mgPerKg ? `${la.mgPerKg} mg/kg` : "Fixed"}
                 </td>
                 <td className="px-3 py-2.5 font-mono font-bold text-blue-600 dark:text-blue-400">
-                  {la.mgPerKg ? `${maxDose} mg` : "—"}
-                  {la.max && la.mgPerKg && +(la.mgPerKg * weight).toFixed(0) >= la.max && (
+                  {maxDose ? `${maxDose} mg` : "—"}
+                  {capped && (
                     <span className="text-[8px] text-amber-500 ml-1">(capped at {la.max} mg)</span>
                   )}
                 </td>
@@ -412,8 +439,10 @@ function NerveBlockCard({ block }) {
           <span className="text-[9px] font-mono bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded">
             {block.duration}
           </span>
-          <CaretDown size={12} weight="bold"
-            className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+          <CaretDown
+            size={12} weight="bold"
+            className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
+          />
         </div>
       </button>
 
@@ -421,13 +450,19 @@ function NerveBlockCard({ block }) {
         <div className="px-4 pb-4 pt-3 space-y-3 bg-white dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
-              <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Drug & Dose</div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Pill size={10} weight="bold" className="text-slate-400" />
+                <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Drug & Dose</span>
+              </div>
               <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-200">
                 {block.drug}
               </div>
             </div>
             <div>
-              <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Nerves Blocked</div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Brain size={10} weight="bold" className="text-slate-400" />
+                <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Nerves Blocked</span>
+              </div>
               <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-200">
                 {block.nerves}
               </div>
@@ -435,12 +470,18 @@ function NerveBlockCard({ block }) {
           </div>
 
           <div>
-            <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Landmarks</div>
+            <div className="flex items-center gap-1.5 mb-1">
+              <Crosshair size={10} weight="bold" className="text-slate-400" />
+              <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Landmarks</span>
+            </div>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{block.landmarks}</p>
           </div>
 
           <div>
-            <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Technique</div>
+            <div className="flex items-center gap-1.5 mb-1">
+              <Stethoscope size={10} weight="bold" className="text-slate-400" />
+              <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Technique</span>
+            </div>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{block.technique}</p>
           </div>
 
@@ -450,8 +491,12 @@ function NerveBlockCard({ block }) {
           </div>
 
           {block.refUrl && (
-            <a href={block.refUrl} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[10px] font-mono text-blue-600 dark:text-blue-400 hover:underline">
+            <a
+              href={block.refUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[10px] font-mono text-blue-600 dark:text-blue-400 hover:underline"
+            >
               <ArrowSquareOut size={11} weight="bold" />
               Reference / Cases
             </a>
@@ -462,9 +507,16 @@ function NerveBlockCard({ block }) {
   );
 }
 
+// ─── PSA PRINCIPLES SUB-TAB ───────────────────────────────────────────────────
+const PSA_PHASE_CONFIG = [
+  { id: "pre",    label: "Pre-Procedure",  Icon: NoteBlank,   color: "text-blue-500"   },
+  { id: "during", label: "During",         Icon: Lightning,   color: "text-amber-500"  },
+  { id: "post",   label: "Post-Procedure", Icon: CheckSquare, color: "text-emerald-500" },
+];
+
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function SedationAnalgesiaTab() {
-  const { weight } = useWeight();
+  const { weight }     = useWeight();
   const [psaSection, setPsaSection] = useState("pre");
 
   return (
@@ -472,8 +524,10 @@ export default function SedationAnalgesiaTab() {
 
       {/* ── Header ── */}
       <div>
-        <h2 className="font-bold text-2xl text-slate-900 dark:text-white mb-1"
-            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+        <h2
+          className="font-bold text-2xl text-slate-900 dark:text-white mb-1"
+          style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
+        >
           Sedation &amp; Analgesia
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
@@ -486,38 +540,42 @@ export default function SedationAnalgesiaTab() {
       <div className="flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-800 dark:text-amber-200">
         <Warning size={13} weight="fill" className="flex-shrink-0 mt-0.5 text-amber-500" />
         <span>
-          All sedation and regional anaesthesia must be performed with appropriate monitoring, trained personnel,
-          and emergency equipment immediately available. Reference only — individualise to patient.
+          All sedation and regional anaesthesia must be performed with appropriate monitoring,
+          trained personnel, and emergency equipment immediately available.
+          Reference only — individualise to patient.
         </span>
       </div>
 
       {/* ═══════════════════════════════════════════
           1. PSA AGENT TABLE
       ═══════════════════════════════════════════ */}
-      <Section title="PSA Agent Comparison — Weight-Based Doses" icon="💉" defaultOpen={true}>
+      <Section title="PSA Agent Comparison — Weight-Based Doses" sectionKey="psa" defaultOpen={true}>
         <PSAAgentTable weight={weight} />
       </Section>
 
       {/* ═══════════════════════════════════════════
           2. PSA PRINCIPLES
       ═══════════════════════════════════════════ */}
-      <Section title="PSA Principles — Pre / During / Post Procedure" icon="📋">
+      <Section title="PSA Principles — Pre / During / Post Procedure" sectionKey="psaPrinciples">
         {/* Sub-tabs */}
         <div className="flex gap-2 mb-4 flex-wrap">
-          {[
-            { id: "pre",   label: "Pre-Procedure",  icon: "📝" },
-            { id: "during",label: "During",         icon: "⚡" },
-            { id: "post",  label: "Post-Procedure", icon: "✅" },
-          ].map(t => (
-            <button key={t.id} onClick={() => setPsaSection(t.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
-                psaSection === t.id
-                  ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
-                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
-              }`}>
-              {t.icon} {t.label}
-            </button>
-          ))}
+          {PSA_PHASE_CONFIG.map(t => {
+            const active = psaSection === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setPsaSection(t.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                  active
+                    ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
+                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
+                }`}
+              >
+                <t.Icon size={12} weight="bold" className={active ? "" : t.color} />
+                {t.label}
+              </button>
+            );
+          })}
         </div>
 
         <div className="space-y-2">
@@ -540,7 +598,7 @@ export default function SedationAnalgesiaTab() {
       {/* ═══════════════════════════════════════════
           3. PSA REGIMENS
       ═══════════════════════════════════════════ */}
-      <Section title="Common PSA Regimens" icon="🧪">
+      <Section title="Common PSA Regimens" sectionKey="regimens">
         <div className="space-y-3">
           {PSA_REGIMENS.map((r, i) => (
             <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
@@ -558,12 +616,20 @@ export default function SedationAnalgesiaTab() {
                   <div className="text-xs text-slate-600 dark:text-slate-300">{r.indication}</div>
                 </div>
                 <div>
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mb-1">Pros</div>
+                  <div className="flex items-center gap-1 mb-1">
+                    <CheckCircle size={9} weight="fill" className="text-emerald-500" />
+                    <span className="text-[9px] font-mono uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Pros</span>
+                  </div>
                   <div className="text-xs text-slate-600 dark:text-slate-300">{r.pros}</div>
                 </div>
                 <div>
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-red-500 mb-1">Cons / Cautions</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-300">{r.cons} {r.cautions && `· ${r.cautions}`}</div>
+                  <div className="flex items-center gap-1 mb-1">
+                    <Warning size={9} weight="fill" className="text-red-500" />
+                    <span className="text-[9px] font-mono uppercase tracking-widest text-red-500">Cons / Cautions</span>
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-300">
+                    {r.cons}{r.cautions ? ` · ${r.cautions}` : ""}
+                  </div>
                 </div>
               </div>
             </div>
@@ -574,17 +640,19 @@ export default function SedationAnalgesiaTab() {
       {/* ═══════════════════════════════════════════
           4. LOCAL ANAESTHETICS
       ═══════════════════════════════════════════ */}
-      <Section title="Local Anaesthetic Safe Dose Reference" icon="💊">
+      <Section title="Local Anaesthetic Safe Dose Reference" sectionKey="local">
         <div className="space-y-3">
           <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-            Maximum doses for <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span> patient.
+            Maximum doses for{" "}
+            <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span> patient.
             NEVER exceed absolute maximum regardless of weight.
           </p>
           <LocalAnaestheticTable weight={weight} />
           <div className="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-3 py-2.5 text-xs text-red-800 dark:text-red-200">
             <Warning size={12} weight="fill" className="flex-shrink-0 mt-0.5 text-red-500" />
             <span>
-              <strong>NEVER use adrenaline-containing solutions</strong> for digital blocks (fingers/toes), penile blocks, or other end-artery sites. Risk of irreversible ischaemia.
+              <strong>NEVER use adrenaline-containing solutions</strong> for digital blocks (fingers/toes),
+              penile blocks, or other end-artery sites. Risk of irreversible ischaemia.
             </span>
           </div>
         </div>
@@ -593,11 +661,14 @@ export default function SedationAnalgesiaTab() {
       {/* ═══════════════════════════════════════════
           5. NERVE BLOCKS
       ═══════════════════════════════════════════ */}
-      <Section title="Pediatric ED Nerve Blocks" icon="🎯">
+      <Section title="Pediatric ED Nerve Blocks" sectionKey="blocks">
         <div className="space-y-3">
           <div className="flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 px-3 py-2 text-xs text-blue-800 dark:text-blue-200">
             <Lightbulb size={12} weight="fill" className="flex-shrink-0 mt-0.5 text-blue-500" />
-            <span>Ultrasound guidance preferred for most blocks. Aspirate every 5 mL. Monitor for LAST (see below). Reference: baby-blocks.com · NYSORA</span>
+            <span>
+              Ultrasound guidance preferred for most blocks. Aspirate every 5 mL.
+              Monitor for LAST (see below). Reference: baby-blocks.com · NYSORA
+            </span>
           </div>
           {NERVE_BLOCKS.map(block => (
             <NerveBlockCard key={block.id} block={block} />
@@ -608,11 +679,17 @@ export default function SedationAnalgesiaTab() {
       {/* ═══════════════════════════════════════════
           6. LAST PROTOCOL
       ═══════════════════════════════════════════ */}
-      <Section title="LAST — Local Anaesthetic Systemic Toxicity" icon="🚨">
+      <Section title="LAST — Local Anaesthetic Systemic Toxicity" sectionKey="last">
         <div className="space-y-4">
+
           {/* Signs */}
           <div>
-            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-2">Signs & Symptoms</div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <Heartbeat size={11} weight="bold" className="text-amber-500" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400">
+                Signs &amp; Symptoms
+              </span>
+            </div>
             <div className="space-y-1.5">
               {LAST_PROTOCOL.signs.map((s, i) => (
                 <div key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
@@ -625,12 +702,19 @@ export default function SedationAnalgesiaTab() {
 
           {/* Management */}
           <div>
-            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-red-500 mb-2">Emergency Management</div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <ShieldWarning size={11} weight="bold" className="text-red-500" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-red-500">
+                Emergency Management
+              </span>
+            </div>
             <div className="space-y-2">
               {LAST_PROTOCOL.management.map((step, i) => (
                 <div key={i} className="flex items-start gap-2.5">
                   <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 mt-0.5 ${
-                    i < 2 ? "bg-red-600 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
+                    i < 2
+                      ? "bg-red-600 text-white"
+                      : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
                   }`}>
                     {i + 1}
                   </span>
@@ -640,27 +724,49 @@ export default function SedationAnalgesiaTab() {
             </div>
           </div>
 
-          {/* Intralipid box */}
+          {/* Intralipid rescue box */}
           <div className="rounded-xl border-2 border-red-500 bg-red-50 dark:bg-red-950/40 p-4">
-            <div className="font-black text-red-700 dark:text-red-300 text-sm mb-2"
-                 style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-              20% INTRALIPID RESCUE — {weight} kg
+            <div className="flex items-center gap-2 mb-3">
+              <Radioactive size={16} weight="fill" className="text-red-600 dark:text-red-400" />
+              <span
+                className="font-black text-red-700 dark:text-red-300 text-sm"
+                style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
+              >
+                20% INTRALIPID RESCUE — {weight} kg
+              </span>
             </div>
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
-              <div>
-                <div className="text-[9px] font-mono uppercase tracking-widest text-red-500 mb-1">Bolus</div>
-                <div className="font-mono font-bold text-red-700 dark:text-red-300 text-lg">
+              <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-1 mb-1">
+                  <ArrowRight size={9} weight="bold" className="text-red-500" />
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-red-500">Bolus</span>
+                </div>
+                <div className="font-mono font-bold text-red-700 dark:text-red-300 text-2xl">
                   {+(1.5 * weight).toFixed(0)} mL
                 </div>
-                <div className="text-red-600 dark:text-red-400">1.5 mL/kg over 1 min. Repeat q5 min × 2.</div>
+                <div className="text-red-600 dark:text-red-400 mt-1">
+                  1.5 mL/kg over 1 min. Repeat q5 min × 2 if arrest persists.
+                </div>
               </div>
-              <div>
-                <div className="text-[9px] font-mono uppercase tracking-widest text-red-500 mb-1">Infusion</div>
-                <div className="font-mono font-bold text-red-700 dark:text-red-300 text-lg">
+              <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-1 mb-1">
+                  <ArrowRight size={9} weight="bold" className="text-red-500" />
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-red-500">Infusion</span>
+                </div>
+                <div className="font-mono font-bold text-red-700 dark:text-red-300 text-2xl">
                   {+(0.25 * weight).toFixed(0)}–{+(0.5 * weight).toFixed(0)} mL/min
                 </div>
-                <div className="text-red-600 dark:text-red-400">0.25–0.5 mL/kg/min. Max 12 mL/kg total.</div>
+                <div className="text-red-600 dark:text-red-400 mt-1">
+                  0.25–0.5 mL/kg/min. Max cumulative 12 mL/kg total.
+                </div>
               </div>
+            </div>
+            <div className="flex items-start gap-2 mt-3 text-[10px] text-red-700 dark:text-red-300">
+              <Warning size={11} weight="fill" className="text-red-500 flex-shrink-0 mt-0.5" />
+              <span>
+                Use reduced adrenaline doses in LAST arrest (1 mcg/kg only — NOT 10 mcg/kg).
+                Avoid vasopressin, calcium channel blockers, and propofol during lipid rescue.
+              </span>
             </div>
           </div>
         </div>
@@ -668,7 +774,8 @@ export default function SedationAnalgesiaTab() {
 
       {/* Footer */}
       <div className="text-[10px] text-slate-400 dark:text-slate-500 italic text-center pt-2">
-        Tintinalli ch.38 · Fleischer &amp; Ludwig ch.4 · ACEP PSA Guidelines 2014 · NYSORA · baby-blocks.com · IAP Analgesia &amp; Sedation 2021
+        Tintinalli ch.38 · Fleischer &amp; Ludwig ch.4 · ACEP PSA Guidelines 2014 · NYSORA ·
+        baby-blocks.com · IAP Analgesia &amp; Sedation 2021
       </div>
     </div>
   );
