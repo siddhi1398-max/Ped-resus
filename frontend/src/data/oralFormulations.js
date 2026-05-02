@@ -15,7 +15,7 @@ export const ORAL_DRUGS = [
     name: "Amoxicillin",
     category: "antibiotic",
     indication: "Pneumonia / AOM / pharyngitis / UTI / skin infections",
-    dosePerKg: 40,
+    dosePerKg: 30,
     frequency: "TDS",
     frequencyHours: 8,
     unit: "mg",
