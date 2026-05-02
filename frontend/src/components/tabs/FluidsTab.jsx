@@ -696,12 +696,12 @@ function PeriOpSection({ weight }) {
 
 // ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
 const SECTIONS = [
-  { id: "maintenance", label: "Maintenance",     Icon: Drop      },
-  { id: "diarrhoea",   label: "Diarrhoea / ORS", Icon: Toilet    },
-  { id: "dka",         label: "DKA",             Icon: Heartbeat },
-  { id: "burns",       label: "Burns",           Icon: Fire      },
-  { id: "shock",       label: "Shock",           Icon: Lightning },
-  { id: "periop",      label: "Peri-op",         Icon: Hospital  },
+  { id: "maintenance", label: "Maintenance",          Icon: Drop      },
+  { id: "diarrhoea",   label: "Dehydration/Diarrhea", Icon: Toilet    },
+  { id: "dka",         label: "DKA",                  Icon: Syringe   },
+  { id: "burns",       label: "Burns",                Icon: Fire      },
+  { id: "shock",       label: "Shock",                Icon: Lightning },
+  { id: "periop",      label: "Peri-op",              Icon: Hospital  },
 ];
 
 export default function FluidsTab() {
