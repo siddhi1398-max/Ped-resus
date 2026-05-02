@@ -26,7 +26,7 @@ import {
   ArrowsIn,
   ArrowsOut,
   SkipBack,
-  Activity,
+  Pulse,
   ChartLine,
   Stethoscope,
 } from "@phosphor-icons/react";
@@ -729,7 +729,7 @@ export default function WaveformView() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Activity size={13} style={{ color: "#4a9eff" }} />
+          <Pulse size={13} style={{ color: "#4a9eff" }} />
           <span style={{ fontSize: 10, letterSpacing: 3, color: "#4a9eff", textTransform: "uppercase" }}>
             Ped·Resus — Vent Monitor
           </span>
