@@ -11,7 +11,12 @@ import {
 } from "../../data/fluids";
 import { Input } from "../ui/input";
 import DoseCard from "../DoseCard";
-import { Warning, CheckCircle, ArrowRight, CaretDown, Info } from "@phosphor-icons/react";
+import {
+  Warning, CheckCircle, ArrowRight, CaretDown, Info,
+  Drop, Toilet, Pill, Fire, Lightning, Hospital,
+  MagnifyingGlass, SaltShaker, Syringe, ChartBar,
+  Ruler, Target, Heartbeat, Gauge, FirstAid,
+} from "@phosphor-icons/react";
 
 // ─── COLOUR MAPS ──────────────────────────────────────────────────────────────
 const CMAP = {
@@ -24,19 +29,22 @@ const CMAP = {
 };
 
 // ─── SHARED HELPERS ───────────────────────────────────────────────────────────
-function SectionToggle({ title, icon, children, defaultOpen = false, accent }) {
+function SectionToggle({ title, IconComp, children, defaultOpen = false, accent }) {
   const [open, setOpen] = useState(defaultOpen);
   const c = CMAP[accent] || {};
   return (
     <div className={`border rounded-xl overflow-hidden ${accent ? c.border : "border-slate-200 dark:border-slate-700"}`}>
-      <button onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${accent ? `${c.bg}` : "bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800"}`}>
+      <button
+        onClick={() => setOpen(!open)}
+        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${accent ? c.bg : "bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800"}`}
+      >
         <div className="flex items-center gap-2">
-          <span>{icon}</span>
+          {IconComp && <IconComp size={15} weight="bold" className={`flex-shrink-0 ${accent ? c.text : "text-slate-400"}`} />}
           <span className={`font-bold text-sm ${accent ? c.text : "text-slate-900 dark:text-white"}`}
-            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{title}</span>
+                style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{title}</span>
         </div>
-        <CaretDown size={13} weight="bold" className={`transition-transform duration-200 ${open ? "rotate-180" : ""} ${accent ? c.text : "text-slate-400"}`} />
+        <CaretDown size={13} weight="bold"
+          className={`transition-transform duration-200 flex-shrink-0 ${open ? "rotate-180" : ""} ${accent ? c.text : "text-slate-400"}`} />
       </button>
       {open && <div className="px-4 py-4 bg-white dark:bg-slate-900/50">{children}</div>}
     </div>
@@ -73,13 +81,12 @@ function MaintenanceSection({ weight }) {
       <div>
         <h3 className="font-bold text-base mb-3" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>Maintenance & Bolus</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-          <DoseCard testid="mf-hr"    category="fluid" title="Maintenance (4-2-1)"               value={maintenanceFluid(weight)}  unit="mL/hr" />
-          <DoseCard testid="mf-day"   category="fluid" title="Daily (Holliday-Segar)"            value={maintenanceDaily(weight)}  unit="mL / 24 hr" />
-          <DoseCard testid="bolus-20" category="fluid" title="Resuscitation bolus"               value={weight * 20}               unit="mL (20 mL/kg NS/LR)" />
-          <DoseCard testid="bolus-10" category="fluid" title="Cautious bolus (DKA/cardiac)"      value={weight * 10}               unit="mL (10 mL/kg)" />
+          <DoseCard testid="mf-hr"    category="fluid" title="Maintenance (4-2-1)"          value={maintenanceFluid(weight)} unit="mL/hr" />
+          <DoseCard testid="mf-day"   category="fluid" title="Daily (Holliday-Segar)"       value={maintenanceDaily(weight)} unit="mL / 24 hr" />
+          <DoseCard testid="bolus-20" category="fluid" title="Resuscitation bolus"          value={weight * 20}              unit="mL (20 mL/kg NS/LR)" />
+          <DoseCard testid="bolus-10" category="fluid" title="Cautious bolus (DKA/cardiac)" value={weight * 10}              unit="mL (10 mL/kg)" />
         </div>
       </div>
-
       <div>
         <h3 className="font-bold text-base mb-3" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>Fluid Types Reference</h3>
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
@@ -114,22 +121,18 @@ function DiarrhoeaSection({ weight }) {
   const [plan, setPlan] = useState("some");
   const p = DEHYDRATION_PLAN[plan];
   const c = CMAP[p.color];
-  const orsTotalPlanB = orsVolumePlanB(weight);
-  const orsHr = orsRatePerHour(weight);
 
   return (
     <div className="space-y-5">
-
-      {/* Assessment table */}
-      <SectionToggle title="Dehydration Assessment (WHO / IAP)" icon="🔍" defaultOpen={true}>
+      <SectionToggle title="Dehydration Assessment (WHO / IAP)" IconComp={MagnifyingGlass} defaultOpen={true}>
         <div className="overflow-x-auto">
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr>
-                <th className="p-2.5 text-left font-mono text-[9px] uppercase tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-800 rounded-tl-lg">Feature</th>
+                <th className="p-2.5 text-left font-mono text-[9px] uppercase tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-800">Feature</th>
                 <th className="p-2.5 text-left font-mono text-[9px] uppercase tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40">No dehydration</th>
                 <th className="p-2.5 text-left font-mono text-[9px] uppercase tracking-widest text-amber-600 bg-amber-50 dark:bg-amber-950/40">Some (5–9%)</th>
-                <th className="p-2.5 text-left font-mono text-[9px] uppercase tracking-widest text-red-600 bg-red-50 dark:bg-red-950/40 rounded-tr-lg">Severe (≥ 10%)</th>
+                <th className="p-2.5 text-left font-mono text-[9px] uppercase tracking-widest text-red-600 bg-red-50 dark:bg-red-950/40">Severe (≥ 10%)</th>
               </tr>
             </thead>
             <tbody>
@@ -149,14 +152,13 @@ function DiarrhoeaSection({ weight }) {
         </p>
       </SectionToggle>
 
-      {/* Plan selector */}
       <div>
         <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-2">Select Treatment Plan</div>
         <div className="flex gap-2">
           {[
-            { id: "none",   label: "Plan A — No dehydration",   color: "emerald" },
-            { id: "some",   label: "Plan B — Some dehydration",  color: "amber" },
-            { id: "severe", label: "Plan C — Severe / IV",       color: "red" },
+            { id: "none",   label: "Plan A — No dehydration",  color: "emerald" },
+            { id: "some",   label: "Plan B — Some dehydration", color: "amber" },
+            { id: "severe", label: "Plan C — Severe / IV",      color: "red" },
           ].map(pl => {
             const cm = CMAP[pl.color];
             return (
@@ -170,32 +172,28 @@ function DiarrhoeaSection({ weight }) {
         </div>
       </div>
 
-      {/* Active plan */}
       <div className={`rounded-xl border-2 p-4 space-y-4 ${c.border} ${c.bg}`}>
         <div className={`font-bold text-lg ${c.text}`} style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
           {p.label} — {p.plan}
         </div>
 
-        {/* ORS calculation for Plan B */}
         {plan === "some" && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <DataRow label="Total ORS (Plan B)" value={`${orsTotalPlanB} mL`} highlight />
-            <DataRow label="Over 4 hours" value={`${orsHr} mL/hr`} />
+            <DataRow label="Total ORS (Plan B)" value={`${orsVolumePlanB(weight)} mL`} highlight />
+            <DataRow label="Over 4 hours"       value={`${orsRatePerHour(weight)} mL/hr`} />
             <DataRow label="Per stool (top-up)" value={`${orsAfterStool(weight)} mL`} />
-            <DataRow label="Weight" value={`${weight} kg`} />
+            <DataRow label="Weight"             value={`${weight} kg`} />
           </div>
         )}
 
-        {/* IV plan for severe */}
         {plan === "severe" && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <DataRow label="Shock bolus" value={`${weight * 20} mL`} highlight />
+            <DataRow label="Shock bolus"   value={`${weight * 20} mL`} highlight />
             <DataRow label="(20 mL/kg NS)" value="over 15–30 min" />
-            <DataRow label="Repeat up to" value={`${weight * 60} mL total`} />
+            <DataRow label="Repeat up to"  value={`${weight * 60} mL total`} />
           </div>
         )}
 
-        {/* Steps */}
         <div>
           <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-2">Management Steps</div>
           <div className="space-y-1.5">
@@ -208,9 +206,11 @@ function DiarrhoeaSection({ weight }) {
           </div>
         </div>
 
-        {/* Discharge / home care */}
         <div className={`rounded-lg border p-3 ${c.border}`} style={{ background: "rgba(0,0,0,0.03)" }}>
-          <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-2">🏠 Discharge / Home Care Instructions</div>
+          <div className="flex items-center gap-1.5 mb-2">
+            <Hospital size={12} weight="bold" className="text-slate-400" />
+            <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400">Discharge / Home Care Instructions</span>
+          </div>
           <div className="space-y-1">
             {p.discharge.map((d, i) => (
               <div key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
@@ -222,18 +222,17 @@ function DiarrhoeaSection({ weight }) {
         </div>
       </div>
 
-      {/* ORS composition */}
-      <SectionToggle title="ORS Composition (WHO Low-Osmolarity)" icon="🧂">
+      <SectionToggle title="ORS Composition (WHO Low-Osmolarity)" IconComp={SaltShaker}>
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">WHO 2003 (recommended)</div>
             {[
-              { label: "Na⁺",         value: "75 mmol/L" },
-              { label: "K⁺",          value: "20 mmol/L" },
-              { label: "Cl⁻",         value: "65 mmol/L" },
-              { label: "Citrate",     value: "10 mmol/L" },
-              { label: "Glucose",     value: "75 mmol/L" },
-              { label: "Osmolarity",  value: "245 mOsm/L" },
+              { label: "Na⁺",        value: "75 mmol/L"  },
+              { label: "K⁺",         value: "20 mmol/L"  },
+              { label: "Cl⁻",        value: "65 mmol/L"  },
+              { label: "Citrate",    value: "10 mmol/L"  },
+              { label: "Glucose",    value: "75 mmol/L"  },
+              { label: "Osmolarity", value: "245 mOsm/L" },
             ].map(r => (
               <div key={r.label} className="flex justify-between text-xs px-3 py-1.5 rounded bg-slate-50 dark:bg-slate-800">
                 <span className="font-mono text-slate-500">{r.label}</span>
@@ -246,9 +245,9 @@ function DiarrhoeaSection({ weight }) {
             <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">Home-made ORS (when sachets unavailable)</div>
             <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs text-amber-800 dark:text-amber-200">
               <div className="font-bold mb-2">Recipe per 1 litre clean water:</div>
-              <div>• 6 level teaspoons of sugar</div>
-              <div>• ½ level teaspoon of salt</div>
-              <div className="mt-2 text-[10px] opacity-70">Boil water, cool before use. Discard after 24 hours. Less accurate than commercial ORS — prefer sachets when available.</div>
+              <div>· 6 level teaspoons of sugar</div>
+              <div>· ½ level teaspoon of salt</div>
+              <div className="mt-2 text-[10px] opacity-70">Boil water, cool before use. Discard after 24 hours.</div>
             </div>
             <div className="mt-3">
               <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">Danger signs — return immediately</div>
@@ -265,8 +264,7 @@ function DiarrhoeaSection({ weight }) {
         </div>
       </SectionToggle>
 
-      {/* Zinc + antibiotic table */}
-      <SectionToggle title="Antibiotic Indications" icon="💊">
+      <SectionToggle title="Antibiotic Indications" IconComp={Pill}>
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
           <table className="w-full text-xs border-collapse">
             <thead>
@@ -304,16 +302,13 @@ function DkaSection({ weight }) {
         <Warning size={13} weight="fill" className="flex-shrink-0 mt-0.5 text-red-500" />
         <span>DKA carries a 0.5–1% risk of cerebral oedema — most common cause of DKA mortality in children. Avoid rapid fluid shifts. Do not give insulin bolus.</span>
       </div>
-
-      {/* Quick calcs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <DoseCard testid="dka-bolus"  category="fluid" title="Initial bolus (if shocked)"  value={weight * 10} unit="mL 0.9% NaCl" />
-        <DoseCard testid="dka-def5"   category="fluid" title="5% deficit"                 value={weight * 50} unit="mL total" />
-        <DoseCard testid="dka-def7"   category="fluid" title="7% deficit (moderate)"      value={weight * 70} unit="mL total" />
-        <DoseCard testid="dka-def10"  category="fluid" title="10% deficit (severe)"       value={weight * 100} unit="mL total" />
+        <DoseCard testid="dka-bolus" category="fluid" title="Initial bolus (if shocked)"  value={weight * 10}  unit="mL 0.9% NaCl" />
+        <DoseCard testid="dka-def5"  category="fluid" title="5% deficit"                 value={weight * 50}  unit="mL total" />
+        <DoseCard testid="dka-def7"  category="fluid" title="7% deficit (moderate)"      value={weight * 70}  unit="mL total" />
+        <DoseCard testid="dka-def10" category="fluid" title="10% deficit (severe)"       value={weight * 100} unit="mL total" />
       </div>
       <p className="text-[10px] font-mono text-slate-400">All deficits replaced over 48 hours. Subtract any resuscitation boluses already given.</p>
-
       <div className="space-y-2">
         {DKA_PROTOCOL.map((s, i) => (
           <div key={s.title} className={`rounded-xl border p-4 ${s.title.includes("RED") ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/30" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50"}`}>
@@ -348,47 +343,47 @@ function BurnsSection({ weight }) {
           className="w-24 font-mono text-right" />
         <span className="font-mono text-sm text-slate-500">%</span>
       </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <DoseCard testid="park-total"  category="fluid" title="Total 24-hr fluid"         value={parkland.total24.toFixed(0)}  unit="mL (3 mL/kg/%BSA)" />
-        <DoseCard testid="park-first8" category="fluid" title="First 8 hr (from burn)"   value={parkland.first8.toFixed(0)}   unit="mL" />
-        <DoseCard testid="park-next16" category="fluid" title="Next 16 hr"               value={parkland.next16.toFixed(0)}   unit="mL" />
+        <DoseCard testid="park-total"  category="fluid" title="Total 24-hr fluid"       value={parkland.total24.toFixed(0)} unit="mL (3 mL/kg/%BSA)" />
+        <DoseCard testid="park-first8" category="fluid" title="First 8 hr (from burn)"  value={parkland.first8.toFixed(0)}  unit="mL" />
+        <DoseCard testid="park-next16" category="fluid" title="Next 16 hr"              value={parkland.next16.toFixed(0)}  unit="mL" />
       </div>
-
       <div className="rounded-xl border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 p-4 text-xs text-amber-800 dark:text-amber-200 space-y-1.5">
         <div className="font-bold text-sm mb-2" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>Important notes</div>
-        <div>• Use Lactated Ringer's (preferred) or 0.9% NaCl</div>
-        <div>• Add MAINTENANCE fluids for children &lt; 30 kg (above and beyond Parkland volume)</div>
-        <div>• Time from <strong>burn injury</strong>, not from hospital presentation</div>
-        <div>• Reassess hourly: target urine output 0.5–1 mL/kg/hr (infants 1–2 mL/kg/hr)</div>
-        <div>• Do NOT give colloid in first 8 hours (capillary leak phase)</div>
-        <div>• Albumin 5% (0.5 mL/kg/%BSA) may be added from 8–24 hr if oedema worsening</div>
-        <div>• Burns &gt; 15% BSA: IV access mandatory. Consider urinary catheter for output monitoring.</div>
+        {[
+          "Use Lactated Ringer's (preferred) or 0.9% NaCl",
+          "Add MAINTENANCE fluids for children < 30 kg (above and beyond Parkland volume)",
+          "Time from burn injury, not from hospital presentation",
+          "Reassess hourly: target urine output 0.5–1 mL/kg/hr (infants 1–2 mL/kg/hr)",
+          "Do NOT give colloid in first 8 hours (capillary leak phase)",
+          "Albumin 5% (0.5 mL/kg/%BSA) may be added from 8–24 hr if oedema worsening",
+          "Burns > 15% BSA: IV access mandatory. Consider urinary catheter for output monitoring.",
+        ].map((note, i) => (
+          <div key={i} className="flex items-start gap-1.5">
+            <ArrowRight size={11} weight="bold" className="text-amber-600 flex-shrink-0 mt-0.5" />
+            <span>{note}</span>
+          </div>
+        ))}
       </div>
-
-      <SectionToggle title="Lund-Browder Chart (paediatric BSA estimation)" icon="📐">
+      <SectionToggle title="Lund-Browder Chart (paediatric BSA estimation)" IconComp={Ruler}>
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr className="bg-slate-900 dark:bg-slate-950 text-white">
                 <th className="p-2.5 text-left font-mono text-[9px] uppercase tracking-widest">Area</th>
-                <th className="p-2.5 text-center font-mono text-[9px] uppercase tracking-widest">&lt;1 yr</th>
-                <th className="p-2.5 text-center font-mono text-[9px] uppercase tracking-widest">1 yr</th>
-                <th className="p-2.5 text-center font-mono text-[9px] uppercase tracking-widest">5 yr</th>
-                <th className="p-2.5 text-center font-mono text-[9px] uppercase tracking-widest">10 yr</th>
-                <th className="p-2.5 text-center font-mono text-[9px] uppercase tracking-widest">Adult</th>
+                {["<1 yr","1 yr","5 yr","10 yr","Adult"].map(h => <th key={h} className="p-2.5 text-center font-mono text-[9px] uppercase tracking-widest">{h}</th>)}
               </tr>
             </thead>
             <tbody>
               {[
-                ["Head",         "19%", "17%", "13%",  "11%",  "7%"],
-                ["Neck",          "2%",  "2%",  "2%",   "2%",  "2%"],
-                ["Trunk (ant)",  "13%", "13%", "13%",  "13%", "13%"],
-                ["Trunk (post)", "13%", "13%", "13%",  "13%", "13%"],
-                ["Each arm",      "4%",  "4%",  "4%",   "4%",  "4%"],
-                ["Each thigh",    "3%",  "4%",  "4%",   "4%",  "4%"],
-                ["Each lower leg","2%",  "3%",  "3%",   "3%",  "3%"],
-                ["Each foot",     "3%",  "3%",  "3.5%", "3.5%","3.5%"],
+                ["Head",          "19%","17%","13%","11%","7%"    ],
+                ["Neck",           "2%", "2%", "2%", "2%","2%"    ],
+                ["Trunk (ant)",   "13%","13%","13%","13%","13%"   ],
+                ["Trunk (post)",  "13%","13%","13%","13%","13%"   ],
+                ["Each arm",       "4%", "4%", "4%", "4%","4%"    ],
+                ["Each thigh",     "3%", "4%", "4%", "4%","4%"    ],
+                ["Each lower leg", "2%", "3%", "3%", "3%","3%"    ],
+                ["Each foot",      "3%", "3%","3.5%","3.5%","3.5%"],
               ].map(([area, ...vals], i) => (
                 <tr key={area} className={`border-t border-slate-100 dark:border-slate-800 ${i % 2 === 0 ? "bg-white dark:bg-slate-900/20" : "bg-slate-50/50 dark:bg-slate-900/40"}`}>
                   <td className="p-2.5 font-semibold">{area}</td>
@@ -408,39 +403,38 @@ function ShockSection({ weight }) {
   const [shockType, setShockType] = useState("hypovolaemic");
   const [shockView, setShockView] = useState("identify");
   const st = SHOCK_TYPES.find(s => s.id === shockType);
-  const c = CMAP[st.color];
+  const c  = CMAP[st.color];
   const fluidDose = SHOCK_MANAGEMENT.fluids[
-    shockType === "distributive" ? "septic" :
+    shockType === "distributive" ? "septic"     :
     shockType === "cardiogenic"  ? "cardiogenic" :
     shockType === "obstructive"  ? "obstructive" : "hypovolaemic"
   ];
 
+  const shockViews = [
+    { id: "identify",   label: "1. Identification",      Icon: MagnifyingGlass },
+    { id: "initial",    label: "2. Initial Management",  Icon: Lightning       },
+    { id: "definitive", label: "3. Definitive Treatment",Icon: Target          },
+  ];
+
   return (
     <div className="space-y-5">
-
-      {/* View tabs */}
       <div className="flex flex-wrap gap-2">
-        {[
-          { id: "identify", label: "1. Identification",        emoji: "🔍" },
-          { id: "initial",  label: "2. Initial Management",    emoji: "⚡" },
-          { id: "definitive",label: "3. Definitive Treatment", emoji: "🎯" },
-        ].map(v => (
+        {shockViews.map(v => (
           <button key={v.id} onClick={() => setShockView(v.id)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider border transition-all ${
               shockView === v.id
                 ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
                 : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
             }`}>
-            <span>{v.emoji}</span> {v.label}
+            <v.Icon size={13} weight="bold" />
+            {v.label}
           </button>
         ))}
       </div>
 
-      {/* ── IDENTIFICATION ── */}
       {shockView === "identify" && (
         <div className="space-y-4">
-          {/* Vitals threshold table */}
-          <SectionToggle title="Age-Specific Vital Sign Thresholds" icon="📊" defaultOpen={true}>
+          <SectionToggle title="Age-Specific Vital Sign Thresholds" IconComp={ChartBar} defaultOpen={true}>
             <div className="overflow-x-auto">
               <table className="w-full text-xs border-collapse">
                 <thead>
@@ -465,12 +459,11 @@ function ShockSection({ weight }) {
                 </tbody>
               </table>
             </div>
-            <div className="text-[10px] font-mono text-slate-400 mt-2">
-              PALS 2020: SBP threshold for hypotension = 70 + (2 × age in years) mmHg. Tachycardia is the most sensitive early sign.
-            </div>
+            <p className="text-[10px] font-mono text-slate-400 mt-2">
+              PALS 2020: SBP threshold = 70 + (2 × age in years) mmHg. Tachycardia is the most sensitive early sign.
+            </p>
           </SectionToggle>
 
-          {/* Compensated vs Uncompensated */}
           <div className="grid sm:grid-cols-2 gap-4">
             {Object.values(SHOCK_IDENTIFICATION).map(si => {
               const sc = CMAP[si.color];
@@ -481,7 +474,8 @@ function ShockSection({ weight }) {
                   <div className="space-y-1">
                     {si.features.map((f, i) => (
                       <div key={i} className="flex items-start gap-1.5 text-xs text-slate-700 dark:text-slate-200">
-                        <span className={`font-bold ${sc.text} flex-shrink-0`}>→</span> {f}
+                        <ArrowRight size={11} weight="bold" className={`${sc.text} flex-shrink-0 mt-0.5`} />
+                        {f}
                       </div>
                     ))}
                   </div>
@@ -490,7 +484,6 @@ function ShockSection({ weight }) {
             })}
           </div>
 
-          {/* Shock type selector */}
           <div>
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-2">Shock Type — Causes</div>
             <div className="flex flex-wrap gap-2 mb-3">
@@ -515,10 +508,8 @@ function ShockSection({ weight }) {
         </div>
       )}
 
-      {/* ── INITIAL MANAGEMENT ── */}
       {shockView === "initial" && (
         <div className="space-y-4">
-          {/* Shock type selector */}
           <div>
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-2">Shock Type</div>
             <div className="flex flex-wrap gap-2">
@@ -534,46 +525,39 @@ function ShockSection({ weight }) {
             </div>
           </div>
 
-          {/* Initial actions */}
-          <SectionToggle title="Immediate Simultaneous Actions" icon="⚡" defaultOpen={true} accent="red">
+          <SectionToggle title="Immediate Simultaneous Actions" IconComp={Lightning} defaultOpen={true} accent="red">
             <div className="space-y-1.5">
               {SHOCK_MANAGEMENT.initial.map((item, i) => (
                 <div key={i} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-200">
-                  <span className="w-5 h-5 rounded-full bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i+1}</span>
+                  <span className="w-5 h-5 rounded-full bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
                   {item}
                 </div>
               ))}
             </div>
           </SectionToggle>
 
-          {/* Fluid strategy for type */}
           <div className={`rounded-xl border-2 p-4 ${c.border} ${c.bg}`}>
             <div className={`font-bold text-sm mb-1 ${c.text}`} style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
               Fluid Strategy — {st.label} Shock
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
-              <DataRow label="Bolus" value={`${weight * 20} mL`} highlight />
-              <DataRow label="20 mL/kg" value={shockType === "cardiogenic" ? "5–10 mL/kg cautious" : "over 5–15 min"} />
+              <DataRow label="Bolus"      value={`${weight * 20} mL`} highlight />
+              <DataRow label="20 mL/kg"   value={shockType === "cardiogenic" ? "5–10 mL/kg cautious" : "over 5–15 min"} />
               <DataRow label="Max 1st hr" value={shockType === "cardiogenic" || shockType === "obstructive" ? "Treat cause first" : `${weight * 60} mL`} />
             </div>
-            <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed border-l-2 border-current pl-3">
-              {fluidDose}
-            </p>
+            <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed border-l-2 border-current pl-3">{fluidDose}</p>
           </div>
 
-          {/* Antibiotics */}
           {shockType === "distributive" && (
-            <SectionToggle title="Empiric Antibiotics (Septic Shock)" icon="💊" defaultOpen={true} accent="orange">
+            <SectionToggle title="Empiric Antibiotics (Septic Shock)" IconComp={Syringe} defaultOpen={true} accent="orange">
               <BulletList items={SHOCK_MANAGEMENT.antibiotics} />
             </SectionToggle>
           )}
         </div>
       )}
 
-      {/* ── DEFINITIVE TREATMENT ── */}
       {shockView === "definitive" && (
         <div className="space-y-4">
-          {/* Vasoactive drugs */}
           <div>
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-3">Vasoactive / Inotropic Drugs</div>
             <div className="space-y-2">
@@ -591,15 +575,16 @@ function ShockSection({ weight }) {
             </div>
           </div>
 
-          {/* Definitive steps */}
-          <SectionToggle title="Definitive / Cause-Specific Treatment" icon="🎯" defaultOpen={true}>
+          <SectionToggle title="Definitive / Cause-Specific Treatment" IconComp={Target} defaultOpen={true}>
             <BulletList items={SHOCK_MANAGEMENT.definitive} />
           </SectionToggle>
 
-          {/* Endpoints */}
           <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-4">
-            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400 mb-3">
-              Resuscitation Endpoints — Goals of Treatment
+            <div className="flex items-center gap-2 mb-3">
+              <Gauge size={13} weight="bold" className="text-emerald-600 dark:text-emerald-400" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400">
+                Resuscitation Endpoints — Goals of Treatment
+              </span>
             </div>
             <div className="grid sm:grid-cols-2 gap-1.5">
               {SHOCK_ENDPOINTS.map((ep, i) => (
@@ -621,8 +606,8 @@ function PeriOpSection({ weight }) {
   const [hgbStart, setHgbStart] = useState(12);
   const [hgbMin,   setHgbMin]   = useState(7);
   const [hoursNPO, setHoursNPO] = useState(6);
-  const ebv    = estimatedBloodVolume(weight);
-  const abl    = allowableBloodLoss(weight, hgbStart, hgbMin);
+  const ebv     = estimatedBloodVolume(weight);
+  const abl     = allowableBloodLoss(weight, hgbStart, hgbMin);
   const deficit = npoDeficit(weight, hoursNPO);
 
   return (
@@ -671,13 +656,9 @@ function PeriOpSection({ weight }) {
           </label>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <DoseCard testid="abl-card"   category="resuscitation" title="Allowable Blood Loss"
-            value={abl.toFixed(0)} unit="mL (before transfusion)" />
-          <DoseCard testid="abl-formula" category="other" title="Formula"
-            value="EBV × ΔHgb / Hgb̄"
-            unit={`${ebv.toFixed(0)} × ${(hgbStart - hgbMin).toFixed(1)} / ${((hgbStart + hgbMin) / 2).toFixed(1)}`} />
-          <DoseCard testid="transfuse-thresh" category="resuscitation" title="pRBC transfuse"
-            value="Hb < 7" unit="g/dL (stable child)" note="< 8–9 if cardiac / critical" />
+          <DoseCard testid="abl-card"         category="resuscitation" title="Allowable Blood Loss" value={abl.toFixed(0)} unit="mL (before transfusion)" />
+          <DoseCard testid="abl-formula"      category="other"         title="Formula"              value="EBV × ΔHgb / Hgb̄" unit={`${ebv.toFixed(0)} × ${(hgbStart - hgbMin).toFixed(1)} / ${((hgbStart + hgbMin) / 2).toFixed(1)}`} />
+          <DoseCard testid="transfuse-thresh" category="resuscitation" title="pRBC transfuse"       value="Hb < 7" unit="g/dL (stable child)" note="< 8–9 if cardiac / critical" />
         </div>
       </div>
 
@@ -692,9 +673,9 @@ function PeriOpSection({ weight }) {
           </label>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <DoseCard testid="npo-deficit"    category="fluid" title="Total NPO deficit" value={deficit.toFixed(0)} unit="mL (hours × 4-2-1)" />
-          <DoseCard testid="npo-replace-1"  category="fluid" title="1st hour replace"  value={(deficit / 2).toFixed(0)} unit="mL + maintenance" note="50% in 1st hour" />
-          <DoseCard testid="npo-replace-2"  category="fluid" title="Hours 2–3 replace" value={(deficit / 4).toFixed(0)} unit="mL/hr + maintenance" note="25% per hour × 2 hours" />
+          <DoseCard testid="npo-deficit"   category="fluid" title="Total NPO deficit"  value={deficit.toFixed(0)}       unit="mL (hours × 4-2-1)" />
+          <DoseCard testid="npo-replace-1" category="fluid" title="1st hour replace"   value={(deficit / 2).toFixed(0)} unit="mL + maintenance"    note="50% in 1st hour" />
+          <DoseCard testid="npo-replace-2" category="fluid" title="Hours 2–3 replace"  value={(deficit / 4).toFixed(0)} unit="mL/hr + maintenance"  note="25% per hour × 2 hours" />
         </div>
       </div>
 
@@ -714,25 +695,25 @@ function PeriOpSection({ weight }) {
 }
 
 // ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
+const SECTIONS = [
+  { id: "maintenance", label: "Maintenance",     Icon: Drop      },
+  { id: "diarrhoea",   label: "Diarrhoea / ORS", Icon: Toilet    },
+  { id: "dka",         label: "DKA",             Icon: Heartbeat },
+  { id: "burns",       label: "Burns",           Icon: Fire      },
+  { id: "shock",       label: "Shock",           Icon: Lightning },
+  { id: "periop",      label: "Peri-op",         Icon: Hospital  },
+];
+
 export default function FluidsTab() {
   const { weight } = useWeight();
   const [sec, setSec] = useState("maintenance");
-
-  const SECTIONS = [
-    { id: "maintenance", label: "Maintenance",        emoji: "💧" },
-    { id: "diarrhoea",   label: "Diarrhoea / ORS",   emoji: "🚿" },
-    { id: "dka",         label: "DKA",                emoji: "🩸" },
-    { id: "burns",       label: "Burns",              emoji: "🔥" },
-    { id: "shock",       label: "Shock",              emoji: "⚡" },
-    { id: "periop",      label: "Peri-op",            emoji: "🏥" },
-  ];
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="font-bold text-2xl sm:text-3xl tracking-tight mb-1"
             style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-          Fluid & Resuscitation
+          Fluid &amp; Resuscitation
         </h2>
         <p className="text-sm text-slate-600 dark:text-slate-400">
           Live calculations for{" "}
@@ -741,7 +722,6 @@ export default function FluidsTab() {
         </p>
       </div>
 
-      {/* Sub-tab buttons */}
       <div className="flex flex-wrap gap-1.5">
         {SECTIONS.map((s) => (
           <button key={s.id} onClick={() => setSec(s.id)}
@@ -750,12 +730,12 @@ export default function FluidsTab() {
                 ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
                 : "bg-transparent border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900"
             }`}>
-            <span>{s.emoji}</span> {s.label}
+            <s.Icon size={13} weight="bold" />
+            {s.label}
           </button>
         ))}
       </div>
 
-      {/* Sub-tab content */}
       {sec === "maintenance" && <MaintenanceSection weight={weight} />}
       {sec === "diarrhoea"   && <DiarrhoeaSection   weight={weight} />}
       {sec === "dka"         && <DkaSection          weight={weight} />}
