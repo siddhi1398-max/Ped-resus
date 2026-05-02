@@ -26,7 +26,6 @@ import {
   ArrowsIn,
   ArrowsOut,
   SkipBack,
-  Pulse,
   ChartLine,
   Stethoscope,
 } from "@phosphor-icons/react";
