@@ -21,7 +21,7 @@ import {
   Syringe, FirstAid, Wind, Pill, ClipboardText, Flask,
   Crosshair, Heartbeat, ArrowRight, X, Brain, Stethoscope,
   NoteBlank, Lightning, CheckSquare, ShieldWarning, TestTube,
-  Target, Radioactive,
+  Target, Radioactive, EyedropperSample,
 } from "@phosphor-icons/react";
 import {
   LOCAL_ANAESTHETICS, PSA_PRINCIPLES, PSA_REGIMENS, NERVE_BLOCKS, LAST_PROTOCOL,
@@ -356,13 +356,13 @@ const CMAP = {
 
 // ─── SECTION ICON MAP ─────────────────────────────────────────────────────────
 const SECTION_ICONS = {
-  psa:           { icon: Syringe,       color: "text-violet-500" },
-  oralSedation:  { icon: Pill,          color: "text-teal-500"   },
-  psaPrinciples: { icon: ClipboardText, color: "text-blue-500"   },
-  regimens:      { icon: TestTube,      color: "text-teal-500"   },
-  local:         { icon: Pill,          color: "text-orange-500" },
-  blocks:        { icon: Crosshair,     color: "text-red-500"    },
-  last:          { icon: ShieldWarning, color: "text-red-600"    },
+  psa:           { icon: Syringe,          color: "text-violet-500" },
+  oralSedation:  { icon: EyedropperSample, color: "text-teal-500"   },
+  psaPrinciples: { icon: ClipboardText,    color: "text-blue-500"   },
+  regimens:      { icon: TestTube,         color: "text-teal-500"   },
+  local:         { icon: ShieldWarning,    color: "text-orange-500" },
+  blocks:        { icon: Crosshair,        color: "text-red-500"    },
+  last:          { icon: ShieldWarning,    color: "text-red-600"    },
 };
 
 // ─── SECTION TOGGLE ───────────────────────────────────────────────────────────
