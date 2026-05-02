@@ -18,7 +18,7 @@ import {
   Waveform,
   Drop,
   Fire,
-  CircleWavyWarning,
+  SealWarning,
   CheckCircle,
   Pulse,
   ArrowFatLinesUp,
@@ -443,7 +443,7 @@ function StaticWaveformCard({ w, isEtco2 = false }) {
     ? CheckCircle
     : w.category === "maneuver"
     ? PauseCircle
-    : CircleWavyWarning;
+    : SealWarning;
 
   return (
     <div style={{ background: "#0a0f14", border: "1px solid #1e2d3d", borderRadius: 10, overflow: "hidden" }}>
@@ -984,7 +984,7 @@ export default function WaveformView() {
 
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                <CircleWavyWarning size={11} weight="fill" style={{ color: "#f87171" }} />
+                <SealWarning size={11} weight="fill" style={{ color: "#f87171" }} />
                 <span style={{ fontSize: 9, color: "#f87171", letterSpacing: 2, textTransform: "uppercase" }}>Abnormal Patterns</span>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 }}>
