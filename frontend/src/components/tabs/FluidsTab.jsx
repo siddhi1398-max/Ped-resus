@@ -14,7 +14,7 @@ import DoseCard from "../DoseCard";
 import {
   Warning, CheckCircle, ArrowRight, CaretDown, Info,
   Drop, Toilet, Pill, Fire, Lightning, Hospital,
-  MagnifyingGlass, SaltShaker, Syringe, ChartBar,
+  MagnifyingGlass, PintGlass, Syringe, ChartBar,
   Ruler, Target, Heartbeat, Gauge, FirstAid,
 } from "@phosphor-icons/react";
 
@@ -222,7 +222,7 @@ function DiarrhoeaSection({ weight }) {
         </div>
       </div>
 
-      <SectionToggle title="ORS Composition (WHO Low-Osmolarity)" IconComp={SaltShaker}>
+      <SectionToggle title="ORS Composition (WHO Low-Osmolarity)" IconComp={PintGlass}>
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">WHO 2003 (recommended)</div>
