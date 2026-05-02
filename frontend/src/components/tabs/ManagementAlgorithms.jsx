@@ -3,7 +3,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * Single-file Management Algorithm Tab with 5 sub-tabs:
  *   1. ED Management       — IAP 2019-2023 diagnostic + management algorithms
- *   2. AHA Algorithms      — PALS CPR cadence + step-by-step pathways
+ *   2. AHA Algorithms      — PALS CPR cadence + step-by-step pathways.
  *   3. Clinical Guidelines — IAP guideline summaries (accordion)
  *   4. Clinical Pathways   — Interactive decision trees + DDx tables
  *   5. Prehospital         — PREM triangle, triage, transfer (with NIS sub-tab)
