@@ -33,7 +33,7 @@ import PrehospitalTab from "./components/tabs/PrehospitalTab";
 import ImmunisationTab from "./components/tabs/ImmunisationTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
-  ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon, Lightning
+  ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon, Lightning,
   Lock, X, BookOpen,
 } from "@phosphor-icons/react";
 
