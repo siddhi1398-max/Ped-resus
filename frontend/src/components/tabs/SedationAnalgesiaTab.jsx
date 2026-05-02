@@ -3,12 +3,15 @@
 // Sedation & Analgesia reference tab
 // Sections:
 //   1. PSA Agent Comparison Table (weight-based doses)
-//   2. PSA Principles (pre/during/post procedure)
-//   3. Common PSA Regimens
-//   4. Local Anaesthetics Max Dose Table
-//   5. Nerve Blocks
-//   6. LAST Protocol
+//   2. Oral Sedative Agents (paediatric)
+//   3. PSA Principles (pre/during/post procedure)
+//   4. Common PSA Regimens
+//   5. Local Anaesthetics Max Dose Table
+//   6. Nerve Blocks
+//   7. LAST Protocol
 // Refs: Tintinalli ch.38 · F&L ch.4 · ACEP PSA guidelines · NYSORA · IAP
+//       Morgan & Mikhail Clinical Anaesthesiology · Motoyama Paediatric Anaesthesia
+//       Cote & Lerman (eds) A Practice of Anesthesia for Infants & Children 6e
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from "react";
@@ -188,6 +191,153 @@ const PSA_AGENTS = [
   },
 ];
 
+// ─── ORAL SEDATIVE AGENTS ─────────────────────────────────────────────────────
+// Refs: Cote & Lerman 6e · Motoyama Paediatric Anaesthesia · Tintinalli 9e ch.38
+//       Morgan & Mikhail 7e · IAP Sedation Guidelines 2021 · ISPAD
+// Indian brand names sourced from CIMS India / Drug Today India 2024
+const ORAL_SEDATIVES = [
+  {
+    drug: "Midazolam",
+    brands: "Versed (Roche) · Mezolam (Neon) · Dormalin (Torrent) · Dormicum (Roche)",
+    class: "Benzodiazepine",
+    classColor: "sky",
+    dose: "0.3–0.6 mg/kg PO (max 15 mg)",
+    onset: "15–20 min",
+    working: "30–45 min",
+    halfLife: "1.7–2.4 hr",
+    formulations: "Syrup 2 mg/mL · IV solution 1 mg/mL (used orally mixed in juice)",
+    comments: "Most widely used oral pre-med in Indian paediatric practice. Bitter taste — mix in juice or honey. Amnesia + anxiolysis. Anticonvulsant. Disinhibition / dysphoria in ~10%. Respiratory depression at higher doses.",
+    cautions: "Respiratory depression + apnoea at doses >0.75 mg/kg. Paradoxical agitation. Requires monitoring.",
+    pearl: "Gold standard oral sedation in children. Onset predictable at 15–20 min. Give 30 min before procedure.",
+  },
+  {
+    drug: "Triclofos Sodium",
+    brands: "Pedicloryl (FDC) · Tricloryl · Calmax (Alkem) · Hypnoderm",
+    class: "Sedative-Hypnotic",
+    classColor: "violet",
+    dose: "50–75 mg/kg PO (max 1,000 mg / 1 g single dose)",
+    onset: "20–40 min",
+    working: "6–8 hr",
+    halfLife: "4–8 hr (active metabolite trichloroethanol)",
+    formulations: "Syrup 500 mg/5 mL — widely available in India · Oral solution",
+    comments: "Preferred oral sedative for non-painful procedural sedation in Indian children (EEG, echo, MRI, ophthalmology). Metabolised to trichloroethanol (same active metabolite as chloral hydrate). Palatable syrup — well accepted. NOT analgesic. Long duration useful for MRI. Less cardiorespiratory depression than chloral hydrate.",
+    cautions: "Prolonged sedation (4–8 hr) — requires prolonged observation. Sensitises myocardium to catecholamines. Hepatic/renal disease — use with caution. Avoid in neonates <1 month. Do NOT combine with CNS depressants without monitoring.",
+    pearl: "Workhorse oral sedative in Indian paediatric practice. Dose 75 mg/kg for MRI sedation — success rate ~85%. Must fast and monitor. Avoid in cardiac disease due to myocardial sensitisation.",
+  },
+  {
+    drug: "Chloral Hydrate",
+    brands: "No longer commercially available in India (discontinued) · Previously: Somnote, Noctec",
+    class: "Sedative-Hypnotic",
+    classColor: "rose",
+    dose: "25–100 mg/kg PO (max 1,000 mg single dose; up to 2,000 mg total)",
+    onset: "30–60 min",
+    working: "60–90 min",
+    halfLife: "4–8 hr (trichloroethanol metabolite)",
+    formulations: "No longer available in India — replaced by triclofos sodium",
+    comments: "Historically widely used. Sensitises myocardium to epinephrine — arrhythmia risk. Active metabolite trichloroethanol same as triclofos sodium. Now largely replaced by triclofos in India. Listed for completeness.",
+    cautions: "Not available in India. Narrow therapeutic index. Myocardial sensitisation. Respiratory depression. Hepatotoxicity in repeated doses.",
+    pearl: "Triclofos sodium is essentially a pro-drug of chloral hydrate with equivalent efficacy and better palatability. Use triclofos where chloral hydrate protocols are referenced.",
+  },
+  {
+    drug: "Hydroxyzine",
+    brands: "Atarax (UCB) · Vistaril · Hismanal · Hydroxyzine (Cipla, Sun)",
+    class: "Antihistamine",
+    classColor: "amber",
+    dose: "1–2 mg/kg PO (max 50 mg)",
+    onset: "30–45 min",
+    working: "30–45 min",
+    halfLife: "3–7 hr (children shorter than adults)",
+    formulations: "Syrup 10 mg/5 mL (Atarax) · Tablets 10 mg, 25 mg",
+    comments: "Antiemetic + anxiolytic + mild sedation. Anticholinergic effects (dry mouth, urinary retention). Useful as pre-medication to reduce opioid requirements. No respiratory depression at standard doses. Often combined with midazolam for enhanced anxiolysis.",
+    cautions: "Anticholinergic: avoid in pyloric stenosis, BPH, glaucoma. May prolong QT at higher doses. Avoid in neonates (<1 month).",
+    pearl: "Useful adjunct to midazolam for anxiolysis + antiemesis. 1 mg/kg PO gives reliable sedation and reduces post-operative nausea.",
+  },
+  {
+    drug: "Diphenhydramine",
+    brands: "Benadryl (Pfizer/Johnson & Johnson) · Zydryl · Dimedrol · Diphen (various)",
+    class: "Antihistamine",
+    classColor: "amber",
+    dose: "1–2 mg/kg PO (max 50 mg)",
+    onset: "5–30 min",
+    working: "30–45 min",
+    halfLife: "4–7 hr",
+    formulations: "Benadryl Syrup 12.5 mg/5 mL · Tablets 25 mg, 50 mg",
+    comments: "Antihistamine with sedative + anticholinergic properties. Antiemetic. Mild anxiolysis. Widely available in India. Paradoxical excitation in ~10% of children under 6 yr — use with caution. NOT a primary sedative agent.",
+    cautions: "Paradoxical excitation common in young children. Anticholinergic effects. Avoid <2 yr. Not recommended as sole sedative.",
+    pearl: "Useful for anxiolysis and antiemesis. Paradoxical excitement more common than hydroxyzine. Benadryl syrup widely available OTC.",
+  },
+  {
+    drug: "Promethazine",
+    brands: "Phenergan (Sanofi) · Fenez (FDC) · Promethafix · Avomine (various)",
+    class: "Antihistamine / Phenothiazine",
+    classColor: "orange",
+    dose: "0.5–1 mg/kg PO (max 25 mg)",
+    onset: "15–30 min",
+    working: "60 min",
+    halfLife: "10–19 hr",
+    formulations: "Phenergan Syrup 5 mg/5 mL · Tablets 10 mg, 25 mg",
+    comments: "Antihistamine + antiemetic + phenothiazine. Sedation, anxiolysis, antiemetic. Extrapyramidal effects (akathisia, dystonia) — especially in infants. Respiratory depression risk. FDA black box warning: AVOID in children <2 yr (risk of fatal respiratory depression). Use cautiously in 2–12 yr.",
+    cautions: "AVOID in < 2 yr (fatal respiratory depression reported — FDA black box). Extrapyramidal reactions in 2–12 yr — treat with benztropine. QT prolongation at higher doses. Respiratory depression synergistic with opioids.",
+    pearl: "Useful antiemetic in >2 yr. Sedative effect less reliable than midazolam. Reserve for antiemesis rather than as primary sedative. Preferred oral antiemetic in resource-limited settings.",
+  },
+  {
+    drug: "Diazepam",
+    brands: "Valium (Roche) · Calmpose (Ranbaxy) · Paxum (Torrent) · Antenex (various)",
+    class: "Benzodiazepine",
+    classColor: "sky",
+    dose: "0.25–0.5 mg/kg PO (max 10 mg)",
+    onset: "20–30 min",
+    working: "60 min",
+    halfLife: "20–100 hr (active metabolites much longer)",
+    formulations: "Calmpose Syrup 2 mg/5 mL · Tablets 2 mg, 5 mg, 10 mg",
+    comments: "Anxiolytic + amnestic + anticonvulsant. Long half-life with active metabolites (desmethyldiazepam) — prolonged sedation. Less predictable oral absorption than midazolam. Largely replaced by midazolam for procedural sedation. Useful for seizure prophylaxis and prolonged anxiolysis.",
+    cautions: "Active metabolites → prolonged sedation (12–24 hr post-dose). Accumulation with repeated dosing. Respiratory depression. Not recommended for outpatient procedural sedation where discharge is required.",
+    pearl: "Desmethyldiazepam half-life can be 36–200 hr in children — inappropriate for outpatient sedation where early discharge needed. Use midazolam instead for procedures.",
+  },
+  {
+    drug: "Lorazepam",
+    brands: "Ativan (Wyeth/Pfizer) · Calmdown (Cipla) · Lor (Sun Pharma) · Larpose",
+    class: "Benzodiazepine",
+    classColor: "sky",
+    dose: "0.05 mg/kg PO/SL (max 2 mg)",
+    onset: "30–60 min",
+    working: "60–90 min",
+    halfLife: "10–20 hr",
+    formulations: "Ativan Tablets 1 mg, 2 mg (sublingual possible) · IV solution used orally",
+    comments: "Potent anxiolytic + amnestic. Useful sublingual route — reliable absorption. No active metabolites unlike diazepam. Less respiratory depression than diazepam at equivalent anxiolytic doses. Limited paediatric oral sedation data compared to midazolam.",
+    cautions: "Longer half-life than midazolam → prolonged sedation. Paradoxical agitation. Respiratory depression with concomitant opioids. Limited paediatric dosing data for oral route.",
+    pearl: "Sublingual lorazepam (0.05 mg/kg) useful when oral access limited. Onset 15–30 min sublingually. More predictable than oral diazepam.",
+  },
+  {
+    drug: "Ketamine (oral)",
+    brands: "Ketamine (Neon, Troikaa, AstraZeneca) · Ketalar · Aneket",
+    class: "NMDA Antagonist",
+    classColor: "violet",
+    dose: "3–6 mg/kg PO (with midazolam 0.3 mg/kg PO)",
+    onset: "20–40 min",
+    working: "20–120 min (wide variability)",
+    halfLife: "2–3 hr (but oral bioavailability only 16–20% due to first-pass)",
+    formulations: "Ketamine injection 500 mg/10 mL — mixed in juice for oral use (no specific oral formulation in India)",
+    comments: "Oral route has low and variable bioavailability (16–20%) due to extensive first-pass metabolism. Requires higher doses than parenteral. Usually combined with oral midazolam to reduce emergence dysphoria. Analgesic + amnestic + anxiolytic. Working time highly variable — poor predictability for timed procedures.",
+    cautions: "Wide variability in oral absorption — unreliable for timed procedures (MRI slot etc.). Dysphoria and emergence reactions. Hypersalivation — add glycopyrrolate 0.01 mg/kg PO if using. Raised ICP risk (relative). Avoid <3 months.",
+    pearl: "Oral ketamine (3–6 mg/kg) + midazolam (0.3 mg/kg) combination useful for uncooperative children when IV access not possible. Accept wide variability in onset and duration. Combination reduces emergence dysphoria.",
+  },
+  {
+    drug: "Dexmedetomidine (intranasal)",
+    brands: "Precedex (Hospira/Pfizer) · Dexdomitor · Dextomid (Neon) · Dexdor",
+    class: "Alpha-2 Agonist",
+    classColor: "teal",
+    dose: "1–2 mcg/kg IN (procedural) · 0.001–0.004 mg/kg PO (limited data)",
+    onset: "30 min IN",
+    working: "60–120 min",
+    halfLife: "2–3 hr",
+    formulations: "100 mcg/mL IV solution — used intranasally with atomiser device (MAD nasal) · No specific IN formulation in India",
+    comments: "α2-agonist: anxiolysis without respiratory depression. Intranasal route widely used off-label — MAD nasal device gives reliable absorption. Patients remain arousable and cooperative. No amnesia. Useful for MRI, echo, EEG in children who do not need analgesia. Bradycardia and hypotension at higher doses. Tasteless when given intranasally.",
+    cautions: "Bradycardia + hypotension dose-dependent. Slow onset (30 min IN) — poor for urgent sedation. Not analgesic. Expensive. Reversal with atipamezole (not routinely available in India).",
+    pearl: "IN dexmedetomidine 2–3 mcg/kg — excellent pre-med for MRI, ECHO, ophthalmology where cooperative calm child is needed. No respiratory depression = unique safety advantage. Combine with IN midazolam for enhanced effect.",
+  },
+];
+
 // ─── COLOUR MAP ───────────────────────────────────────────────────────────────
 const CMAP = {
   violet:  "bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-800",
@@ -200,25 +350,25 @@ const CMAP = {
   red:     "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800",
   amber:   "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800",
   purple:  "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
-  cyan:    "bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800",
   rose:    "bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+  cyan:    "bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800",
 };
 
-// ─── SECTION ICON MAP — maps section titles to Phosphor icons ─────────────────
-// Used by the Section component to render a consistent icon instead of emoji
+// ─── SECTION ICON MAP ─────────────────────────────────────────────────────────
 const SECTION_ICONS = {
-  psa:     { icon: Syringe,       color: "text-violet-500" },
-  psaPrinciples: { icon: ClipboardText, color: "text-blue-500" },
-  regimens:{ icon: TestTube,      color: "text-teal-500" },
-  local:   { icon: Pill,          color: "text-orange-500" },
-  blocks:  { icon: Crosshair,     color: "text-red-500" },
-  last:    { icon: ShieldWarning, color: "text-red-600" },
+  psa:           { icon: Syringe,       color: "text-violet-500" },
+  oralSedation:  { icon: Pill,          color: "text-teal-500"   },
+  psaPrinciples: { icon: ClipboardText, color: "text-blue-500"   },
+  regimens:      { icon: TestTube,      color: "text-teal-500"   },
+  local:         { icon: Pill,          color: "text-orange-500" },
+  blocks:        { icon: Crosshair,     color: "text-red-500"    },
+  last:          { icon: ShieldWarning, color: "text-red-600"    },
 };
 
 // ─── SECTION TOGGLE ───────────────────────────────────────────────────────────
 function Section({ title, sectionKey, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
-  const cfg = SECTION_ICONS[sectionKey] || { icon: NoteBlank, color: "text-slate-400" };
+  const cfg  = SECTION_ICONS[sectionKey] || { icon: NoteBlank, color: "text-slate-400" };
   const Icon = cfg.icon;
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
@@ -228,17 +378,11 @@ function Section({ title, sectionKey, children, defaultOpen = false }) {
       >
         <div className="flex items-center gap-2.5">
           <Icon size={16} weight="bold" className={`flex-shrink-0 ${cfg.color}`} />
-          <span
-            className="font-bold text-sm text-slate-900 dark:text-white"
-            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
-          >
-            {title}
-          </span>
+          <span className="font-bold text-sm text-slate-900 dark:text-white"
+                style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{title}</span>
         </div>
-        <CaretDown
-          size={14} weight="bold"
-          className={`text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-        />
+        <CaretDown size={14} weight="bold"
+          className={`text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
       {open && <div className="px-5 py-4 bg-white dark:bg-slate-900/50">{children}</div>}
     </div>
@@ -273,15 +417,12 @@ function PSAAgentTable({ weight }) {
         <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span>.
         Tap any agent row to see clinical details.
       </p>
-
       <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
         <table className="w-full text-xs border-collapse min-w-[700px]">
           <thead>
             <tr className="bg-slate-100 dark:bg-slate-800">
-              {["Agent", "IV Dose", "IN / IM Dose", "Onset / Duration", "Analg.", "Airway", "BP", "Reversal"].map(h => (
-                <th key={h} className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">
-                  {h}
-                </th>
+              {["Agent","IV Dose","IN / IM Dose","Onset / Duration","Analg.","Airway","BP","Reversal"].map(h => (
+                <th key={h} className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">{h}</th>
               ))}
             </tr>
           </thead>
@@ -290,20 +431,11 @@ function PSAAgentTable({ weight }) {
               const isOpen = expanded === a.name;
               return (
                 <>
-                  <tr
-                    key={a.name}
-                    onClick={() => setExpanded(isOpen ? null : a.name)}
-                    className={`border-t border-slate-100 dark:border-slate-800 cursor-pointer transition-colors ${
-                      isOpen
-                        ? "bg-slate-50 dark:bg-slate-800/60"
-                        : "hover:bg-slate-50 dark:hover:bg-slate-800/30"
-                    }`}
-                  >
+                  <tr key={a.name} onClick={() => setExpanded(isOpen ? null : a.name)}
+                    className={`border-t border-slate-100 dark:border-slate-800 cursor-pointer transition-colors ${isOpen ? "bg-slate-50 dark:bg-slate-800/60" : "hover:bg-slate-50 dark:hover:bg-slate-800/30"}`}>
                     <td className="px-3 py-2.5">
                       <div className="font-bold text-slate-900 dark:text-white">{a.name}</div>
-                      <span className={`inline-block text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border mt-0.5 ${CMAP[a.classColor]}`}>
-                        {a.class}
-                      </span>
+                      <span className={`inline-block text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border mt-0.5 ${CMAP[a.classColor]}`}>{a.class}</span>
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="font-mono font-bold text-blue-600 dark:text-blue-400">{wDose(a.ivDose)}</div>
@@ -320,24 +452,16 @@ function PSAAgentTable({ weight }) {
                     <td className="px-3 py-2.5 text-center">
                       {a.analgesia
                         ? <CheckCircle size={14} weight="fill" className="text-emerald-500 mx-auto" />
-                        : <X size={12} weight="bold" className="text-slate-300 dark:text-slate-600 mx-auto" />
-                      }
+                        : <X size={12} weight="bold" className="text-slate-300 dark:text-slate-600 mx-auto" />}
                     </td>
                     <td className="px-3 py-2.5">
-                      <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${CMAP[a.airwayColor]}`}>
-                        {a.airway}
-                      </span>
+                      <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${CMAP[a.airwayColor]}`}>{a.airway}</span>
                     </td>
                     <td className="px-3 py-2.5">
-                      <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${CMAP[a.bpColor]}`}>
-                        {a.bp}
-                      </span>
+                      <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${CMAP[a.bpColor]}`}>{a.bp}</span>
                     </td>
-                    <td className="px-3 py-2.5 text-slate-500 dark:text-slate-400 text-[10px]">
-                      {a.reversal}
-                    </td>
+                    <td className="px-3 py-2.5 text-slate-500 dark:text-slate-400 text-[10px]">{a.reversal}</td>
                   </tr>
-
                   {isOpen && (
                     <tr key={`${a.name}-exp`} className="border-t border-slate-100 dark:border-slate-800">
                       <td colSpan={8} className="px-4 pb-4 pt-2 bg-slate-50 dark:bg-slate-800/50">
@@ -359,9 +483,7 @@ function PSAAgentTable({ weight }) {
                           <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-3 border border-amber-200 dark:border-amber-800">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Lightbulb size={10} weight="fill" className="text-amber-500" />
-                              <span className="text-[9px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400">
-                                Clinical Pearl
-                              </span>
+                              <span className="text-[9px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400">Clinical Pearl</span>
                             </div>
                             <p className="text-xs text-amber-800 dark:text-amber-200">{a.pearl}</p>
                           </div>
@@ -379,6 +501,153 @@ function PSAAgentTable({ weight }) {
   );
 }
 
+// ─── ORAL SEDATION TABLE ──────────────────────────────────────────────────────
+function OralSedationTable({ weight }) {
+  const [expanded, setExpanded] = useState(null);
+
+  // Compute weight-based dose from dose string "X–Y mg/kg PO"
+  const calcDose = (doseStr, wt) => {
+    const mgKg  = doseStr.match(/([\d.]+)–?([\d.]*)\s*mg\/kg/);
+    const mcgKg = doseStr.match(/([\d.]+)–?([\d.]*)\s*mcg\/kg/);
+    if (mgKg) {
+      const lo = +(parseFloat(mgKg[1]) * wt).toFixed(1);
+      const hi = mgKg[2] ? +(parseFloat(mgKg[2]) * wt).toFixed(1) : null;
+      // apply max where stated
+      const maxMatch = doseStr.match(/max\s+([\d,]+)\s*mg/);
+      const cap = maxMatch ? parseInt(maxMatch[1].replace(",","")) : null;
+      const loC = cap ? Math.min(lo, cap) : lo;
+      const hiC = hi && cap ? Math.min(hi, cap) : hi;
+      if (hiC) return `${loC}–${hiC} mg${cap && hi >= cap ? ` (max ${cap} mg)` : ""}`;
+      return `${loC} mg${cap && lo >= cap ? ` (max ${cap} mg)` : ""}`;
+    }
+    if (mcgKg) {
+      const lo = +(parseFloat(mcgKg[1]) * wt).toFixed(0);
+      const hi = mcgKg[2] ? +(parseFloat(mcgKg[2]) * wt).toFixed(0) : null;
+      return hi ? `${lo}–${hi} mcg` : `${lo} mcg`;
+    }
+    return "—";
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+        Weight-based doses for{" "}
+        <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span>.
+        Tap any row for Indian formulations, clinical comments, and pearls.
+      </p>
+
+      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+        <table className="w-full text-xs border-collapse min-w-[640px]">
+          <thead>
+            <tr className="bg-slate-100 dark:bg-slate-800">
+              {["Drug","Class","Dose / Route","Calc dose","Onset (min)","Working (min)","Half-life"].map(h => (
+                <th key={h} className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {ORAL_SEDATIVES.map(os => {
+              const isOpen = expanded === os.drug;
+              return (
+                <>
+                  <tr key={os.drug} onClick={() => setExpanded(isOpen ? null : os.drug)}
+                    className={`border-t border-slate-100 dark:border-slate-800 cursor-pointer transition-colors ${isOpen ? "bg-slate-50 dark:bg-slate-800/60" : "hover:bg-slate-50 dark:hover:bg-slate-800/30"}`}>
+                    <td className="px-3 py-2.5">
+                      <div className="font-bold text-slate-900 dark:text-white whitespace-nowrap">{os.drug}</div>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <span className={`text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border ${CMAP[os.classColor]}`}>{os.class}</span>
+                    </td>
+                    <td className="px-3 py-2.5 font-mono text-slate-600 dark:text-slate-300 text-[10px]">{os.dose}</td>
+                    <td className="px-3 py-2.5">
+                      <span className="font-mono font-bold text-teal-600 dark:text-teal-400">{calcDose(os.dose, weight)}</span>
+                    </td>
+                    <td className="px-3 py-2.5 font-mono text-slate-600 dark:text-slate-300">{os.onset}</td>
+                    <td className="px-3 py-2.5 font-mono text-slate-600 dark:text-slate-300">{os.working}</td>
+                    <td className="px-3 py-2.5 font-mono text-slate-500 dark:text-slate-400">{os.halfLife}</td>
+                  </tr>
+
+                  {isOpen && (
+                    <tr key={`${os.drug}-exp`} className="border-t border-slate-100 dark:border-slate-800">
+                      <td colSpan={7} className="px-4 pb-4 pt-3 bg-slate-50 dark:bg-slate-800/50">
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+                          {/* Indian brands */}
+                          <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <Flask size={10} weight="bold" className="text-slate-400" />
+                              <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Indian Brands</span>
+                            </div>
+                            <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{os.brands}</p>
+                          </div>
+
+                          {/* Formulations */}
+                          <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <Pill size={10} weight="bold" className="text-slate-400" />
+                              <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Formulations</span>
+                            </div>
+                            <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{os.formulations}</p>
+                          </div>
+
+                          {/* Comments */}
+                          <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <NoteBlank size={10} weight="bold" className="text-slate-400" />
+                              <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Clinical Comments</span>
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{os.comments}</p>
+                          </div>
+
+                          {/* Cautions + pearl */}
+                          <div className="space-y-2">
+                            <div className="bg-red-50 dark:bg-red-950/30 rounded-lg p-2.5 border border-red-200 dark:border-red-800">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <Warning size={9} weight="fill" className="text-red-500" />
+                                <span className="text-[9px] font-mono uppercase tracking-widest text-red-500">Cautions</span>
+                              </div>
+                              <p className="text-xs text-red-800 dark:text-red-200 leading-relaxed">{os.cautions}</p>
+                            </div>
+                            <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5 border border-amber-200 dark:border-amber-800">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <Lightbulb size={9} weight="fill" className="text-amber-500" />
+                                <span className="text-[9px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400">Pearl</span>
+                              </div>
+                              <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">{os.pearl}</p>
+                            </div>
+                          </div>
+
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footnotes */}
+      <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 px-4 py-3 space-y-1.5">
+        <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Notes</div>
+        {[
+          "Triclofos sodium and chloral hydrate are pro-drugs of trichloroethanol — equivalent efficacy. Triclofos is preferred in India due to better palatability and availability.",
+          "Oral ketamine bioavailability is 16–20% — use 3–6 mg/kg PO. Working time is highly variable (20–120 min). Combine with oral midazolam.",
+          "Dexmedetomidine is listed for intranasal use — no oral formulation available in India. Use IV solution (100 mcg/mL) with MAD atomiser device.",
+          "Promethazine CONTRAINDICATED < 2 yr (FDA black box — fatal respiratory depression). Use with extreme caution 2–12 yr.",
+          "All oral sedation requires: NPO status · IV access ready · pulse oximetry monitoring · resuscitation equipment immediately available.",
+        ].map((note, i) => (
+          <div key={i} className="flex items-start gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+            <span className="font-bold text-slate-400 flex-shrink-0">{i + 1}.</span>
+            {note}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── LOCAL ANAESTHETIC TABLE ──────────────────────────────────────────────────
 function LocalAnaestheticTable({ weight }) {
   return (
@@ -387,9 +656,7 @@ function LocalAnaestheticTable({ weight }) {
         <thead>
           <tr className="bg-slate-100 dark:bg-slate-800">
             {["Agent", "Max mg/kg", `Max dose (${weight} kg)`, "Concentration", "Onset", "Duration"].map(h => (
-              <th key={h} className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">
-                {h}
-              </th>
+              <th key={h} className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-slate-500">{h}</th>
             ))}
           </tr>
         </thead>
@@ -406,9 +673,7 @@ function LocalAnaestheticTable({ weight }) {
                 </td>
                 <td className="px-3 py-2.5 font-mono font-bold text-blue-600 dark:text-blue-400">
                   {maxDose ? `${maxDose} mg` : "—"}
-                  {capped && (
-                    <span className="text-[8px] text-amber-500 ml-1">(capped at {la.max} mg)</span>
-                  )}
+                  {capped && <span className="text-[8px] text-amber-500 ml-1">(capped at {la.max} mg)</span>}
                 </td>
                 <td className="px-3 py-2.5 text-slate-500 dark:text-slate-400">{la.concentration}</td>
                 <td className="px-3 py-2.5 text-slate-600 dark:text-slate-300">{la.onset}</td>
@@ -427,25 +692,17 @@ function NerveBlockCard({ block }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-      >
+      <button onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
         <div className="text-left">
           <div className="font-bold text-sm text-slate-900 dark:text-white">{block.name}</div>
           <div className="text-[10px] text-slate-400 font-mono mt-0.5">{block.indication}</div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-[9px] font-mono bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded">
-            {block.duration}
-          </span>
-          <CaretDown
-            size={12} weight="bold"
-            className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
-          />
+          <span className="text-[9px] font-mono bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded">{block.duration}</span>
+          <CaretDown size={12} weight="bold" className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
         </div>
       </button>
-
       {open && (
         <div className="px-4 pb-4 pt-3 space-y-3 bg-white dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
           <div className="grid sm:grid-cols-2 gap-3">
@@ -454,21 +711,16 @@ function NerveBlockCard({ block }) {
                 <Pill size={10} weight="bold" className="text-slate-400" />
                 <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Drug & Dose</span>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-200">
-                {block.drug}
-              </div>
+              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-200">{block.drug}</div>
             </div>
             <div>
               <div className="flex items-center gap-1.5 mb-1">
                 <Brain size={10} weight="bold" className="text-slate-400" />
                 <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Nerves Blocked</span>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-200">
-                {block.nerves}
-              </div>
+              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-200">{block.nerves}</div>
             </div>
           </div>
-
           <div>
             <div className="flex items-center gap-1.5 mb-1">
               <Crosshair size={10} weight="bold" className="text-slate-400" />
@@ -476,7 +728,6 @@ function NerveBlockCard({ block }) {
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{block.landmarks}</p>
           </div>
-
           <div>
             <div className="flex items-center gap-1.5 mb-1">
               <Stethoscope size={10} weight="bold" className="text-slate-400" />
@@ -484,21 +735,14 @@ function NerveBlockCard({ block }) {
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{block.technique}</p>
           </div>
-
           <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
             <Warning size={12} weight="fill" className="text-red-500 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-red-800 dark:text-red-200">{block.cautions}</p>
           </div>
-
           {block.refUrl && (
-            <a
-              href={block.refUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[10px] font-mono text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              <ArrowSquareOut size={11} weight="bold" />
-              Reference / Cases
+            <a href={block.refUrl} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[10px] font-mono text-blue-600 dark:text-blue-400 hover:underline">
+              <ArrowSquareOut size={11} weight="bold" />Reference / Cases
             </a>
           )}
         </div>
@@ -507,77 +751,70 @@ function NerveBlockCard({ block }) {
   );
 }
 
-// ─── PSA PRINCIPLES SUB-TAB ───────────────────────────────────────────────────
+// ─── PSA PRINCIPLES ───────────────────────────────────────────────────────────
 const PSA_PHASE_CONFIG = [
-  { id: "pre",    label: "Pre-Procedure",  Icon: NoteBlank,   color: "text-blue-500"   },
-  { id: "during", label: "During",         Icon: Lightning,   color: "text-amber-500"  },
+  { id: "pre",    label: "Pre-Procedure",  Icon: NoteBlank,   color: "text-blue-500"    },
+  { id: "during", label: "During",         Icon: Lightning,   color: "text-amber-500"   },
   { id: "post",   label: "Post-Procedure", Icon: CheckSquare, color: "text-emerald-500" },
 ];
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function SedationAnalgesiaTab() {
-  const { weight }     = useWeight();
+  const { weight }    = useWeight();
   const [psaSection, setPsaSection] = useState("pre");
 
   return (
     <div className="space-y-5">
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div>
-        <h2
-          className="font-bold text-2xl text-slate-900 dark:text-white mb-1"
-          style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
-        >
+        <h2 className="font-bold text-2xl text-slate-900 dark:text-white mb-1"
+            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
           Sedation &amp; Analgesia
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-          PSA agents · Local anaesthetics · Nerve blocks · LAST protocol ·
-          Tintinalli ch.38 · F&amp;L ch.4 · ACEP PSA guidelines · NYSORA · IAP
+          PSA agents · Oral sedation · Local anaesthetics · Nerve blocks · LAST protocol ·
+          Tintinalli ch.38 · F&amp;L ch.4 · ACEP PSA · NYSORA · IAP · Cote &amp; Lerman 6e
         </p>
       </div>
 
-      {/* ── Disclaimer ── */}
+      {/* Disclaimer */}
       <div className="flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-800 dark:text-amber-200">
         <Warning size={13} weight="fill" className="flex-shrink-0 mt-0.5 text-amber-500" />
         <span>
-          All sedation and regional anaesthesia must be performed with appropriate monitoring,
-          trained personnel, and emergency equipment immediately available.
-          Reference only — individualise to patient.
+          All sedation must be performed with appropriate monitoring, trained personnel,
+          and emergency equipment immediately available. Reference only — individualise to patient.
         </span>
       </div>
 
-      {/* ═══════════════════════════════════════════
-          1. PSA AGENT TABLE
-      ═══════════════════════════════════════════ */}
+      {/* 1. PSA AGENTS */}
       <Section title="PSA Agent Comparison — Weight-Based Doses" sectionKey="psa" defaultOpen={true}>
         <PSAAgentTable weight={weight} />
       </Section>
 
-      {/* ═══════════════════════════════════════════
-          2. PSA PRINCIPLES
-      ═══════════════════════════════════════════ */}
+      {/* 2. ORAL SEDATION */}
+      <Section title="Oral Sedative Agents — Paediatric (Indian Brands)" sectionKey="oralSedation">
+        <OralSedationTable weight={weight} />
+      </Section>
+
+      {/* 3. PSA PRINCIPLES */}
       <Section title="PSA Principles — Pre / During / Post Procedure" sectionKey="psaPrinciples">
-        {/* Sub-tabs */}
         <div className="flex gap-2 mb-4 flex-wrap">
           {PSA_PHASE_CONFIG.map(t => {
             const active = psaSection === t.id;
             return (
-              <button
-                key={t.id}
-                onClick={() => setPsaSection(t.id)}
+              <button key={t.id} onClick={() => setPsaSection(t.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
                   active
                     ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
                     : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
-                }`}
-              >
+                }`}>
                 <t.Icon size={12} weight="bold" className={active ? "" : t.color} />
                 {t.label}
               </button>
             );
           })}
         </div>
-
         <div className="space-y-2">
           {(psaSection === "pre"
             ? PSA_PRINCIPLES.preProcedure
@@ -595,9 +832,7 @@ export default function SedationAnalgesiaTab() {
         </div>
       </Section>
 
-      {/* ═══════════════════════════════════════════
-          3. PSA REGIMENS
-      ═══════════════════════════════════════════ */}
+      {/* 4. PSA REGIMENS */}
       <Section title="Common PSA Regimens" sectionKey="regimens">
         <div className="space-y-3">
           {PSA_REGIMENS.map((r, i) => (
@@ -627,9 +862,7 @@ export default function SedationAnalgesiaTab() {
                     <Warning size={9} weight="fill" className="text-red-500" />
                     <span className="text-[9px] font-mono uppercase tracking-widest text-red-500">Cons / Cautions</span>
                   </div>
-                  <div className="text-xs text-slate-600 dark:text-slate-300">
-                    {r.cons}{r.cautions ? ` · ${r.cautions}` : ""}
-                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-300">{r.cons}{r.cautions ? ` · ${r.cautions}` : ""}</div>
                 </div>
               </div>
             </div>
@@ -637,14 +870,11 @@ export default function SedationAnalgesiaTab() {
         </div>
       </Section>
 
-      {/* ═══════════════════════════════════════════
-          4. LOCAL ANAESTHETICS
-      ═══════════════════════════════════════════ */}
+      {/* 5. LOCAL ANAESTHETICS */}
       <Section title="Local Anaesthetic Safe Dose Reference" sectionKey="local">
         <div className="space-y-3">
           <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-            Maximum doses for{" "}
-            <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span> patient.
+            Maximum doses for <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span> patient.
             NEVER exceed absolute maximum regardless of weight.
           </p>
           <LocalAnaestheticTable weight={weight} />
@@ -658,17 +888,12 @@ export default function SedationAnalgesiaTab() {
         </div>
       </Section>
 
-      {/* ═══════════════════════════════════════════
-          5. NERVE BLOCKS
-      ═══════════════════════════════════════════ */}
+      {/* 6. NERVE BLOCKS */}
       <Section title="Pediatric ED Nerve Blocks" sectionKey="blocks">
         <div className="space-y-3">
           <div className="flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 px-3 py-2 text-xs text-blue-800 dark:text-blue-200">
             <Lightbulb size={12} weight="fill" className="flex-shrink-0 mt-0.5 text-blue-500" />
-            <span>
-              Ultrasound guidance preferred for most blocks. Aspirate every 5 mL.
-              Monitor for LAST (see below). Reference: baby-blocks.com · NYSORA
-            </span>
+            <span>Ultrasound guidance preferred for most blocks. Aspirate every 5 mL. Monitor for LAST (see below). Reference: baby-blocks.com · NYSORA</span>
           </div>
           {NERVE_BLOCKS.map(block => (
             <NerveBlockCard key={block.id} block={block} />
@@ -676,19 +901,13 @@ export default function SedationAnalgesiaTab() {
         </div>
       </Section>
 
-      {/* ═══════════════════════════════════════════
-          6. LAST PROTOCOL
-      ═══════════════════════════════════════════ */}
+      {/* 7. LAST PROTOCOL */}
       <Section title="LAST — Local Anaesthetic Systemic Toxicity" sectionKey="last">
         <div className="space-y-4">
-
-          {/* Signs */}
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <Heartbeat size={11} weight="bold" className="text-amber-500" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400">
-                Signs &amp; Symptoms
-              </span>
+              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400">Signs &amp; Symptoms</span>
             </div>
             <div className="space-y-1.5">
               {LAST_PROTOCOL.signs.map((s, i) => (
@@ -699,23 +918,15 @@ export default function SedationAnalgesiaTab() {
               ))}
             </div>
           </div>
-
-          {/* Management */}
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <ShieldWarning size={11} weight="bold" className="text-red-500" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-red-500">
-                Emergency Management
-              </span>
+              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-red-500">Emergency Management</span>
             </div>
             <div className="space-y-2">
               {LAST_PROTOCOL.management.map((step, i) => (
                 <div key={i} className="flex items-start gap-2.5">
-                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 mt-0.5 ${
-                    i < 2
-                      ? "bg-red-600 text-white"
-                      : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
-                  }`}>
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 mt-0.5 ${i < 2 ? "bg-red-600 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200"}`}>
                     {i + 1}
                   </span>
                   <div className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{step}</div>
@@ -723,15 +934,11 @@ export default function SedationAnalgesiaTab() {
               ))}
             </div>
           </div>
-
-          {/* Intralipid rescue box */}
           <div className="rounded-xl border-2 border-red-500 bg-red-50 dark:bg-red-950/40 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Radioactive size={16} weight="fill" className="text-red-600 dark:text-red-400" />
-              <span
-                className="font-black text-red-700 dark:text-red-300 text-sm"
-                style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}
-              >
+              <span className="font-black text-red-700 dark:text-red-300 text-sm"
+                    style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
                 20% INTRALIPID RESCUE — {weight} kg
               </span>
             </div>
@@ -741,32 +948,21 @@ export default function SedationAnalgesiaTab() {
                   <ArrowRight size={9} weight="bold" className="text-red-500" />
                   <span className="text-[9px] font-mono uppercase tracking-widest text-red-500">Bolus</span>
                 </div>
-                <div className="font-mono font-bold text-red-700 dark:text-red-300 text-2xl">
-                  {+(1.5 * weight).toFixed(0)} mL
-                </div>
-                <div className="text-red-600 dark:text-red-400 mt-1">
-                  1.5 mL/kg over 1 min. Repeat q5 min × 2 if arrest persists.
-                </div>
+                <div className="font-mono font-bold text-red-700 dark:text-red-300 text-2xl">{+(1.5 * weight).toFixed(0)} mL</div>
+                <div className="text-red-600 dark:text-red-400 mt-1">1.5 mL/kg over 1 min. Repeat q5 min × 2 if arrest persists.</div>
               </div>
               <div className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-red-200 dark:border-red-800">
                 <div className="flex items-center gap-1 mb-1">
                   <ArrowRight size={9} weight="bold" className="text-red-500" />
                   <span className="text-[9px] font-mono uppercase tracking-widest text-red-500">Infusion</span>
                 </div>
-                <div className="font-mono font-bold text-red-700 dark:text-red-300 text-2xl">
-                  {+(0.25 * weight).toFixed(0)}–{+(0.5 * weight).toFixed(0)} mL/min
-                </div>
-                <div className="text-red-600 dark:text-red-400 mt-1">
-                  0.25–0.5 mL/kg/min. Max cumulative 12 mL/kg total.
-                </div>
+                <div className="font-mono font-bold text-red-700 dark:text-red-300 text-2xl">{+(0.25 * weight).toFixed(0)}–{+(0.5 * weight).toFixed(0)} mL/min</div>
+                <div className="text-red-600 dark:text-red-400 mt-1">0.25–0.5 mL/kg/min. Max cumulative 12 mL/kg total.</div>
               </div>
             </div>
             <div className="flex items-start gap-2 mt-3 text-[10px] text-red-700 dark:text-red-300">
               <Warning size={11} weight="fill" className="text-red-500 flex-shrink-0 mt-0.5" />
-              <span>
-                Use reduced adrenaline doses in LAST arrest (1 mcg/kg only — NOT 10 mcg/kg).
-                Avoid vasopressin, calcium channel blockers, and propofol during lipid rescue.
-              </span>
+              <span>Use reduced adrenaline doses in LAST arrest (1 mcg/kg only — NOT 10 mcg/kg). Avoid vasopressin, calcium channel blockers, and propofol during lipid rescue.</span>
             </div>
           </div>
         </div>
@@ -774,8 +970,8 @@ export default function SedationAnalgesiaTab() {
 
       {/* Footer */}
       <div className="text-[10px] text-slate-400 dark:text-slate-500 italic text-center pt-2">
-        Tintinalli ch.38 · Fleischer &amp; Ludwig ch.4 · ACEP PSA Guidelines 2014 · NYSORA ·
-        baby-blocks.com · IAP Analgesia &amp; Sedation 2021
+        Tintinalli ch.38 · Fleischer &amp; Ludwig ch.4 · ACEP PSA Guidelines 2014 · NYSORA · baby-blocks.com ·
+        IAP Analgesia &amp; Sedation 2021 · Cote &amp; Lerman 6e · Morgan &amp; Mikhail 7e · CIMS India 2024
       </div>
     </div>
   );
