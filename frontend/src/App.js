@@ -35,7 +35,7 @@ import GuidelinesTab from "./components/tabs/IAPGuidelinesTab";
 import PrehospitalTab from "./components/tabs/PrehospitalTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
-  ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon,
+  ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon, Hospital,
   Lock, X, BookOpen,
 } from "@phosphor-icons/react";
 
