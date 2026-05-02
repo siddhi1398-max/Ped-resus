@@ -30,7 +30,7 @@ import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
 import AlgorithmsTab from "./components/tabs/AlgorithmsTab";
 import ClinicalPathwaysTab from "./components/tabs/ClinicalPathwaysTab";
-import ImagingTab from "./components/tabs/ImagingTab";
+import PrehospitalTab from "./components/tabs/PrehospitalTab";
 import GuidelinesTab from "./components/tabs/IAPGuidelinesTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
@@ -76,7 +76,7 @@ const ALL_TABS = [
   { id: "algorithms",    label: "PALS Algorithms",      icon: TreeStructure, Comp: AlgorithmsTab,        free: false },
   { id: "pathways",      label: "Clinical Pathways",    icon: Stethoscope,   Comp: ClinicalPathwaysTab,  free: false },
   { id: "iap",           label: "Guidelines",           icon: BookOpen,      Comp: IAPGuidelinesTab,     free: false },
-  { id: "imaging",       label: "Imaging",              icon: ImageIcon,     Comp: ImagingTab,           free: false },
+  { id: "prehospital",   label: "Prehospital",          icon: ImageIcon,     Comp: PrehospitalTab,       free: false },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
