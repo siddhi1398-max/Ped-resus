@@ -1,7 +1,36 @@
 // WaveformView.jsx — Enhanced with hold maneuvers, realistic physics,
 // static critical waveform library, and EtCO2 subsection
+// Icons: @phosphor-icons/react throughout
 
 import { useEffect, useRef, useState } from "react";
+import {
+  Broadcast,
+  Books,
+  Wind,
+  PauseCircle,
+  StopCircle,
+  Warning,
+  Lightbulb,
+  ArrowRight,
+  Heartbeat,
+  WaveTriangle,
+  WaveSawtooth,
+  Waveform,
+  Drop,
+  Fire,
+  CircleWavyWarning,
+  CheckCircle,
+  Pulse,
+  ArrowFatLinesUp,
+  ArrowFatLinesDown,
+  ArrowsIn,
+  ArrowsOut,
+  SealWarning,
+  SkipBack,
+  Activity,
+  ChartLine,
+  Stethoscope,
+} from "@phosphor-icons/react";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 const SAMPLE_RATE = 200;
@@ -107,7 +136,6 @@ function generateSample(t, modeKey, scenKey, holdState) {
   const R    = s.resistance;
   const C    = s.compliance;
 
-  // Inspiratory Hold: freeze at plateau
   if (holdState === "insp") {
     const plateau = peep + (vtT / 50) * (1 / C);
     return {
@@ -118,7 +146,6 @@ function generateSample(t, modeKey, scenKey, holdState) {
     };
   }
 
-  // Expiratory Hold: freeze near auto-PEEP level
   if (holdState === "exp") {
     const trapped = peep + s.autopeep;
     return {
@@ -135,7 +162,7 @@ function generateSample(t, modeKey, scenKey, holdState) {
   if (isVC) {
     if (inInsp) {
       flow = 40;
-      const elasticP  = peep + (vtT * inspPhase) / (50 * C);
+      const elasticP   = peep + (vtT * inspPhase) / (50 * C);
       const resistiveP = flow * R * 0.18;
       pressure = s.starvation
         ? elasticP + resistiveP - 8 * Math.sin(Math.PI * inspPhase)
@@ -338,10 +365,10 @@ const ETCO2_WAVEFORMS = [
     description: "Classic rectangular waveform. Four distinct phases. EtCO₂ 35–45 mmHg.",
     path: "M5,75 L20,75 L25,25 L70,20 L75,20 L80,75 L120,75 L125,25 L170,20 L175,20 L180,75 L215,75",
     phases: [
-      { label: "Phase I", detail: "Baseline — dead space gas, CO₂ ≈ 0" },
-      { label: "Phase II", detail: "Rapid expiratory upstroke — alveolar gas arrives" },
+      { label: "Phase I",   detail: "Baseline — dead space gas, CO₂ ≈ 0" },
+      { label: "Phase II",  detail: "Rapid expiratory upstroke — alveolar gas arrives" },
       { label: "Phase III", detail: "Alveolar plateau — EtCO₂ read at peak" },
-      { label: "Phase 0", detail: "Inspiration — CO₂ washed out to zero" },
+      { label: "Phase 0",   detail: "Inspiration — CO₂ washed out to zero" },
     ],
     pearl: "Normal EtCO₂: 35–45 mmHg. EtCO₂ = PaCO₂ − 5–10 mmHg in normal physiology (dead space effect).",
   },
@@ -351,7 +378,7 @@ const ETCO2_WAVEFORMS = [
     path: "M5,75 L20,75 L25,60 L35,35 L55,22 L75,20 L80,75 L125,75 L130,60 L140,35 L160,22 L180,20 L185,75 L215,75",
     phases: [
       { label: "Sloped Phase III", detail: "Uneven emptying from obstructed airways" },
-      { label: "No plateau", detail: "EtCO₂ still rising at cycle-off — underestimates true PaCO₂" },
+      { label: "No plateau",       detail: "EtCO₂ still rising at cycle-off — underestimates true PaCO₂" },
     ],
     pearl: "Shark fin = obstructive. Treat bronchospasm. Widen I:E. EtCO₂ may significantly underestimate true PaCO₂ — blood gas required.",
   },
@@ -360,18 +387,18 @@ const ETCO2_WAVEFORMS = [
     description: "Baseline CO₂ above zero — patient rebreathing exhaled CO₂. Circuit malfunction or exhausted soda lime.",
     path: "M5,58 L20,58 L25,38 L70,32 L75,32 L80,58 L120,58 L125,38 L170,32 L175,32 L180,58 L215,58",
     phases: [
-      { label: "Elevated baseline", detail: "CO₂ present during inspiration — not zero" },
+      { label: "Elevated baseline",   detail: "CO₂ present during inspiration — not zero" },
       { label: "Reduced ΔCO₂ swing", detail: "Smaller waveform amplitude" },
     ],
-    pearl: "Check CO₂ absorber (soda lime). Check expiratory valve. Rule out oesophageal intubation (which shows flat decaying waveform, not raised baseline).",
+    pearl: "Check CO₂ absorber (soda lime). Check expiratory valve. Rule out oesophageal intubation (flat decaying waveform, not raised baseline).",
   },
   {
     id: "oesophageal-co2", label: "Oesophageal Intubation", color: "#ef4444",
     description: "Small irregular waveforms decaying rapidly to zero. No sustained CO₂. Confirms incorrect tube placement.",
     path: "M5,75 L20,75 L22,55 L30,52 L38,55 L40,75 L60,75 L62,65 L70,63 L78,65 L80,75 L100,75 L102,70 L110,69 L118,70 L120,75 L140,75 L215,75",
     phases: [
-      { label: "Rapidly decaying", detail: "CO₂ from stomach gas, not alveoli" },
-      { label: "Flat after 4–6 breaths", detail: "No sustained alveolar CO₂ production" },
+      { label: "Rapidly decaying",        detail: "CO₂ from stomach gas, not alveoli" },
+      { label: "Flat after 4–6 breaths",  detail: "No sustained alveolar CO₂ production" },
     ],
     pearl: "Any sustained rectangular capnogram confirms endotracheal intubation. Flat/decaying waveform = oesophageal intubation. IMMEDIATELY reintubate.",
   },
@@ -381,7 +408,7 @@ const ETCO2_WAVEFORMS = [
     path: "M5,75 L20,75 L22,68 L35,67 L37,75 L60,75 L62,68 L75,67 L77,75 L100,75 L102,68 L115,67 L117,75 L140,75 L142,45 L160,42 L162,75 L190,75 L192,45 L210,42 L215,75",
     phases: [
       { label: "Low amplitude", detail: "Low CO₂ = poor cardiac output / pulmonary blood flow" },
-      { label: "Sudden rise", detail: "Abrupt ↑ EtCO₂ →ROSC — stop CPR and reassess" },
+      { label: "Sudden rise",   detail: "Abrupt ↑ EtCO₂ → ROSC — stop CPR and reassess" },
     ],
     pearl: "EtCO₂ <10 mmHg after 20 min CPR = poor survival. Sudden rise to >40 mmHg = likely ROSC. Use as real-time CPR quality and ROSC monitor.",
   },
@@ -390,31 +417,42 @@ const ETCO2_WAVEFORMS = [
     description: "Notch in Phase III plateau caused by patient inspiratory effort during expiration. Waning NMB or patient fighting vent.",
     path: "M5,75 L20,75 L22,28 L65,22 L68,30 L72,22 L80,22 L82,75 L125,75 L127,28 L170,22 L173,30 L177,22 L185,22 L187,75 L215,75",
     phases: [
-      { label: "Phase III notch", detail: "Patient effort drops CO₂ momentarily during plateau" },
+      { label: "Phase III notch",    detail: "Patient effort drops CO₂ momentarily during plateau" },
       { label: "Returns to plateau", detail: "Distinguishes from artifact — repeatable each breath" },
     ],
-    pearl: "Curare notch = patient fighting vent. Check sedation (COMFORT-B target 11–17). Check NMB level. Adjust trigger sensitivity. Do not confuse with cardiogenic oscillations.",
+    pearl: "Curare notch = patient fighting vent. Check sedation (COMFORT-B target 11–17). Check NMB level. Adjust trigger sensitivity.",
   },
 ];
 
+// ─── CATEGORY CONFIG ──────────────────────────────────────────────────────────
+function catConfig(category, isEtco2) {
+  if (isEtco2)                  return { color: "#34d399", label: "EtCO₂" };
+  if (category === "normal")    return { color: "#34d399", label: "NORMAL" };
+  if (category === "maneuver")  return { color: "#fbbf24", label: "MANOEUVRE" };
+  return { color: "#f87171", label: "ABNORMAL" };
+}
+
 // ─── STATIC WAVEFORM CARD ─────────────────────────────────────────────────────
 function StaticWaveformCard({ w, isEtco2 = false }) {
-  const catColor = w.category === "normal" || isEtco2
-    ? "#34d399"
+  const { color: catColor, label: catLabel } = catConfig(w.category, isEtco2);
+
+  // Choose a small Phosphor icon for the category badge
+  const CatIcon = isEtco2
+    ? Wind
+    : w.category === "normal"
+    ? CheckCircle
     : w.category === "maneuver"
-    ? "#fbbf24"
-    : "#f87171";
-  const catLabel = w.category === "normal"
-    ? "NORMAL"
-    : w.category === "maneuver"
-    ? "MANOEUVRE"
-    : isEtco2 ? "EtCO₂" : "ABNORMAL";
+    ? PauseCircle
+    : CircleWavyWarning;
 
   return (
     <div style={{ background: "#0a0f14", border: "1px solid #1e2d3d", borderRadius: 10, overflow: "hidden" }}>
       <div style={{ padding: "9px 12px", borderBottom: "1px solid #1e2d3d", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 11, fontWeight: 600, color: "#e2e8f0" }}>{w.label}</span>
-        <span style={{ fontSize: 8, letterSpacing: 2, color: catColor, textTransform: "uppercase" }}>{catLabel}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 8, letterSpacing: 2, color: catColor, textTransform: "uppercase" }}>
+          <CatIcon size={10} weight="fill" style={{ color: catColor }} />
+          {catLabel}
+        </span>
       </div>
       <div style={{ padding: "8px 12px" }}>
         {isEtco2 ? (
@@ -453,7 +491,7 @@ function StaticWaveformCard({ w, isEtco2 = false }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
           {(isEtco2 ? w.phases : w.findings).map((f, i) => (
             <div key={i} style={{ display: "flex", gap: 5, alignItems: "flex-start" }}>
-              <span style={{ color: catColor, fontSize: 9, marginTop: 1, flexShrink: 0 }}>→</span>
+              <ArrowRight size={9} weight="bold" style={{ color: catColor, flexShrink: 0, marginTop: 2 }} />
               <span style={{ fontSize: 10, color: "#64748b" }}>
                 {isEtco2
                   ? <><strong style={{ color: "#94a3b8" }}>{f.label}:</strong> {f.detail}</>
@@ -463,8 +501,9 @@ function StaticWaveformCard({ w, isEtco2 = false }) {
           ))}
         </div>
         {isEtco2 && w.pearl && (
-          <div style={{ marginTop: 8, background: "#1a1000", borderRadius: 4, padding: "5px 8px", fontSize: 10, color: "#fbbf24" }}>
-            💡 {w.pearl}
+          <div style={{ marginTop: 8, background: "#1a1000", borderRadius: 4, padding: "5px 8px", fontSize: 10, color: "#fbbf24", display: "flex", gap: 6, alignItems: "flex-start" }}>
+            <Lightbulb size={11} weight="fill" style={{ color: "#fbbf24", flexShrink: 0, marginTop: 1 }} />
+            {w.pearl}
           </div>
         )}
       </div>
@@ -474,21 +513,21 @@ function StaticWaveformCard({ w, isEtco2 = false }) {
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function WaveformView() {
-  const [mode, setMode]           = useState("vc-ac");
-  const [scen, setScen]           = useState("normal");
-  const [live, setLive]           = useState({ pip: 0, flow: 0, vol: 0, rr: 22 });
-  const [holdState, setHoldState] = useState(null); // null | "insp" | "exp"
+  const [mode, setMode]             = useState("vc-ac");
+  const [scen, setScen]             = useState("normal");
+  const [live, setLive]             = useState({ pip: 0, flow: 0, vol: 0, rr: 22 });
+  const [holdState, setHoldState]   = useState(null);
   const [holdResult, setHoldResult] = useState(null);
-  const [activeTab, setActiveTab] = useState("live");
+  const [activeTab, setActiveTab]   = useState("live");
 
   const canvPRef = useRef(null);
   const canvFRef = useRef(null);
   const canvVRef = useRef(null);
-  const stateRef = useRef({ mode, scen, t: 0, bufIdx: 0, hold: null });
+  const stateRef       = useRef({ mode, scen, t: 0, bufIdx: 0, hold: null });
   const holdResultRef  = useRef(null);
   const holdSamplesRef = useRef(0);
-  const animRef  = useRef(null);
-  const tickRef  = useRef(0);
+  const animRef        = useRef(null);
+  const tickRef        = useRef(0);
 
   const pressBuf = useRef(new Float32Array(HISTORY).fill(5));
   const flowBuf  = useRef(new Float32Array(HISTORY).fill(0));
@@ -556,17 +595,17 @@ export default function WaveformView() {
 
       for (let i = 0; i < steps; i++) {
         stateRef.current.t += DT;
-        const s = generateSample(stateRef.current.t, stateRef.current.mode, stateRef.current.scen, currentHold);
+        const smpl = generateSample(stateRef.current.t, stateRef.current.mode, stateRef.current.scen, currentHold);
         const bi = stateRef.current.bufIdx;
-        pressBuf.current[bi] = s.pressure;
-        flowBuf.current[bi]  = s.flow;
-        volBuf.current[bi]   = s.volume;
+        pressBuf.current[bi] = smpl.pressure;
+        flowBuf.current[bi]  = smpl.flow;
+        volBuf.current[bi]   = smpl.volume;
         stateRef.current.bufIdx = (bi + 1) % HISTORY;
 
         if (currentHold) {
           holdSamplesRef.current++;
           if (holdSamplesRef.current > 60) {
-            holdResultRef.current = { type: currentHold, pressure: Math.round(s.pressure * 10) / 10 };
+            holdResultRef.current = { type: currentHold, pressure: Math.round(smpl.pressure * 10) / 10 };
           }
         }
       }
@@ -597,7 +636,6 @@ export default function WaveformView() {
   const m = MODES[mode];
   const isAlarm = scen !== "normal";
 
-  // Hold result interpretation
   const getResult = () => {
     if (!holdResult) return null;
     const { type, pressure } = holdResult;
@@ -609,10 +647,10 @@ export default function WaveformView() {
       return {
         title: "Inspiratory Hold Result",
         values: [
-          { label: "Plateau (Pplat)",         val: `${pressure} cmH₂O`, color: "#4ade80" },
-          { label: "PIP",                      val: `${Math.round(pip)} cmH₂O`, color: "#94a3b8" },
-          { label: "Peak – Plateau gap",       val: `${gap} cmH₂O`,     color: gap > 10 ? "#f87171" : "#4ade80" },
-          { label: "Driving pressure",         val: `${driv} cmH₂O`,    color: driv > 15 ? "#f87171" : "#4ade80" },
+          { label: "Plateau (Pplat)",    val: `${pressure} cmH₂O`, color: "#4ade80" },
+          { label: "PIP",                val: `${Math.round(pip)} cmH₂O`, color: "#94a3b8" },
+          { label: "Peak – Plateau gap", val: `${gap} cmH₂O`,     color: gap > 10 ? "#f87171" : "#4ade80" },
+          { label: "Driving pressure",   val: `${driv} cmH₂O`,    color: driv > 15 ? "#f87171" : "#4ade80" },
         ],
         interpretation: gap > 10
           ? "↑ Peak–Plateau gap (>10 cmH₂O) → RESISTANCE problem. Consider bronchospasm, secretions, ETT kink."
@@ -626,12 +664,12 @@ export default function WaveformView() {
       return {
         title: "Expiratory Hold Result",
         values: [
-          { label: "Total PEEP",    val: `${pressure} cmH₂O`, color: "#4ade80" },
-          { label: "Set PEEP",      val: `${Math.round(peepSet)} cmH₂O`, color: "#94a3b8" },
-          { label: "Auto-PEEP (PEEPi)", val: `${autoPeep} cmH₂O`, color: autoPeep >= 3 ? "#fb923c" : "#4ade80" },
+          { label: "Total PEEP",         val: `${pressure} cmH₂O`, color: "#4ade80" },
+          { label: "Set PEEP",           val: `${Math.round(peepSet)} cmH₂O`, color: "#94a3b8" },
+          { label: "Auto-PEEP (PEEPi)",  val: `${autoPeep} cmH₂O`, color: autoPeep >= 3 ? "#fb923c" : "#4ade80" },
         ],
         interpretation: autoPeep >= 3
-          ? `Significant auto-PEEP (${autoPeep} cmH₂O). Reduce RR, extend I:E to 1:3–1:4, give bronchodilators. Risk of haemodynamic compromise.`
+          ? `Significant auto-PEEP (${autoPeep} cmH₂O). Reduce RR, extend I:E to 1:3–1:4, give bronchodilators.`
           : "Minimal intrinsic PEEP. Expiratory time appears adequate.",
         color: autoPeep >= 3 ? "#fb923c" : "#4ade80",
       };
@@ -657,15 +695,29 @@ export default function WaveformView() {
     { id: "low-compliance",  label: "Low Cmpl"   },
   ];
 
-  const tabBtn = (id, label) => (
+  // Sub-tab button style
+  const tabBtn = (id, Icon, label) => (
     <button onClick={() => setActiveTab(id)} style={{
-      padding: "5px 14px", borderRadius: 5, cursor: "pointer",
+      display: "flex", alignItems: "center", gap: 5,
+      padding: "5px 12px", borderRadius: 5, cursor: "pointer",
       fontFamily: "inherit", fontSize: 10, letterSpacing: 1, textTransform: "uppercase",
       border: `1px solid ${activeTab === id ? "#4a9eff" : "#1e3a52"}`,
       background: activeTab === id ? "#0d2137" : "#0e1922",
       color: activeTab === id ? "#4a9eff" : "#475569",
-    }}>{label}</button>
+    }}>
+      <Icon size={12} weight={activeTab === id ? "fill" : "regular"} />
+      {label}
+    </button>
   );
+
+  // Small inline button style for mode/scenario
+  const chipBtn = (isActive, isWarn) => ({
+    background: isActive ? (isWarn ? "#1c0a00" : "#0d2137") : "#0e1922",
+    border: `1px solid ${isActive ? (isWarn ? "#f97316" : "#4a9eff") : "#1e3a52"}`,
+    color: isActive ? (isWarn ? "#fb923c" : "#4a9eff") : "#475569",
+    padding: "3px 8px", borderRadius: 4, cursor: "pointer",
+    fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "inherit",
+  });
 
   const normalWfs   = STATIC_WAVEFORMS.filter(w => w.category === "normal");
   const maneuverWfs = STATIC_WAVEFORMS.filter(w => w.category === "maneuver");
@@ -675,11 +727,14 @@ export default function WaveformView() {
     <div className="rounded-xl overflow-hidden border border-slate-800"
          style={{ background: "#0a0f14", fontFamily: '"JetBrains Mono", monospace' }}>
 
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-        <span style={{ fontSize: 10, letterSpacing: 3, color: "#4a9eff", textTransform: "uppercase" }}>
-          Ped·Resus — Vent Monitor
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Activity size={13} style={{ color: "#4a9eff" }} />
+          <span style={{ fontSize: 10, letterSpacing: 3, color: "#4a9eff", textTransform: "uppercase" }}>
+            Ped·Resus — Vent Monitor
+          </span>
+        </div>
         <div className="flex items-center gap-3">
           <span style={{ fontSize: 10, color: "#334155" }}>RR: {live.rr}/min</span>
           <div className="flex items-center gap-1.5">
@@ -704,89 +759,94 @@ export default function WaveformView() {
 
         {/* Sub-tabs */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {tabBtn("live",   "📡 Live Waveforms")}
-          {tabBtn("static", "📚 Waveform Library")}
-          {tabBtn("etco2",  "💨 EtCO₂")}
+          {tabBtn("live",   Broadcast, "Live Waveforms")}
+          {tabBtn("static", Books,     "Waveform Library")}
+          {tabBtn("etco2",  Wind,      "EtCO₂")}
         </div>
 
         {/* ══════════ TAB 1: LIVE ══════════ */}
         {activeTab === "live" && (
           <>
-            {/* Mode / Scenario selectors */}
+            {/* Mode / Scenario */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 9, color: "#334155", letterSpacing: 2, textTransform: "uppercase", marginBottom: 5 }}>Mode</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {modeList.map(ml => (
-                    <button key={ml.id} onClick={() => setMode(ml.id)} style={{
-                      background: mode === ml.id ? "#0d2137" : "#0e1922",
-                      border: `1px solid ${mode === ml.id ? "#4a9eff" : "#1e3a52"}`,
-                      color: mode === ml.id ? "#4a9eff" : "#475569",
-                      padding: "3px 8px", borderRadius: 4, cursor: "pointer",
-                      fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "inherit",
-                    }}>{ml.label}</button>
+                    <button key={ml.id} onClick={() => setMode(ml.id)}
+                      style={chipBtn(mode === ml.id, false)}>
+                      {ml.label}
+                    </button>
                   ))}
                 </div>
               </div>
               <div>
                 <div style={{ fontSize: 9, color: "#334155", letterSpacing: 2, textTransform: "uppercase", marginBottom: 5 }}>Scenario</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {scenList.map(sl => {
-                    const isNorm = sl.id === "normal";
-                    const isAct  = scen === sl.id;
-                    return (
-                      <button key={sl.id} onClick={() => setScen(sl.id)} style={{
-                        background: isAct ? (isNorm ? "#0d2137" : "#1c0a00") : "#0e1922",
-                        border: `1px solid ${isAct ? (isNorm ? "#4a9eff" : "#f97316") : "#1e3a52"}`,
-                        color: isAct ? (isNorm ? "#4a9eff" : "#fb923c") : "#475569",
-                        padding: "3px 8px", borderRadius: 4, cursor: "pointer",
-                        fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "inherit",
-                      }}>{sl.label}</button>
-                    );
-                  })}
+                  {scenList.map(sl => (
+                    <button key={sl.id} onClick={() => setScen(sl.id)}
+                      style={chipBtn(scen === sl.id, scen === sl.id && sl.id !== "normal")}>
+                      {sl.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
 
             {/* Hold Manoeuvres */}
             <div style={{ background: "#0e1116", border: "1px solid #1e3a52", borderRadius: 8, padding: "10px 12px" }}>
-              <div style={{ fontSize: 9, color: "#4a9eff", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Hold Manoeuvres</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <PauseCircle size={11} weight="fill" style={{ color: "#4a9eff" }} />
+                <span style={{ fontSize: 9, color: "#4a9eff", letterSpacing: 2, textTransform: "uppercase" }}>Hold Manoeuvres</span>
+              </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 10 }}>
                 <button onClick={() => triggerHold("insp")} style={{
+                  display: "flex", alignItems: "center", gap: 6,
                   background: holdState === "insp" ? "#1a3a00" : "#0e1922",
                   border: `1px solid ${holdState === "insp" ? "#fbbf24" : "#1e3a52"}`,
                   color: holdState === "insp" ? "#fbbf24" : "#4ade80",
-                  padding: "7px 16px", borderRadius: 5, cursor: "pointer",
+                  padding: "7px 14px", borderRadius: 5, cursor: "pointer",
                   fontSize: 10, letterSpacing: 1, textTransform: "uppercase", fontFamily: "inherit", fontWeight: 600,
                 }}>
-                  {holdState === "insp" ? "⏹ Release" : "⏸ Inspiratory Hold"}
+                  {holdState === "insp"
+                    ? <><StopCircle size={13} weight="fill" /> Release</>
+                    : <><PauseCircle size={13} weight="fill" /> Inspiratory Hold</>}
                 </button>
                 <button onClick={() => triggerHold("exp")} style={{
+                  display: "flex", alignItems: "center", gap: 6,
                   background: holdState === "exp" ? "#1a0a00" : "#0e1922",
                   border: `1px solid ${holdState === "exp" ? "#fbbf24" : "#1e3a52"}`,
                   color: holdState === "exp" ? "#fbbf24" : "#60a5fa",
-                  padding: "7px 16px", borderRadius: 5, cursor: "pointer",
+                  padding: "7px 14px", borderRadius: 5, cursor: "pointer",
                   fontSize: 10, letterSpacing: 1, textTransform: "uppercase", fontFamily: "inherit", fontWeight: 600,
                 }}>
-                  {holdState === "exp" ? "⏹ Release" : "⏸ Expiratory Hold"}
+                  {holdState === "exp"
+                    ? <><StopCircle size={13} weight="fill" /> Release</>
+                    : <><PauseCircle size={13} weight="fill" /> Expiratory Hold</>}
                 </button>
                 <span style={{ fontSize: 9, color: "#334155", lineHeight: 1.5 }}>
-                  4 s hold · auto-releases · waveform turns <span style={{ color: "#fbbf24" }}>amber</span>
+                  4 s · auto-releases · waveform turns <span style={{ color: "#fbbf24" }}>amber</span>
                 </span>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 <div style={{ background: "#060d14", borderRadius: 6, padding: "8px 10px" }}>
-                  <div style={{ fontSize: 9, color: "#4ade80", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>Insp Hold → Plateau pressure</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
+                    <ArrowsIn size={10} weight="bold" style={{ color: "#4ade80" }} />
+                    <span style={{ fontSize: 9, color: "#4ade80", letterSpacing: 1, textTransform: "uppercase" }}>Insp Hold → Plateau</span>
+                  </div>
                   <div style={{ fontSize: 10, color: "#64748b", lineHeight: 1.6 }}>
-                    Occludes expiratory valve at end-inspiration. No flow → pressure equilibrates to alveolar pressure.
-                    <strong style={{ color: "#94a3b8" }}> Peak − Plateau &gt;10 cmH₂O</strong> = resistance ↑.
-                    <strong style={{ color: "#94a3b8" }}> Driving pressure &gt;15 cmH₂O</strong> = reduce Vt.
+                    Occludes expiratory valve. No flow → pressure equilibrates to alveolar pressure.
+                    <strong style={{ color: "#94a3b8" }}> Peak − Plateau &gt;10</strong> = resistance ↑.
+                    <strong style={{ color: "#94a3b8" }}> Driving pressure &gt;15</strong> = reduce Vt.
                   </div>
                 </div>
                 <div style={{ background: "#060d14", borderRadius: 6, padding: "8px 10px" }}>
-                  <div style={{ fontSize: 9, color: "#60a5fa", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>Exp Hold → Auto-PEEP (PEEPi)</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
+                    <ArrowsOut size={10} weight="bold" style={{ color: "#60a5fa" }} />
+                    <span style={{ fontSize: 9, color: "#60a5fa", letterSpacing: 1, textTransform: "uppercase" }}>Exp Hold → Auto-PEEP</span>
+                  </div>
                   <div style={{ fontSize: 10, color: "#64748b", lineHeight: 1.6 }}>
-                    Occludes inspiratory valve at end-expiration. Trapped gas equilibrates. Rise above set PEEP = intrinsic PEEP.
+                    Occludes inspiratory valve at end-expiration. Rise above set PEEP = intrinsic PEEP.
                     <strong style={{ color: "#94a3b8" }}> PEEPi ≥3 cmH₂O</strong> = significant air trapping.
                   </div>
                 </div>
@@ -796,7 +856,10 @@ export default function WaveformView() {
             {/* Hold Result */}
             {result && (
               <div style={{ background: "#0e1116", border: `1px solid ${result.color}44`, borderRadius: 8, padding: "10px 12px" }}>
-                <div style={{ fontSize: 9, color: result.color, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>{result.title}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                  <ChartLine size={11} weight="fill" style={{ color: result.color }} />
+                  <span style={{ fontSize: 9, color: result.color, letterSpacing: 2, textTransform: "uppercase" }}>{result.title}</span>
+                </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
                   {result.values.map((v, i) => (
                     <div key={i} style={{ background: "#060d14", borderRadius: 6, padding: "6px 10px", border: "1px solid #1e2d3d" }}>
@@ -805,7 +868,8 @@ export default function WaveformView() {
                     </div>
                   ))}
                 </div>
-                <div style={{ fontSize: 10, color: result.color, background: "#060d14", borderRadius: 4, padding: "6px 10px", borderLeft: `2px solid ${result.color}` }}>
+                <div style={{ display: "flex", gap: 6, alignItems: "flex-start", fontSize: 10, color: result.color, background: "#060d14", borderRadius: 4, padding: "6px 10px", borderLeft: `2px solid ${result.color}` }}>
+                  <ArrowRight size={11} weight="bold" style={{ flexShrink: 0, marginTop: 2 }} />
                   {result.interpretation}
                 </div>
               </div>
@@ -815,7 +879,7 @@ export default function WaveformView() {
             {isAlarm && (
               <div style={{ background: "#0e1116", border: "1px solid #7c2d12", borderRadius: 8, padding: "10px 12px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#ef4444", display: "inline-block", animation: "vpulse .7s infinite" }} />
+                  <SealWarning size={13} weight="fill" style={{ color: "#ef4444" }} />
                   <span style={{ fontSize: 9, color: "#f97316", letterSpacing: 2, textTransform: "uppercase" }}>{s.alarmTitle}</span>
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 8 }}>
@@ -824,7 +888,10 @@ export default function WaveformView() {
                   ))}
                 </div>
                 <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.65, borderLeft: "2px solid #f97316", paddingLeft: 10, marginBottom: 6 }}>{s.action}</div>
-                <div style={{ fontSize: 10, color: "#fbbf24", background: "#1a1000", borderRadius: 4, padding: "5px 8px" }}>💡 {s.pearl}</div>
+                <div style={{ display: "flex", gap: 6, alignItems: "flex-start", fontSize: 10, color: "#fbbf24", background: "#1a1000", borderRadius: 4, padding: "5px 8px" }}>
+                  <Lightbulb size={11} weight="fill" style={{ color: "#fbbf24", flexShrink: 0, marginTop: 1 }} />
+                  {s.pearl}
+                </div>
               </div>
             )}
 
@@ -863,10 +930,13 @@ export default function WaveformView() {
             </div>
 
             {/* Mode note */}
-            <div style={{ background: "#060d14", border: "1px solid #1e2d3d", borderRadius: 6, padding: "10px 12px" }}>
-              <span style={{ fontSize: 9, color: "#4a9eff", letterSpacing: 2, textTransform: "uppercase" }}>{m.label}</span>
-              <span style={{ color: "#1e3a52", margin: "0 8px" }}>|</span>
-              <span style={{ fontSize: 11, color: "#64748b", lineHeight: 1.7 }}>{m.note}</span>
+            <div style={{ background: "#060d14", border: "1px solid #1e2d3d", borderRadius: 6, padding: "10px 12px", display: "flex", alignItems: "flex-start", gap: 8 }}>
+              <Stethoscope size={12} style={{ color: "#4a9eff", flexShrink: 0, marginTop: 2 }} />
+              <div>
+                <span style={{ fontSize: 9, color: "#4a9eff", letterSpacing: 2, textTransform: "uppercase" }}>{m.label}</span>
+                <span style={{ color: "#1e3a52", margin: "0 8px" }}>|</span>
+                <span style={{ fontSize: 11, color: "#64748b", lineHeight: 1.7 }}>{m.note}</span>
+              </div>
             </div>
           </>
         )}
@@ -879,16 +949,25 @@ export default function WaveformView() {
             </p>
 
             <div>
-              <div style={{ fontSize: 9, color: "#34d399", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Normal Patterns</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <CheckCircle size={11} weight="fill" style={{ color: "#34d399" }} />
+                <span style={{ fontSize: 9, color: "#34d399", letterSpacing: 2, textTransform: "uppercase" }}>Normal Patterns</span>
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 }}>
                 {normalWfs.map(w => <StaticWaveformCard key={w.id} w={w} />)}
               </div>
             </div>
 
             <div>
-              <div style={{ fontSize: 9, color: "#fbbf24", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Hold Manoeuvres</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <PauseCircle size={11} weight="fill" style={{ color: "#fbbf24" }} />
+                <span style={{ fontSize: 9, color: "#fbbf24", letterSpacing: 2, textTransform: "uppercase" }}>Hold Manoeuvres</span>
+              </div>
               <div style={{ background: "#0e1116", border: "1px solid #3a2f00", borderRadius: 8, padding: "10px 12px", marginBottom: 10 }}>
-                <div style={{ fontSize: 10, color: "#fbbf24", marginBottom: 6 }}>💡 How to perform on a real ventilator</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <Lightbulb size={11} weight="fill" style={{ color: "#fbbf24" }} />
+                  <span style={{ fontSize: 10, color: "#fbbf24" }}>How to perform on a real ventilator</span>
+                </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   <div style={{ fontSize: 10, color: "#64748b", lineHeight: 1.65 }}>
                     <strong style={{ color: "#94a3b8" }}>Inspiratory Hold (Drager/Maquet):</strong> Press and hold Insp-Hold button at any point in the breath. Patient must be passive. Hold 0.3–0.5 s. Plateau appears on pressure scalar. Read from vent display before releasing.
@@ -904,7 +983,10 @@ export default function WaveformView() {
             </div>
 
             <div>
-              <div style={{ fontSize: 9, color: "#f87171", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Abnormal Patterns</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <CircleWavyWarning size={11} weight="fill" style={{ color: "#f87171" }} />
+                <span style={{ fontSize: 9, color: "#f87171", letterSpacing: 2, textTransform: "uppercase" }}>Abnormal Patterns</span>
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 }}>
                 {abnormalWfs.map(w => <StaticWaveformCard key={w.id} w={w} />)}
               </div>
@@ -916,15 +998,18 @@ export default function WaveformView() {
         {activeTab === "etco2" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-            {/* Intro card */}
+            {/* Intro */}
             <div style={{ background: "#0e1116", border: "1px solid #1e3a52", borderRadius: 8, padding: "12px 14px" }}>
-              <div style={{ fontSize: 9, color: "#4a9eff", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Capnography — Clinical Overview</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <Wind size={11} weight="fill" style={{ color: "#4a9eff" }} />
+                <span style={{ fontSize: 9, color: "#4a9eff", letterSpacing: 2, textTransform: "uppercase" }}>Capnography — Clinical Overview</span>
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 8, marginBottom: 10 }}>
                 {[
-                  { label: "Normal EtCO₂",        val: "35–45",           unit: "mmHg",        color: "#34d399" },
-                  { label: "EtCO₂ – PaCO₂ gap",   val: "5–10",            unit: "mmHg",        color: "#60a5fa" },
-                  { label: "CPR poor prognosis",   val: "<10",             unit: "mmHg at 20 min", color: "#f87171" },
-                  { label: "ROSC signal",          val: ">40 sudden ↑",   unit: "mmHg",        color: "#a78bfa" },
+                  { label: "Normal EtCO₂",       val: "35–45",        unit: "mmHg",           color: "#34d399" },
+                  { label: "EtCO₂ – PaCO₂ gap",  val: "5–10",         unit: "mmHg",           color: "#60a5fa" },
+                  { label: "CPR poor prognosis",  val: "<10",          unit: "mmHg at 20 min", color: "#f87171" },
+                  { label: "ROSC signal",         val: ">40 sudden ↑", unit: "mmHg",           color: "#a78bfa" },
                 ].map(p => (
                   <div key={p.label} style={{ background: "#060d14", borderRadius: 6, padding: "8px 10px", border: "1px solid #1e2d3d" }}>
                     <div style={{ fontSize: 8, color: "#475569", letterSpacing: 1, textTransform: "uppercase", marginBottom: 2 }}>{p.label}</div>
@@ -934,19 +1019,22 @@ export default function WaveformView() {
                 ))}
               </div>
               <p style={{ fontSize: 10, color: "#64748b", lineHeight: 1.7 }}>
-                Capnography measures CO₂ concentration in exhaled gas over time. The waveform (capnogram) provides real-time information about ventilation, circulation, and airway patency. Uses in paediatric critical care: ETT position confirmation, ventilation monitoring, CPR quality and ROSC detection, sedation monitoring, and metabolic assessment.
+                Capnography measures CO₂ in exhaled gas over time. Uses: ETT position confirmation, ventilation monitoring, CPR quality, ROSC detection, sedation monitoring, and metabolic assessment.
               </p>
             </div>
 
             {/* Four phases */}
             <div style={{ background: "#0e1116", border: "1px solid #1e3a52", borderRadius: 8, padding: "12px 14px" }}>
-              <div style={{ fontSize: 9, color: "#34d399", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>The Four Phases of a Normal Capnogram</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <Waveform size={11} weight="fill" style={{ color: "#34d399" }} />
+                <span style={{ fontSize: 9, color: "#34d399", letterSpacing: 2, textTransform: "uppercase" }}>The Four Phases of a Normal Capnogram</span>
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))", gap: 8 }}>
                 {[
-                  { phase: "Phase I",  sub: "Anatomical dead space", color: "#60a5fa", detail: "Exhaled gas from trachea and large airways. Contains no alveolar CO₂. CO₂ ≈ 0 mmHg. Duration reflects dead space volume." },
-                  { phase: "Phase II", sub: "Expiratory upstroke",   color: "#4ade80", detail: "Rapid rise — mixing of dead space and alveolar gas. Slope steepness reflects expiratory flow and heterogeneity of lung emptying." },
-                  { phase: "Phase III",sub: "Alveolar plateau",      color: "#fbbf24", detail: "CO₂-rich alveolar gas. Slight upward slope is normal. EtCO₂ read at END of Phase III. Steep slope or 'shark fin' = obstructive disease." },
-                  { phase: "Phase 0",  sub: "Inspiration",           color: "#f472b6", detail: "Fresh gas washes CO₂ to zero. Rapid descent. Elevated baseline (>0) = rebreathing. Failure to zero = circuit problem." },
+                  { phase: "Phase I",   sub: "Anatomical dead space", color: "#60a5fa", detail: "Exhaled gas from trachea and large airways. CO₂ ≈ 0 mmHg. Duration reflects dead space volume." },
+                  { phase: "Phase II",  sub: "Expiratory upstroke",   color: "#4ade80", detail: "Rapid rise — mixing of dead space and alveolar gas. Slope reflects heterogeneity of lung emptying." },
+                  { phase: "Phase III", sub: "Alveolar plateau",      color: "#fbbf24", detail: "CO₂-rich alveolar gas. EtCO₂ read at END. Steep slope or 'shark fin' = obstructive disease." },
+                  { phase: "Phase 0",   sub: "Inspiration",           color: "#f472b6", detail: "Fresh gas washes CO₂ to zero. Elevated baseline (>0) = rebreathing. Failure to zero = circuit problem." },
                 ].map(p => (
                   <div key={p.phase} style={{ background: "#060d14", borderRadius: 6, padding: "8px 10px", border: "1px solid #1e2d3d" }}>
                     <div style={{ fontSize: 10, fontWeight: 700, color: p.color }}>{p.phase}</div>
@@ -959,7 +1047,10 @@ export default function WaveformView() {
 
             {/* EtCO2 waveform cards */}
             <div>
-              <div style={{ fontSize: 9, color: "#94a3b8", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Capnogram Patterns — Recognition & Response</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <Pulse size={11} weight="fill" style={{ color: "#94a3b8" }} />
+                <span style={{ fontSize: 9, color: "#94a3b8", letterSpacing: 2, textTransform: "uppercase" }}>Capnogram Patterns — Recognition &amp; Response</span>
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 }}>
                 {ETCO2_WAVEFORMS.map(w => <StaticWaveformCard key={w.id} w={w} isEtco2 />)}
               </div>
@@ -967,19 +1058,31 @@ export default function WaveformView() {
 
             {/* Trend table */}
             <div style={{ background: "#0e1116", border: "1px solid #1e3a52", borderRadius: 8, padding: "12px 14px" }}>
-              <div style={{ fontSize: 9, color: "#4a9eff", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>EtCO₂ Trend Interpretation</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <ChartLine size={11} weight="fill" style={{ color: "#4a9eff" }} />
+                <span style={{ fontSize: 9, color: "#4a9eff", letterSpacing: 2, textTransform: "uppercase" }}>EtCO₂ Trend Interpretation</span>
+              </div>
+              {/* Column headers */}
+              <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.5fr 1.5fr", gap: 8, marginBottom: 4, padding: "0 10px" }}>
+                {["Finding", "Causes", "Action"].map(h => (
+                  <span key={h} style={{ fontSize: 8, color: "#334155", letterSpacing: 2, textTransform: "uppercase" }}>{h}</span>
+                ))}
+              </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                 {[
-                  { finding: "EtCO₂ → 0 suddenly",       cause: "ETT dislodgement, circuit disconnect, cardiac arrest",       action: "Bag manually. DOPE. Check ETT.",                        color: "#ef4444" },
-                  { finding: "EtCO₂ gradually ↓",        cause: "Hyperventilation, ↓ cardiac output, PE, ↓ metabolism",       action: "Reduce RR if iatrogenic. Check haemodynamics. ABG.",    color: "#f97316" },
-                  { finding: "EtCO₂ gradually ↑",        cause: "Hypoventilation, fever, sepsis, ↑ CO₂ production",           action: "Increase RR/Vt. Treat fever. ABG.",                     color: "#f97316" },
-                  { finding: "EtCO₂ sudden ↑",           cause: "ROSC, NaHCO₃ given, sudden ↑ cardiac output",               action: "If CPR: stop and check pulse. Consider ROSC.",          color: "#a78bfa" },
-                  { finding: "Widened EtCO₂–PaCO₂ gap", cause: "↑ Dead space: PE, ↓ CO, hypovolaemia, high PEEP",            action: "ABG mandatory. Investigate dead space physiology.",      color: "#fbbf24" },
-                  { finding: "Shark fin waveform",        cause: "Bronchospasm, asthma, COPD, bronchiolitis",                  action: "Bronchodilators. Extend Te. Adjust I:E.",               color: "#fb923c" },
-                  { finding: "Elevated baseline",         cause: "Rebreathing — exhausted soda lime, stuck expiratory valve",  action: "Change CO₂ absorber. Check circuit valves.",            color: "#60a5fa" },
+                  { finding: "EtCO₂ → 0 suddenly",      cause: "ETT dislodgement, circuit disconnect, cardiac arrest",      action: "Bag manually. DOPE. Check ETT.",                     color: "#ef4444" },
+                  { finding: "EtCO₂ gradually ↓",       cause: "Hyperventilation, ↓ CO, PE, ↓ metabolism",                  action: "Reduce RR if iatrogenic. Haemodynamics. ABG.",        color: "#f97316" },
+                  { finding: "EtCO₂ gradually ↑",       cause: "Hypoventilation, fever, sepsis, ↑ CO₂ production",          action: "Increase RR/Vt. Treat fever. ABG.",                  color: "#f97316" },
+                  { finding: "EtCO₂ sudden ↑",          cause: "ROSC, NaHCO₃ given, ↑ cardiac output",                     action: "If CPR: stop and check pulse. Consider ROSC.",       color: "#a78bfa" },
+                  { finding: "Widened EtCO₂–PaCO₂ gap", cause: "↑ Dead space: PE, ↓ CO, hypovolaemia, high PEEP",           action: "ABG mandatory. Investigate dead space physiology.",  color: "#fbbf24" },
+                  { finding: "Shark fin waveform",       cause: "Bronchospasm, asthma, COPD, bronchiolitis",                 action: "Bronchodilators. Extend Te. Adjust I:E.",            color: "#fb923c" },
+                  { finding: "Elevated baseline",        cause: "Rebreathing — exhausted soda lime, stuck expiratory valve", action: "Change CO₂ absorber. Check circuit valves.",         color: "#60a5fa" },
                 ].map((r, i) => (
                   <div key={i} style={{ display: "grid", gridTemplateColumns: "1.2fr 1.5fr 1.5fr", gap: 8, background: "#060d14", borderRadius: 6, padding: "7px 10px", borderLeft: `2px solid ${r.color}` }}>
-                    <div style={{ fontSize: 10, color: r.color, fontWeight: 600 }}>{r.finding}</div>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 5 }}>
+                      <Warning size={9} weight="fill" style={{ color: r.color, flexShrink: 0, marginTop: 2 }} />
+                      <span style={{ fontSize: 10, color: r.color, fontWeight: 600 }}>{r.finding}</span>
+                    </div>
                     <div style={{ fontSize: 10, color: "#64748b" }}>{r.cause}</div>
                     <div style={{ fontSize: 10, color: "#94a3b8" }}>{r.action}</div>
                   </div>
@@ -989,7 +1092,9 @@ export default function WaveformView() {
           </div>
         )}
 
-        <div style={{ fontSize: 9, color: "#1e3a52", textAlign: "center", letterSpacing: 1 }}>
+        {/* Footer */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 9, color: "#1e3a52", letterSpacing: 1 }}>
+          <Stethoscope size={10} style={{ color: "#1e3a52" }} />
           Tintinalli · BTS/ATS · PEMVECC 2017 · OpenPediatrics · Bhavani-Shankar capnography atlas · schematic for teaching
         </div>
       </div>
