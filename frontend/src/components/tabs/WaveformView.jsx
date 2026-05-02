@@ -25,7 +25,6 @@ import {
   ArrowFatLinesDown,
   ArrowsIn,
   ArrowsOut,
-  SealWarning,
   SkipBack,
   Activity,
   ChartLine,
