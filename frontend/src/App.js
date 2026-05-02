@@ -30,11 +30,11 @@ import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
 import AlgorithmsTab from "./components/tabs/AlgorithmsTab";
 import ClinicalPathwaysTab from "./components/tabs/ClinicalPathwaysTab";
-import PrehospitalManagement from "./components/tabs/ImagingTab";
-import ManagementAlgorithms from "./components/tabs/IAPGuidelinesTab";
+import Imaging from "./components/tabs/ImagingTab";
+import IAPGuidelines from "./components/tabs/IAPGuidelinesTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
-  ClipboardText, Syringe, Stethoscope, FirstAid, Hospital,
+  ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon,
   Lock, X, BookOpen,
 } from "@phosphor-icons/react";
 
@@ -75,8 +75,8 @@ const ALL_TABS = [
   { id: "neonatal",      label: "Neonatal (NRP)",       icon: Baby,          Comp: NeonatalTab,          free: false },
   { id: "algorithms",    label: "PALS Algorithms",      icon: TreeStructure, Comp: AlgorithmsTab,        free: false },
   { id: "pathways",      label: "Clinical Pathways",    icon: Stethoscope,   Comp: ClinicalPathwaysTab,  free: false },
-  { id: "iap",           label: "Management Algorithms",icon: BookOpen,      Comp: IAPGuidelinesTab,     free: false },
-  { id: "prehospital",   label: "Prehospital Management",icon: Hospital,     Comp: ImagingTab,           free: false },
+  { id: "iap",           label: "IAP Guidelines",       icon: BookOpen,      Comp: IAPGuidelinesTab,     free: false },
+  { id: "imaging",       label: "Imaging",              icon: ImageIcon,     Comp: ImagingTab,           free: false },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
