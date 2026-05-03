@@ -1,4 +1,5 @@
 import { EQUIPMENT_ROWS } from "../../data/equipment";
+
 export default function EquipmentTab() {
   const cols = [
     { k: "age", label: "Age" },
@@ -12,6 +13,7 @@ export default function EquipmentTab() {
     { k: "iv", label: "IV" },
     { k: "defib", label: "Defib" },
   ];
+
   return (
     <div className="space-y-6">
       <BroselowTape />
@@ -22,11 +24,12 @@ export default function EquipmentTab() {
           Sizes are internal diameter (mm).
         </p>
       </div>
+
       <div data-testid="equipment-table-wrap" className="rounded-md border border-slate-200 dark:border-slate-800 overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="bg-slate-900 dark:bg-slate-950 text-white">
-              {[cols.map](http://cols.map)((c) => (
+              {cols.map((c) => (
                 <th key={c.k} className="font-mono text-[10px] uppercase tracking-[0.15em] text-left p-3 font-bold whitespace-nowrap">
                   {c.label}
                 </th>
@@ -34,9 +37,9 @@ export default function EquipmentTab() {
             </tr>
           </thead>
           <tbody>
-            {EQUIPMENT_[ROWS.map](http://ROWS.map)((r) => (
+            {EQUIPMENT_ROWS.map((r) => (
               <tr key={r.age} className="border-t border-slate-200 dark:border-slate-800 odd:bg-slate-50 dark:odd:bg-slate-900/40">
-                {[cols.map](http://cols.map)((c) => {
+                {cols.map((c) => {
                   const isNumeric = ["ett", "depth", "suction", "lma", "ngt", "iv", "defib"].includes(c.k);
                   let colorClass = "";
                   if (c.k === "ett") colorClass = "text-emerald-700 dark:text-emerald-400 font-bold";
@@ -55,6 +58,7 @@ export default function EquipmentTab() {
           </tbody>
         </table>
       </div>
+
       <div className="rounded-md border border-slate-200 dark:border-slate-800 p-4 bg-slate-50 dark:bg-slate-900/50">
         <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-2">Formulas</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-sm">
@@ -68,4 +72,4 @@ export default function EquipmentTab() {
       </div>
     </div>
   );
-} 
+}
