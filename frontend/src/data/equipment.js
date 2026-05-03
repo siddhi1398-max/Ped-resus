@@ -6,24 +6,11 @@
 
 // ─── FORMULA ENGINE ───────────────────────────────────────────────────────────
 export function calcEquipment(weight, ageYears) {
- const age = ageYears ?? 0;
-
-// FIX: Added required opening parenthesis '(' before 'age / 4' for both lines below
-const ettUncuffed = age > 0 
-  ? ((age / 4) + 4).toFixed(1) 
-  : weight < 1 ? 2.5 : weight < 2 ? 3.0 : weight < 3 ? 3.0 : 3.5;
-
-const ettCuffed = age > 0 
-  ? ((age / 4) + 3.5).toFixed(1) 
-  : (ettUncuffed - 0.5).toFixed(1); // Added toFixed here to keep string type consistent
-
-const ettDepthOral = age > 0 
-  ? Math.round(age / 2) + 12 
-  : Math.round(weight + 6);
-
-const ettDepthNasal = age > 0 
-  ? Math.round(age / 2) + 15 
-  : Math.round(weight + 9);
+  const age = ageYears ?? 0;
+  const ettUncuffed   = age > 0 ? +(age / 4 + 4).toFixed(1) : weight < 1 ? 2.5 : weight < 2 ? 3.0 : weight < 3 ? 3.0 : 3.5;
+  const ettCuffed     = age > 0 ? +(age / 4 + 3.5).toFixed(1) : ettUncuffed - 0.5;
+  const ettDepthOral  = age > 0 ? Math.round(age / 2 + 12)  : Math.round(weight + 6);
+  const ettDepthNasal = age > 0 ? Math.round(age / 2 + 15) : Math.round(weight + 9);
 
 
   let lma = "1";
