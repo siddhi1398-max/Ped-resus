@@ -8,8 +8,7 @@ import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning, Lightbulb, ArrowRight, CheckCircle, Circle,
-  Wind, Drop, Heartbeat, ClipboardText,
-  Activity, Pulse, Stethoscope, Syringe, ArrowsOut,
+  Wind, Drop, Heartbeat, ClipboardText, Pulse, Stethoscope, Syringe, ArrowsOut,
 } from "@phosphor-icons/react";
 
 // ── All data, formulas, and SVG diagrams live in equipmentData.js ──────────────
