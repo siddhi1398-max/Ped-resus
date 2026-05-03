@@ -33,7 +33,7 @@ import {
   FOB_LMA_STEPS,
   FOBSizingSVG,
 } from "../../data/equipment";
-
+import { EQUIPMENT_ROWS } from "../../data/equipmentreference";
 
 // ─── COLOUR HELPERS ────────────────────────────────────────────────────────────
 const TONE = {
