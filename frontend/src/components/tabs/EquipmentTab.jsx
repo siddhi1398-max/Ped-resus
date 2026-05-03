@@ -12,6 +12,7 @@ import {
 } from "@phosphor-icons/react";
 
 import {
+  calcEquipment,
   getFOBSize,
   getBPCuff,
   BP_CUFF_ROWS,
@@ -32,6 +33,8 @@ import {
   FOB_LMA_STEPS,
   FOBSizingSVG,
 } from "../../data/equipment";
+
+// Reference table data lives in its own file (imported in ReferenceTableView)
 import { EQUIPMENT_ROWS } from "../../data/equipmentreference";
 
 // ─── COLOUR HELPERS ────────────────────────────────────────────────────────────
@@ -73,95 +76,6 @@ function InfoBox({ tone = "amber", icon: Icon, title, children }) {
       {Icon && <Icon size={13} weight="fill" className="flex-shrink-0 mt-0.5" />}
       <div>
         <strong>{title}</strong>{title ? " — " : ""}{children}
-      </div>
-    </div>
-  );
-}
-// ─── SUB-TAB 1: REFERENCE TABLE ───────────────────────────────────────────────
-function ReferenceTableView() {
-  const { weight } = useWeight();
-  const [highlightAge, setHighlightAge] = useState(null);
-
-  const suggestedIdx = useMemo(() => {
-    const idx = EQUIPMENT_ROWS.findIndex(r => parseFloat(r.weight) >= weight);
-    return idx >= 0 ? idx : EQUIPMENT_ROWS.length - 1;
-  }, [weight]);
-
-  const cols = [
-    { k: "age",     label: "Age"          },
-    { k: "weight",  label: "Weight (kg)"  },
-    { k: "ett",     label: "ETT (mm ID)"  },
-    { k: "depth",   label: "Depth (cm)"   },
-    { k: "suction", label: "Suction (Fr)" },
-    { k: "blade",   label: "Laryngoscope" },
-    { k: "lma",     label: "LMA"          },
-    { k: "ngt",     label: "NGT (Fr)"     },
-    { k: "iv",      label: "IV"           },
-    { k: "defib",   label: "Defib (J)"    },
-  ];
-
-  return (
-    <div className="space-y-4">
-      <InfoBox tone="sky" icon={Lightbulb}>
-        Row matching current weight ({weight} kg) highlighted in blue. Tap any row to lock selection.
-      </InfoBox>
-
-      <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="bg-slate-900 dark:bg-slate-950 text-white">
-              {cols.map(c => (
-                <th key={c.k} className="p-3 text-left font-mono text-[9px] uppercase tracking-widest whitespace-nowrap">{c.label}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {EQUIPMENT_ROWS.map((r, i) => {
-              const isSuggested   = i === suggestedIdx;
-              const isHighlighted = highlightAge === r.age;
-              let rowCls = "border-t border-slate-200 dark:border-slate-800 cursor-pointer transition-colors ";
-              if      (isHighlighted) rowCls += "bg-violet-100 dark:bg-violet-950/50 ";
-              else if (isSuggested)   rowCls += "bg-blue-50 dark:bg-blue-950/30 ";
-              else                    rowCls += "odd:bg-white dark:odd:bg-slate-900/30 hover:bg-slate-50 dark:hover:bg-slate-800/30 ";
-              return (
-                <tr key={r.age} className={rowCls} onClick={() => setHighlightAge(isHighlighted ? null : r.age)}>
-                  <td className="p-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                    {r.age}
-                    {isSuggested && !isHighlighted && (
-                      <span className="ml-1.5 text-[8px] font-mono uppercase tracking-widest text-blue-500 border border-blue-200 dark:border-blue-800 rounded px-1 py-0.5">wt</span>
-                    )}
-                  </td>
-                  <td className="p-3 font-mono text-slate-600 dark:text-slate-300">{r.weight}</td>
-                  <td className="p-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">{r.ett}</td>
-                  <td className="p-3 font-mono text-blue-600 dark:text-blue-400">{r.depth}</td>
-                  <td className="p-3 font-mono text-slate-600 dark:text-slate-300">{r.suction}</td>
-                  <td className="p-3 font-mono text-amber-700 dark:text-amber-400">{r.blade}</td>
-                  <td className="p-3 font-mono text-slate-600 dark:text-slate-300">{r.lma}</td>
-                  <td className="p-3 font-mono text-slate-600 dark:text-slate-300">{r.ngt}</td>
-                  <td className="p-3 font-mono text-slate-600 dark:text-slate-300">{r.iv}</td>
-                  <td className="p-3 font-mono font-bold text-red-600 dark:text-red-400">{r.defib}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex flex-wrap gap-4 text-[10px] font-mono text-slate-400">
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-100 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800" />Weight match</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-violet-100 dark:bg-violet-950/50 border border-violet-200 dark:border-violet-800" />Selected</span>
-      </div>
-
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-4">
-        <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400 mb-3">Formula Reference</div>
-        <div className="grid sm:grid-cols-2 gap-2 font-mono text-xs">
-          {FORMULA_ROWS.map(f => (
-            <div key={f.label} className="flex justify-between gap-2 bg-white dark:bg-slate-900 rounded-lg px-3 py-2 border border-slate-100 dark:border-slate-800">
-              <span className="text-slate-500 dark:text-slate-400">{f.label}</span>
-              <span className="font-bold text-slate-800 dark:text-white whitespace-nowrap">{f.val}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -281,6 +195,40 @@ function VortexSVG() {
   );
 }
 
+// ─── SUB-TAB 1: EQUIPMENT CALCULATOR ─────────────────────────────────────────
+function LiveEquipmentCalculator() {
+  const { weight } = useWeight();  // ← from WeightContext — no manual input
+  const [cuffed, setCuffed] = useState(true);
+  const [checkedItems, setCheckedItems] = useState({});
+
+  const eq = useMemo(() => calcEquipment(weight), [weight]);
+  const ettSize = cuffed ? eq.ettCuffed : eq.ettUncuffed;
+
+  const maintenance =
+    weight < 10  ? weight * 100
+    : weight < 20 ? 1000 + (weight - 10) * 50
+    : 1500 + (weight - 20) * 20;
+
+  const checklistItems = [
+    { id: "suction",  label: "Suction working + Yankauer attached" },
+    { id: "bvm",      label: `BVM + correct mask (${eq.maskSize})` },
+    { id: "o2",       label: "O₂ flow confirmed + reservoir bag" },
+    { id: "ett",      label: `ETT ${ettSize} mm ${cuffed ? "(cuffed)" : "(uncuffed)"} + one size above/below` },
+    { id: "syringe",  label: "10 mL syringe for cuff inflation" },
+    { id: "stylet",   label: "Stylet shaped + lubricated inside ETT" },
+    { id: "laryngo",  label: `Laryngoscope ${eq.blade} — light working` },
+    { id: "capno",    label: "Colorimetric ETCO₂ or waveform capnography" },
+    { id: "tape",     label: `ETT tape/holder prepared for ${eq.ettDepthOral} cm at lip` },
+    { id: "iv",       label: `IV/IO access confirmed (${eq.iv} or IO)` },
+    { id: "drugs",    label: "RSI drugs drawn up and labelled (see Resuscitation tab)" },
+    { id: "desat",    label: "Monitoring: SpO₂, ECG, ETCO₂ in place" },
+    { id: "backup",   label: `Difficult airway backup: LMA ${eq.lma}, scalpel kit` },
+  ];
+
+  const toggleCheck  = (id) => setCheckedItems(prev => ({ ...prev, [id]: !prev[id] }));
+  const checkedCount = checklistItems.filter(item => checkedItems[item.id]).length;
+  const allChecked   = checkedCount === checklistItems.length;
+
   return (
     <div className="space-y-5">
 
@@ -347,6 +295,80 @@ function VortexSVG() {
           </div>
         </div>
       </div>
+
+      {/* Equipment grid */}
+      <div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400 mb-3">All Equipment — {weight} kg</div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <EquipCard label="LMA Size"         value={eq.lma}                     sub="Laryngeal mask airway"          tone="blue"   Icon={Wind}        highlighted />
+          <EquipCard label="Suction Catheter" value={`${eq.suction} Fr`}         sub="≈ 3 × ETT size"                tone="slate"  Icon={ArrowsOut}               />
+          <EquipCard label="Laryngoscope"     value={eq.blade}                   sub="Blade size/type"               tone="amber"  Icon={Stethoscope}             />
+          <EquipCard label="BVM Mask"         value={eq.maskSize}                sub="Bag-valve-mask size"           tone="sky"    Icon={Wind}                    />
+          <EquipCard label="NGT / OGT"        value={eq.ngt}                     sub="Nasogastric tube"              tone="slate"                                 />
+          <EquipCard label="IV Cannula"       value={eq.iv}                      sub="Peripheral IV"                 tone="blue"   Icon={Drop}        highlighted />
+          <EquipCard label="IO Access"        value={eq.io}                      sub="Intraosseous needle"           tone="red"    Icon={Syringe}                 />
+          <EquipCard label="Urinary Catheter" value={eq.ucath}                   sub="Foley catheter"               tone="slate"                                 />
+          <EquipCard label="Chest Drain"      value={eq.chestDrain}             sub="Intercostal drain"             tone="violet" Icon={Wind}                    />
+          <EquipCard label="Defibrillation"   value={`${eq.defib} J`}            sub={`4 J/kg · max ${eq.defibMax} J`} tone="red" Icon={Heartbeat}   highlighted />
+          <EquipCard label="Cardioversion"    value={`${eq.cardiovert} J`}       sub="0.5–1 J/kg sync"              tone="amber"  Icon={Pulse}                   />
+          <EquipCard label="Maintenance"      value={`${maintenance} mL/24hr`}  sub="Holliday-Segar"               tone="slate"  Icon={Drop}                    />
+        </div>
+      </div>
+
+      {/* Pre-intubation checklist */}
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className={`flex items-center justify-between px-4 py-3 border-b ${
+          allChecked
+            ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800"
+            : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+        }`}>
+          <div className="flex items-center gap-2">
+            <ClipboardText size={14} weight="fill" className={allChecked ? "text-emerald-500" : "text-slate-400"} />
+            <span className="font-bold text-sm text-slate-900 dark:text-white"
+                  style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>Pre-intubation Checklist</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs text-slate-400">{checkedCount}/{checklistItems.length}</span>
+            {allChecked
+              ? <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><CheckCircle size={10} weight="fill" />Ready</span>
+              : <button onClick={() => setCheckedItems({})} className="text-[10px] font-mono text-slate-400 hover:text-slate-600 underline">Reset</button>
+            }
+          </div>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-slate-900/50 grid sm:grid-cols-2 gap-1.5">
+          {checklistItems.map(item => (
+            <button key={item.id} onClick={() => toggleCheck(item.id)}
+              className={`flex items-start gap-2.5 text-left rounded-lg px-3 py-2 transition-all text-xs ${
+                checkedItems[item.id]
+                  ? "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200"
+                  : "bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-200"
+              }`}>
+              {checkedItems[item.id]
+                ? <CheckCircle size={13} weight="fill" className="text-emerald-500 flex-shrink-0 mt-0.5" />
+                : <Circle      size={13} weight="regular" className="text-slate-300 dark:text-slate-600 flex-shrink-0 mt-0.5" />}
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {!allChecked && checkedCount > 0 && (
+          <div className="px-4 py-2 bg-amber-50 dark:bg-amber-950/20 border-t border-amber-100 dark:border-amber-900">
+            <div className="flex items-center gap-1.5">
+              <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
+                <div className="bg-amber-500 rounded-full h-1.5 transition-all"
+                     style={{ width: `${(checkedCount / checklistItems.length) * 100}%` }} />
+              </div>
+              <span className="font-mono text-[10px] text-amber-600 dark:text-amber-400">
+                {Math.round((checkedCount / checklistItems.length) * 100)}%
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ─── SUB-TAB 2: DIFFICULT AIRWAY ──────────────────────────────────────────────
 function DifficultAirwayView() {
@@ -762,12 +784,102 @@ function MonitoringEquipmentView() {
   );
 }
 
+// ─── SUB-TAB 4: REFERENCE TABLE ───────────────────────────────────────────────
+function ReferenceTableView() {
+  const { weight } = useWeight();
+  const [highlightAge, setHighlightAge] = useState(null);
+
+  const suggestedIdx = useMemo(() => {
+    const idx = EQUIPMENT_ROWS.findIndex(r => parseFloat(r.weight) >= weight);
+    return idx >= 0 ? idx : EQUIPMENT_ROWS.length - 1;
+  }, [weight]);
+
+  const cols = [
+    { k: "age",     label: "Age"          },
+    { k: "weight",  label: "Weight (kg)"  },
+    { k: "ett",     label: "ETT (mm ID)"  },
+    { k: "depth",   label: "Depth (cm)"   },
+    { k: "suction", label: "Suction (Fr)" },
+    { k: "blade",   label: "Laryngoscope" },
+    { k: "lma",     label: "LMA"          },
+    { k: "ngt",     label: "NGT (Fr)"     },
+    { k: "iv",      label: "IV"           },
+    { k: "defib",   label: "Defib (J)"    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <InfoBox tone="sky" icon={Lightbulb}>
+        Row matching current weight ({weight} kg) highlighted in blue. Tap any row to lock selection.
+      </InfoBox>
+
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-x-auto">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="bg-slate-900 dark:bg-slate-950 text-white">
+              {cols.map(c => (
+                <th key={c.k} className="p-3 text-left font-mono text-[9px] uppercase tracking-widest whitespace-nowrap">{c.label}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {EQUIPMENT_ROWS.map((r, i) => {
+              const isSuggested   = i === suggestedIdx;
+              const isHighlighted = highlightAge === r.age;
+              let rowCls = "border-t border-slate-200 dark:border-slate-800 cursor-pointer transition-colors ";
+              if      (isHighlighted) rowCls += "bg-violet-100 dark:bg-violet-950/50 ";
+              else if (isSuggested)   rowCls += "bg-blue-50 dark:bg-blue-950/30 ";
+              else                    rowCls += "odd:bg-white dark:odd:bg-slate-900/30 hover:bg-slate-50 dark:hover:bg-slate-800/30 ";
+              return (
+                <tr key={r.age} className={rowCls} onClick={() => setHighlightAge(isHighlighted ? null : r.age)}>
+                  <td className="p-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                    {r.age}
+                    {isSuggested && !isHighlighted && (
+                      <span className="ml-1.5 text-[8px] font-mono uppercase tracking-widest text-blue-500 border border-blue-200 dark:border-blue-800 rounded px-1 py-0.5">wt</span>
+                    )}
+                  </td>
+                  <td className="p-3 font-mono text-slate-600 dark:text-slate-300">{r.weight}</td>
+                  <td className="p-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">{r.ett}</td>
+                  <td className="p-3 font-mono text-blue-600 dark:text-blue-400">{r.depth}</td>
+                  <td className="p-3 font-mono text-slate-600 dark:text-slate-300">{r.suction}</td>
+                  <td className="p-3 font-mono text-amber-700 dark:text-amber-400">{r.blade}</td>
+                  <td className="p-3 font-mono text-slate-600 dark:text-slate-300">{r.lma}</td>
+                  <td className="p-3 font-mono text-slate-600 dark:text-slate-300">{r.ngt}</td>
+                  <td className="p-3 font-mono text-slate-600 dark:text-slate-300">{r.iv}</td>
+                  <td className="p-3 font-mono font-bold text-red-600 dark:text-red-400">{r.defib}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex flex-wrap gap-4 text-[10px] font-mono text-slate-400">
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-100 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800" />Weight match</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-violet-100 dark:bg-violet-950/50 border border-violet-200 dark:border-violet-800" />Selected</span>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-4">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400 mb-3">Formula Reference</div>
+        <div className="grid sm:grid-cols-2 gap-2 font-mono text-xs">
+          {FORMULA_ROWS.map(f => (
+            <div key={f.label} className="flex justify-between gap-2 bg-white dark:bg-slate-900 rounded-lg px-3 py-2 border border-slate-100 dark:border-slate-800">
+              <span className="text-slate-500 dark:text-slate-400">{f.label}</span>
+              <span className="font-bold text-slate-800 dark:text-white whitespace-nowrap">{f.val}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
 const TABS = [
-  { id: "table",      label: "Reference Table",      Icon: ClipboardText },
+  { id: "calculator", label: "Equipment Calculator", Icon: Wind          },
   { id: "difficult",  label: "Difficult Airway",     Icon: Warning       },
-  { id: "monitoring", label: "Monitoring",           Icon: Pulse         },
+  { id: "monitoring", label: "Monitoring",            Icon: Pulse         },
+  { id: "table",      label: "Reference Table",      Icon: ClipboardText },
 ];
 
 export default function EquipmentTab() {
@@ -808,10 +920,11 @@ export default function EquipmentTab() {
         ))}
       </div>
 
-      {activeTab === "table"      && <ReferenceTableView />}
+      {activeTab === "calculator" && <LiveEquipmentCalculator />}
       {activeTab === "difficult"  && <DifficultAirwayView />}
       {activeTab === "monitoring" && <MonitoringEquipmentView />}
-     
+      {activeTab === "table"      && <ReferenceTableView />}
+
       <div className="text-[10px] text-slate-400 dark:text-slate-500 italic text-center pt-2">
         Harriet Lane 23e · Fleischer &amp; Ludwig 7e · APLS · AIDAA 2022 ·
         Vortex Approach — N. Chrimes 2016 · vortexapproach.org · Morgan &amp; Mikhail 7e · AHA PALS 2020
