@@ -42,7 +42,6 @@ import {
   SpO2ProbeSVG,
 } from "../../data/equipment";
 
-import { EQUIPMENT_ROWS } from "../../data/equipment";
 
 // ─── COLOUR HELPERS ────────────────────────────────────────────────────────────
 const TONE = {
