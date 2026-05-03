@@ -207,6 +207,12 @@ export default function GlobalSearch({ onNavigate }) {
     : [];
 
   // Keyboard navigation
+ const handleSelect = (entry) => {
+    onNavigate(entry.tab);
+    setQuery("");
+    setOpen(false);
+    inputRef.current?.blur();
+   
   const handleKeyDown = useCallback((e) => {
     if (!open || results.length === 0) return;
     if (e.key === "ArrowDown") {
@@ -226,12 +232,6 @@ export default function GlobalSearch({ onNavigate }) {
       inputRef.current?.blur();
     }
   }, [open, results, focused]);
-
-  const handleSelect = (entry) => {
-    onNavigate(entry.tab);
-    setQuery("");
-    setOpen(false);
-    inputRef.current?.blur();
   };
 
   // Reset focused when results change
