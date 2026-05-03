@@ -846,7 +846,7 @@ function ReferenceTableView() {
 const TABS = [
   { id: "calculator", label: "Equipment Calculator", Icon: Wind          },
   { id: "difficult",  label: "Difficult Airway",     Icon: Warning       },
-  { id: "monitoring", label: "Monitoring Equipment", Icon: Activity      },
+  { id: "monitoring", label: "Monitoring Equipment", Icon: Pulse         },
   { id: "table",      label: "Reference Table",      Icon: ClipboardText },
 ];
 
