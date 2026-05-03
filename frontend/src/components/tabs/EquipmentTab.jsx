@@ -1,4 +1,5 @@
 import { EQUIPMENT_ROWS } from "../../data/equipment";
+import BroselowTape from "../BroselowTape";
 
 export default function EquipmentTab() {
   const cols = [
