@@ -10,8 +10,7 @@ import { useWeight } from "../../context/WeightContext";
 import {
   Warning, Lightbulb, ArrowRight, CheckCircle, Circle,
   Syringe, Wind, Drop, Heartbeat, FirstAid, ClipboardText,
-  ArrowsOut, Pulse, Stethoscope, MaskHappy, Waves,
-  Activity, Gauge,
+  ArrowsOut, Pulse, Stethoscope, MaskHappy, Waves, Gauge,
 } from "@phosphor-icons/react";
 import { EQUIPMENT_ROWS } from "../../data/equipment";
 
