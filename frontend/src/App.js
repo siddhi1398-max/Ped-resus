@@ -37,7 +37,6 @@ import {
   Lock, X, BookOpen,
 } from "@phosphor-icons/react";
 
-import GlobalSearch from "./components/GlobalSearch";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
