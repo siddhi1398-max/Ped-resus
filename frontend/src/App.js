@@ -28,8 +28,8 @@ import SyrupCalculatorTab from "./components/tabs/SyrupCalculatorTab";
 import ScoresTab from "./components/tabs/ScoresTab";
 import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
-import ManagementAlgorithmsTab from "./components/tabs/ManagementAlgorithmsTab";
 import TraumaResuscitationTab from "./components/tabs/TraumaResuscitationTab";
+import ManagementAlgorithmsTab from "./components/tabs/ManagementAlgorithmsTab";
 import PrehospitalTab from "./components/tabs/PrehospitalTab";
 import ImmunisationTab from "./components/tabs/ImmunisationTab";
 import {
@@ -73,9 +73,9 @@ const ALL_TABS = [
   { id: "scores",        label: "Severity Scores",      icon: ClipboardText,    Comp: ScoresTab,                free: false },
   { id: "sedation",      label: "Sedation & Analgesia", icon: FirstAid,         Comp: SedationAnalgesiaTab,     free: false },
   { id: "neonatal",      label: "Neonatal",             icon: Baby,             Comp: NeonatalTab,              free: false },
+  { id: "trauma",        label: "Trauma Resuscitation", icon: PersonSimpleBike, Comp: TraumaResuscitationTab,   free: false },
   { id: "algorithms",    label: "Management Algorithms",icon: TreeStructure,    Comp: ManagementAlgorithmsTab,  free: false },
   { id: "prehsopital",   label: "Prehospital",          icon: ImageIcon,        Comp: PrehospitalTab,           free: false },
-  { id: "trauma",        label: "Trauma Resuscitation", icon: PersonSimpleBike, Comp: TraumaResuscitationTab,   free: false },
   { id: "immunisation",  label: "Immunisation",         icon: Syringe,          Comp: ImmunisationTab,          free: false },
 ];
 
