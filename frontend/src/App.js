@@ -29,12 +29,13 @@ import ScoresTab from "./components/tabs/ScoresTab";
 import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
 import ManagementAlgorithmsTab from "./components/tabs/ManagementAlgorithmsTab";
+import TraumaResuscitationTab from "../components/tabs/TraumaTab";
 import PrehospitalTab from "./components/tabs/PrehospitalTab";
 import ImmunisationTab from "./components/tabs/ImmunisationTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon, Lightning,
-  Lock, X, BookOpen,
+  Lock, X, BookOpen, PersonSimpleBike,
 } from "@phosphor-icons/react";
 
 import { initializeApp } from "firebase/app";
@@ -66,15 +67,16 @@ const ALL_TABS = [
   { id: "vitals",        label: "Vitals",               icon: Stethoscope,   Comp: VitalsTab,                free: false },
   { id: "resuscitation", label: "Resuscitation",        icon: Lightning,     Comp: ResuscitationTab,         free: false },
   { id: "ventilator",    label: "Ventilator",           icon: Wind,          Comp: VentilatorTab,            free: false },
-  { id: "fluids",        label: "Fluids",               icon: Drop,          Comp: FluidsTab,                free: false },
-  { id: "drugs",         label: "Drug Doses",           icon: Pill,          Comp: DrugsTab,                 free: false },
-  { id: "syrup",         label: "Syrup Calculator",     icon: Eyedropper,    Comp: SyrupCalculatorTab,       free: false },
-  { id: "scores",        label: "Severity Scores",      icon: ClipboardText, Comp: ScoresTab,                free: false },
-  { id: "sedation",      label: "Sedation & Analgesia", icon: FirstAid,      Comp: SedationAnalgesiaTab,     free: false },
-  { id: "neonatal",      label: "Neonatal",             icon: Baby,          Comp: NeonatalTab,              free: false },
-  { id: "algorithms",    label: "Management Algorithms",icon: TreeStructure, Comp: ManagementAlgorithmsTab,  free: false },
-  { id: "prehsopital",   label: "Prehospital",          icon: ImageIcon,     Comp: PrehospitalTab,           free: false },
-  { id: "immunisation",  label: "Immunisation",         icon: Syringe,       Comp: ImmunisationTab,          free: false },
+  { id: "fluids",        label: "Fluids",               icon: Drop,             Comp: FluidsTab,                free: false },
+  { id: "drugs",         label: "Drug Doses",           icon: Pill,             Comp: DrugsTab,                 free: false },
+  { id: "syrup",         label: "Syrup Calculator",     icon: Eyedropper,       Comp: SyrupCalculatorTab,       free: false },
+  { id: "scores",        label: "Severity Scores",      icon: ClipboardText,    Comp: ScoresTab,                free: false },
+  { id: "sedation",      label: "Sedation & Analgesia", icon: FirstAid,         Comp: SedationAnalgesiaTab,     free: false },
+  { id: "neonatal",      label: "Neonatal",             icon: Baby,             Comp: NeonatalTab,              free: false },
+  { id: "algorithms",    label: "Management Algorithms",icon: TreeStructure,    Comp: ManagementAlgorithmsTab,  free: false },
+  { id: "prehsopital",   label: "Prehospital",          icon: ImageIcon,        Comp: PrehospitalTab,           free: false },
+  { id: "traums",        label: "Trauma Resuscitation", icon: PersonSimpleBike, Comp: TraumaTab,                free: false },
+  { id: "immunisation",  label: "Immunisation",         icon: Syringe,          Comp: ImmunisationTab,          free: false },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
