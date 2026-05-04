@@ -1,5 +1,5 @@
 // EquipmentTab.jsx — Airway Equipment & Monitoring
-// Sub-tabs: Reference Table · Equipment Cards · Difficult Airway · Monitoring
+// Sub-tabs: Reference Table · Difficult Airway · Monitoring
 // Sources: Harriet Lane 23e · Fleischer & Ludwig 7e · APLS · AIDAA 2022
 //          Vortex Approach (Chrimes 2016 · vortexapproach.org)
 //          Morgan & Mikhail 7e · AHA PALS 2020
@@ -25,82 +25,7 @@ const TONE = {
   slate:   { text: "text-slate-600 dark:text-slate-400",   bg: "bg-slate-50 dark:bg-slate-900/50",   border: "border-slate-200 dark:border-slate-700"   },
 };
 
-// ─── FORMULA ENGINE ────────────────────────────────────────────────────────────
-function calcEquipment(weight) {
-  // Weight-only formulas (no separate age input — weight context drives everything)
-  const ettUncuffed   = weight < 1 ? 2.5 : weight < 2 ? 3.0 : weight < 3 ? 3.0 : weight < 4 ? 3.5 : +(Math.round((weight / 4 + 4) * 2) / 2).toFixed(1);
-  const ettCuffed     = +(ettUncuffed - 0.5).toFixed(1);
-  const ettDepthOral  = Math.round(weight + 6);
-  const ettDepthNasal = Math.round(weight + 9);
-
-  let lma = "1";
-  if (weight >= 5  && weight < 10)  lma = "1.5";
-  if (weight >= 10 && weight < 20)  lma = "2";
-  if (weight >= 20 && weight < 30)  lma = "2.5";
-  if (weight >= 30 && weight < 50)  lma = "3";
-  if (weight >= 50 && weight < 70)  lma = "4";
-  if (weight >= 70)                  lma = "5";
-
-  const suction = Math.round(ettUncuffed * 3);
-
-  let blade = "0 straight";
-  if (weight >= 3  && weight < 10) blade = "1 straight";
-  if (weight >= 10 && weight < 20) blade = "2 straight/curved";
-  if (weight >= 20)                 blade = "3 Macintosh";
-
-  let ngt = "5 Fr";
-  if (weight >= 3  && weight < 7)  ngt = "5–8 Fr";
-  if (weight >= 7  && weight < 15) ngt = "8–10 Fr";
-  if (weight >= 15 && weight < 30) ngt = "10–12 Fr";
-  if (weight >= 30)                 ngt = "12–14 Fr";
-
-  let iv = "24G";
-  if (weight >= 10 && weight < 25) iv = "22G";
-  if (weight >= 25 && weight < 50) iv = "20G";
-  if (weight >= 50)                 iv = "18G";
-
-  let io = "15 mm pink";
-  if (weight >= 40) io = "25 mm blue";
-
-  const chestDrain = weight < 10 ? "10–14 Fr" : weight < 20 ? "16–20 Fr" : weight < 40 ? "20–28 Fr" : "28–32 Fr";
-  const ucath      = weight < 5  ? "5 Fr"     : weight < 10 ? "6 Fr"     : weight < 20 ? "8 Fr"     : weight < 40 ? "10 Fr" : "12 Fr";
-  const defib      = Math.round(weight * 4);
-  const defibMax   = Math.min(weight * 10, 360);
-  const cardiovert = Math.round(weight * 1);
-
-  let maskSize = "Neonatal";
-  if (weight >= 4  && weight < 10) maskSize = "Infant";
-  if (weight >= 10 && weight < 25) maskSize = "Child";
-  if (weight >= 25)                 maskSize = "Adult";
-
-  const preferCuffed = weight >= 8;
-
-  return {
-    ettUncuffed, ettCuffed, ettDepthOral, ettDepthNasal,
-    lma, suction, blade, ngt, iv, io,
-    chestDrain, ucath, defib, defibMax, cardiovert,
-    maskSize, preferCuffed,
-  };
-}
-
 // ─── SHARED WIDGETS ────────────────────────────────────────────────────────────
-function EquipCard({ label, value, sub, tone = "slate", Icon, highlighted }) {
-  const t = TONE[tone];
-  return (
-    <div className={`rounded-xl border p-3 bg-white dark:bg-slate-900 transition-all ${
-      highlighted
-        ? `${t.border} ring-2 ring-offset-1 ring-offset-white dark:ring-offset-slate-950 ${t.border.replace("border-", "ring-")}`
-        : "border-slate-200 dark:border-slate-700"
-    }`}>
-      {Icon && <Icon size={13} weight="fill" className={`${t.text} mb-1.5`} />}
-      <div className="font-mono text-[9px] uppercase tracking-widest text-slate-400 mb-1">{label}</div>
-      <div className={`font-black text-lg leading-none mb-0.5 ${highlighted ? t.text : "text-slate-900 dark:text-white"}`}
-           style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{value}</div>
-      {sub && <div className="text-[10px] text-slate-400 font-mono mt-0.5">{sub}</div>}
-    </div>
-  );
-}
-
 function InfoBox({ tone = "amber", icon: Icon, title, children }) {
   const t = TONE[tone];
   return (
@@ -151,22 +76,14 @@ function FOBSizingSVG() {
 }
 
 // ─── VORTEX SVG — correct per vortexapproach.org (Chrimes 2016) ───────────────
-// Layout: circular tool, 3 lifelines as equal arcs (Face Mask · SGA · ETT),
-// outer Green Zone ring = oxygenation maintained,
-// centre = Neck Rescue (CICO — all lifelines failed),
-// small green disc inside centre = Green Zone also reachable via neck rescue,
-// spiral arrows = inward movement when lifeline fails.
 function VortexSVG() {
   const cx = 200, cy = 200, R = 170, rMid = 100, rInner = 62;
 
-  // Helper: point on circle
   const pt = (deg, r) => {
     const rad = (deg - 90) * Math.PI / 180;
     return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
   };
 
-  // 3 lifelines at 0°, 120°, 240° (top = Face Mask, bottom-right = SGA, bottom-left = ETT)
-  // Each sector spans 120°
   const sectors = [
     { label: "FACE MASK",   sub: "Lifeline 1", startDeg: -60, endDeg: 60,  fill: "#1e3a8a", stroke: "#3b82f6", textDeg: 0,   textColor: "#93c5fd" },
     { label: "SGA",         sub: "Lifeline 2", startDeg: 60,  endDeg: 180, fill: "#4c1d95", stroke: "#8b5cf6", textDeg: 120, textColor: "#c4b5fd" },
@@ -191,15 +108,12 @@ function VortexSVG() {
         </marker>
       </defs>
 
-      {/* Background */}
       <rect width="400" height="400" rx="14" fill="#080e1c" />
 
-      {/* Outer Green Zone ring */}
       <circle cx={cx} cy={cy} r={R + 18} fill="#052e16" opacity="0.6" />
       <circle cx={cx} cy={cy} r={R + 18} fill="none" stroke="#16a34a" strokeWidth="2.5" />
       <circle cx={cx} cy={cy} r={R}      fill="none" stroke="#15803d" strokeWidth="1" strokeDasharray="4,3" />
 
-      {/* GREEN ZONE label — 4 corners of the ring */}
       {[0, 90, 180, 270].map(deg => {
         const [x, y] = pt(deg, R + 10);
         return (
@@ -211,12 +125,10 @@ function VortexSVG() {
         );
       })}
 
-      {/* Three sector arcs (lifelines) */}
       {sectors.map(s => (
         <g key={s.label}>
           <path d={arcPath(s.startDeg, s.endDeg, R, rInner + 4)}
                 fill={s.fill} fillOpacity="0.45" stroke={s.stroke} strokeWidth="1.5" />
-          {/* Sector label — positioned at midpoint of arc */}
           {(() => {
             const midDeg = (s.startDeg + s.endDeg) / 2;
             const [tx, ty] = pt(midDeg, rMid + 28);
@@ -232,14 +144,12 @@ function VortexSVG() {
         </g>
       ))}
 
-      {/* Sector dividing lines (radial, from inner to outer) */}
       {[0, 120, 240].map(deg => {
         const [x1, y1] = pt(deg, rInner + 4);
         const [x2, y2] = pt(deg, R);
         return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#334155" strokeWidth="1.2" />;
       })}
 
-      {/* Spiral/inward arrows — one per lifeline sector suggesting descent */}
       {sectors.map(s => {
         const midDeg = (s.startDeg + s.endDeg) / 2;
         const [ax, ay] = pt(midDeg, rMid + 5);
@@ -251,7 +161,6 @@ function VortexSVG() {
         );
       })}
 
-      {/* "OPTIMISE" labels on each dividing line */}
       {[0, 120, 240].map((deg, i) => {
         const [x, y] = pt(deg + 10, rMid + 45);
         return (
@@ -263,12 +172,10 @@ function VortexSVG() {
         );
       })}
 
-      {/* Centre circle — Neck Rescue (CICO) */}
       <circle cx={cx} cy={cy} r={rInner}     fill="#3b0000" />
       <circle cx={cx} cy={cy} r={rInner}     fill="none" stroke="#dc2626" strokeWidth="2.5" />
       <circle cx={cx} cy={cy} r={rInner - 6} fill="#2d0000" />
 
-      {/* Small green disc inside centre = Green Zone reachable via Neck Rescue */}
       <circle cx={cx} cy={cy - 26} r="10" fill="#15803d" opacity="0.9" />
       <text x={cx} y={cy - 23} textAnchor="middle" fill="#dcfce7" fontSize="5.5"
             fontWeight="800" fontFamily="monospace">GREEN</text>
@@ -284,7 +191,6 @@ function VortexSVG() {
       <text x={cx} y={cy + 35} textAnchor="middle" fill="#f87171" fontSize="6"
             fontFamily="monospace">All lifelines failed</text>
 
-      {/* Source */}
       <text x={cx} y="396" textAnchor="middle" fill="#1e3a5f" fontSize="6.5" fontFamily="monospace">
         Vortex Approach · N. Chrimes 2016 · vortexapproach.org
       </text>
@@ -401,190 +307,7 @@ function ReferenceTableView() {
   );
 }
 
-// ─── TAB 2: EQUIPMENT CARDS ────────────────────────────────────────────────────
-function EquipmentCardsView() {
-  const { weight } = useWeight();
-  const [cuffed, setCuffed] = useState(true);
-  const [checkedItems, setCheckedItems] = useState({});
-
-  const eq      = useMemo(() => calcEquipment(weight), [weight]);
-  const ettSize = cuffed ? eq.ettCuffed : eq.ettUncuffed;
-
-  const maintenance =
-    weight < 10  ? weight * 100
-    : weight < 20 ? 1000 + (weight - 10) * 50
-    : 1500 + (weight - 20) * 20;
-
-  const checklistItems = [
-    { id: "suction",  label: "Suction working + Yankauer attached" },
-    { id: "bvm",      label: `BVM + correct mask (${eq.maskSize})` },
-    { id: "o2",       label: "O₂ flow confirmed + reservoir bag" },
-    { id: "ett",      label: `ETT ${ettSize} mm ${cuffed ? "(cuffed)" : "(uncuffed)"} + size above/below` },
-    { id: "syringe",  label: "10 mL syringe for cuff inflation" },
-    { id: "stylet",   label: "Stylet shaped + lubricated inside ETT" },
-    { id: "laryngo",  label: `Laryngoscope ${eq.blade} — light working` },
-    { id: "capno",    label: "Waveform ETCO₂ or colorimetric attached" },
-    { id: "tape",     label: `ETT holder prepared for ${eq.ettDepthOral} cm at lip` },
-    { id: "iv",       label: `IV/IO access confirmed (${eq.iv} or IO)` },
-    { id: "drugs",    label: "RSI drugs drawn up + labelled (Resuscitation tab)" },
-    { id: "desat",    label: "Monitoring: SpO₂, ECG, ETCO₂ in place" },
-    { id: "backup",   label: `Difficult airway backup: LMA ${eq.lma}, scalpel kit` },
-  ];
-
-  const toggleCheck  = id => setCheckedItems(prev => ({ ...prev, [id]: !prev[id] }));
-  const checkedCount = checklistItems.filter(i => checkedItems[i.id]).length;
-  const allChecked   = checkedCount === checklistItems.length;
-
-  return (
-    <div className="space-y-5">
-
-      {/* Weight from context — ETT type toggle only */}
-      <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 px-4 py-3 flex-wrap gap-3">
-        <div>
-          <div className="font-mono text-[9px] uppercase tracking-widest text-slate-400">Patient Weight</div>
-          <div className="font-black text-2xl text-slate-900 dark:text-white"
-               style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-            {weight} <span className="text-sm font-normal text-slate-400">kg</span>
-          </div>
-        </div>
-        <div className="flex flex-col gap-1">
-          <div className="font-mono text-[9px] uppercase tracking-widest text-slate-400">ETT Type</div>
-          <div className="flex gap-2">
-            {[{ v: false, l: "Uncuffed" }, { v: true, l: "Cuffed" }].map(opt => (
-              <button key={opt.l} onClick={() => setCuffed(opt.v)}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-mono transition-all ${
-                  cuffed === opt.v
-                    ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
-                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500"
-                }`}>{opt.l}</button>
-            ))}
-          </div>
-        </div>
-      </div>
-      {eq.preferCuffed && (
-        <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300 -mt-3 px-1">
-          <CheckCircle size={12} weight="fill" className="text-emerald-500" />
-          Cuffed ETT preferred (≥8 kg) — reduces reintubation, allows PEEP, safer in transport
-        </div>
-      )}
-
-      {/* Hero ETT */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="rounded-xl border-2 border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 p-5">
-          <div className="font-mono text-[9px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1">
-            ETT Size — {cuffed ? "Cuffed" : "Uncuffed"}
-          </div>
-          <div className="font-black text-5xl text-emerald-700 dark:text-emerald-300 leading-none mb-1"
-               style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-            {ettSize}<span className="text-lg font-normal ml-1">mm ID</span>
-          </div>
-          <div className="text-xs text-emerald-600 dark:text-emerald-400 font-mono mt-2 space-y-0.5">
-            <div>Also prepare: {+(ettSize - 0.5).toFixed(1)} mm and {+(ettSize + 0.5).toFixed(1)} mm</div>
-            <div>{cuffed ? `Uncuffed equivalent: ${eq.ettUncuffed} mm` : `Cuffed equivalent: ${eq.ettCuffed} mm`}</div>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
-            <div className="font-mono text-[9px] uppercase tracking-widest text-slate-400 mb-1">Depth — Oral</div>
-            <div className="font-black text-3xl text-blue-600 dark:text-blue-400"
-                 style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-              {eq.ettDepthOral}<span className="text-sm font-normal ml-1">cm</span>
-            </div>
-            <div className="text-[10px] text-slate-400 font-mono mt-1">at lips</div>
-          </div>
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
-            <div className="font-mono text-[9px] uppercase tracking-widest text-slate-400 mb-1">Depth — Nasal</div>
-            <div className="font-black text-3xl text-violet-600 dark:text-violet-400"
-                 style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-              {eq.ettDepthNasal}<span className="text-sm font-normal ml-1">cm</span>
-            </div>
-            <div className="text-[10px] text-slate-400 font-mono mt-1">at nares</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Equipment grid */}
-      <div>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400 mb-3">
-          All Equipment — {weight} kg
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          <EquipCard label="LMA Size"         value={eq.lma}                sub="Laryngeal mask airway"        tone="blue"   Icon={Wind}        highlighted />
-          <EquipCard label="Suction Catheter" value={`${eq.suction} Fr`}    sub="≈ 3 × ETT size"              tone="slate"  Icon={ArrowsOut}               />
-          <EquipCard label="Laryngoscope"     value={eq.blade}              sub="Blade size/type"             tone="amber"  Icon={Stethoscope}             />
-          <EquipCard label="BVM Mask"         value={eq.maskSize}           sub="Bag-valve-mask size"         tone="sky"    Icon={Wind}                    />
-          <EquipCard label="NGT / OGT"        value={eq.ngt}                sub="Nasogastric tube"            tone="slate"                                 />
-          <EquipCard label="IV Cannula"       value={eq.iv}                 sub="Peripheral IV"               tone="blue"   Icon={Drop}        highlighted />
-          <EquipCard label="IO Access"        value={eq.io}                 sub="Intraosseous needle"         tone="red"    Icon={Syringe}                 />
-          <EquipCard label="Urinary Catheter" value={eq.ucath}              sub="Foley catheter"              tone="slate"                                 />
-          <EquipCard label="Chest Drain"      value={eq.chestDrain}         sub="Intercostal drain"           tone="violet" Icon={Wind}                    />
-          <EquipCard label="Defibrillation"   value={`${eq.defib} J`}       sub={`4 J/kg · max ${eq.defibMax} J`} tone="red" Icon={Heartbeat} highlighted />
-          <EquipCard label="Cardioversion"    value={`${eq.cardiovert} J`}  sub="0.5–1 J/kg sync"            tone="amber"  Icon={Pulse}                   />
-          <EquipCard label="Maintenance"      value={`${maintenance} mL`}   sub="mL/24hr · Holliday-Segar"   tone="slate"  Icon={Drop}                    />
-        </div>
-      </div>
-
-      {/* Pre-intubation checklist */}
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div className={`flex items-center justify-between px-4 py-3 border-b ${
-          allChecked
-            ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800"
-            : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700"
-        }`}>
-          <div className="flex items-center gap-2">
-            <ClipboardText size={14} weight="fill" className={allChecked ? "text-emerald-500" : "text-slate-400"} />
-            <span className="font-bold text-sm text-slate-900 dark:text-white"
-                  style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-              Pre-intubation Checklist
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-slate-400">{checkedCount}/{checklistItems.length}</span>
-            {allChecked
-              ? <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <CheckCircle size={10} weight="fill" />Ready
-                </span>
-              : <button onClick={() => setCheckedItems({})}
-                  className="text-[10px] font-mono text-slate-400 hover:text-slate-600 underline">Reset</button>
-            }
-          </div>
-        </div>
-
-        <div className="p-4 bg-white dark:bg-slate-900/50 grid sm:grid-cols-2 gap-1.5">
-          {checklistItems.map(item => (
-            <button key={item.id} onClick={() => toggleCheck(item.id)}
-              className={`flex items-start gap-2.5 text-left rounded-lg px-3 py-2 transition-all text-xs ${
-                checkedItems[item.id]
-                  ? "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200"
-                  : "bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-200"
-              }`}>
-              {checkedItems[item.id]
-                ? <CheckCircle size={13} weight="fill" className="text-emerald-500 flex-shrink-0 mt-0.5" />
-                : <Circle      size={13} weight="regular" className="text-slate-300 dark:text-slate-600 flex-shrink-0 mt-0.5" />}
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        {!allChecked && checkedCount > 0 && (
-          <div className="px-4 py-2 bg-amber-50 dark:bg-amber-950/20 border-t border-amber-100 dark:border-amber-900">
-            <div className="flex items-center gap-1.5">
-              <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
-                <div className="bg-amber-500 rounded-full h-1.5 transition-all"
-                     style={{ width: `${(checkedCount / checklistItems.length) * 100}%` }} />
-              </div>
-              <span className="font-mono text-[10px] text-amber-600 dark:text-amber-400">
-                {Math.round((checkedCount / checklistItems.length) * 100)}%
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── TAB 3: DIFFICULT AIRWAY ───────────────────────────────────────────────────
+// ─── TAB 2: DIFFICULT AIRWAY ───────────────────────────────────────────────────
 function DifficultAirwayView() {
   const { weight } = useWeight();
   const [section, setSection] = useState("predict");
@@ -865,8 +588,7 @@ function DifficultAirwayView() {
   );
 }
 
-// ─── TAB 4: MONITORING ─────────────────────────────────────────────────────────
-// Removed: ETCO₂ (covered in Ventilator tab), SpO₂ SVG, BVM SVG
+// ─── TAB 3: MONITORING ─────────────────────────────────────────────────────────
 function MonitoringView() {
   const { weight } = useWeight();
   const [section, setSection] = useState("spo2");
@@ -944,7 +666,6 @@ function MonitoringView() {
         ))}
       </div>
 
-      {/* SPO2 — text only, no SVG */}
       {section === "spo2" && (
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4 space-y-4">
           <div>
@@ -990,7 +711,6 @@ function MonitoringView() {
         </div>
       )}
 
-      {/* BP */}
       {section === "bp" && (
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4 space-y-4">
           <div className="font-bold text-sm mb-1" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
@@ -1055,7 +775,6 @@ function MonitoringView() {
         </div>
       )}
 
-      {/* BVM — text only, no SVG */}
       {section === "bvm" && (
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4 space-y-4">
           <div className="font-bold text-sm mb-1" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
@@ -1112,15 +831,14 @@ function MonitoringView() {
 
 // ─── MAIN EXPORT ───────────────────────────────────────────────────────────────
 const TABS = [
-  { id: "table",      label: "Reference Table",       Icon: ClipboardText  },  // ← first
-  { id: "equipment",  label: "Equipment Cards",       Icon: Wind          },
-  { id: "difficult",  label: "Difficult Airway",      Icon: Warning       },
-  { id: "monitoring", label: "Monitoring",            Icon: Pulse         },
+  { id: "table",      label: "Reference Table",  Icon: ClipboardText },
+  { id: "difficult",  label: "Difficult Airway", Icon: Warning       },
+  { id: "monitoring", label: "Monitoring",       Icon: Pulse         },
 ];
 
 export default function EquipmentTab() {
   const { weight }  = useWeight();
-  const [activeTab, setActiveTab] = useState("table");  // ← default first
+  const [activeTab, setActiveTab] = useState("table");
 
   return (
     <div className="space-y-5">
@@ -1157,7 +875,6 @@ export default function EquipmentTab() {
       </div>
 
       {activeTab === "table"      && <ReferenceTableView />}
-      {activeTab === "equipment"  && <EquipmentCardsView />}
       {activeTab === "difficult"  && <DifficultAirwayView />}
       {activeTab === "monitoring" && <MonitoringView />}
 
