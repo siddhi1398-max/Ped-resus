@@ -29,7 +29,7 @@ import ScoresTab from "./components/tabs/ScoresTab";
 import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
 import ManagementAlgorithmsTab from "./components/tabs/ManagementAlgorithmsTab";
-import TraumaResuscitationTab from "../components/tabs/TraumaResuscitationTab";
+import TraumaResuscitationTab from "./components/tabs/TraumaResuscitationTab";
 import PrehospitalTab from "./components/tabs/PrehospitalTab";
 import ImmunisationTab from "./components/tabs/ImmunisationTab";
 import {
