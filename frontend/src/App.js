@@ -71,7 +71,7 @@ const ALL_TABS = [
   { id: "ventilator",    label: "Ventilator",           icon: Wind,             Comp: VentilatorTab,            free: false },
   { id: "fluids",        label: "Fluids",               icon: Drop,             Comp: FluidsTab,                free: false },
   { id: "abg",           label: "ABG",                  icon: FlaskConical,     Comp: ABGTab,                   free: false },
-  { id: "drugs",         label: "Drug Doses",           icon: Pill,             Comp: DrugsTab,                 free: false },
+  { id: "drugs",         label: "Drugs",                icon: Pill,             Comp: DrugsTab,                 free: false },
   { id: "syrup",         label: "Syrup Calculator",     icon: Eyedropper,       Comp: SyrupCalculatorTab,       free: false },
   { id: "scores",        label: "Severity Scores",      icon: ClipboardText,    Comp: ScoresTab,                free: false },
   { id: "sedation",      label: "Sedation & Analgesia", icon: FirstAid,         Comp: SedationAnalgesiaTab,     free: false },
