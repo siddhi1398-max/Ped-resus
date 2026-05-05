@@ -44,8 +44,8 @@ function getNormals(ageMonths) {
     return { pH: [7.34, 7.45], pco2: [34, 45], hco3: [20, 25], pao2: [75, 100], be: [-4, 2],   label: "Infant (1–12 mo)"   };
   if (ageMonths < 36)   // Toddler
     return { pH: [7.35, 7.45], pco2: [34, 44], hco3: [21, 25], pao2: [80, 100], be: [-3, 3],   label: "Toddler (1–3 yr)"   };
-  return                // School age / Adolescent — adult-equivalent
-         { pH: [7.35, 7.45], pco2: [35, 45], hco3: [22, 26], pao2: [80, 100],   be: [-3, 3],   label: "Child / Adolescent" };
+  if (ageMonths > 36)   // School age / Adolescent — adult-equivalent
+    return { pH: [7.35, 7.45], pco2: [35, 45], hco3: [22, 26], pao2: [80, 100],   be: [-3, 3],   label: "Child / Adolescent" };
 }
 
 // ─── CORE INTERPRETATION ENGINE ────────────────────────────────────────────────
