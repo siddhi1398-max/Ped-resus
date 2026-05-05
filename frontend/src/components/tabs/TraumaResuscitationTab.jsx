@@ -7,7 +7,7 @@ import { useWeight } from "../../context/WeightContext";
 import {
   Warning, ArrowRight, CheckCircle, Circle, Heartbeat,
   Drop, Brain, ClipboardText, Pulse, FirstAid, Siren,
-  ArrowsClockwise, Thermometer, Eye,
+  ArrowsClockwise, Thermometer, Eye, X,
 } from "@phosphor-icons/react";
 
 // ─── COLOUR HELPERS (identical to rest of app) ─────────────────────────────────
@@ -66,33 +66,22 @@ function BulletList({ items, tone = "slate", icon: Icon }) {
 // ─── WEIGHT-BASED CALC ─────────────────────────────────────────────────────────
 function calcTrauma(weight) {
   const w = weight;
-  // Blood volume
   const ebv = w < 1 ? Math.round(w * 100) : w <= 3 ? Math.round(w * 90) : Math.round(w * 80);
-  // Shock thresholds: 10% = mild, 20% = moderate, 30% = severe, 40% = pre-terminal
   const shock10 = Math.round(ebv * 0.10);
   const shock20 = Math.round(ebv * 0.20);
   const shock30 = Math.round(ebv * 0.30);
   const shock40 = Math.round(ebv * 0.40);
-  // Fluid bolus: 10 mL/kg isotonic (ATLS 11 — limit crystalloid)
   const fluidBolus10  = Math.round(w * 10);
   const fluidBolus20  = Math.round(w * 20);
-  // Blood products 10–15 mL/kg
   const rbcDose   = Math.round(w * 10);
   const ffpDose   = Math.round(w * 10);
   const pltDose   = Math.round(w * 10);
-  // TXA: 15 mg/kg IV over 10 min (max 1000 mg loading dose), then 2 mg/kg/hr x 8hr
   const txaLoad   = Math.min(Math.round(w * 15), 1000);
   const txaInfMg  = Math.round(w * 2);
-  // Hypotension threshold: 70 + (2 × age) — use weight-to-age estimate
-  // Rough weight→age: age ≈ (weight - 9) / 2 for 1-10yr (Luscombe)
   const estimatedAge = Math.max(0, Math.round((w - 9) / 2));
   const sbpMin = w < 3 ? 50 : w < 10 ? 70 : Math.min(90, 70 + estimatedAge * 2);
-  // Permissive hypotension target: MAP ≥ 50 mmHg (no TBI), SBP ≥ sbpMin
-  // Urine output target
-  const uoTarget = Math.round(w * 1); // 1 mL/kg/hr
-  // Mannitol: 0.5–1 g/kg (for herniation / ICP crisis)
+  const uoTarget = Math.round(w * 1);
   const mannitolDose = `${Math.round(w * 0.5)}–${Math.round(w * 1)} mL of 20%`;
-  // 3% NaCl: 2–5 mL/kg
   const htsLow  = Math.round(w * 2);
   const htsHigh = Math.round(w * 5);
 
@@ -105,6 +94,254 @@ function calcTrauma(weight) {
     mannitolDose, htsLow, htsHigh,
     estimatedAge,
   };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PECARN INTERACTIVE CALCULATOR
+// Source: Kuppermann N et al. Lancet 2009 · Validated in 42,412 children
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── PECARN DATA ────────────────────────────────────────────────────────────────
+const PECARN_UNDER2 = {
+  ageLabel: "< 2 years",
+  sensitivity: "100%",
+  // HIGH RISK — CT indicated immediately
+  high: [
+    { id: "gcs_u2",     label: "GCS ≤ 14",                  detail: "Any component giving total ≤14" },
+    { id: "ams_u2",     label: "Altered Mental Status",      detail: "Agitation, somnolence, repetitive questioning, or slow response" },
+    { id: "skull_u2",   label: "Palpable Skull Fracture",    detail: "Palpable step-off or depression on exam" },
+  ],
+  // INTERMEDIATE RISK — CT vs observation (shared decision)
+  intermediate: [
+    { id: "hema_u2",    label: "Non-frontal Scalp Haematoma",  detail: "Occipital, parietal, or temporal location" },
+    { id: "loc_u2",     label: "Loss of Consciousness ≥ 5 sec", detail: "Any witnessed LOC lasting 5 seconds or more" },
+    { id: "mech_u2",    label: "Severe Mechanism of Injury",  detail: "Pedestrian/cyclist (no helmet) struck by motorised vehicle · Fall >1 m (>3 ft) · Head struck by high-impact object" },
+    { id: "act_u2",     label: "Not Acting Normally per Parent", detail: "Parent reports behaviour change, unusual activity, or not being themselves" },
+  ],
+  riskHigh:    "4.4%",
+  riskInter:   "0.9%",
+  riskLow:     "<0.02%",
+};
+
+const PECARN_2PLUS = {
+  ageLabel: "≥ 2 years",
+  sensitivity: "96.8%",
+  // HIGH RISK
+  high: [
+    { id: "gcs_2p",     label: "GCS ≤ 14",                  detail: "Any component giving total ≤14" },
+    { id: "ams_2p",     label: "Altered Mental Status",      detail: "Agitation, somnolence, repetitive questioning, or slow response" },
+    { id: "basilar_2p", label: "Signs of Basilar Skull Fracture", detail: "Battle sign (mastoid bruising) · Raccoon eyes · Haemotympanum · CSF rhinorrhoea or otorrhoea" },
+  ],
+  // INTERMEDIATE RISK
+  intermediate: [
+    { id: "vomit_2p",   label: "History of Vomiting",        detail: "Any vomiting since injury. Note: isolated vomiting alone = 0.2% risk — observation preferred over CT" },
+    { id: "loc_2p",     label: "Loss of Consciousness",      detail: "Any witnessed LOC, any duration" },
+    { id: "mech_2p",    label: "Severe Mechanism of Injury",  detail: "Pedestrian/cyclist (no helmet) struck by motorised vehicle · Fall >1.5 m (>5 ft) · Head struck by high-impact object · MVA with ejection, rollover, or fatality" },
+    { id: "ha_2p",      label: "Severe Headache",             detail: "Patient reports severe or worsening headache" },
+  ],
+  riskHigh:    "4.3%",
+  riskInter:   "0.9%",
+  riskLow:     "<0.05%",
+};
+
+// ── PECARN CARD COMPONENT ──────────────────────────────────────────────────────
+function PecarnCard({ rule }) {
+  const [checked, setChecked] = useState({});
+
+  const toggle = id => setChecked(p => ({ ...p, [id]: !p[id] }));
+  const reset  = () => setChecked({});
+
+  const anyHigh  = rule.high.some(f => checked[f.id]);
+  const anyInter = rule.intermediate.some(f => checked[f.id]);
+  const noneHigh = rule.high.every(f => !checked[f.id]);
+  const noneInter = rule.intermediate.every(f => !checked[f.id]);
+
+  // Determine result state
+  let result = null;
+  if (anyHigh) {
+    result = {
+      tone: "red",
+      verdict: "CT HEAD INDICATED",
+      sub: `High risk — ${rule.riskHigh} risk of ciTBI`,
+      detail: "Non-contrast CT brain required. Do not observe and discharge without imaging.",
+      icon: "🔴",
+    };
+  } else if (anyInter) {
+    result = {
+      tone: "amber",
+      verdict: "OBSERVATION vs CT",
+      sub: `Intermediate risk — ${rule.riskInter} risk of ciTBI`,
+      detail: "Shared decision-making. Consider 4–6 hr observation with serial neuro checks. CT if worsening.",
+      icon: "🟡",
+    };
+  } else if (Object.keys(checked).length > 0 && noneHigh && noneInter) {
+    result = {
+      tone: "emerald",
+      verdict: "CT NOT INDICATED",
+      sub: `Very low risk — ${rule.riskLow} risk of ciTBI`,
+      detail: "Safe for discharge with head injury advice. Return precautions documented.",
+      icon: "🟢",
+    };
+  }
+
+  const hasAnyChecked = Object.values(checked).some(Boolean);
+
+  return (
+    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-slate-900 dark:bg-slate-950 text-white">
+        <div>
+          <div className="font-bold text-sm" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+            PECARN — {rule.ageLabel}
+          </div>
+          <div className="text-[10px] font-mono text-slate-400">
+            Sensitivity {rule.sensitivity} for ciTBI · Kuppermann et al. Lancet 2009
+          </div>
+        </div>
+        {hasAnyChecked && (
+          <button onClick={reset}
+            className="flex items-center gap-1 text-[10px] font-mono text-slate-400 hover:text-white transition-colors">
+            <ArrowsClockwise size={10} weight="bold" />Reset
+          </button>
+        )}
+      </div>
+
+      <div className="p-4 space-y-4">
+        {/* STEP 1 — High risk */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-5 h-5 rounded-full bg-red-600 text-white text-[9px] flex items-center justify-center font-black flex-shrink-0">1</div>
+            <div className="font-bold text-xs text-red-600 dark:text-red-400 uppercase tracking-wider">
+              High-Risk Features — CT Indicated if ANY present
+            </div>
+            <div className="text-[9px] font-mono text-slate-400 ml-auto">{rule.riskHigh} ciTBI risk</div>
+          </div>
+          <div className="space-y-1.5">
+            {rule.high.map(f => (
+              <button key={f.id} onClick={() => toggle(f.id)}
+                className={`w-full flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-left transition-all border ${
+                  checked[f.id]
+                    ? "bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-700"
+                    : "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 hover:border-red-200 dark:hover:border-red-900"
+                }`}>
+                <div className={`w-4 h-4 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                  checked[f.id]
+                    ? "bg-red-500 border-red-500"
+                    : "border-slate-300 dark:border-slate-600"
+                }`}>
+                  {checked[f.id] && <CheckCircle size={10} weight="fill" className="text-white" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className={`text-xs font-semibold ${checked[f.id] ? "text-red-800 dark:text-red-200" : "text-slate-700 dark:text-slate-200"}`}>
+                    {f.label}
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-mono mt-0.5">{f.detail}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 border-t border-slate-100 dark:border-slate-700" />
+          <div className="text-[9px] font-mono text-slate-400 uppercase tracking-widest px-2">
+            if none above — check intermediate risk
+          </div>
+          <div className="flex-1 border-t border-slate-100 dark:border-slate-700" />
+        </div>
+
+        {/* STEP 2 — Intermediate risk */}
+        <div className={noneHigh ? "" : "opacity-50 pointer-events-none"}>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-5 h-5 rounded-full bg-amber-500 text-white text-[9px] flex items-center justify-center font-black flex-shrink-0">2</div>
+            <div className="font-bold text-xs text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+              Intermediate-Risk Features — Observation vs CT
+            </div>
+            <div className="text-[9px] font-mono text-slate-400 ml-auto">{rule.riskInter} ciTBI risk</div>
+          </div>
+          <div className="space-y-1.5">
+            {rule.intermediate.map(f => (
+              <button key={f.id} onClick={() => noneHigh && toggle(f.id)}
+                className={`w-full flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-left transition-all border ${
+                  checked[f.id]
+                    ? "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700"
+                    : "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 hover:border-amber-200 dark:hover:border-amber-900"
+                }`}>
+                <div className={`w-4 h-4 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                  checked[f.id]
+                    ? "bg-amber-500 border-amber-500"
+                    : "border-slate-300 dark:border-slate-600"
+                }`}>
+                  {checked[f.id] && <CheckCircle size={10} weight="fill" className="text-white" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className={`text-xs font-semibold ${checked[f.id] ? "text-amber-800 dark:text-amber-200" : "text-slate-700 dark:text-slate-200"}`}>
+                    {f.label}
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-mono mt-0.5">{f.detail}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Result */}
+        {result && (
+          <div className={`rounded-xl border-2 p-4 transition-all ${TONE[result.tone].bg} ${TONE[result.tone].border}`}>
+            <div className="flex items-start gap-3">
+              <div className="text-2xl flex-shrink-0">{result.icon}</div>
+              <div className="flex-1">
+                <div className={`font-black text-base leading-none mb-1 ${TONE[result.tone].text}`}
+                     style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                  {result.verdict}
+                </div>
+                <div className={`font-mono text-[10px] font-bold mb-1.5 ${TONE[result.tone].text}`}>
+                  {result.sub}
+                </div>
+                <div className="text-xs text-slate-600 dark:text-slate-300">{result.detail}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* No checks yet — prompt */}
+        {!hasAnyChecked && (
+          <div className="rounded-lg border border-dashed border-slate-200 dark:border-slate-700 px-4 py-3 text-center text-[11px] font-mono text-slate-400">
+            Check applicable features above to see CT recommendation
+          </div>
+        )}
+
+        {/* Low risk prompt when all checked but none positive */}
+        {hasAnyChecked && !result && noneHigh && noneInter && (
+          <div className={`rounded-xl border-2 p-4 ${TONE.emerald.bg} ${TONE.emerald.border}`}>
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">🟢</div>
+              <div>
+                <div className={`font-black text-base ${TONE.emerald.text}`}
+                     style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                  CT NOT INDICATED
+                </div>
+                <div className={`font-mono text-[10px] font-bold mb-1.5 ${TONE.emerald.text}`}>
+                  Very low risk — {rule.riskLow} risk of ciTBI
+                </div>
+                <div className="text-xs text-slate-600 dark:text-slate-300">
+                  Safe for discharge with head injury advice. Return precautions documented.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-[9px] font-mono text-slate-400">
+        ciTBI = clinically important TBI (death, neurosurgery, intubation ≥24 hr, hospitalisation ≥2 nights) ·
+        This tool aids decision-making — clinical judgement supersedes algorithm output ·
+        Kuppermann N et al. <em>Lancet</em> 2009;374:1160–70
+      </div>
+    </div>
+  );
 }
 
 // ─── TAB 1: PRIMARY SURVEY (xABCDE) ──────────────────────────────────────────
@@ -489,6 +726,7 @@ function ShockFluidsView() {
 function TBIView() {
   const { weight } = useWeight();
   const c = useMemo(() => calcTrauma(weight), [weight]);
+  const [tbiSection, setTbiSection] = useState("management");
 
   const gcsTable = {
     eye:    [{ s: 4, a: "Opens spontaneously",               i: "Opens spontaneously"          },
@@ -514,6 +752,7 @@ function TBIView() {
         Paediatric TBI — leading cause of trauma mortality. Avoid the 4 H's: Hypoxia (SpO₂ &lt;94%), Hypotension (SBP &lt;{c.sbpMin} mmHg), Hypercarbia (PaCO₂ &gt;45), Hyperthermia (&gt;37.5°C). Secondary injury is preventable.
       </InfoBox>
 
+      {/* Severity tiles */}
       <div className="grid sm:grid-cols-3 gap-3">
         {[
           { label: "Severe TBI",    val: "GCS ≤8",    sub: "Immediate definitive airway", tone: "red"    },
@@ -532,94 +771,188 @@ function TBIView() {
         })}
       </div>
 
-      {/* GCS Table */}
-      <SectionCard tone="violet" title="Paediatric Glasgow Coma Scale (pGCS)">
-        <div className="grid sm:grid-cols-3 gap-4">
-          {[
-            { key: "eye",    label: "Eye Opening (E)", max: 4 },
-            { key: "verbal", label: "Verbal Response (V) — Older / Infant", max: 5 },
-            { key: "motor",  label: "Motor Response (M)", max: 6 },
-          ].map(section => (
-            <div key={section.key}>
-              <div className="font-mono text-[9px] uppercase tracking-widest text-violet-600 dark:text-violet-400 mb-2">
-                {section.label}
+      {/* Sub-nav */}
+      <div className="flex flex-wrap gap-1.5">
+        {[
+          { id: "management", label: "Management" },
+          { id: "gcs",        label: "GCS Scale"  },
+          { id: "pecarn",     label: "PECARN CT Rule" },
+        ].map(s => (
+          <button key={s.id} onClick={() => setTbiSection(s.id)}
+            className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] uppercase tracking-widest transition-all ${
+              tbiSection === s.id
+                ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
+                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
+            }`}>{s.label}</button>
+        ))}
+      </div>
+
+      {/* ── MANAGEMENT ── */}
+      {tbiSection === "management" && (
+        <div className="grid sm:grid-cols-2 gap-4">
+          <SectionCard tone="red" title="Severe TBI Management (GCS ≤8)">
+            <div className="space-y-2 text-xs">
+              <BulletList tone="red" items={[
+                "Immediate RSI — avoid ketamine alone if haemodynamically unstable with high ICP (debated)",
+                "Maintain SpO₂ 94–99% — never let hypoxia occur",
+                `Maintain SBP ≥${c.sbpMin} mmHg (age-appropriate) — NO permissive hypotension in TBI`,
+                "Target PaCO₂ 35–40 mmHg — avoid hyperventilation unless herniation",
+                "HOB 30° once haemodynamics stable — improves venous drainage",
+                "Osmotherapy for ICP crisis / herniation (see below)",
+                "Avoid fever: target temp 36–37.5°C. Avoid prophylactic hypothermia (no benefit)",
+                "Neurosurgery consult immediately for GCS ≤8, focal deficits, or haematoma on CT",
+                "CT head priority — but resuscitate first (unstable → OR not CT)",
+              ]} />
+            </div>
+          </SectionCard>
+
+          <div className="space-y-4">
+            <SectionCard tone="amber" title={`Osmotherapy — ${weight} kg`}>
+              <div className="space-y-2 text-xs">
+                <div className={`rounded-lg border p-3 font-mono ${TONE.amber.bg} ${TONE.amber.border} text-amber-800 dark:text-amber-200 space-y-1`}>
+                  <div className="font-bold text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">
+                    ICP Crisis / Herniation Signs
+                  </div>
+                  <div>3% NaCl (HTS): <strong>{c.htsLow}–{c.htsHigh} mL IV</strong> over 10–20 min</div>
+                  <div>Mannitol 20%: <strong>{c.mannitolDose}</strong> IV over 20 min</div>
+                  <div className="text-[10px] text-amber-600 dark:text-amber-400">
+                    HTS preferred if hypovolaemic. Mannitol: avoid if hypovolaemic.
+                  </div>
+                </div>
+                <BulletList tone="amber" items={[
+                  "Herniation signs: fixed dilated pupil(s), Cushing triad (bradycardia + hypertension + irregular breathing), posturing",
+                  "Hyperventilate ONLY as bridge to osmotherapy in active herniation: target PaCO₂ 30–35 mmHg",
+                  "Repeat osmotherapy q4–6h if needed; monitor Na⁺ (target 145–160 mmol/L for HTS)",
+                ]} />
               </div>
-              <div className="space-y-1">
-                {gcsTable[section.key].map(row => (
-                  <div key={row.s} className="flex items-start gap-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 px-2.5 py-1.5">
-                    <span className="font-black text-sm text-violet-600 dark:text-violet-400 w-4 flex-shrink-0"
-                          style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{row.s}</span>
-                    <div>
-                      <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">{row.a}</div>
-                      {row.i !== row.a && (
-                        <div className="text-[10px] text-violet-500 dark:text-violet-400 font-mono">Infant: {row.i}</div>
-                      )}
+            </SectionCard>
+          </div>
+        </div>
+      )}
+
+      {/* ── GCS TABLE ── */}
+      {tbiSection === "gcs" && (
+        <SectionCard tone="violet" title="Paediatric Glasgow Coma Scale (pGCS)">
+          <div className="grid sm:grid-cols-3 gap-4">
+            {[
+              { key: "eye",    label: "Eye Opening (E)", max: 4 },
+              { key: "verbal", label: "Verbal Response (V) — Older / Infant", max: 5 },
+              { key: "motor",  label: "Motor Response (M)", max: 6 },
+            ].map(section => (
+              <div key={section.key}>
+                <div className="font-mono text-[9px] uppercase tracking-widest text-violet-600 dark:text-violet-400 mb-2">
+                  {section.label}
+                </div>
+                <div className="space-y-1">
+                  {gcsTable[section.key].map(row => (
+                    <div key={row.s} className="flex items-start gap-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 px-2.5 py-1.5">
+                      <span className="font-black text-sm text-violet-600 dark:text-violet-400 w-4 flex-shrink-0"
+                            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{row.s}</span>
+                      <div>
+                        <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">{row.a}</div>
+                        {row.i !== row.a && (
+                          <div className="text-[10px] text-violet-500 dark:text-violet-400 font-mono">Infant: {row.i}</div>
+                        )}
+                      </div>
                     </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 px-1 text-[10px] font-mono text-slate-400">
+            Total = E + V + M · Minimum 3, Maximum 15 · Severe ≤8 · Moderate 9–13 · Mild 14–15
+          </div>
+        </SectionCard>
+      )}
+
+      {/* ── PECARN CARDS ── */}
+      {tbiSection === "pecarn" && (
+        <div className="space-y-4">
+          <InfoBox tone="sky" icon={Brain}>
+            PECARN CT decision rules for <strong>minor head injury</strong> (GCS 14–15 on presentation). Select the applicable age group and check present features. Validated in 42,412 children across 25 EDs (Kuppermann 2009).
+          </InfoBox>
+
+          {/* Age selector — show both or toggle */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <PecarnCard rule={PECARN_UNDER2} />
+            <PecarnCard rule={PECARN_2PLUS}  />
+          </div>
+
+          {/* Severe mechanism reference */}
+          <SectionCard tone="slate" title="Severe Mechanism of Injury — Definition">
+            <div className="grid sm:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-slate-300">
+              <div>
+                <div className="font-bold text-[10px] uppercase tracking-wider text-slate-400 mb-2">
+                  Age &lt; 2 years
+                </div>
+                <BulletList tone="slate" items={[
+                  "Pedestrian or cyclist (no helmet) struck by motorised vehicle",
+                  "Fall > 1 m (> 3 ft) from height",
+                  "Head struck by a high-impact object",
+                ]} />
+              </div>
+              <div>
+                <div className="font-bold text-[10px] uppercase tracking-wider text-slate-400 mb-2">
+                  Age ≥ 2 years
+                </div>
+                <BulletList tone="slate" items={[
+                  "Pedestrian or cyclist (no helmet) struck by motorised vehicle",
+                  "Fall > 1.5 m (> 5 ft) from height",
+                  "Head struck by a high-impact object",
+                  "MVA with ejection, rollover, or death of another passenger",
+                ]} />
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* Observation protocol */}
+          <SectionCard tone="amber" title="Observation Protocol (Intermediate Risk)">
+            <div className="space-y-2 text-xs">
+              <BulletList tone="amber" items={[
+                "Minimum 4–6 hr observation in ED with serial neurological assessments every 30–60 min",
+                "Document GCS, pupils, headache severity, vomiting, and behaviour at each check",
+                "CT indicated if: GCS drops, new or worsening symptoms, vomiting increasing, or parental/clinician concern",
+                "Isolated vomiting (no other features) has 0.2% ciTBI risk — observation preferred over CT",
+                "Shared decision-making: discuss radiation risk (lifetime CT risk ~1:2000 for fatal cancer) vs missed injury",
+                "High-risk social situation, unreliable follow-up, or non-accidental injury concern → lower threshold for CT",
+              ]} />
+            </div>
+          </SectionCard>
+
+          {/* Discharge advice */}
+          <SectionCard tone="emerald" title="Discharge Head Injury Advice (Low-Risk Patients)">
+            <div className="space-y-2 text-xs">
+              <p className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">
+                Return immediately if ANY of the following develop:
+              </p>
+              <div className="grid sm:grid-cols-2 gap-1.5">
+                {[
+                  "Worsening or severe headache not relieved by paracetamol",
+                  "Repeated vomiting (>2 episodes after leaving hospital)",
+                  "Increasing drowsiness or difficulty waking",
+                  "Unusual behaviour or confusion",
+                  "Seizure or convulsion",
+                  "Weakness, numbness, or visual disturbance",
+                  "Unequal pupils or squinting",
+                  "Clear fluid from nose or ear",
+                  "Deterioration in any neurological symptom",
+                  "Child not acting normally per carer within 24–48 hr",
+                ].map((s, i) => (
+                  <div key={i} className="flex items-start gap-1.5 text-emerald-700 dark:text-emerald-300">
+                    <ArrowRight size={9} weight="bold" className="text-emerald-500 flex-shrink-0 mt-0.5" />{s}
                   </div>
                 ))}
               </div>
             </div>
-          ))}
-        </div>
-        <div className="mt-3 px-1 text-[10px] font-mono text-slate-400">
-          Total = E + V + M · Minimum 3, Maximum 15 · Severe ≤8 · Moderate 9–13 · Mild 14–15
-        </div>
-      </SectionCard>
-
-      {/* Management Grid */}
-      <div className="grid sm:grid-cols-2 gap-4">
-        <SectionCard tone="red" title="Severe TBI Management (GCS ≤8)">
-          <div className="space-y-2 text-xs">
-            <BulletList tone="red" items={[
-              "Immediate RSI — avoid ketamine alone if haemodynamically unstable with high ICP (debated)",
-              "Maintain SpO₂ 94–99% — never let hypoxia occur",
-              `Maintain SBP ≥${c.sbpMin} mmHg (age-appropriate) — NO permissive hypotension in TBI`,
-              "Target PaCO₂ 35–40 mmHg — avoid hyperventilation unless herniation",
-              "HOB 30° once haemodynamics stable — improves venous drainage",
-              "Osmotherapy for ICP crisis / herniation (see below)",
-              "Avoid fever: target temp 36–37.5°C. Avoid prophylactic hypothermia (no benefit)",
-              "Neurosurgery consult immediately for GCS ≤8, focal deficits, or haematoma on CT",
-              "CT head priority — but resuscitate first (unstable → OR not CT)",
-            ]} />
-          </div>
-        </SectionCard>
-
-        <div className="space-y-4">
-          <SectionCard tone="amber" title={`Osmotherapy — ${weight} kg`}>
-            <div className="space-y-2 text-xs">
-              <div className={`rounded-lg border p-3 font-mono ${TONE.amber.bg} ${TONE.amber.border} text-amber-800 dark:text-amber-200 space-y-1`}>
-                <div className="font-bold text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">
-                  ICP Crisis / Herniation Signs
-                </div>
-                <div>3% NaCl (HTS): <strong>{c.htsLow}–{c.htsHigh} mL IV</strong> over 10–20 min</div>
-                <div>Mannitol 20%: <strong>{c.mannitolDose}</strong> IV over 20 min</div>
-                <div className="text-[10px] text-amber-600 dark:text-amber-400">
-                  HTS preferred if hypovolaemic. Mannitol: avoid if hypovolaemic.
-                </div>
-              </div>
-              <BulletList tone="amber" items={[
-                "Herniation signs: fixed dilated pupil(s), Cushing triad (bradycardia + hypertension + irregular breathing), posturing",
-                "Hyperventilate ONLY as bridge to osmotherapy in active herniation: target PaCO₂ 30–35 mmHg",
-                "Repeat osmotherapy q4–6h if needed; monitor Na⁺ (target 145–160 mmol/L for HTS)",
-              ]} />
-            </div>
           </SectionCard>
 
-          <SectionCard tone="sky" title="PECARN Rule — CT Decision (Mild TBI)">
-            <div className="text-xs space-y-1.5 text-slate-600 dark:text-slate-300">
-              <div className="font-bold text-[10px] uppercase tracking-widest text-sky-600 dark:text-sky-400 mb-1">High-risk features → CT head</div>
-              <BulletList tone="sky" items={[
-                "GCS <15 at 2 hours post-injury",
-                "Suspected skull fracture or palpable depression",
-                "Altered mental status (confusion, agitation, slow response)",
-                "Scalp haematoma (especially posterior/parietal in <2 yr)",
-                "Basilar skull fracture signs: Battle sign, raccoon eyes, haemotympanum, CSF leak",
-                "Severe mechanism: MVA ejection / rollover, fall >3 m (or >1 m in <2 yr), head struck by high-speed object",
-              ]} />
-            </div>
-          </SectionCard>
+          <p className="text-[10px] text-slate-400 font-mono text-center">
+            Kuppermann N et al. <em>Lancet</em> 2009;374:1160–70 · PECARN (Pediatric Emergency Care Applied Research Network) ·
+            N=42,412 · 25 EDs · Sensitivity 100% (&lt;2 yr) / 96.8% (≥2 yr)
+          </p>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -802,7 +1135,6 @@ function TraumaScoresView() {
 
   const gcsTotal = gcsE + gcsV + gcsM;
 
-  // Revised Trauma Score
   const gcsRts  = gcsTotal >= 13 ? 4 : gcsTotal >= 9 ? 3 : gcsTotal >= 6 ? 2 : gcsTotal >= 4 ? 1 : 0;
   const sbpRts  = sbp >= 90 ? 4 : sbp >= 76 ? 3 : sbp >= 50 ? 2 : sbp > 0 ? 1 : 0;
   const rrRts   = (rr >= 10 && rr <= 29) ? 4 : rr > 29 ? 3 : (rr >= 6 && rr <= 9) ? 2 : (rr >= 1 && rr <= 5) ? 1 : 0;
@@ -810,9 +1142,8 @@ function TraumaScoresView() {
   const rtsSurv = rts >= 7 ? ">95%" : rts >= 5 ? "~75%" : rts >= 3 ? "~50%" : "<25%";
   const rtsTone = rts >= 6 ? "emerald" : rts >= 4 ? "amber" : "red";
 
-  // SIPA (Shock Index Paediatric Age-Adjusted) — approximation
   const estimatedAge = Math.max(1, Math.round((weight - 9) / 2));
-  const si = +(120 / Math.max(sbp, 1)).toFixed(2); // rough: using 120 as representative HR
+  const si = +(120 / Math.max(sbp, 1)).toFixed(2);
 
   return (
     <div className="space-y-5">
