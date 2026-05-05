@@ -641,7 +641,7 @@ export default function ABGTab() {
       {/* Results */}
       {!hasMinInput && (
         <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/30 p-8 text-center">
-          <FlaskConical size={28} className="text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+          <Flask size={28} className="text-slate-300 dark:text-slate-600 mx-auto mb-2" />
           <div className="font-mono text-xs text-slate-400">Enter pH, PaCO₂, and HCO₃⁻ to begin interpretation</div>
         </div>
       )}
