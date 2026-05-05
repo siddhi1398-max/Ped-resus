@@ -6,7 +6,7 @@ import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   Thermometer, Wind, Heartbeat, Waveform, Warning,
-  CheckCircle, XCircle, ArrowRight, Lightbulb,
+  CheckCircle, XCircle, ArrowRight, Lightbulb, Table,
   Lightning, Pulse, Plus, Trash, Download, User, Info,
 } from "@phosphor-icons/react";
 import { VITALS_ROWS, TEMP_NOTES, SPO2_NOTES, minSBP } from "../../data/vitals";
@@ -212,9 +212,8 @@ function LiveCalculator() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TAB 2 — REFERENCE TABLE
+// TAB 2 — QUICK REFERENCE
 // ═══════════════════════════════════════════════════════════════════════════════
-
 function ReferenceTable() {
   const { weight } = useWeight();
   const [highlightAge, setHighlightAge] = useState(null);
@@ -278,10 +277,6 @@ function ReferenceTable() {
     </div>
   );
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// TAB 3 — QUICK REFERENCE
-// ═══════════════════════════════════════════════════════════════════════════════
 
 function QuickReference() {
   return (
@@ -389,7 +384,7 @@ function QuickReference() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TAB 4 — ECG & RHYTHM RECOGNITION
+// TAB 3 — ECG & RHYTHM RECOGNITION
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ── ECG grid background ──
@@ -685,7 +680,7 @@ function ECGTab() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TAB 5 — VITALS TRENDING
+// TAB 4 — VITALS TRENDING
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function getTrendNormals(ageYears) {
@@ -959,8 +954,7 @@ function VitalsTrending() {
 
 const TABS = [
   { id: "calculator", label: "Live Calculator", Icon: Heartbeat   },
-  { id: "table",      label: "Reference Table", Icon: Waveform    },
-  { id: "reference",  label: "Quick Reference", Icon: Thermometer },
+  { id: "reference",  label: "Quick Reference", Icon: Table       },
   { id: "ecg",        label: "ECG & Rhythms",   Icon: Lightning   },
   { id: "trending",   label: "Vitals Trending", Icon: Pulse       },
 ];
@@ -1018,7 +1012,6 @@ export default function VitalsTab() {
       </div>
 
       {activeTab === "calculator" && <LiveCalculator />}
-      {activeTab === "table"      && <ReferenceTable />}
       {activeTab === "reference"  && <QuickReference />}
       {activeTab === "ecg"        && <ECGTab />}
       {activeTab === "trending"   && <VitalsTrending />}
