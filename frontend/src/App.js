@@ -65,7 +65,7 @@ const DEV_EMAIL = "dr.siddhi.em@gmail.com";
 
 const ALL_TABS = [
   { id: "calculator",    label: "Calculator",           icon: Calculator,       Comp: CalculatorTab,            free: true  },
-  { id: "equipment",     label: "Equipment & Tubes",    icon: Wrench,           Comp: EquipmentTab,             free: false },
+  { id: "equipment",     label: "Equipments",           icon: Wrench,           Comp: EquipmentTab,             free: false },
   { id: "vitals",        label: "Vitals",               icon: Stethoscope,      Comp: VitalsTab,                free: false },
   { id: "resuscitation", label: "Resuscitation",        icon: Lightning,        Comp: ResuscitationTab,         free: false },
   { id: "ventilator",    label: "Ventilator",           icon: Wind,             Comp: VentilatorTab,            free: false },
