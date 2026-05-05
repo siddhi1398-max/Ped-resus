@@ -37,7 +37,7 @@ import CoPilotTab from "./components/tabs/CoPilotTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon, Lightning,
-  Lock, X, BookOpen, PersonSimpleBike, AirplaneInFlight, FlaskConical;
+  Lock, X, BookOpen, PersonSimpleBike, AirplaneInFlight, FlaskConical, 
 } from "@phosphor-icons/react";
 
 import { initializeApp } from "firebase/app";
