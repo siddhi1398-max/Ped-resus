@@ -43,6 +43,78 @@ function InfoBox({ tone = "amber", icon: Icon, title, children }) {
   );
 }
 
+// ─── WEIGHT-AWARE DOSE HELPERS ─────────────────────────────────────────────────
+
+/**
+ * Replaces "X mg/kg" and "X–Y mg/kg" / "X mcg/kg" patterns with computed values.
+ * Also handles "X–Y mcg/kg/min" style infusion rates.
+ */
+function computeNebDose(doseStr, weight) {
+  if (!weight || !doseStr) return doseStr;
+
+  let result = doseStr;
+
+  // Range: "0.15–0.3 mg/kg/hr" → "X.XX–X.XX mg/hr"
+  result = result.replace(
+    /([\d.]+)[–-]([\d.]+)\s*(mg|mcg)\/kg(\/(?:hr|min|day))?/g,
+    (_, lo, hi, unit, per) => {
+      const suffix = per || "";
+      const loVal = (parseFloat(lo) * weight).toFixed(2);
+      const hiVal = (parseFloat(hi) * weight).toFixed(2);
+      return `${loVal}–${hiVal} ${unit}${suffix} [for ${weight} kg]`;
+    }
+  );
+
+  // Single: "0.5 mg/kg" → "X.XX mg"
+  result = result.replace(
+    /([\d.]+)\s*(mg)\/kg(\/(?:hr|min|day))?/g,
+    (_, n, unit, per) => {
+      const suffix = per || "";
+      return `${(parseFloat(n) * weight).toFixed(2)} ${unit}${suffix} [for ${weight} kg]`;
+    }
+  );
+
+  // Single mcg/kg
+  result = result.replace(
+    /([\d.]+)\s*mcg\/kg(\/(?:hr|min|day))?/g,
+    (_, n, per) => {
+      const suffix = per || "";
+      return `${(parseFloat(n) * weight).toFixed(1)} mcg${suffix} [for ${weight} kg]`;
+    }
+  );
+
+  return result;
+}
+
+/**
+ * Parses weight-bracket dose strings like:
+ *   "<20 kg: 2.5 mg · ≥20 kg: 5 mg"
+ * and returns an array of { text, active } so the inapplicable bracket
+ * can be visually dimmed.
+ */
+function resolveWeightBracket(doseStr, weight) {
+  if (!weight || !doseStr) return [{ text: doseStr, active: true }];
+
+  // Only process strings that actually contain weight brackets
+  const hasBracket = /[<≥>]\s*\d+\s*kg/i.test(doseStr);
+  if (!hasBracket) return [{ text: computeNebDose(doseStr, weight), active: true }];
+
+  const parts = doseStr.split(/\s*·\s*/).map(s => s.trim());
+
+  return parts.map(part => {
+    const ltMatch  = part.match(/^<\s*(\d+)\s*kg/i);
+    const gteMatch = part.match(/^[≥>=]+\s*(\d+)\s*kg/i);
+    const lteMatch = part.match(/^≤\s*(\d+)\s*kg/i);
+
+    let active = true;
+    if (ltMatch)  active = weight <  parseFloat(ltMatch[1]);
+    if (gteMatch) active = weight >= parseFloat(gteMatch[1]);
+    if (lteMatch) active = weight <= parseFloat(lteMatch[1]);
+
+    return { text: computeNebDose(part, weight), active };
+  });
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // NEBULISED DRUG DATA
 // Sources: Piyush Gupta 18th Ed · IAP Asthma / Bronchiolitis Guidelines
@@ -240,10 +312,45 @@ const NEB_TECHNIQUE = [
   "Wash mask and cup with warm water after each use · Air dry",
 ];
 
+// ─── DOSE DISPLAY COMPONENT ────────────────────────────────────────────────────
+// Renders a single dose value string with weight-bracket highlighting and
+// per-kg computation. Active bracket is bold; inactive is dimmed + struck.
+function DoseValue({ doseStr, weight, toneText }) {
+  const parts = resolveWeightBracket(doseStr, weight);
+
+  // Single part (no brackets) — just render inline
+  if (parts.length === 1) {
+    return <span className={`text-xs font-semibold ${toneText}`}>{parts[0].text}</span>;
+  }
+
+  // Multiple brackets — render each with active/inactive styling
+  return (
+    <span className="text-xs font-semibold">
+      {parts.map(({ text, active }, i) => (
+        <span key={i}>
+          {i > 0 && <span className="text-slate-300 dark:text-slate-600 mx-1">·</span>}
+          <span className={
+            active
+              ? toneText
+              : "text-slate-400 dark:text-slate-600 line-through text-[10px]"
+          }>
+            {text}
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
 // ─── NEBULISED DRUG CARD ─────────────────────────────────────────────────────
 function NebDrugCard({ drug, weight }) {
   const [open, setOpen] = useState(false);
   const t = TONE[drug.classColor] || TONE.slate;
+
+  // Preview dose shown in collapsed header — first dose entry, first bracket resolved
+  const previewDoseStr = Object.values(drug.dose)[0].split("·")[0].trim();
+  const previewParts   = resolveWeightBracket(previewDoseStr, weight);
+  const previewActive  = previewParts.find(p => p.active) || previewParts[0];
 
   return (
     <div className={`border rounded-xl overflow-hidden bg-white dark:bg-slate-900/50 ${open ? "border-slate-300 dark:border-slate-600" : "border-slate-200 dark:border-slate-700"}`}>
@@ -261,9 +368,12 @@ function NebDrugCard({ drug, weight }) {
             <div className="text-[10px] font-mono text-slate-400 mt-0.5 truncate">{drug.brands.split(" · ")[0]} · {drug.brands.split(" · ")[1]}</div>
           </div>
         </div>
+
+        {/* Collapsed dose preview — shows weight-resolved active bracket */}
         <div className={`text-[10px] font-mono font-bold flex-shrink-0 mr-2 ${t.text}`}>
-          {Object.values(drug.dose)[0].split("·")[0].trim()}
+          {previewActive.text}
         </div>
+
         <ArrowRight size={12} weight="bold" className={`text-slate-400 flex-shrink-0 transition-transform duration-200 ${open ? "rotate-90" : ""}`} />
       </button>
 
@@ -277,10 +387,18 @@ function NebDrugCard({ drug, weight }) {
               {Object.entries(drug.dose).map(([k, v]) => (
                 <div key={k} className={`rounded-lg px-3 py-2 border ${t.border} ${t.bg}`}>
                   <div className="text-[9px] font-mono uppercase tracking-wider text-slate-400 mb-0.5">{k.replace(/_/g," ")}</div>
-                  <div className={`text-xs font-semibold ${t.text}`}>{v}</div>
+                  {/* Weight-aware dose rendering */}
+                  <DoseValue doseStr={v} weight={weight} toneText={t.text} />
                 </div>
               ))}
             </div>
+            {/* Weight indicator */}
+            {weight && (
+              <div className="mt-1.5 text-[9px] font-mono text-slate-400 flex items-center gap-1">
+                <span className={`font-bold ${t.text}`}>⚖ {weight} kg</span>
+                <span>· doses above computed for this weight</span>
+              </div>
+            )}
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
@@ -447,7 +565,9 @@ function NebulisedDrugsTab({ weight }) {
                     <div className="space-y-1">
                       {combo.steps.map((s, i) => (
                         <div key={i} className="flex items-start gap-1.5 text-xs text-slate-700 dark:text-slate-200">
-                          <span className={`font-bold ${t.text} flex-shrink-0 text-[10px]`}>{i+1}.</span>{s}
+                          <span className={`font-bold ${t.text} flex-shrink-0 text-[10px]`}>{i+1}.</span>
+                          {/* Resolve weight-based doses inside combo protocol steps */}
+                          {computeNebDose(s, weight)}
                         </div>
                       ))}
                     </div>
