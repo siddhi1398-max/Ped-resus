@@ -8,10 +8,9 @@ import {
   Thermometer, Wind, Heartbeat, Waveform, Warning,
   CheckCircle, XCircle, ArrowRight, Lightbulb,
 } from "@phosphor-icons/react";
-// FIX 5: Removed unused 'Drop' import
 import { VITALS_ROWS, TEMP_NOTES, SPO2_NOTES, minSBP } from "../../data/vitals";
 import ECGContent from "./components/ECGTab";        
-import VitalsTrendContent from "./components/VitalsTrendTab";
+import VitalsTrendsContent from "./components/VitalsTrendsTab";
 
 // ─── COLOUR HELPERS ────────────────────────────────────────────────────────────
 const TONE = {
@@ -443,7 +442,7 @@ const TABS = [
   { id: "table",      label: "Reference Table",    Icon: Waveform    },
   { id: "reference",  label: "Quick Reference",    Icon: Thermometer },
   { id: "ecg",        label: "ECG & Rhythms",      Icon: Heartbeat   },
-  { id: "trends",     label: "Vitals Trending",    Icon: Waveform    },
+  { id: "trends",     label: "Vitals Trend",       Icon: Pulse       },
 ];
 
 export default function VitalsTab() {
@@ -506,7 +505,7 @@ export default function VitalsTab() {
       {activeTab === "table"      && <ReferenceTable />}
       {activeTab === "reference"  && <QuickReference />}
       {activeTab === "ecg"        && <ECGContent />}
-      {activeTab === "trends"     && <VitalsTrendContent />}
+      {activeTab === "trends"     && <VitalsTrendsContent />}
       
 
       <div className="text-[10px] text-slate-400 dark:text-slate-500 italic text-center pt-2">
