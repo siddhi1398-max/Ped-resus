@@ -32,10 +32,11 @@ import TraumaResuscitationTab from "./components/tabs/TraumaResuscitationTab";
 import ManagementAlgorithmsTab from "./components/tabs/ManagementAlgorithmsTab";
 import PrehospitalTab from "./components/tabs/PrehospitalTab";
 import ImmunisationTab from "./components/tabs/ImmunisationTab";
+import CoPilotTab from "./components/tabs/CoPilotTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon, Lightning,
-  Lock, X, BookOpen, PersonSimpleBike,
+  Lock, X, BookOpen, PersonSimpleBike, AirplaneInFlight,
 } from "@phosphor-icons/react";
 
 import { initializeApp } from "firebase/app";
@@ -77,6 +78,7 @@ const ALL_TABS = [
   { id: "algorithms",    label: "Management Algorithms",icon: TreeStructure,    Comp: ManagementAlgorithmsTab,  free: false },
   { id: "prehsopital",   label: "Prehospital",          icon: ImageIcon,        Comp: PrehospitalTab,           free: false },
   { id: "immunisation",  label: "Immunisation",         icon: Syringe,          Comp: ImmunisationTab,          free: false },
+  { id: "copilot",       label: "Co-Pilot",             icon: AirplaneInFlight, Comp: CoPilotTab,               free: true  },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
