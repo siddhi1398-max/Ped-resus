@@ -23,6 +23,7 @@ import VitalsTab from "./components/tabs/VitalsTab";
 import ResuscitationTab from "./components/tabs/ResuscitationTab";
 import VentilatorTab from "./components/tabs/VentilatorTab";
 import FluidsTab from "./components/tabs/FluidsTab";
+import ABGTab from "./components/tabs/ABGTab";
 import DrugsTab from "./components/tabs/DrugsTab";
 import SyrupCalculatorTab from "./components/tabs/SyrupCalculatorTab";
 import ScoresTab from "./components/tabs/ScoresTab";
@@ -36,7 +37,7 @@ import CoPilotTab from "./components/tabs/CoPilotTab";
 import {
   Calculator, Wrench, Wind, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon, Lightning,
-  Lock, X, BookOpen, PersonSimpleBike, AirplaneInFlight,
+  Lock, X, BookOpen, PersonSimpleBike, AirplaneInFlight, FlaskConical,
 } from "@phosphor-icons/react";
 
 import { initializeApp } from "firebase/app";
@@ -69,6 +70,7 @@ const ALL_TABS = [
   { id: "resuscitation", label: "Resuscitation",        icon: Lightning,        Comp: ResuscitationTab,         free: false },
   { id: "ventilator",    label: "Ventilator",           icon: Wind,             Comp: VentilatorTab,            free: false },
   { id: "fluids",        label: "Fluids",               icon: Drop,             Comp: FluidsTab,                free: false },
+  { id: "abg",           label: "ABG",                  icon: FlaskConical,     Comp: ABGTab,                   free: false },
   { id: "drugs",         label: "Drug Doses",           icon: Pill,             Comp: DrugsTab,                 free: false },
   { id: "syrup",         label: "Syrup Calculator",     icon: Eyedropper,       Comp: SyrupCalculatorTab,       free: false },
   { id: "scores",        label: "Severity Scores",      icon: ClipboardText,    Comp: ScoresTab,                free: false },
