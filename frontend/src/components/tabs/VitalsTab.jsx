@@ -9,8 +9,8 @@ import {
   CheckCircle, XCircle, ArrowRight, Lightbulb,
 } from "@phosphor-icons/react";
 import { VITALS_ROWS, TEMP_NOTES, SPO2_NOTES, minSBP } from "../../data/vitals";
-import ECGContent from "./components/ECGTab";        
-import VitalsTrendsContent from "./components/VitalsTrendsTab";
+import ECGContent from "./components/tab/ECGTab";        
+import VitalsTrendsContent from "./components/tab/VitalsTrendsTab";
 
 // ─── COLOUR HELPERS ────────────────────────────────────────────────────────────
 const TONE = {
