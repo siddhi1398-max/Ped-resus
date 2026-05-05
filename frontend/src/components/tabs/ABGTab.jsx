@@ -15,7 +15,7 @@ import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning, ArrowRight, CheckCircle, Info,
-  Lightbulb, FlaskConical, ArrowsClockwise,
+  Lightbulb, Flask, ArrowsClockwise,
 } from "@phosphor-icons/react";
 
 // ─── TONE HELPERS ──────────────────────────────────────────────────────────────
