@@ -92,12 +92,12 @@ function interpretABG({ pH, pco2, hco3, pao2, na, cl, albumin, lactate, fio2, ag
   if (isAcidaemia || (!inNormalRange && pH < 7.40)) {
     if (co2High && !hco3High)  { primaryDisorder = "respiratory_acidosis";  tone = "orange"; }
     else if (hco3Low)           { primaryDisorder = "metabolic_acidosis";     tone = "red";    }
-    else if (co2High && hco3High){ primaryDisorder = "mixed_resp_met_acidosis"; tone = "red"; }
+    else if (co2High && hco3Low){ primaryDisorder = "mixed_resp_met_acidosis"; tone = "red"; }
     else                         { primaryDisorder = "metabolic_acidosis";     tone = "red";    }
   } else if (isAlkalaemia || (!inNormalRange && pH > 7.40)) {
     if (co2Low && !hco3Low)    { primaryDisorder = "respiratory_alkalosis";  tone = "blue";   }
     else if (hco3High)          { primaryDisorder = "metabolic_alkalosis";    tone = "violet"; }
-    else if (co2Low && hco3Low) { primaryDisorder = "mixed_resp_met_alkalosis"; tone = "violet"; }
+    else if (co2Low && hco3High) { primaryDisorder = "mixed_resp_met_alkalosis"; tone = "violet"; }
     else                         { primaryDisorder = "metabolic_alkalosis";    tone = "violet"; }
   } else {
     // Normal pH — could be compensated or normal
