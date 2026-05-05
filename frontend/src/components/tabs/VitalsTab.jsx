@@ -10,6 +10,8 @@ import {
 } from "@phosphor-icons/react";
 // FIX 5: Removed unused 'Drop' import
 import { VITALS_ROWS, TEMP_NOTES, SPO2_NOTES, minSBP } from "../../data/vitals";
+import ECGContent from "./components/ECGTab";        
+import VitalsTrendContent from "./components/VitalsTrendTab";
 
 // ─── COLOUR HELPERS ────────────────────────────────────────────────────────────
 const TONE = {
@@ -437,9 +439,11 @@ function QuickReference() {
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 const TABS = [
-  { id: "calculator", label: "Live Calculator", Icon: Heartbeat   },
-  { id: "table",      label: "Reference Table", Icon: Waveform    },
-  { id: "reference",  label: "Quick Reference", Icon: Thermometer },
+  { id: "calculator", label: "Live Calculator",    Icon: Heartbeat   },
+  { id: "table",      label: "Reference Table",    Icon: Waveform    },
+  { id: "reference",  label: "Quick Reference",    Icon: Thermometer },
+  { id: "ecg",        label: "ECG & Rhythms",      Icon: Heartbeat   },
+  { id: "trends",     label: "Vitals Trending",    Icon: Waveform    },
 ];
 
 export default function VitalsTab() {
@@ -501,6 +505,9 @@ export default function VitalsTab() {
       {activeTab === "calculator" && <LiveCalculator />}
       {activeTab === "table"      && <ReferenceTable />}
       {activeTab === "reference"  && <QuickReference />}
+      {activeTab === "ecg"        && <ECGContent />}
+      {activeTab === "trends"     && <VitalsTrendContent />}
+      
 
       <div className="text-[10px] text-slate-400 dark:text-slate-500 italic text-center pt-2">
         Nelson Textbook 21e · PALS 2020 AHA · Harriet Lane Handbook 23e · AAP Bright Futures
