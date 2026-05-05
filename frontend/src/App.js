@@ -26,7 +26,6 @@ import FluidsTab from "./components/tabs/FluidsTab";
 import ABGTab from "./components/tabs/ABGTab";
 import DrugsTab from "./components/tabs/DrugsTab";
 import SyrupCalculatorTab from "./components/tabs/SyrupCalculatorTab";
-import ScoresTab from "./components/tabs/ScoresTab";
 import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
 import NeonatalTab from "./components/tabs/NeonatalTab";
 import TraumaResuscitationTab from "./components/tabs/TraumaResuscitationTab";
@@ -35,7 +34,7 @@ import PrehospitalTab from "./components/tabs/PrehospitalTab";
 import ImmunisationTab from "./components/tabs/ImmunisationTab";
 import CoPilotTab from "./components/tabs/CoPilotTab";
 import {
-  Calculator, Wrench, Wind, Flask, Pill, Heartbeat, TreeStructure, Drop, Eyedropper, Baby,
+  Calculator, Wrench, Wind, Flask, Pill, Heartbeat, TreeStructure, Drop, Eyedropper,MoonStars, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon, Lightning,
   Lock, X, BookOpen, PersonSimpleBike, AirplaneInFlight,
 } from "@phosphor-icons/react";
@@ -73,8 +72,7 @@ const ALL_TABS = [
   { id: "abg",           label: "ABG",                  icon: Flask,            Comp: ABGTab,                   free: false },
   { id: "drugs",         label: "Drugs",                icon: Pill,             Comp: DrugsTab,                 free: false },
   { id: "syrup",         label: "Syrup Calculator",     icon: Eyedropper,       Comp: SyrupCalculatorTab,       free: false },
-  { id: "scores",        label: "Severity Scores",      icon: ClipboardText,    Comp: ScoresTab,                free: false },
-  { id: "sedation",      label: "Sedation & Analgesia", icon: FirstAid,         Comp: SedationAnalgesiaTab,     free: false },
+  { id: "sedation",      label: "Sedation & Analgesia", icon: MoonStars,        Comp: SedationAnalgesiaTab,     free: false },
   { id: "neonatal",      label: "Neonatal",             icon: Baby,             Comp: NeonatalTab,              free: false },
   { id: "trauma",        label: "Trauma Resuscitation", icon: PersonSimpleBike, Comp: TraumaResuscitationTab,   free: false },
   { id: "algorithms",    label: "Management Algorithms",icon: TreeStructure,    Comp: ManagementAlgorithmsTab,  free: false },
