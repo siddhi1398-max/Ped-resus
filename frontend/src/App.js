@@ -11,28 +11,28 @@ import "@fontsource/jetbrains-mono/700.css";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { WeightProvider } from "./context/WeightContext";
 import TopBar from "./components/TopBar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
-import CalculatorTab from "./components/tabs/CalculatorTab";
-import EquipmentTab from "./components/tabs/EquipmentTab";
-import VitalsTab from "./components/tabs/VitalsTab";
-import ResuscitationTab from "./components/tabs/ResuscitationTab";
-import VentilatorTab from "./components/tabs/VentilatorTab";
-import FluidsTab from "./components/tabs/FluidsTab";
-import ABGTab from "./components/tabs/ABGTab";
-import DrugsTab from "./components/tabs/DrugsTab";
-import SyrupCalculatorTab from "./components/tabs/SyrupCalculatorTab";
-import SedationAnalgesiaTab from "./components/tabs/SedationAnalgesiaTab";
-import NeonatalTab from "./components/tabs/NeonatalTab";
-import TraumaResuscitationTab from "./components/tabs/TraumaResuscitationTab";
-import ManagementAlgorithmsTab from "./components/tabs/ManagementAlgorithmsTab";
-import PrehospitalTab from "./components/tabs/PrehospitalTab";
-import ImmunisationTab from "./components/tabs/ImmunisationTab";
-import CoPilotTab from "./components/tabs/CoPilotTab";
+const CalculatorTab           = lazy(() => import("./components/tabs/CalculatorTab"));
+const EquipmentTab            = lazy(() => import("./components/tabs/EquipmentTab"));
+const VitalsTab               = lazy(() => import("./components/tabs/VitalsTab"));
+const ResuscitationTab        = lazy(() => import("./components/tabs/ResuscitationTab"));
+const VentilatorTab           = lazy(() => import("./components/tabs/VentilatorTab"));
+const FluidsTab               = lazy(() => import("./components/tabs/FluidsTab"));
+const ABGTab                  = lazy(() => import("./components/tabs/ABGTab"));
+const DrugsTab                = lazy(() => import("./components/tabs/DrugsTab"));
+const SyrupCalculatorTab      = lazy(() => import("./components/tabs/SyrupCalculatorTab"));
+const SedationAnalgesiaTab    = lazy(() => import("./components/tabs/SedationAnalgesiaTab"));
+const NeonatalTab             = lazy(() => import("./components/tabs/NeonatalTab"));
+const TraumaResuscitationTab  = lazy(() => import("./components/tabs/TraumaResuscitationTab"));
+const ManagementAlgorithmsTab = lazy(() => import("./components/tabs/ManagementAlgorithmsTab"));
+const PrehospitalTab          = lazy(() => import("./components/tabs/PrehospitalTab"));
+const ImmunisationTab         = lazy(() => import("./components/tabs/ImmunisationTab"));
+const CoPilotTab              = lazy(() => import("./components/tabs/CoPilotTab"));
 import {
   Calculator, Wrench, Wind, Flask, Pill, Heartbeat, TreeStructure, Drop, Eyedropper,MoonStars, Baby,
   ClipboardText, Syringe, Stethoscope, FirstAid, Image as ImageIcon, Lightning,
@@ -464,10 +464,16 @@ function Home() {
           </TabsList>
 
           {ALL_TABS.map((t) => (
-            <TabsContent key={t.id} value={t.id} className="mt-6 sm:mt-8 focus-visible:outline-none">
-              <t.Comp />
-            </TabsContent>
-          ))}
+  <TabsContent key={t.id} value={t.id} className="mt-6 sm:mt-8 focus-visible:outline-none">
+    <Suspense fallback={
+      <div className="flex justify-center py-24">
+        <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+      </div>
+    }>
+      <t.Comp />
+    </Suspense>
+  </TabsContent>
+))}
         </Tabs>
 
         <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate.400">
