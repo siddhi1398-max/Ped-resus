@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { SEARCH_INDEX } from "./searchIndex";
+import { SEARCH_INDEX } from "../searchIndex";
 
 // ─── Search Logic ─────────────────────────────────────────────────────────────
 
