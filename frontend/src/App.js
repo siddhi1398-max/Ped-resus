@@ -478,9 +478,11 @@ useEffect(() => {
 
       <TopBar />
 
-      {/* Status bar */}
-      <div className="border-b border-slate-100 dark:border-slate-900 px-4 sm:px-6 py-1.5 flex items-center justify-between max-w-7xl mx-auto">
-        <div>
+     {/* Status bar */}
+      <div className="border-b border-slate-100 dark:border-slate-900 px-4 sm:px-6 py-1.5 flex items-center gap-4 max-w-7xl mx-auto">
+
+        {/* Left: badge */}
+        <div className="flex-shrink-0">
           {paid ? (
             <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Full Access
@@ -493,7 +495,13 @@ useEffect(() => {
           ) : null}
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Centre: search bar */}
+        <div className="flex-1 min-w-0">
+          <SearchBar onResultSelect={handleSearchSelect} />
+        </div>
+
+        {/* Right: user info */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {user ? (
             <>
               {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
@@ -506,12 +514,7 @@ useEffect(() => {
           ) : null}
         </div>
       </div>
-
-      {/* Search bar — between status bar and tabs */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-        <SearchBar onResultSelect={handleSearchSelect} />
-      </div>
-
+        
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <Tabs value={tab} onValueChange={(val) => handleTabClick(val)}>
           <TabsList className="w-full justify-start flex-wrap h-auto p-1.5 bg-slate-100 dark:bg-slate-900 gap-1">
