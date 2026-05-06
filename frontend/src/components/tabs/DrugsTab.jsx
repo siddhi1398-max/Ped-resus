@@ -804,18 +804,18 @@ const TABS = [
 export default function DrugsTab() {
   const { weight } = useWeight();
   const [activeTab, setActiveTab] = useState("drugs");
-  const [q,   setQ]   = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [cat, setCat] = useState("all");
 
-  const filtered = useMemo(() => {
-    const catDef = DRUG_CATEGORIES.find((c) => c.id === cat);
-    const matches = catDef?.matches;
-    return DRUGS.filter((d) => {
-      const matchCat = !matches || matches.includes(d.category);
-      const matchQ   = !q || d.name.toLowerCase().includes(q.toLowerCase()) || d.indication.toLowerCase().includes(q.toLowerCase());
-      return matchCat && matchQ;
-    });
-  }, [q, cat]);
+ const filtered = useMemo(() => {
+  const catDef = DRUG_CATEGORIES.find((c) => c.id === cat);
+  const matches = catDef?.matches;
+  return DRUGS.filter((d) => {
+    const matchCat = !matches || matches.includes(d.category);
+    const matchQ   = !searchQuery || d.name.toLowerCase().includes(searchQuery.toLowerCase()) || d.indication.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchQ;
+  });
+}, [searchQuery, cat]);
 
   return (
     <div className="space-y-5">
@@ -856,8 +856,8 @@ export default function DrugsTab() {
               <Input
                 data-testid="drug-search"
                 placeholder="Search drug or indication…"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
