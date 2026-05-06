@@ -493,13 +493,6 @@ useEffect(() => {
           ) : null}
         </div>
 
-       {/* Search Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-        <SearchBar onResultSelect={handleSearchSelect} />
-      </div>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-            
         <div className="flex items-center gap-2">
           {user ? (
             <>
@@ -512,6 +505,11 @@ useEffect(() => {
             <button onClick={() => setShowDialog(true)} className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign in</button>
           ) : null}
         </div>
+      </div>
+
+      {/* Search bar — between status bar and tabs */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+        <SearchBar onResultSelect={handleSearchSelect} />
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
@@ -533,19 +531,19 @@ useEffect(() => {
           </TabsList>
 
           {ALL_TABS.map((t) => (
-  <TabsContent key={t.id} value={t.id} className="mt-6 sm:mt-8 focus-visible:outline-none">
-    <Suspense fallback={
-      <div className="flex justify-center py-24">
-        <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
-      </div>
-    }>
-      <t.Comp />
-    </Suspense>
-  </TabsContent>
-))}
+            <TabsContent key={t.id} value={t.id} className="mt-6 sm:mt-8 focus-visible:outline-none">
+              <Suspense fallback={
+                <div className="flex justify-center py-24">
+                  <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+                </div>
+              }>
+                <t.Comp />
+              </Suspense>
+            </TabsContent>
+          ))}
         </Tabs>
 
-        <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate.400">
+        <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex flex-col sm:flex-row justify-between gap-4">
             <div>
               <span className="font-mono uppercase tracking-[0.15em] text-slate-700 dark:text-slate-300">PED.RESUS</span>
