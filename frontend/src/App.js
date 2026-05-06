@@ -458,8 +458,6 @@ useEffect(() => {
     setPaid(true);
     setShowDialog(false);
   }, []);
-
-  const [focusId, setFocusId] = useState(null);
   
   const handleSearchSelect = useCallback((entry) => {
   const t = ALL_TABS.find(t => t.id === entry.tab);
@@ -542,7 +540,7 @@ useEffect(() => {
         <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
       </div>
     }>
-      <t.Comp focusId={tab === t.id ? focusId : null} />
+      <t.Comp />
     </Suspense>
   </TabsContent>
 ))}
