@@ -80,6 +80,23 @@ const ALL_TABS = [
   { id: "immunisation",  label: "Immunisation",         icon: Syringe,          Comp: ImmunisationTab,          free: false },
   { id: "copilot",       label: "Co-Pilot",             icon: AirplaneInFlight, Comp: CoPilotTab,               free: true  },
 ];
+const preloadAllTabs = () => {
+  import("./components/tabs/EquipmentTab");
+  import("./components/tabs/VitalsTab");
+  import("./components/tabs/ResuscitationTab");
+  import("./components/tabs/VentilatorTab");
+  import("./components/tabs/FluidsTab");
+  import("./components/tabs/ABGTab");
+  import("./components/tabs/DrugsTab");
+  import("./components/tabs/SyrupCalculatorTab");
+  import("./components/tabs/SedationAnalgesiaTab");
+  import("./components/tabs/NeonatalTab");
+  import("./components/tabs/TraumaResuscitationTab");
+  import("./components/tabs/ManagementAlgorithmsTab");
+  import("./components/tabs/PrehospitalTab");
+  import("./components/tabs/ImmunisationTab");
+  import("./components/tabs/CoPilotTab");
+};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function loadRazorpay() {
@@ -140,7 +157,6 @@ function openRazorpay({ email, uid, displayName, onSuccess, onError, onDismiss }
   const key = process.env.REACT_APP_RAZORPAY_KEY_ID;
   if (!key) { onError("Payment config missing. Contact " + DEV_EMAIL); return; }
 
-  // Freeze values in local vars before passing to Razorpay
   const frozenEmail = email;
   const frozenUid   = uid;
 
@@ -155,12 +171,11 @@ function openRazorpay({ email, uid, displayName, onSuccess, onError, onDismiss }
 
     handler: async (response) => {
       try {
-        // Always save by email
         await savePaidByEmail(frozenEmail, response.razorpay_payment_id);
-        // Also save by UID if logged in
         if (frozenUid) {
           await savePaidByUid(frozenUid, frozenEmail, response.razorpay_payment_id);
         }
+        localStorage.setItem("paid_email", "true");
         onSuccess();
       } catch (e) {
         onError(
@@ -177,7 +192,6 @@ function openRazorpay({ email, uid, displayName, onSuccess, onError, onDismiss }
   rzp.on("payment.failed", (r) => onError("Payment failed: " + r.error.description));
   rzp.open();
 }
-
 // ─── PAYWALL DIALOG ───────────────────────────────────────────────────────────
 function PaywallDialog({ user, onSuccess, onClose }) {
   const [view,  setView]  = useState("choose"); // "choose" | "login" | "pay"
@@ -381,7 +395,8 @@ function Home() {
   const [authReady,  setAuthReady]  = useState(false);
   const [showDialog, setShowDialog] = useState(false);
 
-  useEffect(() => {
+ // useEffect 1 — auth check
+useEffect(() => {
   return onAuthStateChanged(auth, async (u) => {
     setUser(u);
     if (u) {
@@ -393,13 +408,11 @@ function Home() {
           )
         ]);
         setPaid(hasPaid);
-        // ✅ Save result locally so offline visits work
         if (hasPaid) {
           localStorage.setItem(`paid_${u.uid}`, "true");
           setShowDialog(false);
         }
       } catch {
-        // ✅ Firestore failed — check local cache instead
         const cachedPaid = localStorage.getItem(`paid_${u.uid}`) === "true";
         setPaid(cachedPaid);
         if (!cachedPaid) {
@@ -407,10 +420,17 @@ function Home() {
         }
       }
     } else {
-      setPaid(false);
+      const cachedPaid = localStorage.getItem("paid_email") === "true";
+      setPaid(cachedPaid);
     }
     setAuthReady(true);
   });
+}, []);
+
+// useEffect 2 — preload all tabs after 5 seconds
+useEffect(() => {
+  const timer = setTimeout(preloadAllTabs, 5000);
+  return () => clearTimeout(timer);
 }, []);
 
   const handleTabClick = useCallback((tabId) => {
@@ -464,7 +484,7 @@ function Home() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <Tabs value={tab} onValueChange={() => {}}>
+        <Tabs value={tab} onValueChange={(val) => handleTabClick(val)}>
           <TabsList className="w-full justify-start flex-wrap h-auto p-1.5 bg-slate-100 dark:bg-slate-900 gap-1">
             {ALL_TABS.map((t) => {
               const Icon = t.icon;
