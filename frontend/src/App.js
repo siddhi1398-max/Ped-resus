@@ -45,12 +45,12 @@ import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } 
 
 // ─── FIREBASE ─────────────────────────────────────────────────────────────────
 const firebaseConfig = {
-  apiKey:            "AIzaSyC794KlXXWDOANEEtq2-s4cU8J9cD_9Qgs",
-  authDomain:        "pedresus-3fb27.firebaseapp.com",
-  projectId:         "pedresus-3fb27",
-  storageBucket:     "pedresus-3fb27.firebasestorage.app",
-  messagingSenderId: "70799823874",
-  appId:             "1:70799823874:web:b5d4801bf42a0f8c5d431b",
+  apiKey:            process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain:        process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId:         process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket:     process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             process.env.REACT_APP_FIREBASE_APP_ID,
 };
 const firebaseApp    = initializeApp(firebaseConfig);
 const auth           = getAuth(firebaseApp);
