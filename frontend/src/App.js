@@ -76,7 +76,7 @@ const ALL_TABS = [
   { id: "neonatal",      label: "Neonatal",             icon: Baby,             Comp: NeonatalTab,              free: false },
   { id: "trauma",        label: "Trauma Resuscitation", icon: PersonSimpleBike, Comp: TraumaResuscitationTab,   free: false },
   { id: "algorithms",    label: "Management Algorithms",icon: TreeStructure,    Comp: ManagementAlgorithmsTab,  free: false },
-  { id: "prehsopital",   label: "Prehospital",          icon: ImageIcon,        Comp: PrehospitalTab,           free: false },
+  { id: "prehospital",   label: "Prehospital",          icon: ImageIcon,        Comp: PrehospitalTab,           free: false },
   { id: "immunisation",  label: "Immunisation",         icon: Syringe,          Comp: ImmunisationTab,          free: false },
   { id: "copilot",       label: "Co-Pilot",             icon: AirplaneInFlight, Comp: CoPilotTab,               free: true  },
 ];
