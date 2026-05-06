@@ -399,21 +399,34 @@ function Home() {
 useEffect(() => {
   return onAuthStateChanged(auth, async (u) => {
     setUser(u);
+
+    // Save user info locally when online
     if (u) {
+      localStorage.setItem("cached_uid", u.uid);
+      localStorage.setItem("cached_email", u.email || "");
+    }
+
+    // If offline and u is null, try cached user
+    const effectiveUid   = u?.uid   || localStorage.getItem("cached_uid");
+    const effectiveEmail = u?.email || localStorage.getItem("cached_email");
+
+    if (effectiveUid || effectiveEmail) {
       try {
         const hasPaid = await Promise.race([
-          checkAndLinkPaid(u.uid, u.email),
+          checkAndLinkPaid(effectiveUid, effectiveEmail),
           new Promise((_, reject) =>
             setTimeout(() => reject(new Error("timeout")), 5000)
           )
         ]);
         setPaid(hasPaid);
         if (hasPaid) {
-          localStorage.setItem(`paid_${u.uid}`, "true");
+          localStorage.setItem(`paid_${effectiveUid}`, "true");
           setShowDialog(false);
         }
       } catch {
-        const cachedPaid = localStorage.getItem(`paid_${u.uid}`) === "true";
+        const cachedPaid =
+          localStorage.getItem(`paid_${effectiveUid}`) === "true" ||
+          localStorage.getItem("paid_email") === "true";
         setPaid(cachedPaid);
         if (!cachedPaid) {
           toast.error("Couldn't verify access. Check your connection.");
@@ -423,6 +436,7 @@ useEffect(() => {
       const cachedPaid = localStorage.getItem("paid_email") === "true";
       setPaid(cachedPaid);
     }
+
     setAuthReady(true);
   });
 }, []);
