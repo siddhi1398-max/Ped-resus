@@ -14,6 +14,7 @@ import { ThemeProvider } from "next-themes";
 import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { WeightProvider } from "./context/WeightContext";
 import TopBar from "./components/TopBar";
+import SearchBar from "./components/SearchBar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
@@ -458,6 +459,15 @@ useEffect(() => {
     setShowDialog(false);
   }, []);
 
+  const handleSearchSelect = useCallback((entry) => {
+  const t = ALL_TABS.find(t => t.id === entry.tab);
+  if (t?.free || paid) {
+    setTab(entry.tab);
+  } else {
+    setShowDialog(true);
+  }
+}, [paid]);
+
   return (
     <div className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-slate-100"
       style={{ fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
@@ -483,6 +493,13 @@ useEffect(() => {
           ) : null}
         </div>
 
+       {/* Search Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+        <SearchBar onResultSelect={handleSearchSelect} />
+      </div>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            
         <div className="flex items-center gap-2">
           {user ? (
             <>
