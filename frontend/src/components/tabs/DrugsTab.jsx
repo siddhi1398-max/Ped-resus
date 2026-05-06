@@ -343,8 +343,8 @@ function DoseValue({ doseStr, weight, toneText }) {
 }
 
 // ─── NEBULISED DRUG CARD ─────────────────────────────────────────────────────
-function NebDrugCard({ drug, weight }) {
-  const [open, setOpen] = useState(false);
+function NebDrugCard({ drug, weight, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen);
   const t = TONE[drug.classColor] || TONE.slate;
 
   // Preview dose shown in collapsed header — first dose entry, first bracket resolved
@@ -482,7 +482,7 @@ function NebDrugCard({ drug, weight }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // NEBULISED DRUGS TAB
 // ═══════════════════════════════════════════════════════════════════════════════
-function NebulisedDrugsTab({ weight }) {
+function NebulisedDrugsTab({ weight, focusId = null }) {
   const [section, setSection] = useState("drugs");
 
   return (
@@ -510,9 +510,9 @@ function NebulisedDrugsTab({ weight }) {
       {/* ── NEBULISED DRUGS ── */}
       {section === "drugs" && (
         <div className="space-y-3">
-          {NEBULISED_DRUGS.map(drug => (
-            <NebDrugCard key={drug.id} drug={drug} weight={weight} />
-          ))}
+         {NEBULISED_DRUGS.map(drug => (
+  <NebDrugCard key={drug.id} drug={drug} weight={weight} defaultOpen={focusId === drug.id} />
+))}
 
           {/* Combination reference */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-4">
@@ -801,11 +801,11 @@ const TABS = [
   { id: "nebs",    label: "Nebulised Drugs", Icon: Wind },
 ];
 
-export default function DrugsTab() {
+export default function DrugsTab({ focusId = null }) {
   const { weight } = useWeight();
-  const [activeTab, setActiveTab] = useState("drugs");
-  const [q,   setQ]   = useState("");
-  const [cat, setCat] = useState("all");
+  const [activeTab, setActiveTab] = useState(
+    focusId?.startsWith("neb") ? "nebs" : "drugs"
+  );
 
   const filtered = useMemo(() => {
     const catDef = DRUG_CATEGORIES.find((c) => c.id === cat);
@@ -921,7 +921,7 @@ export default function DrugsTab() {
       )}
 
       {/* ── NEBULISED DRUGS ── */}
-      {activeTab === "nebs" && <NebulisedDrugsTab weight={weight} />}
+      {activeTab === "nebs" && <NebulisedDrugsTab weight={weight} focusId={focusId} />}
     </div>
   );
 }
