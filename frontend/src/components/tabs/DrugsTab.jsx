@@ -807,7 +807,7 @@ export default function DrugsTab({ focusId = null }) {
     focusId?.startsWith("neb") ? "nebs" : "drugs"
   );
 
-  const filtered = useMemo(() => {
+ const filtered = useMemo(() => {
     const catDef = DRUG_CATEGORIES.find((c) => c.id === cat);
     const matches = catDef?.matches;
     return DRUGS.filter((d) => {
@@ -815,6 +815,7 @@ export default function DrugsTab({ focusId = null }) {
       const matchQ   = !q || d.name.toLowerCase().includes(q.toLowerCase()) || d.indication.toLowerCase().includes(q.toLowerCase());
       return matchCat && matchQ;
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, cat]);
 
   return (
