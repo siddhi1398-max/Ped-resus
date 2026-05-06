@@ -3,23 +3,14 @@ import { SEARCH_INDEX } from "../searchIndex";
 
 // ─── Search Logic ─────────────────────────────────────────────────────────────
 
-function searchIndex(query) {
+function runSearch(query) {
   const q = query.trim().toLowerCase();
   if (!q) return [];
-
   const terms = q.split(/\s+/);
 
   const scored = SEARCH_INDEX.map((entry) => {
-    const haystack = [
-      entry.label,
-      entry.description,
-      ...(entry.keywords ?? []),
-      entry.section,
-      entry.tabLabel,
-    ]
-      .join(" ")
-      .toLowerCase();
-
+    const haystack = [entry.label, entry.description, ...(entry.keywords ?? []), entry.section, entry.tabLabel]
+      .join(" ").toLowerCase();
     let score = 0;
     for (const term of terms) {
       if (entry.label.toLowerCase().includes(term)) score += 10;
@@ -28,9 +19,7 @@ function searchIndex(query) {
       if (entry.section.toLowerCase().includes(term)) score += 2;
       if (entry.tabLabel.toLowerCase().includes(term)) score += 1;
     }
-    const allMatch = terms.every((t) => haystack.includes(t));
-    if (allMatch && terms.length > 1) score += 5;
-
+    if (terms.every((t) => haystack.includes(t)) && terms.length > 1) score += 5;
     return { entry, score };
   });
 
@@ -41,7 +30,7 @@ function searchIndex(query) {
     .map(({ entry }) => entry);
 }
 
-// ─── Tab accent colours (matching PedResus card border colours) ───────────────
+// ─── Tab colours ──────────────────────────────────────────────────────────────
 
 const TAB_COLORS = {
   calculator:    "#e53e3e",
@@ -62,40 +51,46 @@ const TAB_COLORS = {
   copilot:       "#805ad5",
 };
 
+// ─── Fonts — matching PedResus exactly ────────────────────────────────────────
+
+const MONO = "'JetBrains Mono', 'Courier New', monospace";
+const BODY = "'IBM Plex Sans', system-ui, sans-serif";
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function SearchBar({ onResultSelect }) {
-  const [query, setQuery]     = useState("");
+  const [query,   setQuery]   = useState("");
   const [results, setResults] = useState([]);
-  const [open, setOpen]       = useState(false);
-  const [active, setActive]   = useState(-1);
+  const [open,    setOpen]    = useState(false);
+  const [active,  setActive]  = useState(-1);
 
   const inputRef    = useRef(null);
   const dropdownRef = useRef(null);
 
-  const runSearch = useCallback(() => {
+  const handleSearch = useCallback(() => {
     if (!query.trim()) { setResults([]); setOpen(false); return; }
-    const hits = searchIndex(query);
+    const hits = runSearch(query);
     setResults(hits);
     setOpen(hits.length > 0);
     setActive(-1);
   }, [query]);
 
+  // Close on outside click
   useEffect(() => {
-    function handleClick(e) {
+    function onClickOutside(e) {
       if (
         dropdownRef.current && !dropdownRef.current.contains(e.target) &&
         inputRef.current    && !inputRef.current.contains(e.target)
       ) setOpen(false);
     }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
   function handleKeyDown(e) {
     if (e.key === "Enter") {
       if (active >= 0 && results[active]) selectResult(results[active]);
-      else runSearch();
+      else handleSearch();
       return;
     }
     if (!open) return;
@@ -105,7 +100,7 @@ export default function SearchBar({ onResultSelect }) {
   }
 
   function selectResult(entry) {
-    setQuery(entry.label);
+    setQuery("");
     setOpen(false);
     setActive(-1);
     onResultSelect?.(entry);
@@ -120,20 +115,21 @@ export default function SearchBar({ onResultSelect }) {
 
   return (
     <div style={s.wrapper}>
-      {/* Input row */}
-      <div style={s.inputRow}>
-        <span style={s.icon}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-        </span>
+
+      {/* ── Input pill — styled like FULL ACCESS badge but bigger ── */}
+      <div style={s.pill} ref={inputRef}>
+
+        {/* Search icon */}
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+          stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          style={{ flexShrink: 0 }}>
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
 
         <input
-          ref={inputRef}
           type="text"
           value={query}
-          placeholder="SEARCH DRUGS, EQUIPMENT, ALGORITHMS..."
+          placeholder="Search drugs, equipment, algorithms..."
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => { if (results.length) setOpen(true); }}
@@ -143,28 +139,37 @@ export default function SearchBar({ onResultSelect }) {
           aria-label="Search PedResus"
         />
 
+        {/* Clear button */}
         {query && (
           <button onClick={clearSearch} style={s.clearBtn} aria-label="Clear">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         )}
 
-        <button onClick={runSearch} style={s.searchBtn}>
-          SEARCH
+        {/* Divider */}
+        <div style={s.divider} />
+
+        {/* Search trigger */}
+        <button onClick={handleSearch} style={s.searchBtn} aria-label="Search">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
         </button>
+
       </div>
 
-      {/* Dropdown */}
+      {/* ── Dropdown ── */}
       {open && (
         <ul ref={dropdownRef} style={s.dropdown} role="listbox">
           {results.length === 0 ? (
-            <li style={s.noResults}>NO RESULTS FOUND</li>
+            <li style={s.noResults}>No results found</li>
           ) : (
             results.map((entry, i) => {
-              const color = TAB_COLORS[entry.tab] ?? "#e53e3e";
+              const color    = TAB_COLORS[entry.tab] ?? "#64748b";
               const isActive = active === i;
               return (
                 <li
@@ -174,32 +179,30 @@ export default function SearchBar({ onResultSelect }) {
                   onMouseEnter={() => setActive(i)}
                   onMouseLeave={() => setActive(-1)}
                   onClick={() => selectResult(entry)}
-                  style={{
-                    ...s.resultItem,
-                    background: isActive ? "#f7f8fa" : "#ffffff",
-                  }}
+                  style={{ ...s.resultItem, background: isActive ? "#f8fafc" : "#fff" }}
                 >
+                  {/* Left accent bar */}
                   <span style={{ ...s.accentBar, background: color }} />
 
+                  {/* Content */}
                   <span style={s.resultBody}>
                     <span style={s.metaRow}>
                       <span style={{
                         ...s.tabBadge,
                         color,
-                        borderColor: color + "55",
-                        background: color + "10",
+                        borderColor: color + "44",
+                        background:  color + "10",
                       }}>
                         {entry.tabLabel.toUpperCase()}
                       </span>
                       <span style={s.dot}>·</span>
                       <span style={s.section}>{entry.section.toUpperCase()}</span>
                     </span>
-
                     <span style={s.label}>{entry.label}</span>
                     <span style={s.desc}>{entry.description}</span>
                   </span>
 
-                  <span style={{ ...s.arrow, color: isActive ? color : "#cbd5e0" }}>›</span>
+                  <span style={{ ...s.arrow, color: isActive ? color : "#e2e8f0" }}>›</span>
                 </li>
               );
             })
@@ -212,166 +215,193 @@ export default function SearchBar({ onResultSelect }) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const MONO = "'JetBrains Mono', 'Courier New', monospace";
-const BODY = "'IBM Plex Sans', system-ui, sans-serif";
-
 const s = {
   wrapper: {
     position: "relative",
+    // Let parent (flex-1) control width — just cap it
     width: "100%",
-    maxWidth: 380,
+    maxWidth: 340,
     margin: "0 auto",
-    fontFamily: BODY,
   },
-  inputRow: {
-    display: "flex",
-    alignItems: "center",
-    background: "rgba(255,255,255,0.07)",
-    border: "1px solid rgba(0,0,0,0.12)",
-    borderRadius: 999,
-    padding: "0 6px 0 14px",
-    gap: 6,
-    backdropFilter: "blur(4px)",
+
+  // Pill matches FULL ACCESS badge exactly:
+  // text-[10px] font-mono uppercase tracking-widest border rounded-full px-2 py-0.5
+  // We scale it up slightly for usability
+  pill: {
+    display:        "inline-flex",
+    alignItems:     "center",
+    gap:            6,
+    width:          "100%",
+    fontFamily:     MONO,
+    fontSize:       10,
+    fontWeight:     600,
+    letterSpacing:  "0.12em",
+    textTransform:  "uppercase",
+    color:          "#475569",
+    background:     "transparent",
+    border:         "1px solid #cbd5e0",
+    borderRadius:   9999,
+    padding:        "3px 8px 3px 10px",
+    boxSizing:      "border-box",
   },
-  icon: {
-    color: "#94a3b8",
-    display: "flex",
-    alignItems: "center",
-    flexShrink: 0,
-  },
+
   input: {
-    flex: 1,
-    border: "none",
-    outline: "none",
-    fontFamily: BODY,
-    fontSize: 12,
-    letterSpacing: "0.01em",
-    padding: "8px 4px",
-    background: "transparent",
-    color: "#2d3748",
-    minWidth: 0,
+    flex:           1,
+    border:         "none",
+    outline:        "none",
+    fontFamily:     MONO,
+    fontSize:       10,
+    fontWeight:     500,
+    letterSpacing:  "0.08em",
+    textTransform:  "uppercase",
+    background:     "transparent",
+    color:          "#1e293b",
+    minWidth:       0,
+    padding:        0,
   },
+
   clearBtn: {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    color: "#94a3b8",
-    display: "flex",
-    alignItems: "center",
-    padding: "4px",
+    background:  "none",
+    border:      "none",
+    cursor:      "pointer",
+    color:       "#94a3b8",
+    display:     "flex",
+    alignItems:  "center",
+    padding:     "2px",
     borderRadius: 999,
+    flexShrink:  0,
+  },
+
+  divider: {
+    width:      1,
+    height:     12,
+    background: "#e2e8f0",
     flexShrink: 0,
   },
+
+  // Icon-only search button — subtle, no colour
   searchBtn: {
-    background: "rgba(0,0,0,0.06)",
-    color: "#475569",
-    border: "1px solid rgba(0,0,0,0.08)",
+    background:  "none",
+    border:      "none",
+    cursor:      "pointer",
+    color:       "#94a3b8",
+    display:     "flex",
+    alignItems:  "center",
+    padding:     "2px 2px",
     borderRadius: 999,
-    padding: "5px 14px",
-    fontFamily: BODY,
-    fontSize: 11,
-    fontWeight: 600,
-    letterSpacing: "0.03em",
-    cursor: "pointer",
-    flexShrink: 0,
-    whiteSpace: "nowrap",
-    transition: "background 0.15s",
+    flexShrink:  0,
   },
+
+  // Dropdown — clean card
   dropdown: {
-    position: "absolute",
-    top: "calc(100% + 6px)",
-    left: 0,
-    right: 0,
+    position:   "absolute",
+    top:        "calc(100% + 6px)",
+    left:       "50%",
+    transform:  "translateX(-50%)",
+    width:      "max(100%, 420px)",
     background: "#ffffff",
-    border: "1px solid #e2e8f0",
-    borderRadius: 16,
-    boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
-    zIndex: 1000,
-    listStyle: "none",
-    margin: 0,
-    padding: "6px 0",
-    maxHeight: 440,
-    overflowY: "auto",
+    border:     "1px solid #e2e8f0",
+    borderRadius: 12,
+    boxShadow:  "0 8px 24px rgba(0,0,0,0.10)",
+    zIndex:     1000,
+    listStyle:  "none",
+    margin:     0,
+    padding:    "4px 0",
+    maxHeight:  440,
+    overflowY:  "auto",
   },
+
   noResults: {
-    padding: "14px 16px",
-    fontFamily: BODY,
-    fontSize: 12,
-    color: "#a0aec0",
+    padding:    "12px 16px",
+    fontFamily: MONO,
+    fontSize:   10,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color:      "#94a3b8",
   },
+
   resultItem: {
-    display: "flex",
-    alignItems: "stretch",
-    gap: 12,
-    padding: "10px 14px 10px 0",
-    cursor: "pointer",
-    transition: "background 0.1s",
-    borderBottom: "1px solid #f7f8fa",
+    display:     "flex",
+    alignItems:  "stretch",
+    gap:         10,
+    padding:     "9px 12px 9px 0",
+    cursor:      "pointer",
+    transition:  "background 0.1s",
+    borderBottom: "1px solid #f1f5f9",
   },
+
   accentBar: {
-    width: 3,
+    width:    3,
     minWidth: 3,
     borderRadius: "0 2px 2px 0",
     flexShrink: 0,
   },
+
   resultBody: {
-    flex: 1,
-    display: "flex",
+    flex:          1,
+    display:       "flex",
     flexDirection: "column",
-    gap: 3,
-    minWidth: 0,
+    gap:           3,
+    minWidth:      0,
   },
+
   metaRow: {
-    display: "flex",
+    display:    "flex",
     alignItems: "center",
-    gap: 5,
+    gap:        5,
   },
+
   tabBadge: {
-    fontFamily: MONO,
-    fontSize: 9,
-    fontWeight: 600,
-    letterSpacing: "0.05em",
-    padding: "1px 6px",
-    borderRadius: 20,
-    border: "1px solid",
-    whiteSpace: "nowrap",
+    fontFamily:    MONO,
+    fontSize:      9,
+    fontWeight:    600,
+    letterSpacing: "0.08em",
+    padding:       "1px 5px",
+    borderRadius:  20,
+    border:        "1px solid",
+    whiteSpace:    "nowrap",
   },
+
   dot: {
-    color: "#cbd5e0",
-    fontSize: 12,
+    color:    "#cbd5e0",
+    fontSize: 11,
   },
+
   section: {
-    fontFamily: MONO,
-    fontSize: 9,
-    letterSpacing: "0.05em",
-    color: "#a0aec0",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
+    fontFamily:    MONO,
+    fontSize:      9,
+    letterSpacing: "0.07em",
+    color:         "#94a3b8",
+    whiteSpace:    "nowrap",
+    overflow:      "hidden",
+    textOverflow:  "ellipsis",
   },
+
   label: {
-    fontFamily: BODY,
-    fontSize: 13,
-    fontWeight: 600,
-    color: "#1a202c",
-    lineHeight: 1.3,
+    fontFamily:  BODY,
+    fontSize:    13,
+    fontWeight:  600,
+    color:       "#0f172a",
+    lineHeight:  1.3,
   },
+
   desc: {
-    fontFamily: MONO,
-    fontSize: 10,
+    fontFamily:    MONO,
+    fontSize:      10,
     letterSpacing: "0.02em",
-    color: "#718096",
-    lineHeight: 1.5,
-    overflow: "hidden",
-    display: "-webkit-box",
+    color:         "#64748b",
+    lineHeight:    1.5,
+    overflow:      "hidden",
+    display:       "-webkit-box",
     WebkitLineClamp: 2,
     WebkitBoxOrient: "vertical",
   },
+
   arrow: {
-    fontSize: 20,
-    alignSelf: "center",
-    flexShrink: 0,
-    transition: "color 0.1s",
-    paddingRight: 4,
+    fontSize:    18,
+    alignSelf:   "center",
+    flexShrink:  0,
+    paddingRight: 2,
+    transition:  "color 0.1s",
   },
 };
