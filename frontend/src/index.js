@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 
-// Suppress non-critical Emergent/PerformanceServerTiming errors
 window.addEventListener("error", function (e) {
   if (
     e.error instanceof DOMException &&
@@ -22,3 +22,16 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+serviceWorkerRegistration.register({
+  onUpdate: () => {
+    const { toast } = require("sonner");
+    toast("New version available — refresh to update", {
+      action: {
+        label: "Refresh",
+        onClick: () => window.location.reload(),
+      },
+      duration: Infinity,
+    });
+  }
+});
