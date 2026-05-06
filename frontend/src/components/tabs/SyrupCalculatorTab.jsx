@@ -34,7 +34,7 @@ export default function SyrupCalculatorTab() {
   const { weight } = useWeight();
   const [search,   setSearch]   = useState("");
   const [category, setCategory] = useState("all");
-  const [expanded, setExpanded] = useState(null);
+  const [expanded, setExpanded] = useState(focusId);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
