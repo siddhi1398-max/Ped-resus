@@ -382,18 +382,36 @@ function Home() {
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
-    return onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      if (u) {
-        const hasPaid = await checkAndLinkPaid(u.uid, u.email);
+  return onAuthStateChanged(auth, async (u) => {
+    setUser(u);
+    if (u) {
+      try {
+        const hasPaid = await Promise.race([
+          checkAndLinkPaid(u.uid, u.email),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("timeout")), 5000)
+          )
+        ]);
         setPaid(hasPaid);
-        if (hasPaid) setShowDialog(false);
-      } else {
-        setPaid(false);
+        // ✅ Save result locally so offline visits work
+        if (hasPaid) {
+          localStorage.setItem(`paid_${u.uid}`, "true");
+          setShowDialog(false);
+        }
+      } catch {
+        // ✅ Firestore failed — check local cache instead
+        const cachedPaid = localStorage.getItem(`paid_${u.uid}`) === "true";
+        setPaid(cachedPaid);
+        if (!cachedPaid) {
+          toast.error("Couldn't verify access. Check your connection.");
+        }
       }
-      setAuthReady(true);
-    });
-  }, []);
+    } else {
+      setPaid(false);
+    }
+    setAuthReady(true);
+  });
+}, []);
 
   const handleTabClick = useCallback((tabId) => {
     const t = ALL_TABS.find(t => t.id === tabId);
