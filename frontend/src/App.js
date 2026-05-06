@@ -459,6 +459,8 @@ useEffect(() => {
     setShowDialog(false);
   }, []);
 
+  const [focusId, setFocusId] = useState(null);
+  
   const handleSearchSelect = useCallback((entry) => {
   const t = ALL_TABS.find(t => t.id === entry.tab);
   if (t?.free || paid) {
@@ -533,17 +535,17 @@ useEffect(() => {
             })}
           </TabsList>
 
-          {ALL_TABS.map((t) => (
-            <TabsContent key={t.id} value={t.id} className="mt-6 sm:mt-8 focus-visible:outline-none">
-              <Suspense fallback={
-                <div className="flex justify-center py-24">
-                  <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
-                </div>
-              }>
-                <t.Comp />
-              </Suspense>
-            </TabsContent>
-          ))}
+         {ALL_TABS.map((t) => (
+  <TabsContent key={t.id} value={t.id} className="mt-6 sm:mt-8 focus-visible:outline-none">
+    <Suspense fallback={
+      <div className="flex justify-center py-24">
+        <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
+      </div>
+    }>
+      <t.Comp focusId={tab === t.id ? focusId : null} />
+    </Suspense>
+  </TabsContent>
+))}
         </Tabs>
 
         <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
