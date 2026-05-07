@@ -6,7 +6,7 @@
 //       Cote & Lerman (eds) A Practice of Anesthesia for Infants & Children 6e
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning, Lightbulb, CaretDown, ArrowSquareOut, CheckCircle,
@@ -366,9 +366,23 @@ function ExpandedDetail({ bestFor, cautions, pearl, brands, formulations, commen
 }
 
 // ─── PSA AGENT TABLE ──────────────────────────────────────────────────────────
-function PSAAgentTable({ weight }) {
+function PSAAgentTable({ weight, searchEntry }) {
   const [expanded, setExpanded] = useState(null);
 
+  useEffect(() => {
+    if (!searchEntry?.drugId) return;
+    const match = PSA_AGENTS.find(a =>
+      searchEntry.drugId.toLowerCase().includes(a.name.split(" ")[0].toLowerCase())
+    );
+    if (match) {
+      setExpanded(match.name);
+      setTimeout(() => {
+        document.getElementById(`sed-psa-${match.name}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 150);
+    }
+  }, [searchEntry]);
+  
   const wDose = (doseStr) => {
     if (!doseStr || doseStr === "—") return "—";
     const mgKg  = doseStr.match(/([\d.]+)–?([\d.]*)\s*mg\/kg/);
@@ -408,7 +422,8 @@ function PSAAgentTable({ weight }) {
               return (
                 <>
                   <tr key={a.name}
-                    onClick={() => setExpanded(isOpen ? null : a.name)}
+  id={`sed-psa-${a.name}`}
+  onClick={() => setExpanded(isOpen ? null : a.name)}
                     className={`border-t border-slate-100 dark:border-slate-800 cursor-pointer transition-colors ${
                       isOpen ? "bg-slate-50 dark:bg-slate-800/60" : "hover:bg-slate-50 dark:hover:bg-slate-800/30"
                     }`}>
@@ -462,8 +477,23 @@ function PSAAgentTable({ weight }) {
 }
 
 // ─── ORAL SEDATION TABLE ──────────────────────────────────────────────────────
-function OralSedationTable({ weight }) {
+function OralSedationTable({ weight, searchEntry }) {
   const [expanded, setExpanded] = useState(null);
+
+  useEffect(() => {
+    if (!searchEntry?.drugId) return;
+    // match by drugId — e.g. "triclofos-sedation" matches drug name "Triclofos Sodium"
+    const match = ORAL_SEDATIVES.find(os =>
+      searchEntry.drugId.toLowerCase().includes(os.drug.split(" ")[0].toLowerCase())
+    );
+    if (match) {
+      setExpanded(match.drug);
+      setTimeout(() => {
+        document.getElementById(`sed-oral-${match.drug}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 150);
+    }
+  }, [searchEntry]);
 
   const calcDose = (doseStr, wt) => {
     const mgKg  = doseStr.match(/([\d.]+)–?([\d.]*)\s*mg\/kg/);
@@ -508,8 +538,9 @@ function OralSedationTable({ weight }) {
               const isOpen = expanded === os.drug;
               return (
                 <>
-                  <tr key={os.drug}
-                    onClick={() => setExpanded(isOpen ? null : os.drug)}
+                 <tr key={os.drug}
+  id={`sed-oral-${os.drug}`}
+  onClick={() => setExpanded(isOpen ? null : os.drug)}
                     className={`border-t border-slate-100 dark:border-slate-800 cursor-pointer transition-colors ${
                       isOpen ? "bg-slate-50 dark:bg-slate-800/60" : "hover:bg-slate-50 dark:hover:bg-slate-800/30"
                     }`}>
@@ -701,14 +732,14 @@ export default function SedationAnalgesiaTab({ searchEntry }) {
       </div>
 
       {/* 1 — PSA AGENTS */}
-      <Section title="PSA Agent Comparison — Weight-Based Doses" sectionKey="psa" defaultOpen={true}>
-        <PSAAgentTable weight={weight} />
+      <Section title="PSA Agent Comparison — Weight-Based Doses" sectionKey="psa" defaultOpen={!!searchEntry}>
+        <PSAAgentTable weight={weight} searchEntry={searchEntry} />
       </Section>
 
       {/* 2 — ORAL SEDATION */}
-      <Section title="Oral Sedative Agents — Paediatric (Indian Brands)" sectionKey="oralSedation">
-        <OralSedationTable weight={weight} />
-      </Section>
+     <Section title="Oral Sedative Agents — Paediatric (Indian Brands)" sectionKey="oralSedation" defaultOpen={!!searchEntry}>
+  <OralSedationTable weight={weight} searchEntry={searchEntry} />
+</Section>
 
       {/* 3 — PSA PRINCIPLES */}
       <Section title="PSA Principles — Pre / During / Post Procedure" sectionKey="psaPrinciples">
