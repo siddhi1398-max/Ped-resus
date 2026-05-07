@@ -2,7 +2,7 @@
 // Sub-tabs: Drug Doses Table · Nebulised Drugs
 // Sources: Piyush Gupta 18th Ed · IAP · Ontario Lung Care Pathway · GINA Paediatric
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useWeight } from "../../context/WeightContext";
 import { useSearchNavigate } from "../../hooks/useSearchNavigate";
 import { DRUGS, DRUG_CATEGORIES, computeDrugDose } from "../../data/drugs";
@@ -825,27 +825,39 @@ export default function DrugsTab() {
   const [expandedDrugId, setExpandedDrugId] = useState(null); //
 
   //
-   useSearchNavigate("drugs", ({ section, drugId }) => {
-    if (section === "Nebulised Drugs") {
-      setActiveTab("nebs");
-    } else {
-      setActiveTab("drugs");
-      if (drugId) {
-        const matchedDrug = DRUGS.find(d => d.id === drugId);
-        if (matchedDrug) {
-          setSearchQuery(matchedDrug.name);
-          setCat("all");
-        }
-      }
-    }
+  const handleSearchNav = useCallback(({ section, drugId }) => {
+  if (section === "Nebulised Drugs") {
+    setActiveTab("nebs");
     if (drugId) {
       setExpandedDrugId(drugId);
       setTimeout(() => {
-        document.getElementById(`drug-row-${drugId}`)
+        document.getElementById(`neb-drug-${drugId}`)
           ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 250);
+      }, 200);
     }
-  });
+    return;
+  }
+
+  setActiveTab("drugs");
+
+  if (drugId) {
+    const matchedDrug = DRUGS.find(d => d.id === drugId);
+    if (matchedDrug) {
+      const matchingCat = DRUG_CATEGORIES.find(c =>
+        c.matches?.includes(matchedDrug.category)
+      );
+      setCat(matchingCat?.id ?? "all");
+      setSearchQuery(matchedDrug.name);
+    }
+    setExpandedDrugId(drugId);
+    setTimeout(() => {
+      document.getElementById(`drug-row-${drugId}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 400);
+  }
+}, []);
+
+useSearchNavigate("drugs", handleSearchNav);
 
   // ← ADD HERE
   useEffect(() => {
