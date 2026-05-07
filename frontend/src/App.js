@@ -497,7 +497,7 @@ useEffect(() => {
 
         {/* Centre: search bar */}
         <div className="flex-1 min-w-0">
-          <SearchBar onResultSelect={handleSearchSelect} />
+          <SearchBar onNavigate={(tabId) => handleTabClick(tabId)} />
         </div>
 
         {/* Right: user info */}
