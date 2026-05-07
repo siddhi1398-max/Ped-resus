@@ -99,12 +99,20 @@ export default function SearchBar({ onResultSelect }) {
     else if (e.key === "Escape") { setOpen(false); setActive(-1); }
   }
 
-  function selectResult(entry) {
-    setQuery("");
-    setOpen(false);
-    setActive(-1);
-    onResultSelect?.(entry);
-  }
+ function selectResult(entry) {
+  setQuery("");
+  setOpen(false);
+  setActive(-1);
+  onResultSelect?.(entry);
+  // Dispatch deep-link event — App.jsx will switch tab, then fire this after delay
+  // We store entry on window so App can re-dispatch after tab mounts
+  window._pendingSearchNav = {
+    tab:     entry.tab,
+    id:      entry.id,
+    drugId:  entry.drugId  ?? null,
+    section: entry.section ?? null,
+  };
+}
 
   function clearSearch() {
     setQuery("");
