@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
-import { useSearchNavigate } from "../../hooks/useSearchNavigate";
 import { ORAL_DRUGS, ORAL_CATEGORIES, computeSyrupDose } from "../../data/oralFormulations";
 import { MagnifyingGlass, Drop, Pill, Info, Warning, ArrowRight } from "@phosphor-icons/react";
 
@@ -31,23 +30,24 @@ const BORDER_ACCENT = {
 };
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
-export default function SyrupCalculatorTab() {
+export default function SyrupCalculatorTab({ searchEntry }) {
   const { weight } = useWeight();
   const [search,   setSearch]   = useState("");
   const [category, setCategory] = useState("all");
   const [expandedDrugId, setExpandedDrugId] = useState(null);
   const [expanded, setExpanded] = useState(null); 
   
-  useSearchNavigate("syrup", ({ drugId }) => {
-  if (drugId) {
-    setExpandedDrugId(drugId);
-    setExpanded(drugId);          
-    setTimeout(() => {
-      document.getElementById(`syrup-drug-${drugId}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 250);
-  }
-});
+  useEffect(() => {
+  if (!searchEntry?.drugId) return;
+  setSearch("");
+  setCategory("all");
+  setExpanded(searchEntry.drugId);
+  setExpandedDrugId(searchEntry.drugId);
+  setTimeout(() => {
+    document.getElementById(`syrup-drug-${searchEntry.drugId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 150);
+}, [searchEntry]);
 
 useEffect(() => {
   if (expandedDrugId) {
