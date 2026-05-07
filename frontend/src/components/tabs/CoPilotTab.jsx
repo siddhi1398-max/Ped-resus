@@ -1,7 +1,7 @@
 // CockpitTab.jsx — Resus Cockpit / Co-Pilot
 // Active resuscitation decision-support: CPR timer, adrenaline intervals,
 // drug log with timestamps, quick-dose strip, event log
-// Designed to run in the background during a live resuscitation
+// AHA PALS 2020/2025 · APLS 6e · ERC 2021
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useWeight } from "../../context/WeightContext";
@@ -9,12 +9,13 @@ import {
   Play, Pause, ArrowCounterClockwise, CheckCircle, Siren,
   Drop, Pill, Lightning, Timer, ClipboardText, X, Bell,
   BellSlash, ArrowRight, Circle, SpeakerHigh, SpeakerSlash,
+  Warning,
 } from "@phosphor-icons/react";
 
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────────
 const CPR_CYCLE_SEC    = 120;  // 2 min
 const ADR_INTERVAL_SEC = 210;  // 3 min 30 sec
-const SHOCK_INTERVAL_SEC = 120; // 2 min
+const SHOCK_INTERVAL_SEC = 120;
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function fmt(sec) {
@@ -32,77 +33,137 @@ function now() {
 function calcDoses(weight) {
   const w = weight;
   return {
-    adrCardiac:   { label: "Adrenaline — Cardiac Arrest", dose: `${(w * 0.01).toFixed(2)} mg`,               vol: `${(w * 0.1).toFixed(1)} mL of 1:10,000`,                      route: "IV/IO",      interval: "Every 3–5 min" },
-    adrAnaphylax: { label: "Adrenaline — Anaphylaxis",    dose: `${Math.min((w * 0.01).toFixed(2), 0.5)} mg`, vol: `${Math.min((w * 0.01).toFixed(2), 0.5)} mL of 1:1,000`,       route: "IM",         interval: "Repeat at 5 min PRN" },
-    atropine:     { label: "Atropine",                    dose: `${Math.max((w * 0.02).toFixed(2), 0.1)} mg (min 0.1)`, vol: `${Math.max((w * 0.02).toFixed(2), 0.1)} mL of 1 mg/mL`, route: "IV/IO",  interval: "Once; repeat × 1" },
-    bicarb:       { label: "Sodium Bicarbonate 8.4%",     dose: `${(w * 1).toFixed(0)} mL`,                  vol: `${(w * 1).toFixed(0)} mL neat`,                               route: "IV/IO slow", interval: "After 2nd adrenaline" },
-    calcium:      { label: "Calcium Chloride 10%",        dose: `${(w * 0.2).toFixed(1)} mL`,                vol: `${(w * 0.2).toFixed(1)} mL`,                                  route: "IV/IO slow", interval: "PRN (hypoCa, CCB OD)" },
-    glucose10:    { label: "Glucose 10%",                 dose: `${(w * 2).toFixed(0)} mL`,                  vol: `${(w * 2).toFixed(0)} mL`,                                    route: "IV/IO",      interval: "For hypoglycaemia" },
-    adenosine:    { label: "Adenosine (SVT)",             dose: `${Math.min((w * 0.1).toFixed(1), 6)} mg`,   vol: `${Math.min((w * 0.1).toFixed(1), 6)} mL of 3 mg/mL`,          route: "IV rapid",   interval: "Repeat 0.2 mg/kg (max 12 mg)" },
-    defib:        { label: "Defibrillation",              dose: `${(w * 4).toFixed(0)} J`,                   vol: `Max ${Math.min(w * 10, 360).toFixed(0)} J`,                    route: "Non-sync",   interval: "After every 2 min CPR" },
-    cardioversion:{ label: "Cardioversion (Sync)",        dose: `${(w * 1).toFixed(0)} J`,                   vol: `Escalate to ${(w * 2).toFixed(0)} J`,                          route: "Sync",       interval: "Conscious sedation first" },
-    midazolam:    { label: "Midazolam (Seizure)",         dose: `${(w * 0.2).toFixed(2)} mg`,                vol: `${(w * 0.2).toFixed(2)} mL buccal/IN`,                        route: "IN/buccal/IV",interval: "Phase 1 (0–5 min)" },
+    // ── Standard IV/IO adrenaline ──────────────────────────────────────────
+    adrCardiac: {
+      label:    "Adrenaline — Cardiac Arrest (IV/IO)",
+      dose:     `${(w * 0.01).toFixed(2)} mg`,
+      vol:      `${(w * 0.1).toFixed(1)} mL of 1:10,000`,
+      route:    "IV/IO",
+      interval: "Every 3–5 min",
+      highlight: false,
+    },
+
+    // ── ETT adrenaline — LAST RESORT (AHA PALS 2020/2025) ─────────────────
+    // Use ONLY when IV/IO cannot be established. 10× the IV dose.
+    // Concentration: 1:1,000 (NOT 1:10,000). Flush 5 mL NS, 5 PPV after.
+    adrETT: {
+      label:    "Adrenaline — ETT Route ⚠ (last resort)",
+      dose:     `${(w * 0.1).toFixed(2)} mg`,
+      vol:      `${(w * 0.1).toFixed(1)} mL of 1:1,000  +  5 mL NS flush`,
+      route:    "ETT",
+      interval: "Every 3–5 min · then 5 PPV · stop compressions during delivery",
+      highlight: true,   // rendered differently — red warning styling
+      warning:  "Use 1:1,000 concentration (NOT 1:10,000). Dose is 10× IV dose. Poor absorption — establish IV/IO ASAP. AHA 2025: IV/IO always preferred.",
+    },
+
+    // ── Anaphylaxis ────────────────────────────────────────────────────────
+    adrAnaphylax: {
+      label:    "Adrenaline — Anaphylaxis",
+      dose:     `${Math.min((w * 0.01).toFixed(2), 0.5)} mg`,
+      vol:      `${Math.min((w * 0.01).toFixed(2), 0.5)} mL of 1:1,000`,
+      route:    "IM",
+      interval: "Repeat at 5 min PRN",
+    },
+
+    // ── Others ────────────────────────────────────────────────────────────
+    atropine: {
+      label:    "Atropine",
+      dose:     `${Math.max((w * 0.02).toFixed(2), 0.1)} mg (min 0.1)`,
+      vol:      `${Math.max((w * 0.02).toFixed(2), 0.1)} mL of 1 mg/mL`,
+      route:    "IV/IO",
+      interval: "Once; repeat × 1",
+    },
+    bicarb: {
+      label:    "Sodium Bicarbonate 8.4%",
+      dose:     `${(w * 1).toFixed(0)} mL`,
+      vol:      `${(w * 1).toFixed(0)} mL neat`,
+      route:    "IV/IO slow",
+      interval: "After 2nd adrenaline",
+    },
+    calcium: {
+      label:    "Calcium Chloride 10%",
+      dose:     `${(w * 0.2).toFixed(1)} mL`,
+      vol:      `${(w * 0.2).toFixed(1)} mL`,
+      route:    "IV/IO slow",
+      interval: "PRN (hypoCa, CCB OD)",
+    },
+    glucose10: {
+      label:    "Glucose 10%",
+      dose:     `${(w * 2).toFixed(0)} mL`,
+      vol:      `${(w * 2).toFixed(0)} mL`,
+      route:    "IV/IO",
+      interval: "For hypoglycaemia",
+    },
+    adenosine: {
+      label:    "Adenosine (SVT)",
+      dose:     `${Math.min((w * 0.1).toFixed(1), 6)} mg`,
+      vol:      `${Math.min((w * 0.1).toFixed(1), 6)} mL of 3 mg/mL`,
+      route:    "IV rapid",
+      interval: "Repeat 0.2 mg/kg (max 12 mg)",
+    },
+    defib: {
+      label:    "Defibrillation",
+      dose:     `${(w * 4).toFixed(0)} J`,
+      vol:      `Max ${Math.min(w * 10, 360).toFixed(0)} J`,
+      route:    "Non-sync",
+      interval: "After every 2 min CPR",
+    },
+    cardioversion: {
+      label:    "Cardioversion (Sync)",
+      dose:     `${(w * 1).toFixed(0)} J`,
+      vol:      `Escalate to ${(w * 2).toFixed(0)} J`,
+      route:    "Sync",
+      interval: "Conscious sedation first",
+    },
+    midazolam: {
+      label:    "Midazolam (Seizure)",
+      dose:     `${(w * 0.2).toFixed(2)} mg`,
+      vol:      `${(w * 0.2).toFixed(2)} mL buccal/IN`,
+      route:    "IN/buccal/IV",
+      interval: "Phase 1 (0–5 min)",
+    },
   };
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// AUDIO ALERT HOOK
-// Web Audio API (synth beeps) + SpeechSynthesis (voice prompts)
-// Both are zero-dependency, zero-file, work fully offline.
-// The AudioContext is created lazily on first user gesture (Start Resus button)
-// to satisfy browser autoplay policies.
-// ═══════════════════════════════════════════════════════════════════════════════
+// ─── AUDIO ALERT HOOK ─────────────────────────────────────────────────────────
 function useAudioAlert(alertsEnabled, voiceEnabled) {
   const ctxRef = useRef(null);
 
-  // Call once on a user-gesture to unlock the AudioContext
   const unlockAudio = useCallback(() => {
     if (!ctxRef.current) {
       ctxRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
-    if (ctxRef.current.state === "suspended") {
-      ctxRef.current.resume();
-    }
+    if (ctxRef.current.state === "suspended") ctxRef.current.resume();
   }, []);
 
-  // Core tone generator
   const beep = useCallback((freq = 880, dur = 0.2, vol = 0.4, type = "sine") => {
     if (!alertsEnabled) return;
     try {
-      const ctx  = ctxRef.current;
+      const ctx = ctxRef.current;
       if (!ctx) return;
       const osc  = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.type            = type;
+      osc.type = type;
       osc.frequency.value = freq;
       gain.gain.setValueAtTime(vol, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + dur);
-    } catch (e) {
-      console.warn("Audio error:", e);
-    }
+    } catch (e) { console.warn("Audio error:", e); }
   }, [alertsEnabled]);
 
-  // Voice prompt — cancels any in-progress utterance first
   const speak = useCallback((text) => {
     if (!alertsEnabled || !voiceEnabled) return;
     try {
       window.speechSynthesis.cancel();
-      const u  = new SpeechSynthesisUtterance(text);
-      u.rate   = 1.05;
-      u.pitch  = 1;
-      u.volume = 1;
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.05; u.pitch = 1; u.volume = 1;
       window.speechSynthesis.speak(u);
-    } catch (e) {
-      console.warn("Speech error:", e);
-    }
+    } catch (e) { console.warn("Speech error:", e); }
   }, [alertsEnabled, voiceEnabled]);
 
-  // ── Named alert patterns ──────────────────────────────────────────────────
-  // CPR cycle complete: two short beeps + one long ascending beep
   const alertCpr = useCallback(() => {
     beep(660, 0.15, 0.5, "sine");
     setTimeout(() => beep(660, 0.15, 0.5, "sine"), 220);
@@ -110,22 +171,17 @@ function useAudioAlert(alertsEnabled, voiceEnabled) {
     setTimeout(() => speak("Check rhythm and pulse"), 500);
   }, [beep, speak]);
 
-  // Adrenaline due: four rapid high-pitched square pulses — hard to miss
   const alertAdrenaline = useCallback(() => {
-    [0, 160, 320, 480].forEach(t =>
-      setTimeout(() => beep(1100, 0.12, 0.45, "square"), t)
-    );
+    [0, 160, 320, 480].forEach(t => setTimeout(() => beep(1100, 0.12, 0.45, "square"), t));
     setTimeout(() => speak("Adrenaline due now"), 700);
   }, [beep, speak]);
 
-  // Adrenaline 60-second warning: two softer amber pulses
   const alertAdrenalineSoon = useCallback(() => {
     beep(880, 0.15, 0.3, "sine");
     setTimeout(() => beep(880, 0.15, 0.3, "sine"), 250);
     setTimeout(() => speak("Adrenaline in one minute"), 400);
   }, [beep, speak]);
 
-  // Shock logged: three ascending tones
   const alertShock = useCallback(() => {
     beep(440, 0.12, 0.4, "triangle");
     setTimeout(() => beep(550, 0.12, 0.4, "triangle"), 140);
@@ -133,7 +189,6 @@ function useAudioAlert(alertsEnabled, voiceEnabled) {
     setTimeout(() => speak("Shock delivered. Resume CPR immediately."), 500);
   }, [beep, speak]);
 
-  // Resus started: single soft confirmation tone
   const alertStart = useCallback(() => {
     beep(660, 0.1, 0.3, "sine");
     setTimeout(() => beep(880, 0.25, 0.35, "sine"), 150);
@@ -160,24 +215,21 @@ function CircleTimer({ elapsed, total, color = "#3b82f6", label, size = 120 }) {
         style={{ transition: "stroke-dashoffset 1s linear" }} />
       <text x={size/2} y={size/2 - 6} textAnchor="middle" fontSize="18"
         fontFamily="monospace" fontWeight="700" fill="currentColor"
-        className="text-slate-900 dark:text-white">
-        {fmt(total - elapsed)}
-      </text>
+        className="text-slate-900 dark:text-white">{fmt(total - elapsed)}</text>
       <text x={size/2} y={size/2 + 12} textAnchor="middle" fontSize="9"
-        fontFamily="monospace" fill="#64748b">
-        {label}
-      </text>
+        fontFamily="monospace" fill="#64748b">{label}</text>
     </svg>
   );
 }
 
-// ─── DRUG LOG ITEM ─────────────────────────────────────────────────────────────
+// ─── LOG ENTRY ─────────────────────────────────────────────────────────────────
 function LogEntry({ entry, onDelete }) {
   return (
     <div className="flex items-start gap-2 text-xs border-b border-slate-100 dark:border-slate-800 py-1.5">
       <span className="font-mono text-slate-400 flex-shrink-0 tabular-nums">{entry.time}</span>
       <span className={`flex-shrink-0 w-1.5 h-1.5 rounded-full mt-1 ${
-        entry.type === "drug"   ? "bg-blue-500"
+        entry.type === "drug"  ? "bg-blue-500"
+        : entry.type === "ett" ? "bg-orange-500"
         : entry.type === "shock" ? "bg-red-500"
         : entry.type === "cpr"   ? "bg-emerald-500"
         : "bg-slate-400"
@@ -193,6 +245,42 @@ function LogEntry({ entry, onDelete }) {
 
 // ─── DOSE CARD ─────────────────────────────────────────────────────────────────
 function DoseCard({ drug, onLog }) {
+  // ETT adrenaline gets a distinct red-bordered warning card
+  if (drug.highlight) {
+    return (
+      <div className="rounded-xl border-2 border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950/20 p-3">
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <div className="font-bold text-xs text-orange-800 dark:text-orange-200 leading-tight"
+               style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+            {drug.label}
+          </div>
+          <span className="text-[9px] font-mono text-orange-600 dark:text-orange-400 flex-shrink-0 border border-orange-300 dark:border-orange-700 rounded px-1.5 py-0.5">
+            {drug.route}
+          </span>
+        </div>
+        <div className="font-black text-xl text-orange-600 dark:text-orange-400 leading-none mb-0.5"
+             style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+          {drug.dose}
+        </div>
+        <div className="text-[10px] font-mono text-orange-700 dark:text-orange-300 mb-1">{drug.vol}</div>
+        <div className="text-[10px] text-orange-600 dark:text-orange-400 font-mono mb-2">{drug.interval}</div>
+        {drug.warning && (
+          <div className="flex items-start gap-1.5 rounded-lg bg-orange-100 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 px-2 py-1.5 mb-2">
+            <Warning size={9} weight="fill" className="text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+            <span className="text-[9px] font-mono text-orange-700 dark:text-orange-300 leading-relaxed">
+              {drug.warning}
+            </span>
+          </div>
+        )}
+        <button
+          onClick={() => onLog(drug.label, drug.dose, drug.route, "ett")}
+          className="w-full flex items-center justify-center gap-1.5 text-[10px] font-mono uppercase tracking-widest py-1.5 rounded-lg border border-orange-300 dark:border-orange-700 bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 hover:bg-orange-200 transition-all">
+          <CheckCircle size={10} weight="fill" /> Log ETT dose
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3">
       <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -211,10 +299,69 @@ function DoseCard({ drug, onLog }) {
       <div className="text-[10px] font-mono text-slate-400 mb-1">{drug.vol}</div>
       <div className="text-[10px] text-amber-600 dark:text-amber-400 font-mono mb-2">{drug.interval}</div>
       <button
-        onClick={() => onLog(drug.label, drug.dose, drug.route)}
+        onClick={() => onLog(drug.label, drug.dose, drug.route, "drug")}
         className="w-full flex items-center justify-center gap-1.5 text-[10px] font-mono uppercase tracking-widest py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-all">
         <CheckCircle size={10} weight="fill" /> Log dose
       </button>
+    </div>
+  );
+}
+
+// ─── 5H5T PANEL ───────────────────────────────────────────────────────────────
+// AHA PALS 2020/2025: 5H + 5T (not 4H4T — paediatric PALS uses this set)
+function FiveHFiveTPanel() {
+  const H5 = [
+    { h: "Hypoxia",               action: "100% O₂, optimise airway, check ETT position + bilateral breath sounds, ETCO₂" },
+    { h: "Hypovolaemia",          action: "10–20 mL/kg NS/blood IV/IO bolus — consider haemorrhage, fluid losses, sepsis" },
+    { h: "Hydrogen ion (Acidosis)",action: "Blood gas — HCO₃⁻ 1 mEq/kg slow IV/IO if pH <7.1 and prolonged arrest" },
+    { h: "Hypo/Hyperkalaemia",    action: "ECG, electrolytes — CaCl 20 mg/kg IV for hyperkalaemia; KCl if severe hypokalaemia" },
+    { h: "Hypothermia",           action: "Core temp — active re-warming; continue CPR until temp ≥30°C" },
+  ];
+  const T5 = [
+    { t: "Tension Pneumothorax",  action: "Needle decompression 2nd ICS MCL or 4–5th ICS AAL immediately — don't wait for CXR" },
+    { t: "Tamponade (cardiac)",   action: "FAST exam — pericardiocentesis 18G subxiphoid approach under US guidance" },
+    { t: "Toxins",                action: "History, tox screen — naloxone 0.01 mg/kg IV/IO for opioids; specific antidotes per agent" },
+    { t: "Thrombosis (PE/CA)",    action: "Suspect if no response + risk factors — thrombolytics (alteplase 0.5–1 mg/kg); ECMO" },
+    { t: "Trauma",                action: "Control haemorrhage, tension pneumo, pericardial tamponade; damage control resuscitation" },
+  ];
+
+  return (
+    <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 overflow-hidden">
+      <div className="px-4 py-3 border-b border-amber-200 dark:border-amber-800 flex items-center gap-2">
+        <Warning size={13} weight="fill" className="text-amber-600 dark:text-amber-400" />
+        <span className="font-bold text-xs text-amber-700 dark:text-amber-300 uppercase tracking-widest font-mono">
+          Reversible Causes — 5H &amp; 5T (AHA PALS 2020/2025)
+        </span>
+      </div>
+      <div className="p-4 grid sm:grid-cols-2 gap-3">
+        {/* 5H */}
+        <div>
+          <div className="font-mono text-[9px] uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-2">5H</div>
+          <div className="space-y-2">
+            {H5.map(({ h, action }) => (
+              <div key={h} className="rounded-lg bg-white dark:bg-slate-900 border border-amber-100 dark:border-amber-900 px-3 py-2">
+                <div className="font-bold text-[11px] text-amber-800 dark:text-amber-200">{h}</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono leading-relaxed">{action}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* 5T */}
+        <div>
+          <div className="font-mono text-[9px] uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-2">5T</div>
+          <div className="space-y-2">
+            {T5.map(({ t, action }) => (
+              <div key={t} className="rounded-lg bg-white dark:bg-slate-900 border border-amber-100 dark:border-amber-900 px-3 py-2">
+                <div className="font-bold text-[11px] text-amber-800 dark:text-amber-200">{t}</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono leading-relaxed">{action}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="px-4 pb-3 text-[9px] font-mono text-amber-500 dark:text-amber-600">
+        Check at every rhythm review. Treat simultaneously — do not interrupt high-quality CPR to investigate.
+      </div>
     </div>
   );
 }
@@ -224,57 +371,38 @@ export default function CockpitTab() {
   const { weight } = useWeight();
   const doses = calcDoses(weight);
 
-  // ── Resus clock ──
   const [resusRunning, setResusRunning] = useState(false);
   const [resusElapsed, setResusElapsed] = useState(0);
+  const [alerts, setAlerts]             = useState(true);
+  const [voice,  setVoice]              = useState(true);
 
-  // ── Audio toggles ──
-  const [alerts, setAlerts]     = useState(true);  // master beep on/off
-  const [voice,  setVoice]      = useState(true);  // voice prompts on/off
-
-  // ── CPR cycle ──
   const [cprElapsed, setCprElapsed] = useState(0);
   const [cprCycles,  setCprCycles]  = useState(0);
 
-  // ── Adrenaline interval ──
-  const [adrSince, setAdrSince] = useState(null); // resusElapsed when last given
+  const [adrSince, setAdrSince] = useState(null);
   const [adrCount, setAdrCount] = useState(0);
-  // Track whether the 60-sec warning has fired for the current interval
   const adrWarnedRef = useRef(false);
 
-  // ── Defibrillation ──
   const [shockCount,   setShockCount]   = useState(0);
   const [shockElapsed, setShockElapsed] = useState(0);
 
-  // ── Drug log ──
-  const [log, setLog] = useState([]);
-
-  // ── View ──
+  const [log,           setLog]           = useState([]);
   const [activeSection, setActiveSection] = useState("cockpit");
+  // Show 5H5T panel toggle
+  const [show5H5T, setShow5H5T] = useState(false);
 
-  const intervalRef = useRef(null);
-
-  // Instantiate audio hook — re-evaluates when toggles change
-  const {
-    unlockAudio,
-    alertCpr,
-    alertAdrenaline,
-    alertAdrenalineSoon,
-    alertShock,
-    alertStart,
-  } = useAudioAlert(alerts, voice);
-
-  // ── Derived adrenaline countdown ──
-  const adrDue     = adrSince !== null ? Math.max(0, ADR_INTERVAL_SEC - (resusElapsed - adrSince)) : null;
-  const adrOverdue = adrDue === 0;
-
-  // Keep latest values accessible inside tick without stale closures
+  const intervalRef     = useRef(null);
   const resusElapsedRef = useRef(resusElapsed);
   const adrSinceRef     = useRef(adrSince);
   useEffect(() => { resusElapsedRef.current = resusElapsed; }, [resusElapsed]);
   useEffect(() => { adrSinceRef.current     = adrSince;     }, [adrSince]);
 
-  // ── Tick ──────────────────────────────────────────────────────────────────
+  const { unlockAudio, alertCpr, alertAdrenaline, alertAdrenalineSoon, alertShock, alertStart } =
+    useAudioAlert(alerts, voice);
+
+  const adrDue     = adrSince !== null ? Math.max(0, ADR_INTERVAL_SEC - (resusElapsed - adrSince)) : null;
+  const adrOverdue = adrDue === 0;
+
   const addEvent = useCallback((text, type = "event") => {
     setLog(p => [{ id: Date.now() + Math.random(), time: now(), text, type }, ...p]);
   }, []);
@@ -282,7 +410,6 @@ export default function CockpitTab() {
   const tick = useCallback(() => {
     setResusElapsed(p => p + 1);
 
-    // CPR cycle
     setCprElapsed(p => {
       const next = p + 1;
       if (next >= CPR_CYCLE_SEC) {
@@ -294,22 +421,18 @@ export default function CockpitTab() {
       return next;
     });
 
-    // Shock interval counter
     setShockElapsed(p => p + 1);
 
-    // Adrenaline warning & overdue (uses refs to avoid stale closure)
-    const elapsed  = resusElapsedRef.current + 1;
-    const since    = adrSinceRef.current;
+    const elapsed = resusElapsedRef.current + 1;
+    const since   = adrSinceRef.current;
     if (since !== null) {
       const timeSince = elapsed - since;
-      // 60-second warning — fire once per interval
       if (timeSince === ADR_INTERVAL_SEC - 60 && !adrWarnedRef.current) {
         adrWarnedRef.current = true;
         alertAdrenalineSoon();
       }
-      // Due alert — fires exactly when countdown hits zero
       if (timeSince === ADR_INTERVAL_SEC) {
-        adrWarnedRef.current = false; // reset for next interval
+        adrWarnedRef.current = false;
         alertAdrenaline();
       }
     }
@@ -324,9 +447,7 @@ export default function CockpitTab() {
     return () => clearInterval(intervalRef.current);
   }, [resusRunning, tick]);
 
-  // ── Actions ───────────────────────────────────────────────────────────────
   function startResus() {
-    // Must be called directly on user gesture — unlocks AudioContext
     unlockAudio();
     setResusRunning(true);
     setResusElapsed(0);
@@ -339,16 +460,17 @@ export default function CockpitTab() {
     setLog([]);
     adrWarnedRef.current = false;
     addEvent("Resuscitation started", "event");
-    // Small delay so state settles before speaking
     setTimeout(() => alertStart(), 200);
   }
 
-  function logDrug(label, dose, route) {
-    addEvent(`${label} — ${dose} ${route}`, "drug");
-    if (label.includes("Adrenaline") && label.includes("Cardiac")) {
+  // Accept optional logType so ETT doses get orange dot
+  function logDrug(label, dose, route, logType = "drug") {
+    addEvent(`${label} — ${dose} ${route}`, logType);
+    // Only IV/IO adrenaline resets the interval timer
+    if (label.includes("Adrenaline") && label.includes("IV/IO")) {
       setAdrSince(resusElapsedRef.current);
       setAdrCount(c => c + 1);
-      adrWarnedRef.current = false; // reset warning for new interval
+      adrWarnedRef.current = false;
     }
   }
 
@@ -391,11 +513,11 @@ export default function CockpitTab() {
           Resus Cockpit
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-          Active resuscitation co-pilot · {weight} kg patient · AHA PALS 2020 · APLS
+          Active resuscitation co-pilot · {weight} kg · AHA PALS 2020/2025 · APLS 6e · ERC 2021
         </p>
       </div>
 
-      {/* MASTER CONTROL BAR */}
+      {/* ── MASTER CONTROL BAR ─────────────────────────────────────────────── */}
       <div className={`rounded-xl border-2 p-4 ${
         resusRunning
           ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/30"
@@ -430,12 +552,8 @@ export default function CockpitTab() {
                 {fmt(resusElapsed)}
               </div>
             )}
-
-            {/* Audio toggle buttons */}
             <div className="flex items-center gap-1.5">
-              {/* Beep toggle */}
-              <button
-                onClick={() => setAlerts(p => !p)}
+              <button onClick={() => setAlerts(p => !p)}
                 title={alerts ? "Mute beeps" : "Unmute beeps"}
                 className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border font-mono text-[10px] uppercase tracking-wider transition-all ${
                   alerts
@@ -445,10 +563,7 @@ export default function CockpitTab() {
                 {alerts ? <Bell size={11} weight="fill" /> : <BellSlash size={11} weight="fill" />}
                 <span className="hidden sm:inline">{alerts ? "Beeps" : "Muted"}</span>
               </button>
-
-              {/* Voice toggle */}
-              <button
-                onClick={() => setVoice(p => !p)}
+              <button onClick={() => setVoice(p => !p)}
                 title={voice ? "Mute voice" : "Unmute voice"}
                 className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border font-mono text-[10px] uppercase tracking-wider transition-all ${
                   voice
@@ -462,47 +577,37 @@ export default function CockpitTab() {
           </div>
         </div>
 
-        {/* Adrenaline overdue banner */}
-        {resusRunning && adrOverdue && alerts && (
+        {/* Adrenaline alerts */}
+        {resusRunning && adrOverdue && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-red-600 text-white px-3 py-2 text-xs font-bold animate-pulse">
             <Bell size={12} weight="fill" />
             ADRENALINE DUE —{" "}
-            {adrCount === 0
-              ? "First dose not yet given"
-              : `Last given ${fmt(resusElapsed - adrSince)} ago`}
+            {adrCount === 0 ? "First dose not yet given" : `Last given ${fmt(resusElapsed - adrSince)} ago`}
           </div>
         )}
-
-        {/* Adrenaline 60-second warning banner */}
         {resusRunning && adrDue !== null && adrDue > 0 && adrDue <= 60 && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-500 text-white px-3 py-2 text-xs font-bold">
             <Bell size={12} weight="fill" /> Adrenaline due in {fmt(adrDue)}
           </div>
         )}
 
-        {/* Audio status hint when resus not started */}
         {!resusRunning && (
           <div className="mt-3 text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
             <Bell size={10} />
-            Audio alerts:{" "}
-            <span className={alerts ? "text-blue-500" : "text-slate-400"}>
-              {alerts ? "beeps on" : "beeps off"}
-            </span>
+            Audio:{" "}
+            <span className={alerts ? "text-blue-500" : "text-slate-400"}>{alerts ? "beeps on" : "beeps off"}</span>
             {" · "}
-            <span className={voice ? "text-violet-500" : "text-slate-400"}>
-              {voice ? "voice on" : "voice off"}
-            </span>
-            {" — "}
-            <span>toggle above before starting</span>
+            <span className={voice ? "text-violet-500" : "text-slate-400"}>{voice ? "voice on" : "voice off"}</span>
+            {" — toggle above before starting"}
           </div>
         )}
       </div>
 
-      {/* SUB-NAV */}
+      {/* ── SUB-NAV ────────────────────────────────────────────────────────── */}
       <div className="flex gap-2 flex-wrap">
         {[
-          { id: "cockpit", label: "Timers"                  },
-          { id: "drugs",   label: "Quick Drugs"             },
+          { id: "cockpit", label: "Timers"                    },
+          { id: "drugs",   label: "Quick Drugs"               },
           { id: "log",     label: `Event Log (${log.length})` },
         ].map(s => (
           <button key={s.id} onClick={() => setActiveSection(s.id)}
@@ -514,11 +619,11 @@ export default function CockpitTab() {
         ))}
       </div>
 
-      {/* ── TIMERS ── */}
+      {/* ── TIMERS ─────────────────────────────────────────────────────────── */}
       {activeSection === "cockpit" && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {/* CPR cycle timer */}
+            {/* CPR cycle */}
             <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 flex flex-col items-center gap-2">
               <CircleTimer elapsed={cprElapsed} total={CPR_CYCLE_SEC} color="#10b981" label="CPR cycle" size={110} />
               <div className="text-[9px] font-mono text-slate-400">Cycle #{cprCycles + 1}</div>
@@ -534,13 +639,12 @@ export default function CockpitTab() {
                 elapsed={adrSince !== null ? resusElapsed - adrSince : 0}
                 total={ADR_INTERVAL_SEC}
                 color={adrOverdue ? "#dc2626" : "#3b82f6"}
-                label="Adrenaline"
-                size={110} />
+                label="Adrenaline" size={110} />
               <div className="text-[9px] font-mono text-slate-400">
                 {adrCount === 0 ? "Not yet given" : `Given ×${adrCount}`}
               </div>
               <button
-                onClick={() => logDrug("Adrenaline — Cardiac Arrest", `${(weight * 0.01).toFixed(2)} mg`, "IV/IO")}
+                onClick={() => logDrug("Adrenaline — Cardiac Arrest (IV/IO)", `${(weight * 0.01).toFixed(2)} mg`, "IV/IO", "drug")}
                 disabled={!resusRunning}
                 className="text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 disabled:opacity-40 transition-all">
                 Log adrenaline
@@ -559,7 +663,7 @@ export default function CockpitTab() {
               </button>
             </div>
 
-            {/* Stats box */}
+            {/* Stats */}
             <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 space-y-3">
               <div className="font-mono text-[9px] uppercase tracking-widest text-slate-400">Session</div>
               {[
@@ -587,9 +691,7 @@ export default function CockpitTab() {
                 <div className="font-black text-3xl text-violet-700 dark:text-violet-300"
                      style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
                   {defibDose} J{" "}
-                  <span className="text-sm font-normal text-violet-400">
-                    / max {Math.round(defibMax)} J
-                  </span>
+                  <span className="text-sm font-normal text-violet-400">/ max {Math.round(defibMax)} J</span>
                 </div>
                 <div className="text-xs text-violet-500 font-mono mt-0.5">
                   4 J/kg · Non-sync · After every 2 min CPR
@@ -606,7 +708,7 @@ export default function CockpitTab() {
             </div>
           </div>
 
-          {/* Post-ROSC checklist */}
+          {/* Post-ROSC */}
           <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 p-4">
             <div className="font-bold text-xs text-emerald-700 dark:text-emerald-300 mb-2 uppercase tracking-widest font-mono">
               Post-ROSC Targets
@@ -629,12 +731,43 @@ export default function CockpitTab() {
               ))}
             </div>
           </div>
+
+          {/* 5H5T — collapsible */}
+          <div>
+            <button
+              onClick={() => setShow5H5T(p => !p)}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/30 transition-all">
+              <div className="flex items-center gap-2">
+                <Warning size={13} weight="fill" className="text-amber-600 dark:text-amber-400" />
+                <span className="font-bold text-xs text-amber-700 dark:text-amber-300 uppercase tracking-widest font-mono">
+                  Reversible Causes — 5H &amp; 5T
+                </span>
+              </div>
+              <span className="text-amber-500 text-[10px] font-mono">
+                {show5H5T ? "▲ hide" : "▼ show"}
+              </span>
+            </button>
+            {show5H5T && (
+              <div className="mt-2">
+                <FiveHFiveTPanel />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* ── QUICK DRUGS ── */}
+      {/* ── QUICK DRUGS ────────────────────────────────────────────────────── */}
       {activeSection === "drugs" && (
         <div className="space-y-4">
+          {/* ETT adrenaline warning banner */}
+          <div className="flex items-start gap-2 rounded-xl border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-950/20 px-3 py-2.5 text-xs text-orange-700 dark:text-orange-300">
+            <Warning size={13} weight="fill" className="flex-shrink-0 mt-0.5 text-orange-500" />
+            <div>
+              <strong>ETT adrenaline</strong> — last resort only. Establish IV/IO within 90 seconds.
+              ETT absorption is unreliable during CPR (limited pulmonary blood flow).
+              IV/IO route is always preferred (AHA PALS 2025).
+            </div>
+          </div>
           <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">
             All doses calculated for {weight} kg — tap "Log dose" to add to event log
           </div>
@@ -646,7 +779,7 @@ export default function CockpitTab() {
         </div>
       )}
 
-      {/* ── EVENT LOG ── */}
+      {/* ── EVENT LOG ──────────────────────────────────────────────────────── */}
       {activeSection === "log" && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -673,18 +806,16 @@ export default function CockpitTab() {
                 Events appear here as the resus progresses
               </div>
             ) : (
-              log.map(entry => (
-                <LogEntry key={entry.id} entry={entry} onDelete={deleteLog} />
-              ))
+              log.map(entry => <LogEntry key={entry.id} entry={entry} onDelete={deleteLog} />)
             )}
           </div>
-          {/* Legend */}
           <div className="flex flex-wrap gap-4 text-[10px] font-mono text-slate-400">
             {[
-              { color: "bg-blue-500",    label: "Drug given"     },
-              { color: "bg-red-500",     label: "Shock / Defib"  },
-              { color: "bg-emerald-500", label: "CPR event"      },
-              { color: "bg-slate-400",   label: "Clinical event" },
+              { color: "bg-blue-500",    label: "Drug (IV/IO)"     },
+              { color: "bg-orange-500",  label: "ETT drug"         },
+              { color: "bg-red-500",     label: "Shock / Defib"    },
+              { color: "bg-emerald-500", label: "CPR event"        },
+              { color: "bg-slate-400",   label: "Clinical event"   },
             ].map(l => (
               <span key={l.label} className="flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${l.color}`} /> {l.label}
@@ -695,7 +826,9 @@ export default function CockpitTab() {
       )}
 
       <div className="text-[10px] text-slate-400 dark:text-slate-500 italic text-center pt-2">
-        AHA PALS 2020 · APLS · ERC Guidelines 2021 · Always verify against local resuscitation protocols
+        AHA PALS 2020/2025 · APLS 6e · ERC 2021 ·
+        ETT epinephrine: 0.1 mg/kg 1:1,000 · 5H5T reversible causes ·
+        Always verify against local protocols
       </div>
     </div>
   );
