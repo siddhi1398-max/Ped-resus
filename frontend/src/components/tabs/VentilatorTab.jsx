@@ -1,7 +1,7 @@
 // frontend/src/components/tabs/VentilatorTab.jsx
 // References: Tintinalli · BTS/ATS · OpenPediatrics · PEMVECC 2017 · ARDSnet · Fleischer & Ludwig
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import WaveformView from "../tabs/WaveformView";
 import { useWeight } from "../../context/WeightContext";
 import {
