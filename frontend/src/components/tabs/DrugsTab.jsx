@@ -2,9 +2,8 @@
 // Sub-tabs: Drug Doses Table · Nebulised Drugs
 // Sources: Piyush Gupta 18th Ed · IAP · Ontario Lung Care Pathway · GINA Paediatric
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
-import { useSearchNavigate } from "../../hooks/useSearchNavigate";
 import { DRUGS, DRUG_CATEGORIES, computeDrugDose } from "../../data/drugs";
 import { Input } from "../ui/input";
 import {
@@ -817,69 +816,53 @@ const TABS = [
   { id: "nebs",    label: "Nebulised Drugs", Icon: Wind },
 ];
 
-export default function DrugsTab() {
+export default function DrugsTab({ searchEntry }) {
   const { weight } = useWeight();
   const [activeTab, setActiveTab] = useState("drugs");
   const [searchQuery, setSearchQuery] = useState("");
   const [cat, setCat] = useState("all");
-  const [expandedDrugId, setExpandedDrugId] = useState(null); //
+  const [expandedDrugId, setExpandedDrugId] = useState(null);
 
-  //
-  const handleSearchNav = useCallback(({ section, drugId }) => {
-  if (section === "Nebulised Drugs") {
-    setActiveTab("nebs");
-    if (drugId) {
-      setExpandedDrugId(drugId);
-      setTimeout(() => {
-        document.getElementById(`neb-drug-${drugId}`)
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 200);
+  useEffect(() => {
+    if (!searchEntry) return;
+    if (searchEntry.section === "Nebulised Drugs") {
+      setActiveTab("nebs");
+      if (searchEntry.drugId) setExpandedDrugId(searchEntry.drugId);
+    } else {
+      setActiveTab("drugs");
+      if (searchEntry.drugId) {
+        const matchedDrug = DRUGS.find(d => d.id === searchEntry.drugId);
+        if (matchedDrug) {
+          const matchingCat = DRUG_CATEGORIES.find(c =>
+            c.matches?.includes(matchedDrug.category)
+          );
+          setCat(matchingCat?.id ?? "all");
+          setSearchQuery(matchedDrug.name);
+        }
+        setExpandedDrugId(searchEntry.drugId);
+      }
     }
-    return;
-  }
+  }, [searchEntry]);
 
-  setActiveTab("drugs");
-
-  if (drugId) {
-    const matchedDrug = DRUGS.find(d => d.id === drugId);
-    if (matchedDrug) {
-      const matchingCat = DRUG_CATEGORIES.find(c =>
-        c.matches?.includes(matchedDrug.category)
-      );
-      setCat(matchingCat?.id ?? "all");
-      setSearchQuery(matchedDrug.name);
-    }
-    setExpandedDrugId(drugId);
-    setTimeout(() => {
-      document.getElementById(`drug-row-${drugId}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 400);
-  }
-}, []);
-
-useSearchNavigate("drugs", handleSearchNav);
-
-  // ← ADD HERE
   useEffect(() => {
     if (expandedDrugId) {
-      const t = setTimeout(() => setExpandedDrugId(null), 3000);
+      const t = setTimeout(() => setExpandedDrugId(null), 6000);
       return () => clearTimeout(t);
     }
   }, [expandedDrugId]);
 
- const filtered = useMemo(() => {
-  const catDef = DRUG_CATEGORIES.find((c) => c.id === cat);
-  const matches = catDef?.matches;
-  return DRUGS.filter((d) => {
-    const matchCat = !matches || matches.includes(d.category);
-    const matchQ   = !searchQuery || d.name.toLowerCase().includes(searchQuery.toLowerCase()) || d.indication.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCat && matchQ;
-  });
-}, [searchQuery, cat]);
+  const filtered = useMemo(() => {
+    const catDef = DRUG_CATEGORIES.find((c) => c.id === cat);
+    const matches = catDef?.matches;
+    return DRUGS.filter((d) => {
+      const matchCat = !matches || matches.includes(d.category);
+      const matchQ   = !searchQuery || d.name.toLowerCase().includes(searchQuery.toLowerCase()) || d.indication.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchCat && matchQ;
+    });
+  }, [searchQuery, cat]);
 
   return (
     <div className="space-y-5">
-      {/* Header */}
       <div>
         <h2 className="font-bold text-2xl text-slate-900 dark:text-white mb-1"
             style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
@@ -892,7 +875,6 @@ useSearchNavigate("drugs", handleSearchNav);
         </p>
       </div>
 
-      {/* Tab switcher */}
       <div className="flex gap-2 flex-wrap">
         {TABS.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
@@ -907,14 +889,12 @@ useSearchNavigate("drugs", handleSearchNav);
         ))}
       </div>
 
-      {/* ── DRUG DOSES TABLE ── */}
       {activeTab === "drugs" && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <MagnifyingGlass size={16} weight="bold" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <Input
-                data-testid="drug-search"
                 placeholder="Search drug or indication…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -923,7 +903,7 @@ useSearchNavigate("drugs", handleSearchNav);
             </div>
             <div className="flex gap-1.5 overflow-x-auto pb-1">
               {DRUG_CATEGORIES.map((c) => (
-                <button key={c.id} data-testid={`drug-cat-${c.id}`} onClick={() => setCat(c.id)}
+                <button key={c.id} onClick={() => setCat(c.id)}
                   className={`px-3 py-1.5 rounded-full border font-mono text-[10px] uppercase tracking-widest whitespace-nowrap transition-all ${
                     cat === c.id
                       ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white"
@@ -947,53 +927,52 @@ useSearchNavigate("drugs", handleSearchNav);
                 </tr>
               </thead>
               <tbody>
-  {filtered.map((d) => (
-    <tr
-      key={d.id}
-      id={`drug-row-${d.id}`}
-      className={`border-t border-slate-200 dark:border-slate-800 align-top transition-all ${
-        expandedDrugId === d.id
-          ? "bg-blue-50 dark:bg-blue-950/30 outline outline-2 outline-blue-400 dark:outline-blue-600 outline-offset-[-2px]"
-          : "odd:bg-slate-50 dark:odd:bg-slate-900/40"
-      }`}
-    >
-      <td className="p-3 font-bold">{d.name}</td>
-      <td className="p-3 text-slate-600 dark:text-slate-300">{d.indication}</td>
-      <td className="p-3">
-        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider border ${CAT_COLORS[d.category]}`}>
-          {d.category}
-        </span>
-      </td>
-      <td className="p-3 font-mono text-xs">
-        {(() => {
-          if (d.fixedDose) return d.fixedDose;
-          if (d.dosePerKg == null) return "—";
-          const maxSuffix = d.max ? ` (max ${d.max})` : "";
-          return `${d.dosePerKg} ${d.unit}/kg${maxSuffix}`;
-        })()}
-      </td>
-      <td className="p-3 font-mono font-bold text-red-600 dark:text-red-400">{computeDrugDose(d, weight)}</td>
-      <td className="p-3 font-mono text-xs">{d.route}</td>
-      <td className="p-3 text-xs text-slate-500 dark:text-slate-400 max-w-xs">{d.notes}</td>
-    </tr>
-  ))}
-  {filtered.length === 0 && (
-    <tr>
-      <td colSpan={7} className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
-        No drugs match your filters.
-      </td>
-    </tr>
-  )}
-</tbody>
+                {filtered.map((d) => (
+                  <tr
+                    key={d.id}
+                    id={`drug-row-${d.id}`}
+                    className={`border-t border-slate-200 dark:border-slate-800 align-top transition-all ${
+                      expandedDrugId === d.id
+                        ? "bg-blue-50 dark:bg-blue-950/30 outline outline-2 outline-blue-400 dark:outline-blue-600 outline-offset-[-2px]"
+                        : "odd:bg-slate-50 dark:odd:bg-slate-900/40"
+                    }`}
+                  >
+                    <td className="p-3 font-bold">{d.name}</td>
+                    <td className="p-3 text-slate-600 dark:text-slate-300">{d.indication}</td>
+                    <td className="p-3">
+                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider border ${CAT_COLORS[d.category]}`}>
+                        {d.category}
+                      </span>
+                    </td>
+                    <td className="p-3 font-mono text-xs">
+                      {(() => {
+                        if (d.fixedDose) return d.fixedDose;
+                        if (d.dosePerKg == null) return "—";
+                        const maxSuffix = d.max ? ` (max ${d.max})` : "";
+                        return `${d.dosePerKg} ${d.unit}/kg${maxSuffix}`;
+                      })()}
+                    </td>
+                    <td className="p-3 font-mono font-bold text-red-600 dark:text-red-400">{computeDrugDose(d, weight)}</td>
+                    <td className="p-3 font-mono text-xs">{d.route}</td>
+                    <td className="p-3 text-xs text-slate-500 dark:text-slate-400 max-w-xs">{d.notes}</td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+                      No drugs match your filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* ── NEBULISED DRUGS ── */}
       {activeTab === "nebs" && (
-  <NebulisedDrugsTab weight={weight} expandedDrugId={expandedDrugId} />
-)}
+        <NebulisedDrugsTab weight={weight} expandedDrugId={expandedDrugId} />
+      )}
     </div>
   );
 }
