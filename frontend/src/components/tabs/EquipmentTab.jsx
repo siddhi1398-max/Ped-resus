@@ -7,6 +7,7 @@
 
 import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
+import EtCO2View from "./data/EtCO2View"; 
 import {
   Warning, Lightbulb, ArrowRight, CheckCircle, Circle,
   Wind, Drop, Heartbeat, ClipboardText, Pulse, Stethoscope,
@@ -1134,10 +1135,11 @@ function MonitoringView() {
 
       <div className="flex flex-wrap gap-1.5">
         {[
-          { id: "spo2", label: "Pulse Oximetry" },
-          { id: "bp",   label: "BP Measurement" },
-          { id: "bvm",  label: "BVM"             },
-          { id: "io",   label: "IO Access"       },
+          { id: "spo2",  label: "Pulse Oximetry" },
+          { id: "bp",    label: "BP Measurement" },
+          { id: "bvm",   label: "BVM"            },
+          { id: "io",    label: "IO Access"      },
+          { id: "etco2", label: "EtCO₂"          },   
         ].map(s => (
           <button key={s.id} onClick={() => setSection(s.id)}
             className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] uppercase tracking-widest transition-all ${
@@ -1310,6 +1312,8 @@ function MonitoringView() {
 
       {/* IO ACCESS — rendered via dedicated component */}
       {section === "io" && <IOAccessView weight={weight} />}
+       {/* EtCO2 — rendered via dedicated component */}
+      {section === "etco2" && <EtCO2View />}
     </div>
   );
 }
