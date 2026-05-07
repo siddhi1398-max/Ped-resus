@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
+import { useSearchNavigate } from "../../hooks/useSearchNavigate";
 import { ORAL_DRUGS, ORAL_CATEGORIES, computeSyrupDose } from "../../data/oralFormulations";
 import { MagnifyingGlass, Drop, Pill, Info, Warning, ArrowRight } from "@phosphor-icons/react";
 
@@ -34,7 +35,26 @@ export default function SyrupCalculatorTab() {
   const { weight } = useWeight();
   const [search,   setSearch]   = useState("");
   const [category, setCategory] = useState("all");
-  const [expanded, setExpanded] = useState(null);
+  const [expandedDrugId, setExpandedDrugId] = useState(null);
+  const [expanded, setExpanded] = useState(null); 
+  
+  useSearchNavigate("syrup", ({ drugId }) => {
+  if (drugId) {
+    setExpandedDrugId(drugId);
+    setExpanded(drugId);          
+    setTimeout(() => {
+      document.getElementById(`syrup-drug-${drugId}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 250);
+  }
+});
+
+useEffect(() => {
+  if (expandedDrugId) {
+    const t = setTimeout(() => setExpandedDrugId(null), 3000);
+    return () => clearTimeout(t);
+  }
+}, [expandedDrugId]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -119,20 +139,23 @@ export default function SyrupCalculatorTab() {
 
         {filtered.map(drug => {
           const result  = computeSyrupDose(drug, weight);
-          const isOpen  = expanded === drug.id;
+          const isOpen = expanded === drug.id || expandedDrugId === drug.id;
           const catColor = CATEGORY_COLORS[drug.category] || CATEGORY_COLORS.other;
           const accent   = BORDER_ACCENT[drug.category] || BORDER_ACCENT.other;
 
           return (
-            <div
-              key={drug.id}
-              className={`rounded-md border border-l-4 ${accent} border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 overflow-hidden`}
-            >
-              {/* Card header — always visible */}
-              <button
-                className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                onClick={() => setExpanded(isOpen ? null : drug.id)}
-              >
+  <div
+    key={drug.id}
+    id={`syrup-drug-${drug.id}`}
+    className={`rounded-md border border-l-4 ${accent} border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 overflow-hidden transition-all ${
+      expandedDrugId === drug.id ? "ring-2 ring-blue-400 dark:ring-blue-500" : ""
+    }`}
+  >
+    {/* Card header */}
+    <button
+      className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+      onClick={() => setExpanded(isOpen ? null : drug.id)}
+    >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
