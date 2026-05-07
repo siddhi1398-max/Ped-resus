@@ -246,6 +246,11 @@ function Section({ title, sectionKey, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   const cfg  = SECTION_ICONS[sectionKey] || { icon: NoteBlank, color: "text-slate-400" };
   const Icon = cfg.icon;
+  
+  useEffect(() => {
+    if (defaultOpen) setOpen(true);
+  }, [defaultOpen]);
+  
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
       <button
@@ -750,14 +755,16 @@ export default function SedationAnalgesiaTab({ searchEntry }) {
       </div>
 
       {/* 1 — PSA AGENTS */}
-      <Section title="PSA Agent Comparison — Weight-Based Doses" sectionKey="psa" defaultOpen={!!searchEntry}>
-        <PSAAgentTable weight={weight} searchEntry={searchEntry} />
-      </Section>
+     <Section title="PSA Agent Comparison — Weight-Based Doses" sectionKey="psa"
+  defaultOpen={!!searchEntry && PSA_AGENTS.some(a =>
+    searchEntry.drugId?.toLowerCase().includes(a.name.split(" ")[0].toLowerCase())
+  )}>
 
       {/* 2 — ORAL SEDATION */}
-     <Section title="Oral Sedative Agents — Paediatric (Indian Brands)" sectionKey="oralSedation" defaultOpen={!!searchEntry}>
-  <OralSedationTable weight={weight} searchEntry={searchEntry} />
-</Section>
+     <Section title="Oral Sedative Agents — Paediatric (Indian Brands)" sectionKey="oralSedation"
+  defaultOpen={!!searchEntry && ORAL_SEDATIVES.some(os =>
+    searchEntry.drugId?.toLowerCase().includes(os.drug.split(" ")[0].toLowerCase())
+  )}>
 
       {/* 3 — PSA PRINCIPLES */}
       <Section title="PSA Principles — Pre / During / Post Procedure" sectionKey="psaPrinciples">
