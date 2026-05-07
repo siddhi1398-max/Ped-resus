@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import WaveformView from "../tabs/WaveformView";
+import VentSim from "../tabs/VentSim"; 
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning,
@@ -208,12 +209,13 @@ export default function VentilatorTab({ searchEntry }) {
   }, [weight, condition, cond]);
 
   // ── View tab config ──────────────────────────────────────────────────────
-  const views = [
-    { id: "settings",     label: "Vent Settings", Icon: Gear       },
-    { id: "troubleshoot", label: "Troubleshoot",  Icon: Wrench     },
-    { id: "waveforms",    label: "Waveforms",     Icon: ChartLine  },
-    { id: "weaning",      label: "Weaning & SBT", Icon: ArrowLineDown },
-  ];
+ const views = [
+  { id: "settings",     label: "Vent Settings",    Icon: Gear          },
+  { id: "troubleshoot", label: "Troubleshoot",     Icon: Wrench        },
+  { id: "waveforms",    label: "Waveform Library", Icon: ChartLine     },
+  { id: "simulator",    label: "Vent Simulator",   Icon: ArrowsOut     }, 
+  { id: "weaning",      label: "Weaning & SBT",    Icon: ArrowLineDown },
+];
 
   return (
     <div className="space-y-5">
@@ -463,8 +465,11 @@ export default function VentilatorTab({ searchEntry }) {
       )}
 
       {/* ════════════════════════ VIEW 3: WAVEFORMS ════════════════════════ */}
-      {activeView === "waveforms" && <WaveformView />}
+      {activeView === "waveforms"  && <WaveformLibrary />}
 
+       {/* ════════════════════════ VIEW 4: VENT SIMULATOR ════════════════════════ */}
+      {activeView === "simulator"  && <VentSim />}
+      
       {/* ════════════════════════ VIEW 4: WEANING ════════════════════════ */}
       {activeView === "weaning" && (
         <div className="space-y-5">
