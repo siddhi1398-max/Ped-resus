@@ -755,20 +755,16 @@ export default function SedationAnalgesiaTab({ searchEntry }) {
       </div>
 
       {/* 1 — PSA AGENTS */}
-      <Section title="PSA Agent Comparison — Weight-Based Doses" sectionKey="psa"
-        defaultOpen={!!searchEntry && PSA_AGENTS.some(a =>
-          searchEntry.drugId?.toLowerCase().includes(a.name.split(" ")[0].toLowerCase())
-        )}>
-        <PSAAgentTable weight={weight} searchEntry={searchEntry} />
-      </Section>
+<Section title="PSA Agent Comparison — Weight-Based Doses" sectionKey="psa"
+  defaultOpen={searchEntry?.section === "PSA Agents"}>
+  <PSAAgentTable weight={weight} searchEntry={searchEntry} />
+</Section>
 
-      {/* 2 — ORAL SEDATION */}
-      <Section title="Oral Sedative Agents — Paediatric (Indian Brands)" sectionKey="oralSedation"
-        defaultOpen={!!searchEntry && ORAL_SEDATIVES.some(os =>
-          searchEntry.drugId?.toLowerCase().includes(os.drug.split(" ")[0].toLowerCase())
-        )}>
-        <OralSedationTable weight={weight} searchEntry={searchEntry} />
-      </Section>
+{/* 2 — ORAL SEDATION */}
+<Section title="Oral Sedative Agents — Paediatric (Indian Brands)" sectionKey="oralSedation"
+  defaultOpen={searchEntry?.section === "Oral Sedation"}>
+  <OralSedationTable weight={weight} searchEntry={searchEntry} />
+</Section>
 
       {/* 3 — PSA PRINCIPLES */}
       <Section title="PSA Principles — Pre / During / Post Procedure" sectionKey="psaPrinciples">
