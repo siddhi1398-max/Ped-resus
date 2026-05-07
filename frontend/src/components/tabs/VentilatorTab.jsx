@@ -167,11 +167,23 @@ function MnemonicCard({ title, items }) {
 }
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
-export default function VentilatorTab() {
+export default function VentilatorTab({ searchEntry }) {
   const { weight } = useWeight();
   const [condition, setCondition]     = useState("normal");
   const [openTrouble, setOpenTrouble] = useState(null);
   const [activeView, setActiveView]   = useState("settings");
+
+  useEffect(() => {
+    if (!searchEntry?.section) return;
+    const sectionMap = {
+      "Settings":   "settings",
+      "Troubleshoot": "troubleshoot",
+      "Waveforms":  "waveforms",
+      "Weaning":    "weaning",
+    };
+    const view = sectionMap[searchEntry.section];
+    if (view) setActiveView(view);
+  }, [searchEntry]);
 
   const cond = CONDITIONS.find(c => c.id === condition);
   const c    = CMAP[cond.color];
