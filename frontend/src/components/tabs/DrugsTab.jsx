@@ -2,7 +2,7 @@
 // Sub-tabs: Drug Doses Table · Nebulised Drugs
 // Sources: Piyush Gupta 18th Ed · IAP · Ontario Lung Care Pathway · GINA Paediatric
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
 import { useSearchNavigate } from "../../hooks/useSearchNavigate";
 import { DRUGS, DRUG_CATEGORIES, computeDrugDose } from "../../data/drugs";
@@ -344,17 +344,33 @@ function DoseValue({ doseStr, weight, toneText }) {
 }
 
 // ─── NEBULISED DRUG CARD ─────────────────────────────────────────────────────
-function NebDrugCard({ drug, weight }) {
+function NebDrugCard({ drug, weight, expandedDrugId }) {
   const [open, setOpen] = useState(false);
+  const isExpanded = expandedDrugId === drug.id;
   const t = TONE[drug.classColor] || TONE.slate;
 
+  useEffect(() => {
+    if (isExpanded) {
+      setOpen(true);
+      setTimeout(() => {
+        document.getElementById(`neb-drug-${drug.id}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    }
+  }, [isExpanded, drug.id]);
   // Preview dose shown in collapsed header — first dose entry, first bracket resolved
   const previewDoseStr = Object.values(drug.dose)[0].split("·")[0].trim();
   const previewParts   = resolveWeightBracket(previewDoseStr, weight);
   const previewActive  = previewParts.find(p => p.active) || previewParts[0];
 
   return (
-    <div className={`border rounded-xl overflow-hidden bg-white dark:bg-slate-900/50 ${open ? "border-slate-300 dark:border-slate-600" : "border-slate-200 dark:border-slate-700"}`}>
+   <div
+  id={`neb-drug-${drug.id}`}
+  className={`border rounded-xl overflow-hidden bg-white dark:bg-slate-900/50 transition-all
+    ${open ? "border-slate-300 dark:border-slate-600" : "border-slate-200 dark:border-slate-700"}
+    ${isExpanded ? "ring-2 ring-blue-400 dark:ring-blue-500 shadow-md" : ""}
+  `}
+>
       <button onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -483,7 +499,7 @@ function NebDrugCard({ drug, weight }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // NEBULISED DRUGS TAB
 // ═══════════════════════════════════════════════════════════════════════════════
-function NebulisedDrugsTab({ weight }) {
+function NebulisedDrugsTab({ weight, expandedDrugId }) {
   const [section, setSection] = useState("drugs");
 
   return (
@@ -511,10 +527,9 @@ function NebulisedDrugsTab({ weight }) {
       {/* ── NEBULISED DRUGS ── */}
       {section === "drugs" && (
         <div className="space-y-3">
-          {NEBULISED_DRUGS.map(drug => (
-            <NebDrugCard key={drug.id} drug={drug} weight={weight} />
-          ))}
-
+        {NEBULISED_DRUGS.map(drug => (
+  <NebDrugCard key={drug.id} drug={drug} weight={weight} expandedDrugId={expandedDrugId} />
+))}
           {/* Combination reference */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-4">
             <div className="font-bold text-sm mb-3 text-slate-800 dark:text-white"
@@ -807,6 +822,38 @@ export default function DrugsTab() {
   const [activeTab, setActiveTab] = useState("drugs");
   const [searchQuery, setSearchQuery] = useState("");
   const [cat, setCat] = useState("all");
+  const [expandedDrugId, setExpandedDrugId] = useState(null); //
+
+  //
+   useSearchNavigate("drugs", ({ section, drugId }) => {
+    if (section === "Nebulised Drugs") {
+      setActiveTab("nebs");
+    } else {
+      setActiveTab("drugs");
+      if (drugId) {
+        const matchedDrug = DRUGS.find(d => d.id === drugId);
+        if (matchedDrug) {
+          setSearchQuery(matchedDrug.name);
+          setCat("all");
+        }
+      }
+    }
+    if (drugId) {
+      setExpandedDrugId(drugId);
+      setTimeout(() => {
+        document.getElementById(`drug-row-${drugId}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 250);
+    }
+  });
+
+  // ← ADD HERE
+  useEffect(() => {
+    if (expandedDrugId) {
+      const t = setTimeout(() => setExpandedDrugId(null), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [expandedDrugId]);
 
  const filtered = useMemo(() => {
   const catDef = DRUG_CATEGORIES.find((c) => c.id === cat);
@@ -888,41 +935,53 @@ export default function DrugsTab() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((d) => (
-                  <tr key={d.id} className="border-t border-slate-200 dark:border-slate-800 odd:bg-slate-50 dark:odd:bg-slate-900/40 align-top">
-                    <td className="p-3 font-bold">{d.name}</td>
-                    <td className="p-3 text-slate-600 dark:text-slate-300">{d.indication}</td>
-                    <td className="p-3">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider border ${CAT_COLORS[d.category]}`}>
-                        {d.category}
-                      </span>
-                    </td>
-                    <td className="p-3 font-mono text-xs">
-                      {(() => {
-                        if (d.fixedDose) return d.fixedDose;
-                        if (d.dosePerKg == null) return "—";
-                        const maxSuffix = d.max ? ` (max ${d.max})` : "";
-                        return `${d.dosePerKg} ${d.unit}/kg${maxSuffix}`;
-                      })()}
-                    </td>
-                    <td className="p-3 font-mono font-bold text-red-600 dark:text-red-400">{computeDrugDose(d, weight)}</td>
-                    <td className="p-3 font-mono text-xs">{d.route}</td>
-                    <td className="p-3 text-xs text-slate-500 dark:text-slate-400 max-w-xs">{d.notes}</td>
-                  </tr>
-                ))}
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">No drugs match your filters.</td>
-                  </tr>
-                )}
-              </tbody>
+  {filtered.map((d) => (
+    <tr
+      key={d.id}
+      id={`drug-row-${d.id}`}
+      className={`border-t border-slate-200 dark:border-slate-800 align-top transition-all ${
+        expandedDrugId === d.id
+          ? "bg-blue-50 dark:bg-blue-950/30 outline outline-2 outline-blue-400 dark:outline-blue-600 outline-offset-[-2px]"
+          : "odd:bg-slate-50 dark:odd:bg-slate-900/40"
+      }`}
+    >
+      <td className="p-3 font-bold">{d.name}</td>
+      <td className="p-3 text-slate-600 dark:text-slate-300">{d.indication}</td>
+      <td className="p-3">
+        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider border ${CAT_COLORS[d.category]}`}>
+          {d.category}
+        </span>
+      </td>
+      <td className="p-3 font-mono text-xs">
+        {(() => {
+          if (d.fixedDose) return d.fixedDose;
+          if (d.dosePerKg == null) return "—";
+          const maxSuffix = d.max ? ` (max ${d.max})` : "";
+          return `${d.dosePerKg} ${d.unit}/kg${maxSuffix}`;
+        })()}
+      </td>
+      <td className="p-3 font-mono font-bold text-red-600 dark:text-red-400">{computeDrugDose(d, weight)}</td>
+      <td className="p-3 font-mono text-xs">{d.route}</td>
+      <td className="p-3 text-xs text-slate-500 dark:text-slate-400 max-w-xs">{d.notes}</td>
+    </tr>
+  ))}
+  {filtered.length === 0 && (
+    <tr>
+      <td colSpan={7} className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+        No drugs match your filters.
+      </td>
+    </tr>
+  )}
+</tbody>
             </table>
           </div>
         </div>
       )}
 
       {/* ── NEBULISED DRUGS ── */}
-      {activeTab === "nebs" && <NebulisedDrugsTab weight={weight} />}
+      {activeTab === "nebs" && (
+  <NebulisedDrugsTab weight={weight} expandedDrugId={expandedDrugId} />
+)}
     </div>
   );
 }
