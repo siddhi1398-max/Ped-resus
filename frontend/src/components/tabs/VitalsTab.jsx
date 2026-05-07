@@ -2,7 +2,7 @@
 // Sub-tabs: Live Calculator · Reference Table · Quick Reference · ECG & Rhythms · Vitals Trending
 // Sources: AHA PALS 2020 · APLS · ESC Paediatric EP Guidelines 2021
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   Thermometer, Wind, Heartbeat, Waveform, Warning,
@@ -959,9 +959,22 @@ const TABS = [
   { id: "trending",   label: "Vitals Trending", Icon: Pulse       },
 ];
 
-export default function VitalsTab() {
+export default function VitalsTab({ searchEntry }) {
   const { weight } = useWeight();
   const [activeTab, setActiveTab] = useState("calculator");
+
+  // ADD this useEffect:
+  useEffect(() => {
+    if (!searchEntry?.section) return;
+    const sectionMap = {
+      "Live Calculator":  "calculator",
+      "Quick Reference":  "reference",
+      "ECG & Rhythms":    "ecg",
+      "Vitals Trending":  "trending",
+    };
+    const tab = sectionMap[searchEntry.section];
+    if (tab) setActiveTab(tab);
+  }, [searchEntry]);
 
   return (
     <div className="space-y-5">
