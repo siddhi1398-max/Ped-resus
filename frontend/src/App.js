@@ -509,10 +509,10 @@ useEffect(() => {
           ) : null}
         </div>
 
-        {/* Centre: search bar */}
-        <div className="flex-1 min-w-0">
-          <SearchBar onNavigate={(tabId) => handleTabClick(tabId)} />
-        </div>
+        {/* Centre: search bar — was onNavigate, must be onResultSelect */}
+<div className="flex-1 min-w-0">
+  <SearchBar onResultSelect={handleSearchSelect} />
+</div>
 
         {/* Right: user info */}
         <div className="flex items-center gap-2 flex-shrink-0">
