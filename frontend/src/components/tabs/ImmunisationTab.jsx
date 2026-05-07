@@ -16,7 +16,7 @@
 //   • Rashtriya Bal Swasthya Karyakram (RBSK) — Developmental Screening
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Warning, Lightbulb, CaretDown, CaretRight,
   Syringe, Baby, BookOpen, Bug, Wind,
@@ -1051,8 +1051,22 @@ function GuidelinesView() {
 // MAIN EXPORT
 // ══════════════════════════════════════════════════════════════════════════════
 
-export default function ImmunisationTab() {
+export default function ImmunisationTab({ searchEntry }) {
   const [activeView, setActiveView] = useState("immunisation");
+
+  // ADD this useEffect:
+  useEffect(() => {
+    if (!searchEntry?.section) return;
+    const sectionMap = {
+      "IAP Schedule":        "immunisation",
+      "NIP/UIP Schedule":    "immunisation",
+      "Special Vaccines":    "immunisation",
+      "Catch-up":            "immunisation",
+      "National Guidelines": "guidelines",
+    };
+    const view = sectionMap[searchEntry.section];
+    if (view) setActiveView(view);
+  }, [searchEntry]);
 
   const views = [
     { id: "immunisation", label: "Immunisation Schedules", icon: Syringe },
