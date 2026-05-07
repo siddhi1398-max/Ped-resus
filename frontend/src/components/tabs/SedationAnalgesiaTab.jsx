@@ -596,7 +596,19 @@ function OralSedationTable({ weight, searchEntry }) {
 }
 
 // ─── LOCAL ANAESTHETIC TABLE ──────────────────────────────────────────────────
-function LocalAnaestheticTable({ weight }) {
+function LocalAnaestheticTable({ weight, searchEntry }) {
+  useEffect(() => {
+    if (!searchEntry?.drugId) return;
+    const match = LOCAL_ANAESTHETICS.find(la =>
+      searchEntry.drugId.toLowerCase().includes(la.name.split(" ")[0].toLowerCase())
+    );
+    if (match) {
+      setTimeout(() => {
+        document.getElementById(`sed-la-${match.name}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 150);
+    }
+  }, [searchEntry]);
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
       <table className="w-full text-xs border-collapse">
@@ -613,7 +625,13 @@ function LocalAnaestheticTable({ weight }) {
             const maxDose = raw ? Math.min(+raw.toFixed(0), la.max || 9999) : null;
             const capped  = raw && la.max && raw >= la.max;
             return (
-              <tr key={i} className="border-t border-slate-100 dark:border-slate-800 odd:bg-white dark:odd:bg-slate-900/30">
+             <tr key={i}
+  id={`sed-la-${la.name}`}
+  className={`border-t border-slate-100 dark:border-slate-800 transition-all ${
+    searchEntry?.drugId?.toLowerCase().includes(la.name.split(" ")[0].toLowerCase())
+      ? "bg-blue-50 dark:bg-blue-950/30 outline outline-2 outline-blue-400 outline-offset-[-2px]"
+      : "odd:bg-white dark:odd:bg-slate-900/30"
+  }`}>
                 <td className="px-3 py-2.5 font-bold text-slate-900 dark:text-white">{la.name}</td>
                 <td className="px-3 py-2.5 font-mono font-bold text-slate-700 dark:text-slate-200">
                   {la.mgPerKg ? `${la.mgPerKg} mg/kg` : "Fixed"}
@@ -819,7 +837,7 @@ export default function SedationAnalgesiaTab({ searchEntry }) {
             Maximum doses for <span className="text-slate-900 dark:text-white font-bold">{weight} kg</span> patient.
             NEVER exceed absolute maximum regardless of weight.
           </p>
-          <LocalAnaestheticTable weight={weight} />
+         <LocalAnaestheticTable weight={weight} searchEntry={searchEntry} />
           <div className="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-3 py-2.5 text-xs text-red-800 dark:text-red-200">
             <Warning size={12} weight="fill" className="flex-shrink-0 mt-0.5 text-red-500" />
             <span><strong>NEVER use adrenaline-containing solutions</strong> for digital blocks (fingers/toes), penile blocks, or other end-artery sites. Risk of irreversible ischaemia.</span>
