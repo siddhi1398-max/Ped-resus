@@ -675,7 +675,7 @@ const PSA_PHASE_CONFIG = [
 ];
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
-export default function SedationAnalgesiaTab() {
+export default function SedationAnalgesiaTab({ searchEntry }) {
   const { weight }    = useWeight();
   const [psaSection, setPsaSection] = useState("pre");
 
