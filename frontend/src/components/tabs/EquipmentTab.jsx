@@ -7,7 +7,7 @@
 
 import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
-import EtCO2View from "./data/EtCO2View"; 
+import EtCO2View from "../../data/EtCO2View";
 import {
   Warning, Lightbulb, ArrowRight, CheckCircle, Circle,
   Wind, Drop, Heartbeat, ClipboardText, Pulse, Stethoscope,
