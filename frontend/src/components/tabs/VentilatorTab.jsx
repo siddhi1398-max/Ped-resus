@@ -2,7 +2,7 @@
 // References: Tintinalli · BTS/ATS · OpenPediatrics · PEMVECC 2017 · ARDSnet · Fleischer & Ludwig
 
 import { useState, useMemo, useEffect } from "react";
-import WaveformView from "../tabs/WaveformView";
+import WaveformLibrary from "../tabs/WaveformView";
 import VentSim from "../tabs/VentSim"; 
 import { useWeight } from "../../context/WeightContext";
 import {
