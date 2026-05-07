@@ -3,6 +3,7 @@
 // Sources: Harriet Lane 23e · Fleischer & Ludwig 7e · APLS · AIDAA 2022
 //          Vortex Approach (Chrimes 2016 · vortexapproach.org)
 //          Morgan & Mikhail 7e · AHA PALS 2020
+//          IO Access: AHA PALS 2020 · ERC 2021 · Paediatric IOI guidelines
 
 import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
@@ -588,6 +589,482 @@ function DifficultAirwayView() {
   );
 }
 
+// ─── IO ACCESS VIEW ────────────────────────────────────────────────────────────
+function IOAccessView({ weight }) {
+  const [ioSection, setIOSection] = useState("overview");
+
+  // Weight-based needle sizing
+  const needleSize = weight < 3 ? "15G · 15 mm"
+    : weight < 10 ? "15G · 15 mm"
+    : weight < 40 ? "15G · 25 mm"
+    : "15G · 25 mm (or 45 mm in obese)";
+
+  const ioSections = [
+    { id: "overview",  label: "Overview & Sites"  },
+    { id: "manual",    label: "Manual / EZ-IO"    },
+    { id: "sternal",   label: "Sternal / FAST"    },
+    { id: "confirm",   label: "Confirmation"      },
+    { id: "difficult", label: "Difficult IV"      },
+  ];
+
+  // IO insertion sites by age/weight
+  const ioSites = [
+    {
+      site: "Proximal Tibia",
+      tone: "emerald",
+      preferred: true,
+      ages: "All ages — first choice",
+      landmark: "2 cm below tibial tuberosity, anteromedial flat surface",
+      avoid: "Fracture ipsilateral limb, previous IO same site, bone disease (OI)",
+      tip: "Most reliable landmark. Flat surface confirms correct position. Avoid growth plate — insert medially.",
+    },
+    {
+      site: "Distal Tibia",
+      tone: "blue",
+      preferred: false,
+      ages: "All ages — second choice",
+      landmark: "2–3 cm above medial malleolus, flat anteromedial surface",
+      avoid: "Fracture, cellulitis over site",
+      tip: "Good alternative when proximal tibia inaccessible. Less tissue overlying cortex in infants.",
+    },
+    {
+      site: "Distal Femur",
+      tone: "sky",
+      preferred: false,
+      ages: "Neonates / infants (<2 yr)",
+      landmark: "3 cm above lateral condyle, anterior surface",
+      avoid: "Fracture, infection over site",
+      tip: "Useful in neonates when tibial sites difficult. Large marrow cavity.",
+    },
+    {
+      site: "Proximal Humerus",
+      tone: "violet",
+      preferred: false,
+      ages: "≥2 yr — preferred for drug delivery speed",
+      landmark: "Greater tubercle: arm adducted/internally rotated, 1–2 cm above surgical neck",
+      avoid: "Shoulder fracture, joint infection",
+      tip: "Fastest drug delivery to central circulation after proximal tibia. Preferred in cardiac arrest ≥2 yr if trained.",
+    },
+    {
+      site: "Manubrium / Sternal",
+      tone: "orange",
+      preferred: false,
+      ages: "Adults / FAST-1 device only",
+      landmark: "Midline of manubrium at angle of Louis",
+      avoid: "Children <12 yr — thin sternum. Previous sternotomy.",
+      tip: "FAST-1 device only. Not recommended in paediatrics due to thin sternal cortex and proximity to heart.",
+    },
+  ];
+
+  // EZ-IO step-by-step
+  const ezioSteps = [
+    { title: "Prepare", detail: "Select site · palpate landmarks · clean skin with chlorhexidine or alcohol" },
+    { title: "Select needle", detail: `EZ-IO needle for ${weight} kg: ${needleSize}. Pink (15G/15mm) for <3–39 kg. Blue (15G/25mm) for ≥40 kg. Yellow (15G/45mm) for excessive tissue.` },
+    { title: "Position", detail: "Stabilise limb. Insert needle at 90° to bone cortex (slightly caudal for tibia to avoid growth plate)" },
+    { title: "Penetrate cortex", detail: "Drill at gentle forward pressure. STOP when sudden loss of resistance felt (cortex entered) — do NOT drill further" },
+    { title: "Remove stylet", detail: "Unscrew and remove the stylet. Hub should be flush or slightly above skin." },
+    { title: "Confirm position", detail: "Needle stands unsupported. Aspirate marrow (often bloody/yellow fat). Attach primed EZ-Connect extension set." },
+    { title: "Flush", detail: "Flush with 5–10 mL 0.9% NaCl. In conscious patient: lignocaine 2% preservative-free 0.5 mg/kg IO before flush (pain)" },
+    { title: "Secure & label", detail: "Secure with EZ-Stabiliser dressing. Label site and time of insertion. IO access is a BRIDGE — escalate to definitive vascular access." },
+  ];
+
+  // Manual IO (Jamshidi/Cook) steps
+  const manualSteps = [
+    { title: "Identify landmarks", detail: "Proximal tibia preferred. Feel tibial tuberosity, move 2 cm distal and 1 cm medial to the flat anteromedial surface." },
+    { title: "Prep & drape", detail: "Sterile technique. Clean widely with chlorhexidine. LA: lignocaine 1% down to periosteum if patient conscious." },
+    { title: "Select needle", detail: "Cook / Jamshidi: 16G for <18 mo · 14G for older children. Butterfly needle 19G acceptable in neonates only." },
+    { title: "Insert with rotation", detail: "Insert at 90° (or 10° away from growth plate). Apply firm downward pressure with rotating motion — do NOT rock side-to-side." },
+    { title: "Confirm entry", detail: "Sudden give / loss of resistance. Needle stands upright unsupported. Aspirate marrow (not always obtained — do not exclude if negative)." },
+    { title: "Flush & secure", detail: "Flush 5 mL NaCl. Secure with tape. Observe for extravasation with each flush." },
+  ];
+
+  // Difficult IV access — alternatives in order
+  const difficultIVAlternatives = [
+    {
+      method: "1. Intraosseous (IO)",
+      tone: "red",
+      indication: "Cardiac arrest / collapse / failed 2 attempts / life-threatening emergency",
+      notes: [
+        "AHA PALS: use IO immediately if IV fails after 2 attempts or 90 seconds",
+        "All resuscitation drugs, fluids, blood products and IO contrast can be given",
+        "Equivalent onset of action to central venous access",
+        "Limit: 24 hr maximum · high-viscosity drugs may need pressure infusion",
+      ],
+    },
+    {
+      method: "2. Ultrasound-Guided Peripheral IV",
+      tone: "blue",
+      indication: "Elective / semi-urgent when peripheral veins invisible",
+      notes: [
+        "Basilic, cephalic, brachial vein — arm or AC fossa",
+        "22–20G cannula · dynamic short-axis view during insertion",
+        "Confirm with flash + aspiration · tape wrist in extension",
+        "Requires ultrasound machine + trained operator",
+      ],
+    },
+    {
+      method: "3. External Jugular Vein (EJV)",
+      tone: "sky",
+      indication: "When peripheral IV fails — non-arrest situation",
+      notes: [
+        "20–22G cannula · patient supine, head turned away, slight Trendelenburg",
+        "EJV runs from angle of mandible to mid-clavicle",
+        "Compress EJV at clavicle to distend vein — insert bevel-up at 20°",
+        "Unreliable in neck trauma / distorted anatomy",
+      ],
+    },
+    {
+      method: "4. Central Venous Catheter (CVC)",
+      tone: "violet",
+      indication: "ICU / theatre — when peripheral IO failed or prolonged access needed",
+      notes: [
+        "Femoral vein — first choice in emergencies (compressible, away from resuscitation field)",
+        "Internal jugular or subclavian if femoral inaccessible",
+        "Ultrasound guidance mandatory — reduces complications by 60%",
+        "Seldinger technique · confirm tip position with CXR before use",
+        "Size: 4Fr (neonate–infant) · 5Fr (child) · 7Fr (adolescent)",
+      ],
+    },
+    {
+      method: "5. Umbilical Venous Catheter (UVC)",
+      tone: "emerald",
+      indication: "Neonates ≤7 days — emergency access only",
+      notes: [
+        "Cut cord 1–2 cm from skin · identify thin-walled UV (+ 2 UA)",
+        "Insert 3.5–5 Fr catheter to 4–5 cm (just until blood aspirates freely)",
+        "Do NOT advance deep in emergency — risk of cardiac arrhythmia",
+        "Confirm position with CXR: tip at junction of UV and ductus venosus",
+        "Emergency UVC is bridge only — exchange for CVC within 24 hr",
+      ],
+    },
+    {
+      method: "6. Surgical Venous Cut-Down",
+      tone: "amber",
+      indication: "Last resort — all above failed, non-arrest, OR unavailable",
+      notes: [
+        "Long saphenous vein at medial malleolus — most accessible in children",
+        "Transverse skin incision 1 cm anterior/superior to medial malleolus",
+        "Blunt dissect to isolate vein · ligate distal, traction suture proximal",
+        "Venotomy with #11 blade · insert cannula or feeding tube · tie off proximal suture",
+        "Requires surgical skill · last resort only",
+      ],
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-1.5">
+        {ioSections.map(s => (
+          <button key={s.id} onClick={() => setIOSection(s.id)}
+            className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] uppercase tracking-widest transition-all ${
+              ioSection === s.id
+                ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
+                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
+            }`}>{s.label}</button>
+        ))}
+      </div>
+
+      {/* OVERVIEW & SITES */}
+      {ioSection === "overview" && (
+        <div className="space-y-4">
+          <InfoBox tone="red" icon={Warning}>
+            AHA PALS 2020: IO access should be obtained immediately if IV access fails after 2 attempts
+            or 90 seconds in a life-threatening emergency. IO is not a last resort — it is second-line.
+          </InfoBox>
+
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4">
+            <div className="font-bold text-sm mb-3" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+              IO Sites — {weight} kg
+            </div>
+            <div className="space-y-3">
+              {ioSites.map(s => (
+                <div key={s.site} className={`rounded-lg border p-3 ${TONE[s.tone].border} ${s.preferred ? TONE[s.tone].bg : "bg-white dark:bg-slate-900/30"}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`font-bold text-xs ${TONE[s.tone].text}`}
+                          style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{s.site}</span>
+                    {s.preferred && (
+                      <span className={`text-[8px] font-mono font-bold uppercase tracking-widest px-1.5 py-0.5 rounded border ${TONE[s.tone].text} ${TONE[s.tone].border} bg-white/60 dark:bg-black/20`}>
+                        FIRST CHOICE
+                      </span>
+                    )}
+                    <span className="text-[10px] text-slate-400 font-mono ml-auto">{s.ages}</span>
+                  </div>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-300 mb-0.5">
+                    <span className="font-semibold text-slate-500 dark:text-slate-400">Landmark: </span>{s.landmark}
+                  </div>
+                  <div className="text-[11px] text-amber-700 dark:text-amber-400 mb-0.5">
+                    <span className="font-semibold">Avoid: </span>{s.avoid}
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 italic">{s.tip}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Contraindications */}
+          <div className={`rounded-xl border p-4 ${TONE.red.border} ${TONE.red.bg}`}>
+            <div className={`font-bold text-xs mb-2 ${TONE.red.text}`}>Absolute Contraindications (any site)</div>
+            <div className="grid sm:grid-cols-2 gap-1">
+              {[
+                "Fracture of the bone selected for IO",
+                "Previous IO in same bone within 24 hr (marrow cavity still breached)",
+                "Compartment syndrome in selected limb",
+                "Infection / burn / cellulitis over insertion site",
+                "Bone disease: osteogenesis imperfecta, osteopetrosis",
+                "Inability to identify landmarks (severe oedema/obesity at site)",
+              ].map((c, i) => (
+                <div key={i} className="flex items-start gap-1.5 text-[11px] text-red-800 dark:text-red-200">
+                  <ArrowRight size={9} weight="bold" className="text-red-500 flex-shrink-0 mt-0.5" />{c}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MANUAL / EZ-IO STEPS */}
+      {ioSection === "manual" && (
+        <div className="space-y-4">
+          {/* EZ-IO */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="font-bold text-sm" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                EZ-IO Powered Drill — {weight} kg
+              </div>
+              <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                PREFERRED DEVICE
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+              Vidacare EZ-IO · recommended in PALS 2020 · &gt;95% first-pass success in trained hands
+            </p>
+
+            <div className="rounded-lg border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/30 p-3 mb-4">
+              <div className="font-bold text-[10px] uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-2">
+                Needle Selection — {weight} kg
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                {[
+                  { color: "bg-pink-400", label: "PINK", code: "15G · 15mm", range: "3–39 kg", current: weight >= 3 && weight < 40 },
+                  { color: "bg-blue-400", label: "BLUE", code: "15G · 25mm", range: "≥40 kg", current: weight >= 40 },
+                  { color: "bg-yellow-400", label: "YELLOW", code: "15G · 45mm", range: "Excessive tissue (adults)", current: false },
+                ].map(n => (
+                  <div key={n.label} className={`rounded-lg border p-2 text-center ${n.current ? "border-sky-400 dark:border-sky-600 bg-white dark:bg-slate-900" : "border-slate-200 dark:border-slate-700 opacity-60"}`}>
+                    <div className={`w-4 h-4 rounded-full mx-auto mb-1 ${n.color}`} />
+                    <div className="font-bold text-slate-800 dark:text-white text-[10px]">{n.label}</div>
+                    <div className="font-mono text-[9px] text-slate-600 dark:text-slate-300">{n.code}</div>
+                    <div className="text-[9px] text-slate-400">{n.range}</div>
+                    {n.current && <div className="text-[8px] font-bold text-sky-600 dark:text-sky-400 mt-0.5">▲ USE THIS</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {ezioSteps.map((step, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 px-3 py-2.5">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-bold font-mono flex items-center justify-center mt-0.5">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <div className="font-bold text-xs text-slate-800 dark:text-white mb-0.5">{step.title}</div>
+                    <div className="text-[11px] text-slate-600 dark:text-slate-300">{step.detail}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Manual IO */}
+          <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4">
+            <div className="font-bold text-sm mb-1 text-amber-700 dark:text-amber-300"
+                 style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+              Manual IO — Jamshidi / Cook Needle
+            </div>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">
+              Use when EZ-IO unavailable. Requires more force — controlled rotation technique essential.
+            </p>
+            <div className="space-y-2">
+              {manualSteps.map((step, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-white/60 dark:bg-black/20 px-3 py-2.5">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-600 text-white text-[9px] font-bold font-mono flex items-center justify-center mt-0.5">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <div className="font-bold text-xs text-amber-800 dark:text-amber-200 mb-0.5">{step.title}</div>
+                    <div className="text-[11px] text-amber-700 dark:text-amber-300">{step.detail}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* STERNAL / FAST */}
+      {ioSection === "sternal" && (
+        <div className="space-y-4">
+          <InfoBox tone="orange" icon={Warning} title="Paediatric caution">
+            Sternal IO (FAST-1) is NOT recommended in children &lt;12 yr. The sternum is thin, growth plates are active, and proximity to the heart increases risk. Use tibial IO in all paediatric emergencies.
+          </InfoBox>
+
+          <div className="rounded-xl border border-orange-200 dark:border-orange-800 bg-white dark:bg-slate-900/50 p-4">
+            <div className="font-bold text-sm mb-3 text-orange-700 dark:text-orange-400"
+                 style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+              FAST-1 Sternal Device — Adults / Adolescents ≥12 yr Only
+            </div>
+            <div className="space-y-2 mb-4">
+              {[
+                { title: "Indication", detail: "Military / pre-hospital when tibial IO inaccessible (limb trauma, amputation, hypothermia with thick tissue)" },
+                { title: "Landmark", detail: "Midline of the manubrium at the angle of Louis (sternal angle — T4 level). Palpate notch + angle → midpoint." },
+                { title: "Insert target patch", detail: "Place FAST-1 target patch over manubrium. Align introducer with target patch centre." },
+                { title: "Infuse", detail: "Push introducer firmly until click. Remove needle — infusion tube remains. Secure with overwrap." },
+                { title: "Flow rate", detail: "Gravity: ~150 mL/hr. Pressure bag: up to 500 mL/hr. Fastest IO site to central circulation." },
+                { title: "Removal", detail: "Pull straight out. Apply pressure 5 min. Single-use — do not re-insert at same site." },
+              ].map((s, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-lg border border-orange-100 dark:border-orange-900 bg-orange-50/50 dark:bg-orange-950/20 px-3 py-2">
+                  <span className="font-bold text-[10px] text-orange-600 dark:text-orange-400 flex-shrink-0 w-20">{s.title}</span>
+                  <span className="text-[11px] text-slate-600 dark:text-slate-300">{s.detail}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className={`rounded-lg border p-3 ${TONE.red.border} ${TONE.red.bg}`}>
+              <div className={`font-bold text-xs mb-2 ${TONE.red.text}`}>FAST-1 Contraindications</div>
+              {[
+                "Age <12 yr (thin sternum — do not use)",
+                "Previous sternotomy or sternal fracture",
+                "Active infection / burn over sternum",
+                "Sternal deformity or tumour",
+                "Obesity with excessive tissue overlying sternum",
+              ].map((c, i) => (
+                <div key={i} className="flex items-start gap-1.5 text-[11px] text-red-800 dark:text-red-200">
+                  <ArrowRight size={9} weight="bold" className="text-red-500 flex-shrink-0 mt-0.5" />{c}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRMATION */}
+      {ioSection === "confirm" && (
+        <div className="space-y-4">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4">
+            <div className="font-bold text-sm mb-3" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+              Confirming IO Placement
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className={`rounded-lg border p-3 ${TONE.emerald.border} ${TONE.emerald.bg}`}>
+                  <div className={`font-bold text-xs mb-2 ${TONE.emerald.text}`}>Signs of Correct Placement ✓</div>
+                  {[
+                    "Needle stands upright, unsupported, without wobble",
+                    "Aspiration of marrow (blood ± yellow fat globules) — not always obtained",
+                    "Flushing with 5–10 mL NaCl: no resistance, no swelling",
+                    "Drugs/fluids infuse with gravity or low pressure",
+                    "Clinical response to drugs (e.g. adrenaline effect in cardiac arrest)",
+                    "No compartment swelling during infusion",
+                  ].map((s, i) => (
+                    <div key={i} className="flex items-start gap-1.5 text-[11px] text-emerald-800 dark:text-emerald-200">
+                      <CheckCircle size={9} weight="fill" className="text-emerald-500 flex-shrink-0 mt-0.5" />{s}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className={`rounded-lg border p-3 ${TONE.red.border} ${TONE.red.bg}`}>
+                  <div className={`font-bold text-xs mb-2 ${TONE.red.text}`}>Signs of Malposition ✗ — REMOVE</div>
+                  {[
+                    "Needle can be rocked — not anchored in cortex",
+                    "Resistance to flushing / hard to infuse",
+                    "Swelling / firmness of limb during flush — extravasation",
+                    "Fluid tracks subcutaneously (visible skin tracking)",
+                    "No clinical drug effect expected",
+                    "Compartment syndrome: pain, pallor, paralysis, pressure",
+                  ].map((s, i) => (
+                    <div key={i} className="flex items-start gap-1.5 text-[11px] text-red-800 dark:text-red-200">
+                      <ArrowRight size={9} weight="bold" className="text-red-500 flex-shrink-0 mt-0.5" />{s}
+                    </div>
+                  ))}
+                </div>
+
+                <div className={`rounded-lg border p-3 ${TONE.amber.border} ${TONE.amber.bg}`}>
+                  <div className={`font-bold text-xs mb-2 ${TONE.amber.text}`}>IO Lab Samples</div>
+                  {[
+                    "Marrow aspirate can be sent for: U&E, glucose, blood gas, cross-match",
+                    "Haemoglobin: unreliable from IO aspirate",
+                    "Cultures: IO blood culture is acceptable",
+                    "Label as 'IO aspirate' — not standard venous blood",
+                  ].map((s, i) => (
+                    <div key={i} className="flex items-start gap-1.5 text-[11px] text-amber-800 dark:text-amber-200">
+                      <ArrowRight size={9} weight="bold" className="text-amber-500 flex-shrink-0 mt-0.5" />{s}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Complications */}
+            <div className="mt-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-3">
+              <div className="font-bold text-xs text-slate-700 dark:text-slate-200 mb-2">Complications & Management</div>
+              <div className="grid sm:grid-cols-2 gap-2">
+                {[
+                  { comp: "Extravasation / compartment syndrome", mgmt: "Remove IO immediately · elevate limb · ortho review" },
+                  { comp: "Osteomyelitis (rare, 0.6%)", mgmt: "Remove IO within 24 hr · IV antibiotics if signs of infection" },
+                  { comp: "Fracture through needle hole", mgmt: "Rare · avoid unnecessary IO in weight-bearing bones · splint" },
+                  { comp: "Fat embolism", mgmt: "Rare with slow infusion rates · monitor for respiratory deterioration" },
+                  { comp: "Growth plate injury (if too proximal)", mgmt: "Correct landmark (2 cm below TT) prevents this · monitor long-term" },
+                  { comp: "Needle dislodgement", mgmt: "Secure with EZ-Stabiliser · do NOT tape to leg — limb movement dislodges" },
+                ].map((c, i) => (
+                  <div key={i} className="rounded border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-2 text-[10px]">
+                    <div className="font-semibold text-slate-700 dark:text-slate-200 mb-0.5">{c.comp}</div>
+                    <div className="text-slate-500 dark:text-slate-400">{c.mgmt}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DIFFICULT IV */}
+      {ioSection === "difficult" && (
+        <div className="space-y-4">
+          <InfoBox tone="amber" icon={Warning}>
+            When IV access is difficult, work through this hierarchy systematically.
+            In cardiac arrest or haemodynamic collapse: go directly to IO. Do not delay resuscitation.
+          </InfoBox>
+
+          <div className="space-y-3">
+            {difficultIVAlternatives.map((d, i) => (
+              <div key={i} className={`rounded-xl border p-4 bg-white dark:bg-slate-900/50 ${TONE[d.tone].border}`}>
+                <div className="flex items-start gap-2 mb-2">
+                  <span className={`flex-shrink-0 w-6 h-6 rounded-full text-[10px] font-bold font-mono flex items-center justify-center border ${TONE[d.tone].text} ${TONE[d.tone].border} ${TONE[d.tone].bg}`}>
+                    {i + 1}
+                  </span>
+                  <div>
+                    <div className={`font-bold text-sm ${TONE[d.tone].text}`}
+                         style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{d.method}</div>
+                    <div className="text-[10px] font-mono text-slate-400 mt-0.5">{d.indication}</div>
+                  </div>
+                </div>
+                <div className="space-y-1 pl-8">
+                  {d.notes.map((n, j) => (
+                    <div key={j} className="flex items-start gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                      <ArrowRight size={10} weight="bold" className={`${TONE[d.tone].text} flex-shrink-0 mt-0.5`} />{n}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── TAB 3: MONITORING ─────────────────────────────────────────────────────────
 function MonitoringView() {
   const { weight } = useWeight();
@@ -656,7 +1133,12 @@ function MonitoringView() {
       </InfoBox>
 
       <div className="flex flex-wrap gap-1.5">
-        {[{ id: "spo2", label: "Pulse Oximetry" }, { id: "bp", label: "BP Measurement" }, { id: "bvm", label: "BVM" }].map(s => (
+        {[
+          { id: "spo2", label: "Pulse Oximetry" },
+          { id: "bp",   label: "BP Measurement" },
+          { id: "bvm",  label: "BVM"             },
+          { id: "io",   label: "IO Access"       },
+        ].map(s => (
           <button key={s.id} onClick={() => setSection(s.id)}
             className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] uppercase tracking-widest transition-all ${
               section === s.id
@@ -825,6 +1307,9 @@ function MonitoringView() {
           </div>
         </div>
       )}
+
+      {/* IO ACCESS — rendered via dedicated component */}
+      {section === "io" && <IOAccessView weight={weight} />}
     </div>
   );
 }
