@@ -5,7 +5,6 @@
 
 import { useState } from "react";
 import { useWeight } from "../../context/WeightContext";
-import { useSearchNavigate } from "../../hooks/useSearchNavigate";
 import {
   MagnifyingGlass, X, CaretRight, CaretDown, Warning, Lightbulb,
   Syringe, Brain, Baby, Drop, Wind, Lightning, TreeStructure,
