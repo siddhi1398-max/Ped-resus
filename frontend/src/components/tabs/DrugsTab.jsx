@@ -4,6 +4,7 @@
 
 import { useState, useMemo } from "react";
 import { useWeight } from "../../context/WeightContext";
+import { useSearchNavigate } from "../../hooks/useSearchNavigate";
 import { DRUGS, DRUG_CATEGORIES, computeDrugDose } from "../../data/drugs";
 import { Input } from "../ui/input";
 import {
