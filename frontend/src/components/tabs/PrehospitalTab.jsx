@@ -8,7 +8,7 @@
 //   • IAPPEM 2026 — Regional Poison Information Centres (India)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning,
@@ -873,9 +873,27 @@ function EquipmentSection() {
 }
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
-export default function PrehospitalTab() {
+export default function PrehospitalTab({ searchEntry }) {
   const { weight } = useWeight();
   const [sec, setSec] = useState("triage");
+
+  // ADD this useEffect:
+  useEffect(() => {
+    if (!searchEntry?.section) return;
+    const sectionMap = {
+      "Triage":         "triage",
+      "BLS & CPR":      "bls",
+      "Choking":        "choking",
+      "Seizures":       "seizure",
+      "Burns":          "burns",
+      "Shock & Fluids": "shock",
+      "Poisoning":      "poisoning",
+      "Envenomation":   "envenomation",
+      "Poison Centres": "poison-centres",
+    };
+    const s = sectionMap[searchEntry.section];
+    if (s) setSec(s);
+  }, [searchEntry]);
 
   const SECTIONS = [
     { id: "triage",       label: "Triage & ABCDE", icon: Siren,         color: "sky"     },
