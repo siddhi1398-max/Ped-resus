@@ -39,10 +39,19 @@ export default function SyrupCalculatorTab({ searchEntry }) {
   
   useEffect(() => {
   if (!searchEntry?.drugId) return;
+  
+  // Find the drug first
+  const matchedDrug = ORAL_DRUGS.find(d => d.id === searchEntry.drugId);
+  if (!matchedDrug) return;
+
+  // Find which category tab it belongs to
+  const matchingCat = ORAL_CATEGORIES.find(c =>
+    c.matches?.includes(matchedDrug.category)
+  );
+
   setSearch("");
-  setCategory("all");
+  setCategory(matchingCat?.id ?? "all");
   setExpanded(searchEntry.drugId);
-  setExpandedDrugId(searchEntry.drugId);
   setTimeout(() => {
     document.getElementById(`syrup-drug-${searchEntry.drugId}`)
       ?.scrollIntoView({ behavior: "smooth", block: "center" });
