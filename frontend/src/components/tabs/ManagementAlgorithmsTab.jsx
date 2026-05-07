@@ -3,7 +3,7 @@
 // Sub-tabs: ED Management · AHA Algorithms · Clinical Guidelines · Interactive Pathways · Differentials
 // Sources: IAP 2019–2023 · Fleischer & Ludwig 7e · Nelson 21e · PALS 2025 AHA · WHO · PREM-TAEI
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   MagnifyingGlass, X, CaretRight, CaretDown, Warning, Lightbulb,
@@ -879,9 +879,22 @@ const TABS = [
   { id: "differentials",label: "Differentials",       Icon: Stethoscope,   shortLabel: "DDx"          },
 ];
 
-export default function ManagementAlgorithmsTab() {
+export default function ManagementAlgorithmsTab({ searchEntry }) {
   const [activeTab, setActiveTab] = useState("ed");
 
+  // ADD this useEffect:
+  useEffect(() => {
+    if (!searchEntry?.section) return;
+    const sectionMap = {
+      "ED Management":        "ed",
+      "AHA Algorithms":       "aha",
+      "Clinical Guidelines":  "guidelines",
+      "Interactive Pathways": "pathways",
+      "Differentials":        "differentials",
+    };
+    const tab = sectionMap[searchEntry.section];
+    if (tab) setActiveTab(tab);
+  }, [searchEntry]);
   return (
     <div className="space-y-5">
       {/* Header */}
