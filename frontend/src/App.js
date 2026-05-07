@@ -395,6 +395,8 @@ function Home() {
   const [paid,       setPaid]       = useState(false);
   const [authReady,  setAuthReady]  = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [searchEntry, setSearchEntry] = useState(null);
+
 
  // useEffect 1 — auth check
 useEffect(() => {
@@ -459,27 +461,11 @@ useEffect(() => {
     setShowDialog(false);
   }, []);
   
- const handleSearchSelect = useCallback((entry) => {
+const handleSearchSelect = useCallback((entry) => {
   const t = ALL_TABS.find(t => t.id === entry.tab);
-  if (!t?.free && !paid) {
-    setShowDialog(true);
-    return;
-  }
-
+  if (!t?.free && !paid) { setShowDialog(true); return; }
   setTab(entry.tab);
-
-  // Give the lazy-loaded tab time to mount and register its event listener,
-  // then dispatch the deep-link navigation event
-  setTimeout(() => {
-    window.dispatchEvent(new CustomEvent("pedresus:search-navigate", {
-      detail: {
-        tab:     entry.tab,
-        id:      entry.id,
-        drugId:  entry.drugId  ?? null,
-        section: entry.section ?? null,
-      }
-    }));
-  }, 350);
+  setSearchEntry(entry);
 }, [paid]);
   
   return (
@@ -511,7 +497,7 @@ useEffect(() => {
 
         {/* Centre: search bar — was onNavigate, must be onResultSelect */}
 <div className="flex-1 min-w-0">
-  <SearchBar onResultSelect={handleSearchSelect} />
+ <SearchBar onResultSelect={handleSearchSelect} />
 </div>
 
         {/* Right: user info */}
@@ -547,17 +533,18 @@ useEffect(() => {
             })}
           </TabsList>
 
-         {ALL_TABS.map((t) => (
+        {ALL_TABS.map((t) => (
   <TabsContent key={t.id} value={t.id} className="mt-6 sm:mt-8 focus-visible:outline-none">
     <Suspense fallback={
       <div className="flex justify-center py-24">
         <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
       </div>
     }>
-      <t.Comp />
+      <t.Comp {...(searchEntry?.tab === t.id ? { searchEntry } : {})} />
     </Suspense>
   </TabsContent>
 ))}
+
         </Tabs>
 
         <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
