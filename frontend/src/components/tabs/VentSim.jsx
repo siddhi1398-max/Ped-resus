@@ -661,10 +661,10 @@ export default function VentSim() {
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", minHeight: 560 }}>
 
         {/* ── LEFT PANEL ── */}
-        <div style={{ borderBottom: "1px solid #1e2d3d", display: "flex", flexDirection: "column" }}>
+        <div style={{ borderRight: "1px solid #1e2d3d", display: "flex", flexDirection: "column" }}>
           <div style={{ borderBottom: "1px solid #1e2d3d", padding: "8px 10px", display: "flex", gap: 4 }}>
             {panelBtn("scenario", "Scenarios")}
             {panelBtn("settings", "Vent Settings")}
@@ -785,7 +785,6 @@ export default function VentSim() {
 
                 <div style={{ borderTop: "1px solid #1e2d3d", paddingTop: 10, marginTop: 4 }}>
                   <div style={{ fontSize: 8, color: "#334155", letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 }}>
-                    <div style={{ borderBottom: "1px solid #1e2d3d", padding: "8px 10px", display: "flex", gap: 4, flexWrap: "wrap" }}>
                     Patient–Vent Interaction
                   </div>
                   <Toggle label="Flow Starvation (VC mode)" value={physiology.starvation}
@@ -821,7 +820,7 @@ export default function VentSim() {
         <div style={{ display: "flex", flexDirection: "column" }}>
 
           {/* Numerics bar */}
-         <div style={{ borderBottom: "1px solid #1e2d3d", display: "flex", flexWrap: "wrap", padding: "0 12px" }}>
+          <div style={{ borderBottom: "1px solid #1e2d3d", display: "flex", padding: "0 12px" }}>
             {[
               { label: "PIP", val: live.pip, unit: "cmH₂O", color: "#4ade80", alert: live.pip > 35 },
               { label: "PEEP", val: settings.peep, unit: "cmH₂O", color: "#4ade80" },
@@ -853,7 +852,7 @@ export default function VentSim() {
                   <div style={{ fontSize: 7, color: "#1e3a52" }}>{row.unit}</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: holdState ? "#fbbf24" : row.color, marginTop: 2 }}>{row.val}</div>
                 </div>
-                <canvas ref={row.ref} style={{ flex: 1, height: 80, minWidth: 0, borderRadius: 4, border: "1px solid #0e1f2e", display: "block" }} />
+                <canvas ref={row.ref} style={{ flex: 1, height: 85, borderRadius: 4, border: "1px solid #0e1f2e", display: "block" }} />
               </div>
             ))}
           </div>
@@ -861,7 +860,7 @@ export default function VentSim() {
           {/* Hold Manoeuvre Controls */}
           <div style={{ borderTop: "1px solid #1e2d3d", padding: "8px 12px", background: "#0a0f14" }}>
             <div style={{ fontSize: 8, color: "#334155", letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 }}>Hold Manoeuvres</div>
-            <div style={{ display: "flex", gap: 8,"1 1 auto", minWidth: 120, flexWrap: "wrap", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               <button onClick={() => triggerHold("insp")} style={{
                 display: "flex", alignItems: "center", gap: 5,
                 background: holdState === "insp" ? "#1a3a00" : "#0e1922",
@@ -898,7 +897,7 @@ export default function VentSim() {
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
                   {result.items.map((item, i) => (
-                    <div key={i} style={{ background: "#0a0f14", borderRadius: 5, padding: "5px 8px", border: "1px solid #1e2d3d", minWidth: 80 }}>
+                    <div key={i} style={{ background: "#0a0f14", borderRadius: 5, padding: "5px 8px", border: "1px solid #1e2d3d" }}>
                       <div style={{ fontSize: 7, color: "#334155", letterSpacing: 1, textTransform: "uppercase" }}>{item.label}</div>
                       <div style={{ fontSize: 17, fontWeight: 700, color: item.color, lineHeight: 1.1 }}>
                         {item.val} <span style={{ fontSize: 8, fontWeight: 400, color: "#475569" }}>{item.unit}</span>
