@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import { useWeight } from "../../context/WeightContext";
+import { useSearchNavigate } from "../../hooks/useSearchNavigate";
 import {
   MagnifyingGlass, X, CaretRight, CaretDown, Warning, Lightbulb,
   Syringe, Brain, Baby, Drop, Wind, Lightning, TreeStructure,
@@ -17,6 +18,15 @@ import { toast } from "sonner";
 import { DIFFERENTIALS } from "../../data/differentials";
 import { PATHWAYS } from "../../data/pathways";
 import { ALGORITHMS as PALS_ALGORITHMS, AHA_2025_UPDATES } from "../../data/algorithms";
+
+useSearchNavigate("algorithms", ({ section }) => {
+  const map = {
+    "ED Management": "ed", "AHA Algorithms": "aha",
+    "Clinical Guidelines": "guidelines",
+    "Interactive Pathways": "pathways", "Differentials": "differentials",
+  };
+  if (map[section]) setActiveTab(map[section]);
+});
 
 // ─── SHARED STYLE MAPS ────────────────────────────────────────────────────────
 const PHASE_COLORS = {
