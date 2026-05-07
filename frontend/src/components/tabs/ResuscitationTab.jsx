@@ -3,7 +3,7 @@ import { RSI_PRE_MEDICATION, RSI_INDUCTION, RSI_PARALYSIS, RSI_POST, RSI_CHECKLI
 import { ICD_INSERTION } from "../../data/criticalCare";
 import InfusionCalculator from "../InfusionCalculator";
 import RuleOfSixs from "../RuleOfSixs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Warning } from "@phosphor-icons/react";
 
 const TONE_CARD = {
@@ -21,9 +21,22 @@ const SECTIONS = [
   { id: "icd",        label: "ICD Insertion" },
 ];
 
-export default function ResuscitationTab() {
+export default function ResuscitationTab({ searchEntry }) {
   const { weight } = useWeight();
   const [sec, setSec] = useState("quickstart");
+
+  useEffect(() => {
+    if (!searchEntry?.section) return;
+    const sectionMap = {
+      "RSI Quickstart": "quickstart",
+      "Infusions (mL/hr)": "infusions",
+      "Rule of 6s": "rule6",
+      "7 Ps Checklist": "checklist",
+      "ICD Insertion": "icd",
+    };
+    const s = sectionMap[searchEntry.section];
+    if (s) setSec(s);
+  }, [searchEntry]);;
 
   return (
     <div className="space-y-6">
