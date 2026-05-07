@@ -459,15 +459,29 @@ useEffect(() => {
     setShowDialog(false);
   }, []);
   
-  const handleSearchSelect = useCallback((entry) => {
+ const handleSearchSelect = useCallback((entry) => {
   const t = ALL_TABS.find(t => t.id === entry.tab);
-  if (t?.free || paid) {
-    setTab(entry.tab);
-  } else {
+  if (!t?.free && !paid) {
     setShowDialog(true);
+    return;
   }
-}, [paid]);
 
+  setTab(entry.tab);
+
+  // Give the lazy-loaded tab time to mount and register its event listener,
+  // then dispatch the deep-link navigation event
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent("pedresus:search-navigate", {
+      detail: {
+        tab:     entry.tab,
+        id:      entry.id,
+        drugId:  entry.drugId  ?? null,
+        section: entry.section ?? null,
+      }
+    }));
+  }, 350);
+}, [paid]);
+  
   return (
     <div className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-slate-100"
       style={{ fontFamily: '"IBM Plex Sans", system-ui, sans-serif' }}>
