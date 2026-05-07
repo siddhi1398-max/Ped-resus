@@ -2,7 +2,7 @@
 // Sub-tabs: Primary Survey · Shock & Fluids · TBI · Secondary Survey · Scores
 // Sources: ATLS 11th ed (ACS 2025) · PALS 2020 · APLS · CRASH-2 · Broselow · Pediatric Surgery NatCertBoard
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   Warning, ArrowRight, CheckCircle, Circle, Heartbeat,
@@ -1300,10 +1300,23 @@ const TABS = [
   { id: "scores",    label: "Trauma Scores",    Icon: ClipboardText },
 ];
 
-export default function TraumaTab() {
+export default function TraumaTab({ searchEntry }) {
   const { weight }  = useWeight();
   const [activeTab, setActiveTab] = useState("primary");
 
+  // ADD this useEffect:
+  useEffect(() => {
+    if (!searchEntry?.section) return;
+    const sectionMap = {
+      "Primary Survey":   "primary",
+      "Shock & Fluids":   "shock",
+      "TBI":              "tbi",
+      "Secondary Survey": "secondary",
+      "Trauma Scores":    "scores",
+    };
+    const tab = sectionMap[searchEntry.section];
+    if (tab) setActiveTab(tab);
+  }, [searchEntry]);
   return (
     <div className="space-y-5">
       <div>
