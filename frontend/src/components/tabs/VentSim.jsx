@@ -1,6 +1,208 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ChartLine, Person, Gear, PuzzlePiece } from "@phosphor-icons/react";
 
+function PuzzleGoals({ goals, settings, holdResult, mode, openHintId, setOpenHintId }) {
+  const [goalsOpen, setGoalsOpen] = useState(false);
+  const goalsDone = goals.filter(g => g.check(settings, holdResult, mode)).length;
+
+  return (
+    <div style={{marginBottom:12}}>
+      <button
+        onClick={() => setGoalsOpen(o => !o)}
+        style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",
+          padding:"8px 10px",borderRadius: goalsOpen ? "6px 6px 0 0" : "6px",
+          background:"#0a0f14",border:"1px solid #1e3a52",
+          borderBottom: goalsOpen ? "1px solid #0d1a26" : "1px solid #1e3a52",
+          cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:8,color:"#334155",letterSpacing:2,textTransform:"uppercase"}}>
+            Goals & Hints
+          </span>
+          {!goalsOpen && goalsDone > 0 && (
+            <span style={{fontSize:8,color:"#4a9eff"}}>
+              {goalsDone}/{goals.length} done
+            </span>
+          )}
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          {!goalsOpen && (
+            <span style={{fontSize:8,color:"#334155",letterSpacing:1}}>tap to reveal</span>
+          )}
+          <span style={{fontSize:10,color:"#334155",display:"inline-block",
+            transition:"transform 0.2s",transform: goalsOpen ? "rotate(180deg)" : "rotate(0deg)"}}>
+            ▼
+          </span>
+        </div>
+      </button>
+
+      {goalsOpen && (
+        <div style={{border:"1px solid #1e3a52",borderTop:"none",borderRadius:"0 0 6px 6px",
+          padding:"10px",background:"#08111a",animation:"slidein 0.15s ease"}}>
+          <div style={{display:"flex",justifyContent:"flex-end",marginBottom:8}}>
+            <span style={{fontSize:9,color:goalsDone===goals.length?"#22c55e":"#4a9eff"}}>
+              {goalsDone}/{goals.length} complete
+            </span>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {goals.map((g,i) => {
+              const done = g.check(settings, holdResult, mode);
+              const hintOpen = openHintId === g.id;
+              return (
+                <div key={g.id}>
+                  <div style={{display:"flex",gap:8,alignItems:"flex-start",padding:"8px 10px",
+                    borderRadius:6,background:done?"#0a1f0a":"#0a0f14",
+                    border:`1px solid ${done?"#22c55e44":"#1e2d3d"}`,transition:"all 0.3s"}}>
+                    <div style={{width:18,height:18,borderRadius:"50%",flexShrink:0,marginTop:1,
+                      background:done?"#22c55e":"#1e2d3d",display:"flex",alignItems:"center",
+                      justifyContent:"center",fontSize:10,color:done?"#fff":"#334155",
+                      transition:"all 0.3s"}}>{done?"✓":i+1}</div>
+                    <div style={{flex:1,fontSize:10,color:done?"#4ade80":"#64748b",lineHeight:1.4}}>
+                      {g.label}
+                    </div>
+                    {!done && (
+                      <button
+                        onClick={()=>setOpenHintId(prev => prev===g.id ? null : g.id)}
+                        style={{padding:"2px 7px",borderRadius:3,cursor:"pointer",
+                          border:`1px solid ${hintOpen?"#4ade8066":"#1e3a52"}`,
+                          background:hintOpen?"#0f1a00":"transparent",
+                          color:hintOpen?"#4ade80":"#334155",
+                          fontSize:8,letterSpacing:1,fontFamily:"inherit",
+                          flexShrink:0,transition:"all 0.15s"}}>
+                        {hintOpen?"HIDE":"HINT"}
+                      </button>
+                    )}
+                  </div>
+                  {hintOpen && !done && (
+                    <div style={{marginTop:3,fontSize:9,color:"#4ade80",background:"#0f1a00",
+                      borderRadius:"0 0 6px 6px",padding:"8px 10px 8px 36px",
+                      border:"1px solid #4ade8022",borderTop:"none",lineHeight:1.6,
+                      animation:"slidein 0.15s ease"}}>
+                      💡 {g.hint}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function useAlarmSound(activeAlarm, alarmDismissed) {
+  const audioCtxRef = useRef(null);
+  const alarmIntervalRef = useRef(null);
+
+  const getAudioCtx = () => {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtxRef.current;
+  };
+
+  const playBeepPattern = useCallback((pattern) => {
+    const ctx = getAudioCtx();
+    if (ctx.state === "suspended") ctx.resume();
+
+    pattern.forEach(({ freq, duration, delay, gain = 0.3, type = "sine" }) => {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+      gainNode.gain.setValueAtTime(0, ctx.currentTime + delay);
+      gainNode.gain.linearRampToValueAtTime(gain, ctx.currentTime + delay + 0.01);
+      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + delay + duration - 0.01);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + duration);
+    });
+  }, []);
+
+  // Different alarm patterns per alarm type
+  const ALARM_PATTERNS = {
+    // High priority — rapid triple beep, high pitch
+    "HIGH PIP + HIGH PLATEAU → LOW COMPLIANCE": {
+      interval: 2500,
+      pattern: [
+        { freq: 1200, duration: 0.12, delay: 0,    gain: 0.4, type: "square" },
+        { freq: 1200, duration: 0.12, delay: 0.18, gain: 0.4, type: "square" },
+        { freq: 1200, duration: 0.12, delay: 0.36, gain: 0.4, type: "square" },
+      ],
+    },
+    "HIGH PIP + LOW Vt → CONSIDER PTX": {
+      interval: 1800,
+      pattern: [
+        { freq: 1400, duration: 0.1,  delay: 0,    gain: 0.45, type: "square" },
+        { freq: 1400, duration: 0.1,  delay: 0.15, gain: 0.45, type: "square" },
+        { freq: 1000, duration: 0.2,  delay: 0.35, gain: 0.45, type: "square" },
+      ],
+    },
+    // Medium priority — double beep, mid pitch
+    "HIGH PIP (RESISTANCE) + AUTO-PEEP": {
+      interval: 3500,
+      pattern: [
+        { freq: 880, duration: 0.15, delay: 0,    gain: 0.35, type: "sine" },
+        { freq: 880, duration: 0.15, delay: 0.25, gain: 0.35, type: "sine" },
+      ],
+    },
+    "LOW Vt — CIRCUIT LEAK": {
+      interval: 3000,
+      pattern: [
+        { freq: 760, duration: 0.18, delay: 0,    gain: 0.3, type: "sine" },
+        { freq: 760, duration: 0.18, delay: 0.28, gain: 0.3, type: "sine" },
+      ],
+    },
+    // Lower priority — single longer beep, lower pitch
+    "FLOW STARVATION — VC MODE": {
+      interval: 4000,
+      pattern: [
+        { freq: 600, duration: 0.3, delay: 0, gain: 0.25, type: "sine" },
+      ],
+    },
+    "PATIENT–VENTILATOR DYSSYNCHRONY": {
+      interval: 3500,
+      pattern: [
+        { freq: 680, duration: 0.15, delay: 0,   gain: 0.28, type: "sine" },
+        { freq: 900, duration: 0.15, delay: 0.2, gain: 0.28, type: "sine" },
+      ],
+    },
+  };
+
+  useEffect(() => {
+    // Clear any existing interval
+    if (alarmIntervalRef.current) {
+      clearInterval(alarmIntervalRef.current);
+      alarmIntervalRef.current = null;
+    }
+
+    if (!activeAlarm || alarmDismissed) return;
+
+    const config = ALARM_PATTERNS[activeAlarm];
+    if (!config) return;
+
+    // Play immediately on alarm trigger
+    playBeepPattern(config.pattern);
+
+    // Then repeat on interval
+    alarmIntervalRef.current = setInterval(() => {
+      playBeepPattern(config.pattern);
+    }, config.interval);
+
+    return () => {
+      if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current);
+    };
+  }, [activeAlarm, alarmDismissed, playBeepPattern]);
+
+  // Cleanup audio context on unmount
+  useEffect(() => {
+    return () => {
+      if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current);
+      if (audioCtxRef.current) audioCtxRef.current.close();
+    };
+  }, []);
+}
 const SAMPLE_RATE = 200;
 const WINDOW_S = 6;
 const HISTORY = SAMPLE_RATE * WINDOW_S;
@@ -407,6 +609,7 @@ export default function VentSim() {
   const [holdState, setHoldState] = useState(null);
   const [holdResult, setHoldResult] = useState(null);
   const [live, setLive] = useState({pip:0,flow:0,vol:0});
+  const [muted, setMuted] = useState(false);
 
   // Puzzle
   const [puzzleIdx, setPuzzleIdx] = useState(0);
@@ -414,6 +617,7 @@ export default function VentSim() {
   const [openHintId, setOpenHintId] = useState(null);
   const [showTeaching, setShowTeaching] = useState(false);
 
+  
   const canvPRef = useRef(null);
   const canvFRef = useRef(null);
   const canvVRef = useRef(null);
@@ -430,6 +634,7 @@ export default function VentSim() {
   useEffect(()=>{stateRef.current.settings=settings;},[settings]);
   useEffect(()=>{stateRef.current.physiology=physiology;},[physiology]);
   useEffect(()=>{stateRef.current.hold=holdState;},[holdState]);
+  useAlarmSound(muted ? null : activeAlarm, alarmDismissed);
 
   const currentPuzzle = PUZZLE_CASES[puzzleIdx];
   useEffect(()=>{
@@ -598,6 +803,15 @@ export default function VentSim() {
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
             <span style={{fontSize:9,color:alarmInfo?.color||"#ef4444",letterSpacing:1.5,textTransform:"uppercase",fontWeight:700}}>⚠ {activeAlarm}</span>
             <div style={{display:"flex",gap:6,flexShrink:0}}>
+               <button
+    onClick={() => setMuted(m => !m)}
+    style={{padding:"3px 8px",borderRadius:3,cursor:"pointer",
+      border:`1px solid ${muted?"#334155":"#1e3a52"}`,
+      background: muted ? "#1e2d3d" : "transparent",
+      color: muted ? "#475569" : "#64748b",
+      fontSize:8,letterSpacing:1,textTransform:"uppercase",fontFamily:"inherit"}}>
+    {muted ? "🔇" : "🔔"}
+  </button>
               <button onClick={()=>setShowTroubleshoot(t=>!t)} style={{padding:"3px 8px",borderRadius:3,cursor:"pointer",border:`1px solid ${alarmInfo?.color||"#ef4444"}`,background:"transparent",color:alarmInfo?.color||"#ef4444",fontSize:8,letterSpacing:1,textTransform:"uppercase",fontFamily:"inherit"}}>{showTroubleshoot?"Hide":"Guide"}</button>
               <button onClick={()=>setAlarmDismissed(true)} style={{padding:"3px 8px",borderRadius:3,cursor:"pointer",border:"1px solid #1e3a52",background:"transparent",color:"#475569",fontSize:8,fontFamily:"inherit"}}>✕</button>
             </div>
@@ -795,38 +1009,15 @@ export default function VentSim() {
             </div>
 
             {/* Goals — with collapsible hints */}
-            <div style={{marginBottom:12}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                <div style={{fontSize:8,color:"#334155",letterSpacing:2,textTransform:"uppercase"}}>Goals</div>
-                <div style={{fontSize:9,color:puzzleGoalsDone===currentPuzzle.goals.length?"#22c55e":"#4a9eff"}}>{puzzleGoalsDone}/{currentPuzzle.goals.length} complete</div>
-              </div>
-              <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                {currentPuzzle.goals.map((g,i)=>{
-                  const done=g.check(settings,holdResult,mode);
-                  const hintOpen = openHintId === g.id;
-                  return(
-                    <div key={g.id}>
-                      <div style={{display:"flex",gap:8,alignItems:"flex-start",padding:"8px 10px",borderRadius:6,background:done?"#0a1f0a":"#0a0f14",border:`1px solid ${done?"#22c55e44":"#1e2d3d"}`,transition:"all 0.3s"}}>
-                        <div style={{width:18,height:18,borderRadius:"50%",flexShrink:0,marginTop:1,background:done?"#22c55e":"#1e2d3d",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:done?"#fff":"#334155",transition:"all 0.3s"}}>{done?"✓":i+1}</div>
-                        <div style={{flex:1,fontSize:10,color:done?"#4ade80":"#64748b",lineHeight:1.4}}>{g.label}</div>
-                        {!done&&(
-                          <button
-                            onClick={()=>setOpenHintId(prev => prev===g.id ? null : g.id)}
-                            style={{padding:"2px 7px",borderRadius:3,cursor:"pointer",border:`1px solid ${hintOpen?"#4ade8066":"#1e3a52"}`,background:hintOpen?"#0f1a00":"transparent",color:hintOpen?"#4ade80":"#334155",fontSize:8,letterSpacing:1,fontFamily:"inherit",flexShrink:0,transition:"all 0.15s"}}>
-                            {hintOpen?"HIDE":"HINT"}
-                          </button>
-                        )}
-                      </div>
-                      {hintOpen&&!done&&(
-                        <div style={{marginTop:3,fontSize:9,color:"#4ade80",background:"#0f1a00",borderRadius:"0 0 6px 6px",padding:"8px 10px 8px 36px",border:"1px solid #4ade8022",borderTop:"none",lineHeight:1.6,animation:"slidein 0.15s ease"}}>
-                          💡 {g.hint}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+<PuzzleGoals
+  key={currentPuzzle.id}
+  goals={currentPuzzle.goals}
+  settings={settings}
+  holdResult={holdResult}
+  mode={mode}
+  openHintId={openHintId}
+  setOpenHintId={setOpenHintId}
+/>
 
             {/* Solved */}
             {puzzleSolved&&(
