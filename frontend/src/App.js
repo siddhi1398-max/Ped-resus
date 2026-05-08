@@ -387,7 +387,78 @@ function PaywallDialog({ user, onSuccess, onClose }) {
     </>
   );
 }
+function TabsSheet({ tab, paid, onTabClick, onClose }) {
+  const categories = [
+    { label: "Assessment",  tabs: ["calculator", "vitals", "abg"] },
+    { label: "Emergency",   tabs: ["resuscitation", "trauma", "prehospital"] },
+    { label: "Treatment",   tabs: ["drugs", "fluids", "syrup", "sedation"] },
+    { label: "Support",     tabs: ["ventilator", "equipment", "neonatal"] },
+    { label: "Reference",   tabs: ["algorithms", "immunisation"] },
+    { label: "Tools",       tabs: ["copilot"] },
+  ];
 
+  return (
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm sm:hidden" onClick={onClose} />
+
+      {/* Sheet */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 rounded-t-2xl shadow-2xl border-t border-slate-200 dark:border-slate-700 px-4 pb-10 pt-4 sm:hidden"
+        style={{ maxHeight: "80vh", overflowY: "auto" }}>
+
+        {/* Handle */}
+        <div className="flex justify-center mb-4">
+          <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white"
+            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+            All Tabs
+          </h2>
+          <button onClick={onClose}
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-all">
+            <X size={14} weight="bold" />
+          </button>
+        </div>
+
+        {/* Grouped tabs */}
+        {categories.map((cat) => (
+          <div key={cat.label} className="mb-4">
+            <div className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-400 mb-1.5 px-1">
+              {cat.label}
+            </div>
+            <div className="rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800">
+              {cat.tabs.map((tabId, i) => {
+                const t = ALL_TABS.find(t => t.id === tabId);
+                if (!t) return null;
+                const Icon = t.icon;
+                const isLocked = !t.free && !paid;
+                const isActive = tab === tabId;
+                return (
+                  <button key={tabId}
+                    onClick={() => { onTabClick(tabId); onClose(); }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-[11px] font-mono uppercase tracking-[0.15em] transition-colors
+                      ${i !== 0 ? "border-t border-slate-100 dark:border-slate-800" : ""}
+                      ${isActive
+                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                        : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 active:bg-slate-50 dark:active:bg-slate-800"
+                      }`}>
+                    <Icon size={14} weight="bold" />
+                    <span className="flex-1 text-left">{t.label}</span>
+                    {isActive && <span className="text-[9px] opacity-60">current</span>}
+                    {isLocked && <Lock size={9} weight="bold" className="text-amber-400 opacity-75" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
 // ─── HOME ─────────────────────────────────────────────────────────────────────
 function Home() {
   const [tab,        setTab]        = useState("calculator");
@@ -396,6 +467,7 @@ function Home() {
   const [authReady,  setAuthReady]  = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [searchEntry, setSearchEntry] = useState(null);
+  const [showTabsSheet, setShowTabsSheet] = useState(false);
 
 
  // useEffect 1 — auth check
@@ -475,7 +547,16 @@ const handleSearchSelect = useCallback((entry) => {
       {showDialog && (
         <PaywallDialog user={user} onSuccess={handleUnlock} onClose={() => setShowDialog(false)} />
       )}
+        {showTabsSheet && (
+  <TabsSheet
+    tab={tab}
+    paid={paid}
+    onTabClick={handleTabClick}
+    onClose={() => setShowTabsSheet(false)}
+  />
+)}
 
+        
       <TopBar />
 
      {/* Status bar */}
@@ -517,21 +598,40 @@ const handleSearchSelect = useCallback((entry) => {
         
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <Tabs value={tab} onValueChange={(val) => handleTabClick(val)}>
-          <TabsList className="w-full justify-start flex-wrap h-auto p-1.5 bg-slate-100 dark:bg-slate-900 gap-1">
-            {ALL_TABS.map((t) => {
-              const Icon = t.icon;
-              const isLocked = !t.free && !paid;
-              return (
-                <TabsTrigger key={t.id} value={t.id} onClick={() => handleTabClick(t.id)}
-                  title={isLocked ? `Unlock for ₹${PRICE_INR}` : t.label}
-                  className="gap-1.5 font-mono text-[11px] uppercase tracking-[0.15em] data-[state=active]:bg-slate-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-slate-900">
-                  <Icon size={13} weight="bold" />
-                  {t.label}
-                  {isLocked && <Lock size={9} weight="bold" className="text-amber-400 ml-0.5 opacity-75" />}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+         {/* Mobile: trigger button */}
+<div className="sm:hidden mb-4">
+  <button
+    onClick={() => setShowTabsSheet(true)}
+    className="w-full flex items-center justify-between px-4 py-2.5 bg-slate-100 dark:bg-slate-900 rounded-xl text-[11px] font-mono uppercase tracking-[0.15em] text-slate-700 dark:text-slate-300">
+    <span className="flex items-center gap-2">
+      {(() => { const t = ALL_TABS.find(t => t.id === tab); const Icon = t?.icon; return Icon ? <Icon size={13} weight="bold" /> : null; })()}
+      {ALL_TABS.find(t => t.id === tab)?.label}
+    </span>
+    <span className="flex items-center gap-1 text-slate-400">
+      <span className="text-[10px]">All Tabs</span>
+      <TreeStructure size={12} weight="bold" />
+    </span>
+  </button>
+</div>
+
+{/* Desktop: original flat tabs */}
+<div className="hidden sm:block">
+  <TabsList className="w-full justify-start flex-wrap h-auto p-1.5 bg-slate-100 dark:bg-slate-900 gap-1">
+    {ALL_TABS.map((t) => {
+      const Icon = t.icon;
+      const isLocked = !t.free && !paid;
+      return (
+        <TabsTrigger key={t.id} value={t.id} onClick={() => handleTabClick(t.id)}
+          title={isLocked ? `Unlock for ₹${PRICE_INR}` : t.label}
+          className="gap-1.5 font-mono text-[11px] uppercase tracking-[0.15em] data-[state=active]:bg-slate-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-slate-900">
+          <Icon size={13} weight="bold" />
+          {t.label}
+          {isLocked && <Lock size={9} weight="bold" className="text-amber-400 ml-0.5 opacity-75" />}
+        </TabsTrigger>
+      );
+    })}
+  </TabsList>
+</div>
 
         {ALL_TABS.map((t) => (
   <TabsContent key={t.id} value={t.id} className="mt-6 sm:mt-8 focus-visible:outline-none">
