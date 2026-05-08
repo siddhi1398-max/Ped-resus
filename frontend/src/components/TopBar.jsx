@@ -104,7 +104,22 @@ export default function TopBar() {
             onValueChange={handleSlider}
             className="flex-1 min-w-0"
           />
-
+{/* Weight input — no age below anymore */}
+<div className="flex items-center gap-1 flex-shrink-0">
+  <Input
+    data-testid="weight-input"
+    type="number"
+    min="0.5"
+    max="100"
+    step="0.5"
+    value={inputVal}
+    onChange={(e) => setInputVal(e.target.value)}
+    onBlur={commitInput}
+    onKeyDown={(e) => e.key === "Enter" && commitInput()}
+    className="w-12 h-7 font-mono text-center text-sm font-bold px-1"
+  />
+  <span className="font-mono text-xs text-slate-500 dark:text-slate-400">kg</span>
+</div>
          {/* Broselow zone */}
 <div
   data-testid="broselow-zone-indicator"
