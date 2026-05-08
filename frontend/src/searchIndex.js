@@ -213,8 +213,8 @@ export const SEARCH_INDEX = [
     description: "Live waveform simulator + library. Inspiratory/expiratory hold manoeuvres",
   },
   {
-    id: "vent-etco2", tab: "ventilator", tabLabel: "Ventilator",
-    section: "Waveforms", label: "EtCO₂ / Capnography",
+    id: "etco2", tab: "equipment", tabLabel: "Equipment",
+    section: "Monitoring", label: "EtCO₂ / Capnography",
     keywords: ["etco2", "capnography", "end tidal co2", "rosc", "oesophageal intubation", "shark fin co2", "cpr monitoring"],
     description: "Normal capnogram phases, shark-fin pattern, oesophageal intubation, ROSC",
   },
