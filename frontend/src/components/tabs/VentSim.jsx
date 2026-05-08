@@ -1,208 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ChartLine, Person, Gear, PuzzlePiece } from "@phosphor-icons/react";
 
-function PuzzleGoals({ goals, settings, holdResult, mode, openHintId, setOpenHintId }) {
-  const [goalsOpen, setGoalsOpen] = useState(false);
-  const goalsDone = goals.filter(g => g.check(settings, holdResult, mode)).length;
-
-  return (
-    <div style={{marginBottom:12}}>
-      <button
-        onClick={() => setGoalsOpen(o => !o)}
-        style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",
-          padding:"8px 10px",borderRadius: goalsOpen ? "6px 6px 0 0" : "6px",
-          background:"#0a0f14",border:"1px solid #1e3a52",
-          borderBottom: goalsOpen ? "1px solid #0d1a26" : "1px solid #1e3a52",
-          cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <span style={{fontSize:8,color:"#334155",letterSpacing:2,textTransform:"uppercase"}}>
-            Goals & Hints
-          </span>
-          {!goalsOpen && goalsDone > 0 && (
-            <span style={{fontSize:8,color:"#4a9eff"}}>
-              {goalsDone}/{goals.length} done
-            </span>
-          )}
-        </div>
-        <div style={{display:"flex",alignItems:"center",gap:6}}>
-          {!goalsOpen && (
-            <span style={{fontSize:8,color:"#334155",letterSpacing:1}}>tap to reveal</span>
-          )}
-          <span style={{fontSize:10,color:"#334155",display:"inline-block",
-            transition:"transform 0.2s",transform: goalsOpen ? "rotate(180deg)" : "rotate(0deg)"}}>
-            ▼
-          </span>
-        </div>
-      </button>
-
-      {goalsOpen && (
-        <div style={{border:"1px solid #1e3a52",borderTop:"none",borderRadius:"0 0 6px 6px",
-          padding:"10px",background:"#08111a",animation:"slidein 0.15s ease"}}>
-          <div style={{display:"flex",justifyContent:"flex-end",marginBottom:8}}>
-            <span style={{fontSize:9,color:goalsDone===goals.length?"#22c55e":"#4a9eff"}}>
-              {goalsDone}/{goals.length} complete
-            </span>
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            {goals.map((g,i) => {
-              const done = g.check(settings, holdResult, mode);
-              const hintOpen = openHintId === g.id;
-              return (
-                <div key={g.id}>
-                  <div style={{display:"flex",gap:8,alignItems:"flex-start",padding:"8px 10px",
-                    borderRadius:6,background:done?"#0a1f0a":"#0a0f14",
-                    border:`1px solid ${done?"#22c55e44":"#1e2d3d"}`,transition:"all 0.3s"}}>
-                    <div style={{width:18,height:18,borderRadius:"50%",flexShrink:0,marginTop:1,
-                      background:done?"#22c55e":"#1e2d3d",display:"flex",alignItems:"center",
-                      justifyContent:"center",fontSize:10,color:done?"#fff":"#334155",
-                      transition:"all 0.3s"}}>{done?"✓":i+1}</div>
-                    <div style={{flex:1,fontSize:10,color:done?"#4ade80":"#64748b",lineHeight:1.4}}>
-                      {g.label}
-                    </div>
-                    {!done && (
-                      <button
-                        onClick={()=>setOpenHintId(prev => prev===g.id ? null : g.id)}
-                        style={{padding:"2px 7px",borderRadius:3,cursor:"pointer",
-                          border:`1px solid ${hintOpen?"#4ade8066":"#1e3a52"}`,
-                          background:hintOpen?"#0f1a00":"transparent",
-                          color:hintOpen?"#4ade80":"#334155",
-                          fontSize:8,letterSpacing:1,fontFamily:"inherit",
-                          flexShrink:0,transition:"all 0.15s"}}>
-                        {hintOpen?"HIDE":"HINT"}
-                      </button>
-                    )}
-                  </div>
-                  {hintOpen && !done && (
-                    <div style={{marginTop:3,fontSize:9,color:"#4ade80",background:"#0f1a00",
-                      borderRadius:"0 0 6px 6px",padding:"8px 10px 8px 36px",
-                      border:"1px solid #4ade8022",borderTop:"none",lineHeight:1.6,
-                      animation:"slidein 0.15s ease"}}>
-                      💡 {g.hint}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function useAlarmSound(activeAlarm, alarmDismissed) {
-  const audioCtxRef = useRef(null);
-  const alarmIntervalRef = useRef(null);
-
-  const getAudioCtx = () => {
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    return audioCtxRef.current;
-  };
-
-  const playBeepPattern = useCallback((pattern) => {
-    const ctx = getAudioCtx();
-    if (ctx.state === "suspended") ctx.resume();
-
-    pattern.forEach(({ freq, duration, delay, gain = 0.3, type = "sine" }) => {
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      osc.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-      gainNode.gain.setValueAtTime(0, ctx.currentTime + delay);
-      gainNode.gain.linearRampToValueAtTime(gain, ctx.currentTime + delay + 0.01);
-      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + delay + duration - 0.01);
-      osc.start(ctx.currentTime + delay);
-      osc.stop(ctx.currentTime + delay + duration);
-    });
-  }, []);
-
-  // Different alarm patterns per alarm type
-  const ALARM_PATTERNS = {
-    // High priority — rapid triple beep, high pitch
-    "HIGH PIP + HIGH PLATEAU → LOW COMPLIANCE": {
-      interval: 2500,
-      pattern: [
-        { freq: 1200, duration: 0.12, delay: 0,    gain: 0.4, type: "square" },
-        { freq: 1200, duration: 0.12, delay: 0.18, gain: 0.4, type: "square" },
-        { freq: 1200, duration: 0.12, delay: 0.36, gain: 0.4, type: "square" },
-      ],
-    },
-    "HIGH PIP + LOW Vt → CONSIDER PTX": {
-      interval: 1800,
-      pattern: [
-        { freq: 1400, duration: 0.1,  delay: 0,    gain: 0.45, type: "square" },
-        { freq: 1400, duration: 0.1,  delay: 0.15, gain: 0.45, type: "square" },
-        { freq: 1000, duration: 0.2,  delay: 0.35, gain: 0.45, type: "square" },
-      ],
-    },
-    // Medium priority — double beep, mid pitch
-    "HIGH PIP (RESISTANCE) + AUTO-PEEP": {
-      interval: 3500,
-      pattern: [
-        { freq: 880, duration: 0.15, delay: 0,    gain: 0.35, type: "sine" },
-        { freq: 880, duration: 0.15, delay: 0.25, gain: 0.35, type: "sine" },
-      ],
-    },
-    "LOW Vt — CIRCUIT LEAK": {
-      interval: 3000,
-      pattern: [
-        { freq: 760, duration: 0.18, delay: 0,    gain: 0.3, type: "sine" },
-        { freq: 760, duration: 0.18, delay: 0.28, gain: 0.3, type: "sine" },
-      ],
-    },
-    // Lower priority — single longer beep, lower pitch
-    "FLOW STARVATION — VC MODE": {
-      interval: 4000,
-      pattern: [
-        { freq: 600, duration: 0.3, delay: 0, gain: 0.25, type: "sine" },
-      ],
-    },
-    "PATIENT–VENTILATOR DYSSYNCHRONY": {
-      interval: 3500,
-      pattern: [
-        { freq: 680, duration: 0.15, delay: 0,   gain: 0.28, type: "sine" },
-        { freq: 900, duration: 0.15, delay: 0.2, gain: 0.28, type: "sine" },
-      ],
-    },
-  };
-
-  useEffect(() => {
-    // Clear any existing interval
-    if (alarmIntervalRef.current) {
-      clearInterval(alarmIntervalRef.current);
-      alarmIntervalRef.current = null;
-    }
-
-    if (!activeAlarm || alarmDismissed) return;
-
-    const config = ALARM_PATTERNS[activeAlarm];
-    if (!config) return;
-
-    // Play immediately on alarm trigger
-    playBeepPattern(config.pattern);
-
-    // Then repeat on interval
-    alarmIntervalRef.current = setInterval(() => {
-      playBeepPattern(config.pattern);
-    }, config.interval);
-
-    return () => {
-      if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current);
-    };
-  }, [activeAlarm, alarmDismissed, playBeepPattern]);
-
-  // Cleanup audio context on unmount
-  useEffect(() => {
-    return () => {
-      if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current);
-      if (audioCtxRef.current) audioCtxRef.current.close();
-    };
-  }, []);
-}
 const SAMPLE_RATE = 200;
 const WINDOW_S = 6;
 const HISTORY = SAMPLE_RATE * WINDOW_S;
@@ -470,6 +268,144 @@ const ALARM_DATA = {
   },
 };
 
+// ─── WEB AUDIO VENTILATOR ENGINE ───────────────────────────────────────────
+function createVentAudio(audioCtx, settings, physiology) {
+  const { rr, pip, peep, ie } = settings;
+  const { resistance, leak, dyssynch } = physiology;
+  const period = 60 / rr;
+  const ti = period * ie / (1 + ie);
+  const te = period - ti;
+  const now = audioCtx.currentTime;
+
+  // Master gain
+  const master = audioCtx.createGain();
+  master.gain.setValueAtTime(0.18, now);
+  master.connect(audioCtx.destination);
+
+  // ── Inspiratory breath: filtered noise burst (high-pass = air rushing in) ──
+  const inspBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * ti * 0.9, audioCtx.sampleRate);
+  const inspData = inspBuf.getChannelData(0);
+  for (let i = 0; i < inspData.length; i++) {
+    // Shaped noise: ramp up then ramp down
+    const env = Math.sin((i / inspData.length) * Math.PI);
+    inspData[i] = (Math.random() * 2 - 1) * env;
+  }
+  const inspSrc = audioCtx.createBufferSource();
+  inspSrc.buffer = inspBuf;
+  const inspFilter = audioCtx.createBiquadFilter();
+  inspFilter.type = "bandpass";
+  // Higher PIP / resistance = higher pitched turbulence
+  inspFilter.frequency.value = 600 + resistance * 300 + pip * 8;
+  inspFilter.Q.value = 0.8;
+  const inspGain = audioCtx.createGain();
+  inspGain.gain.value = 0.5 + (pip / 50) * 0.5;
+  inspSrc.connect(inspFilter);
+  inspFilter.connect(inspGain);
+  inspGain.connect(master);
+  inspSrc.start(now);
+  inspSrc.stop(now + ti * 0.9);
+
+  // ── Ventilator click / valve click at breath start ──
+  const clickBuf = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.008), audioCtx.sampleRate);
+  const clickData = clickBuf.getChannelData(0);
+  for (let i = 0; i < clickData.length; i++) {
+    const env = 1 - i / clickData.length;
+    clickData[i] = (Math.random() * 2 - 1) * env * env;
+  }
+  const clickSrc = audioCtx.createBufferSource();
+  clickSrc.buffer = clickBuf;
+  const clickFilter = audioCtx.createBiquadFilter();
+  clickFilter.type = "highpass";
+  clickFilter.frequency.value = 1800;
+  const clickGain = audioCtx.createGain();
+  clickGain.gain.value = 0.7;
+  clickSrc.connect(clickFilter);
+  clickFilter.connect(clickGain);
+  clickGain.connect(master);
+  clickSrc.start(now);
+  clickSrc.stop(now + 0.01);
+
+  // ── Expiratory whoosh (low-pass exhalation) ──
+  const expBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * te * 0.8, audioCtx.sampleRate);
+  const expData = expBuf.getChannelData(0);
+  for (let i = 0; i < expData.length; i++) {
+    const env = Math.exp(-i / (expData.length * 0.3)) * (1 - i / expData.length);
+    expData[i] = (Math.random() * 2 - 1) * env;
+  }
+  const expSrc = audioCtx.createBufferSource();
+  expSrc.buffer = expBuf;
+  const expFilter = audioCtx.createBiquadFilter();
+  expFilter.type = "bandpass";
+  expFilter.frequency.value = 300 + resistance * 120;
+  expFilter.Q.value = 1.2;
+  const expGain = audioCtx.createGain();
+  expGain.gain.value = 0.35;
+  expSrc.connect(expFilter);
+  expFilter.connect(expGain);
+  expGain.connect(master);
+  expSrc.start(now + ti);
+  expSrc.stop(now + ti + te * 0.8);
+
+  // ── Expiratory valve click ──
+  const expClickSrc = audioCtx.createBufferSource();
+  expClickSrc.buffer = clickBuf; // reuse
+  const expClickGain = audioCtx.createGain();
+  expClickGain.gain.value = 0.4;
+  expClickSrc.connect(clickFilter);
+  expClickGain.connect(master);
+  expClickSrc.start(now + ti);
+  expClickSrc.stop(now + ti + 0.01);
+
+  // ── Leak: gurgling turbulent noise overlaid ──
+  if (leak > 0.2) {
+    const leakBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * ti, audioCtx.sampleRate);
+    const ld = leakBuf.getChannelData(0);
+    for (let i = 0; i < ld.length; i++) {
+      const env = Math.sin((i / ld.length) * Math.PI * 3) * 0.5 + 0.5;
+      ld[i] = (Math.random() * 2 - 1) * env;
+    }
+    const leakSrc = audioCtx.createBufferSource();
+    leakSrc.buffer = leakBuf;
+    const leakFilter = audioCtx.createBiquadFilter();
+    leakFilter.type = "bandpass";
+    leakFilter.frequency.value = 180 + Math.random() * 80;
+    leakFilter.Q.value = 3;
+    const leakGain = audioCtx.createGain();
+    leakGain.gain.value = leak * 1.2;
+    leakSrc.connect(leakFilter);
+    leakFilter.connect(leakGain);
+    leakGain.connect(master);
+    leakSrc.start(now + 0.05);
+    leakSrc.stop(now + ti);
+  }
+
+  // ── Dyssynchrony: extra irregular burst mid-expiry ──
+  if (dyssynch && Math.random() < 0.4) {
+    const dBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.12, audioCtx.sampleRate);
+    const dd = dBuf.getChannelData(0);
+    for (let i = 0; i < dd.length; i++) {
+      const env = Math.sin((i / dd.length) * Math.PI);
+      dd[i] = (Math.random() * 2 - 1) * env;
+    }
+    const dSrc = audioCtx.createBufferSource();
+    dSrc.buffer = dBuf;
+    const dFilter = audioCtx.createBiquadFilter();
+    dFilter.type = "bandpass";
+    dFilter.frequency.value = 900;
+    dFilter.Q.value = 2;
+    const dGain = audioCtx.createGain();
+    dGain.gain.value = 0.5;
+    dSrc.connect(dFilter);
+    dFilter.connect(dGain);
+    dGain.connect(master);
+    const offset = ti + te * (0.3 + Math.random() * 0.3);
+    dSrc.start(now + offset);
+    dSrc.stop(now + offset + 0.12);
+  }
+
+  return period; // return period so scheduler knows when to fire next
+}
+
 function generateSample(t, modeKey, settings, physiology, holdState) {
   const { pip, peep, rr, vt } = settings;
   const { compliance:C, resistance:R, autopeep, leak, dyssynch, starvation } = physiology;
@@ -609,15 +545,23 @@ export default function VentSim() {
   const [holdState, setHoldState] = useState(null);
   const [holdResult, setHoldResult] = useState(null);
   const [live, setLive] = useState({pip:0,flow:0,vol:0});
-  const [muted, setMuted] = useState(false);
+
+  // Sound
+  const [soundOn, setSoundOn] = useState(false);
+  const audioCtxRef = useRef(null);
+  const soundTimerRef = useRef(null);
+  const settingsRef = useRef(settings);
+  const physiologyRef = useRef(physiology);
+  useEffect(() => { settingsRef.current = settings; }, [settings]);
+  useEffect(() => { physiologyRef.current = physiology; }, [physiology]);
 
   // Puzzle
   const [puzzleIdx, setPuzzleIdx] = useState(0);
   const [puzzleSolved, setPuzzleSolved] = useState(false);
   const [openHintId, setOpenHintId] = useState(null);
   const [showTeaching, setShowTeaching] = useState(false);
+  const [goalsExpanded, setGoalsExpanded] = useState(false);
 
-  
   const canvPRef = useRef(null);
   const canvFRef = useRef(null);
   const canvVRef = useRef(null);
@@ -634,7 +578,33 @@ export default function VentSim() {
   useEffect(()=>{stateRef.current.settings=settings;},[settings]);
   useEffect(()=>{stateRef.current.physiology=physiology;},[physiology]);
   useEffect(()=>{stateRef.current.hold=holdState;},[holdState]);
-  useAlarmSound(muted ? null : activeAlarm, alarmDismissed);
+
+  // ── Sound engine ──────────────────────────────────────────────────────────
+  const scheduleSounds = useCallback(() => {
+    if (!audioCtxRef.current) return;
+    const ctx = audioCtxRef.current;
+    if (ctx.state === "suspended") ctx.resume();
+    const period = createVentAudio(ctx, settingsRef.current, physiologyRef.current);
+    soundTimerRef.current = setTimeout(scheduleSounds, period * 1000 - 30);
+  }, []);
+
+  const toggleSound = useCallback(() => {
+    if (soundOn) {
+      setSoundOn(false);
+      clearTimeout(soundTimerRef.current);
+      if (audioCtxRef.current) { audioCtxRef.current.close(); audioCtxRef.current = null; }
+    } else {
+      setSoundOn(true);
+      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      scheduleSounds();
+    }
+  }, [soundOn, scheduleSounds]);
+
+  // Stop sound on unmount
+  useEffect(() => () => {
+    clearTimeout(soundTimerRef.current);
+    if (audioCtxRef.current) audioCtxRef.current.close();
+  }, []);
 
   const currentPuzzle = PUZZLE_CASES[puzzleIdx];
   useEffect(()=>{
@@ -657,6 +627,7 @@ export default function VentSim() {
   const loadPuzzle = useCallback((idx)=>{
     const p=PUZZLE_CASES[idx];
     setPuzzleIdx(idx); setPuzzleSolved(false); setOpenHintId(null); setShowTeaching(false);
+    setGoalsExpanded(false);
     setSettings({...p.initSettings}); setPhysiology({...p.initPhysiology});
     setActiveAlarm(null); setAlarmDismissed(false);
     setHoldResult(null); setHoldState(null); setMode("vc-ac");
@@ -779,6 +750,7 @@ export default function VentSim() {
         @keyframes alarmblink{0%,100%{opacity:1}50%{opacity:.5}}
         @keyframes slidein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
         @keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+        @keyframes goalSlide{from{opacity:0;max-height:0;transform:translateY(-4px)}to{opacity:1;max-height:600px;transform:translateY(0)}}
         input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;}
         input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#4a9eff;cursor:pointer;}
         .shide::-webkit-scrollbar{display:none;}
@@ -790,10 +762,26 @@ export default function VentSim() {
           <div style={{width:7,height:7,borderRadius:"50%",background:holdState?"#fbbf24":activeAlarm&&!alarmDismissed?"#ef4444":"#22c55e",animation:"vpulse 1.2s infinite"}}/>
           <span style={{fontSize:9,letterSpacing:2.5,color:"#4a9eff",textTransform:"uppercase"}}>Vent Sim</span>
         </div>
-        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
           <span style={{fontSize:8,color:"#334155"}}>{MODES[mode]?.label}</span>
           {holdState&&<span style={{fontSize:8,color:"#fbbf24",animation:"vpulse 0.8s infinite"}}>● {holdState==="insp"?"INSP":"EXP"} HOLD</span>}
           {tab==="puzzle"&&<span style={{fontSize:8,color:puzzleGoalsDone===currentPuzzle.goals.length?"#22c55e":"#4a9eff"}}>{puzzleGoalsDone}/{currentPuzzle.goals.length} goals</span>}
+          {/* Sound toggle */}
+          <button
+            onClick={toggleSound}
+            title={soundOn ? "Mute vent sounds" : "Enable vent sounds"}
+            style={{
+              display:"flex",alignItems:"center",gap:4,
+              padding:"3px 8px",borderRadius:4,cursor:"pointer",
+              border:`1px solid ${soundOn?"#4a9eff44":"#1e3a52"}`,
+              background:soundOn?"#0d2137":"transparent",
+              color:soundOn?"#4a9eff":"#334155",
+              fontSize:8,letterSpacing:1,textTransform:"uppercase",
+              fontFamily:"inherit",transition:"all 0.2s",
+            }}>
+            {soundOn ? "🔊" : "🔇"}
+            <span style={{fontSize:7}}>{soundOn?"ON":"OFF"}</span>
+          </button>
         </div>
       </div>
 
@@ -803,15 +791,6 @@ export default function VentSim() {
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
             <span style={{fontSize:9,color:alarmInfo?.color||"#ef4444",letterSpacing:1.5,textTransform:"uppercase",fontWeight:700}}>⚠ {activeAlarm}</span>
             <div style={{display:"flex",gap:6,flexShrink:0}}>
-               <button
-    onClick={() => setMuted(m => !m)}
-    style={{padding:"3px 8px",borderRadius:3,cursor:"pointer",
-      border:`1px solid ${muted?"#334155":"#1e3a52"}`,
-      background: muted ? "#1e2d3d" : "transparent",
-      color: muted ? "#475569" : "#64748b",
-      fontSize:8,letterSpacing:1,textTransform:"uppercase",fontFamily:"inherit"}}>
-    {muted ? "🔇" : "🔔"}
-  </button>
               <button onClick={()=>setShowTroubleshoot(t=>!t)} style={{padding:"3px 8px",borderRadius:3,cursor:"pointer",border:`1px solid ${alarmInfo?.color||"#ef4444"}`,background:"transparent",color:alarmInfo?.color||"#ef4444",fontSize:8,letterSpacing:1,textTransform:"uppercase",fontFamily:"inherit"}}>{showTroubleshoot?"Hide":"Guide"}</button>
               <button onClick={()=>setAlarmDismissed(true)} style={{padding:"3px 8px",borderRadius:3,cursor:"pointer",border:"1px solid #1e3a52",background:"transparent",color:"#475569",fontSize:8,fontFamily:"inherit"}}>✕</button>
             </div>
@@ -1008,16 +987,111 @@ export default function VentSim() {
               <Slider label="Peak Flow" unit="L/min" value={settings.flow} min={3} max={30} step={1} onChange={v=>updateSetting("flow",v)} color="#60a5fa"/>
             </div>
 
-            {/* Goals — with collapsible hints */}
-<PuzzleGoals
-  key={currentPuzzle.id}
-  goals={currentPuzzle.goals}
-  settings={settings}
-  holdResult={holdResult}
-  mode={mode}
-  openHintId={openHintId}
-  setOpenHintId={setOpenHintId}
-/>
+            {/* ── COLLAPSIBLE GOALS SECTION ── */}
+            <div style={{marginBottom:12}}>
+              {/* Goals header — always visible, acts as toggle */}
+              <button
+                onClick={()=>setGoalsExpanded(e=>!e)}
+                style={{
+                  width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",
+                  padding:"9px 12px",borderRadius:goalsExpanded?"6px 6px 0 0":"6px",
+                  cursor:"pointer",border:"1px solid #1e3a52",
+                  background:goalsExpanded?"#0d1a0d":"#0a0f14",
+                  fontFamily:"inherit",transition:"all 0.15s",
+                }}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontSize:8,color:"#334155",letterSpacing:2,textTransform:"uppercase"}}>Goals & Hints</span>
+                  <span style={{
+                    fontSize:8,fontWeight:700,
+                    color:puzzleGoalsDone===currentPuzzle.goals.length?"#22c55e":"#4a9eff",
+                    background:puzzleGoalsDone===currentPuzzle.goals.length?"#22c55e18":"#4a9eff18",
+                    padding:"2px 7px",borderRadius:10,
+                  }}>{puzzleGoalsDone}/{currentPuzzle.goals.length}</span>
+                  {puzzleGoalsDone > 0 && puzzleGoalsDone < currentPuzzle.goals.length && (
+                    <span style={{fontSize:7,color:"#4ade80",letterSpacing:1}}>
+                      {currentPuzzle.goals.filter(g=>g.check(settings,holdResult,mode)).map(()=>"▪").join("")}
+                      {currentPuzzle.goals.filter(g=>!g.check(settings,holdResult,mode)).map(()=>"▫").join("")}
+                    </span>
+                  )}
+                </div>
+                <span style={{
+                  fontSize:10,color:"#334155",
+                  transform:goalsExpanded?"rotate(180deg)":"rotate(0deg)",
+                  transition:"transform 0.2s",display:"inline-block",
+                }}>▼</span>
+              </button>
+
+              {/* Collapsed hint strip — shows mini progress without revealing goals */}
+              {!goalsExpanded && (
+                <div style={{
+                  padding:"6px 12px",borderRadius:"0 0 6px 6px",
+                  background:"#070c0a",border:"1px solid #1e3a52",borderTop:"none",
+                  fontSize:8,color:"#334155",lineHeight:1.5,
+                }}>
+                  {puzzleGoalsDone === 0
+                    ? "Examine the waveforms and adjust settings to fix this patient."
+                    : puzzleGoalsDone === currentPuzzle.goals.length
+                    ? "✓ All goals met — expand to review."
+                    : `${puzzleGoalsDone} goal${puzzleGoalsDone>1?"s":""} met — keep going. Expand to see targets.`}
+                </div>
+              )}
+
+              {/* Expanded goals list */}
+              {goalsExpanded && (
+                <div style={{
+                  border:"1px solid #1e3a52",borderTop:"none",
+                  borderRadius:"0 0 6px 6px",overflow:"hidden",
+                  animation:"goalSlide 0.2s ease",
+                }}>
+                  {currentPuzzle.goals.map((g,i)=>{
+                    const done=g.check(settings,holdResult,mode);
+                    const hintOpen = openHintId === g.id;
+                    return(
+                      <div key={g.id} style={{borderTop:i>0?"1px solid #1a2530":"none"}}>
+                        <div style={{
+                          display:"flex",gap:8,alignItems:"flex-start",
+                          padding:"8px 10px",
+                          background:done?"#0a1f0a":"#080e14",
+                          transition:"background 0.3s",
+                        }}>
+                          <div style={{
+                            width:18,height:18,borderRadius:"50%",flexShrink:0,marginTop:1,
+                            background:done?"#22c55e":"#1e2d3d",
+                            display:"flex",alignItems:"center",justifyContent:"center",
+                            fontSize:10,color:done?"#fff":"#334155",transition:"all 0.3s",
+                          }}>{done?"✓":i+1}</div>
+                          <div style={{flex:1,fontSize:10,color:done?"#4ade80":"#64748b",lineHeight:1.4}}>{g.label}</div>
+                          {!done&&(
+                            <button
+                              onClick={()=>setOpenHintId(prev => prev===g.id ? null : g.id)}
+                              style={{
+                                padding:"2px 7px",borderRadius:3,cursor:"pointer",
+                                border:`1px solid ${hintOpen?"#4ade8066":"#1e3a52"}`,
+                                background:hintOpen?"#0f1a00":"transparent",
+                                color:hintOpen?"#4ade80":"#334155",
+                                fontSize:8,letterSpacing:1,fontFamily:"inherit",flexShrink:0,
+                                transition:"all 0.15s",
+                              }}>
+                              {hintOpen?"HIDE":"HINT"}
+                            </button>
+                          )}
+                        </div>
+                        {hintOpen&&!done&&(
+                          <div style={{
+                            fontSize:9,color:"#4ade80",background:"#0f1a00",
+                            padding:"7px 10px 7px 36px",
+                            borderTop:"1px solid #4ade8022",lineHeight:1.6,
+                            animation:"slidein 0.15s ease",
+                          }}>
+                            💡 {g.hint}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* Solved */}
             {puzzleSolved&&(
