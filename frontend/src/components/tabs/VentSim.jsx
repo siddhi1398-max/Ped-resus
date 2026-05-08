@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { ChartLine, Person, Gear, PuzzlePiece,
+       } from "@phosphor-icons/react";
 
 const SAMPLE_RATE = 200;
 const WINDOW_S = 6;
@@ -776,17 +778,17 @@ export default function VentSim() {
 
       {/* BOTTOM TAB BAR */}
       <div style={{display:"flex",borderTop:"1px solid #1e2d3d",background:"#0a0f14",flexShrink:0}}>
-        {[
-          {id:"monitor",label:"Monitor",icon:"📈"},
-          {id:"scenarios",label:"Scenarios",icon:"🫁"},
-          {id:"controls",label:"Controls",icon:"⚙️"},
-          {id:"puzzle",label:"Puzzle",icon:"🧩"},
-        ].map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,padding:"10px 4px 8px",border:"none",cursor:"pointer",background:tab===t.id?"#0d2137":"transparent",borderTop:`2px solid ${tab===t.id?"#4a9eff":"transparent"}`,color:tab===t.id?"#4a9eff":"#334155",fontFamily:'"JetBrains Mono",monospace',fontSize:7,letterSpacing:1.5,textTransform:"uppercase",display:"flex",flexDirection:"column",alignItems:"center",gap:3,transition:"all 0.15s"}}>
-            <span style={{fontSize:16,lineHeight:1}}>{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
+       {[
+  {id:"monitor",   label:"Monitor",   icon: <ChartLine   size={16} /> },
+  {id:"scenarios", label:"Scenarios", icon: <Person      size={16} /> },
+  {id:"controls",  label:"Controls",  icon: <Gear        size={16} /> },
+  {id:"puzzle",    label:"Puzzle",    icon: <PuzzlePiece size={16} /> },
+].map(t=>(
+  <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,padding:"10px 4px 8px",border:"none",cursor:"pointer",background:tab===t.id?"#0d2137":"transparent",borderTop:`2px solid ${tab===t.id?"#4a9eff":"transparent"}`,color:tab===t.id?"#4a9eff":"#334155",fontFamily:'"JetBrains Mono",monospace',fontSize:7,letterSpacing:1.5,textTransform:"uppercase",display:"flex",flexDirection:"column",alignItems:"center",gap:3,transition:"all 0.15s"}}>
+    <span style={{fontSize:16,lineHeight:1}}>{t.icon}</span>
+    {t.label}
+  </button>
+))}
       </div>
 
       {/* FOOTER */}
