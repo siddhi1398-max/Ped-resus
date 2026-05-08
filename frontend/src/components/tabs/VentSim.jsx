@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ChartLine, Person, Gear, PuzzlePiece,
-       } from "@phosphor-icons/react";
+import { ChartLine, Person, Gear, PuzzlePiece } from "@phosphor-icons/react";
 
 const SAMPLE_RATE = 200;
 const WINDOW_S = 6;
@@ -138,6 +137,83 @@ const PUZZLE_CASES = [
     teaching: "Dyssynchrony types: double-trigger, reverse trigger, flow starvation, auto-triggering. Use COMFORT-B score target 11–17. Optimise fentanyl (1–4 mcg/kg/hr) + midazolam. Switch to PRVC or PSV. Avoid NMB unless refractory ARDS.",
     suggestedHold: null,
   },
+  {
+    id: "puzzle-bronchiolitis", title: "Case 6 — The Tiny Wheeze", badge: "amber",
+    scenario: "6mo, 7kg. RSV bronchiolitis, intubated for apnoea. SpO₂ 91%. Vent alarming high PIP. Chest hyperinflated on exam. RR was set at 40.",
+    initSettings: { pip: 36, peep: 6, rr: 40, vt: 56, fio2: 55, ie: 0.4, flow: 8 },
+    initPhysiology: { compliance: 0.8, resistance: 2.8, autopeep: 6, leak: 0, dyssynch: false, starvation: false },
+    goals: [
+      { id: "g1", label: "Reduce RR to ≤30/min", check: (s) => s.rr <= 30, hint: "Infants with bronchiolitis trap air easily. Slow rate = more time to exhale." },
+      { id: "g2", label: "Extend I:E ≤0.25 (ratio ≥1:3)", check: (s) => s.ie <= 0.25, hint: "Obstructive physiology needs long expiratory time. Target 1:3 or 1:4." },
+      { id: "g3", label: "Keep PEEP ≤5 cmH₂O", check: (s) => s.peep <= 5, hint: "External PEEP worsens air trapping when auto-PEEP is already present." },
+      { id: "g4", label: "Confirm auto-PEEP with expiratory hold", check: (_s, h) => h?.type === "exp", hint: "Expiratory hold quantifies intrinsic PEEP — essential before adjusting PEEP." },
+    ],
+    diagnosis: "Bronchiolitis with air trapping",
+    teaching: "RSV bronchiolitis: small airways + mucus = high resistance + air trapping. Gentle ventilation: Vt 5–6 mL/kg, low RR 25–30, long expiry 1:3–1:4. Avoid high PEEP. Heated humidification essential. Nebulised hypertonic saline may help. NMB rarely needed.",
+    suggestedHold: "exp",
+  },
+  {
+    id: "puzzle-mainbronchus", title: "Case 7 — One Side Silent", badge: "red",
+    scenario: "2yr, 12kg. Post-intubation for epiglottitis. Right chest not moving. SpO₂ 84%. ETT was advanced during securing.",
+    initSettings: { pip: 38, peep: 5, rr: 28, vt: 48, fio2: 100, ie: 0.33, flow: 8 },
+    initPhysiology: { compliance: 0.4, resistance: 1.2, autopeep: 0, leak: 0, dyssynch: false, starvation: false },
+    goals: [
+      { id: "g1", label: "FiO₂ to 100% immediately", check: (s) => s.fio2 >= 100, hint: "Any sudden desaturation post-intubation: 100% FiO₂ first while you diagnose." },
+      { id: "g2", label: "Reduce Vt to ≤72 mL (6 mL/kg) for single lung", check: (s) => s.vt <= 72, hint: "Right mainstem = only left lung ventilated. Halve the Vt to avoid barotrauma." },
+      { id: "g3", label: "Perform inspiratory hold — check plateau", check: (_s, h) => h?.type === "insp", hint: "High PIP with low plateau gap = compliance issue (left lung alone doing all the work)." },
+      { id: "g4", label: "Reduce RR to ≤22 to lower mean airway pressure", check: (s) => s.rr <= 22, hint: "Single-lung ventilation: lower MAP reduces risk to remaining lung." },
+    ],
+    diagnosis: "Right mainstem intubation",
+    teaching: "Right mainstem intubation: most common ETT malposition (right bronchus is more vertical). Confirm depth: lip mark at 3× ETT size (e.g. 3.5mm → 10.5cm at lip). Auscultate bilateral axillae not just chest. Pull back 1–2cm and re-check. CXR: ETT tip should be 1–2cm above carina.",
+    suggestedHold: "insp",
+  },
+  {
+    id: "puzzle-weaning", title: "Case 8 — Ready to Fly?", badge: "emerald",
+    scenario: "5yr, 18kg. Day 4 post-ARDS. FiO₂ has been weaned to 40%. Waking up. Team asks: is this child ready to extubate?",
+    initSettings: { pip: 20, peep: 6, rr: 18, vt: 126, fio2: 40, ie: 0.33, flow: 9 },
+    initPhysiology: { compliance: 0.9, resistance: 1.1, autopeep: 0, leak: 0, dyssynch: false, starvation: false },
+    goals: [
+      { id: "g1", label: "Confirm FiO₂ ≤40%", check: (s) => s.fio2 <= 40, hint: "Extubation readiness: FiO₂ ≤40% is a standard threshold." },
+      { id: "g2", label: "PEEP ≤6 cmH₂O", check: (s) => s.peep <= 6, hint: "Weaning PEEP to 5–6 before extubation reduces post-extubation atelectasis risk." },
+      { id: "g3", label: "PIP ≤22 cmH₂O with normal Vt", check: (s) => s.pip <= 22 && s.vt >= 100, hint: "Low driving pressure with adequate Vt = good compliance recovery." },
+      { id: "g4", label: "RR ≤20/min on minimal support", check: (s) => s.rr <= 20, hint: "Low set RR means patient is breathing spontaneously above the rate — a good sign." },
+      { id: "g5", label: "Perform inspiratory hold — driving pressure ≤12", check: (_s, h) => h?.type === "insp", hint: "Driving pressure = plateau − PEEP. ≤12 cmH₂O suggests lung recovery sufficient for extubation." },
+    ],
+    diagnosis: "Extubation readiness assessment",
+    teaching: "Extubation criteria: FiO₂ ≤40%, PEEP ≤6, adequate cough/gag, minimal secretions, haemodynamically stable, alert. Consider SBT (spontaneous breathing trial) on CPAP/PS for 30–120 mins. Cuff leak test in children >5yr. Post-extubation high-flow or NIV reduces re-intubation risk in high-risk patients.",
+    suggestedHold: "insp",
+  },
+  {
+    id: "puzzle-overventilation", title: "Case 9 — Too Much of a Good Thing", badge: "yellow",
+    scenario: "8yr, 28kg. TBI, GCS 6, intubated for airway protection. ICP monitor in. Nurse notes ICP 28 mmHg, CO₂ 28 mmHg on last gas. RR was set high by the previous team.",
+    initSettings: { pip: 24, peep: 5, rr: 38, vt: 196, fio2: 40, ie: 0.33, flow: 11 },
+    initPhysiology: { compliance: 1.0, resistance: 1.0, autopeep: 2, leak: 0, dyssynch: false, starvation: false },
+    goals: [
+      { id: "g1", label: "Reduce RR to 18–22/min (target PaCO₂ 35–40)", check: (s) => s.rr >= 18 && s.rr <= 22, hint: "Hyperventilation causes cerebral vasoconstriction → ischaemia. Target normocapnia in TBI unless herniation." },
+      { id: "g2", label: "Reduce Vt to ≤168 mL (6 mL/kg)", check: (s) => s.vt <= 168, hint: "High Vt drives down CO₂ too fast. Lung-protective Vt even in TBI." },
+      { id: "g3", label: "Keep PEEP ≤6 (avoid raising ICP)", check: (s) => s.peep <= 6, hint: "High PEEP raises intrathoracic pressure → impairs cerebral venous drainage → raises ICP." },
+      { id: "g4", label: "Confirm auto-PEEP resolved with exp hold", check: (_s, h) => h?.type === "exp", hint: "High RR caused auto-PEEP. After reducing rate, confirm it has cleared." },
+    ],
+    diagnosis: "Iatrogenic hyperventilation in TBI",
+    teaching: "TBI ventilation: target PaCO₂ 35–40 mmHg (normocapnia). Hyperventilation (PaCO₂ <35) causes cerebral vasoconstriction — use ONLY as a bridge during herniation while arranging definitive treatment. High PEEP impairs cerebral venous drainage. Head 30° up, midline. Target SpO₂ ≥95%.",
+    suggestedHold: "exp",
+  },
+  {
+    id: "puzzle-neonatal-rds", title: "Case 10 — The Blue Newborn", badge: "violet",
+    scenario: "Day 1 neonate, 1.8kg, 30 weeks gestation. RDS on CXR. Surfactant given. Now on vent — SpO₂ 88%, ground-glass bilateral infiltrates, stiff chest.",
+    initSettings: { pip: 28, peep: 4, rr: 50, vt: 11, fio2: 70, ie: 0.4, flow: 6 },
+    initPhysiology: { compliance: 0.25, resistance: 1.2, autopeep: 0, leak: 0, dyssynch: false, starvation: false },
+    goals: [
+      { id: "g1", label: "Increase PEEP to 5–7 cmH₂O (RDS recruitment)", check: (s) => s.peep >= 5 && s.peep <= 7, hint: "PEEP prevents alveolar collapse at end-expiration in surfactant-deficient lungs." },
+      { id: "g2", label: "Reduce Vt to 4–6 mL/kg (7–11 mL for 1.8kg)", check: (s) => s.vt >= 7 && s.vt <= 11, hint: "Neonatal lungs are extremely vulnerable to volutrauma. Keep Vt 4–6 mL/kg strictly." },
+      { id: "g3", label: "Increase FiO₂ to ≥70% given SpO₂ 88%", check: (s) => s.fio2 >= 70, hint: "SpO₂ 88% is below target in a preterm. Increase FiO₂ while optimising PEEP." },
+      { id: "g4", label: "Reduce RR to ≤55 (avoid auto-PEEP in preterm)", check: (s) => s.rr <= 55, hint: "Very high RR in neonates can cause air trapping. Target 40–60 with adequate expiratory time." },
+      { id: "g5", label: "Lower PIP to ≤26 cmH₂O", check: (s) => s.pip <= 26, hint: "Post-surfactant compliance improves rapidly. Reduce PIP to avoid over-distension." },
+    ],
+    diagnosis: "Neonatal RDS — surfactant deficiency",
+    teaching: "Neonatal RDS: surfactant deficiency → alveolar collapse → V/Q mismatch. PEEP 5–7 prevents collapse. Vt 4–6 mL/kg avoids volutrauma. After surfactant: compliance improves rapidly — wean PIP quickly or risk pneumothorax. Target SpO₂ 91–95% in preterms (avoid hyperoxia → ROP). Consider HFOV if MAP >12.",
+    suggestedHold: "insp",
+  },
 ];
 
 const MODES = {
@@ -192,7 +268,6 @@ const ALARM_DATA = {
   },
 };
 
-// ─── SAMPLE GENERATOR ─────────────────────────────────────────────────────────
 function generateSample(t, modeKey, settings, physiology, holdState) {
   const { pip, peep, rr, vt } = settings;
   const { compliance:C, resistance:R, autopeep, leak, dyssynch, starvation } = physiology;
@@ -336,10 +411,9 @@ export default function VentSim() {
   // Puzzle
   const [puzzleIdx, setPuzzleIdx] = useState(0);
   const [puzzleSolved, setPuzzleSolved] = useState(false);
-  const [hintText, setHintText] = useState(null);
+  const [openHintId, setOpenHintId] = useState(null);
   const [showTeaching, setShowTeaching] = useState(false);
 
-  // Single set of canvas refs — always mounted in the DOM
   const canvPRef = useRef(null);
   const canvFRef = useRef(null);
   const canvVRef = useRef(null);
@@ -357,7 +431,6 @@ export default function VentSim() {
   useEffect(()=>{stateRef.current.physiology=physiology;},[physiology]);
   useEffect(()=>{stateRef.current.hold=holdState;},[holdState]);
 
-  // Puzzle goal checking
   const currentPuzzle = PUZZLE_CASES[puzzleIdx];
   useEffect(()=>{
     if(tab!=="puzzle"||puzzleSolved) return;
@@ -378,7 +451,7 @@ export default function VentSim() {
 
   const loadPuzzle = useCallback((idx)=>{
     const p=PUZZLE_CASES[idx];
-    setPuzzleIdx(idx); setPuzzleSolved(false); setHintText(null); setShowTeaching(false);
+    setPuzzleIdx(idx); setPuzzleSolved(false); setOpenHintId(null); setShowTeaching(false);
     setSettings({...p.initSettings}); setPhysiology({...p.initPhysiology});
     setActiveAlarm(null); setAlarmDismissed(false);
     setHoldResult(null); setHoldState(null); setMode("vc-ac");
@@ -405,7 +478,6 @@ export default function VentSim() {
     },4000);
   },[holdState]);
 
-  // Animation loop — runs once, canvases always mounted
   useEffect(()=>{
     const cP=canvPRef.current, cF=canvFRef.current, cV=canvVRef.current;
     if(!cP||!cF||!cV) return;
@@ -492,10 +564,10 @@ export default function VentSim() {
   const updateSetting=(k,v)=>setSettings(p=>({...p,[k]:v}));
   const updatePhysiology=(k,v)=>setPhysiology(p=>({...p,[k]:v}));
 
-  // ── Shared waveform block: always in DOM, shown/hidden via display ──
   const waveformVisible = tab==="monitor"||tab==="puzzle";
 
   return(
+    <div style={{padding:"16px 0"}}>
     <div style={{background:"#060d14",color:"#e2e8f0",borderRadius:12,fontFamily:'"JetBrains Mono",monospace',border:"1px solid #1e2d3d",overflow:"hidden",maxWidth:560,margin:"0 auto",display:"flex",flexDirection:"column",minHeight:500}}>
       <style>{`
         @keyframes vpulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -544,10 +616,8 @@ export default function VentSim() {
         </div>
       )}
 
-      {/* ── ALWAYS-MOUNTED WAVEFORM BLOCK ── */}
-      {/* Visibility toggled via display:block / display:none so refs never detach */}
+      {/* WAVEFORM BLOCK */}
       <div style={{display:waveformVisible?"block":"none",flexShrink:0}}>
-        {/* Numerics bar */}
         <div style={{display:"flex",borderBottom:"1px solid #1e2d3d",overflowX:"auto"}} className="shide">
           {[
             {label:"PIP",val:live.pip,unit:"cmH₂O",color:"#4ade80",alert:live.pip>35},
@@ -565,7 +635,6 @@ export default function VentSim() {
           ))}
         </div>
 
-        {/* Canvas traces */}
         <div style={{padding:"6px 10px",display:"flex",flexDirection:"column",gap:4,background:"#060d14"}}>
           {[
             {ref:canvPRef,label:"Paw",unit:"cmH₂O",val:live.pip,color:"#4ade80"},
@@ -583,7 +652,6 @@ export default function VentSim() {
           ))}
         </div>
 
-        {/* Hold controls */}
         <div style={{borderTop:"1px solid #1e2d3d",padding:"8px 10px",background:"#0a0f14"}}>
           <div style={{fontSize:8,color:"#334155",letterSpacing:2,textTransform:"uppercase",marginBottom:6}}>Hold Manoeuvres</div>
           <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
@@ -609,7 +677,7 @@ export default function VentSim() {
         </div>
       </div>
 
-      {/* ── SCROLLABLE CONTENT AREA ── */}
+      {/* SCROLLABLE CONTENT */}
       <div style={{flex:1,overflowY:"auto",background:"#060d14"}} className="shide">
 
         {/* SCENARIOS TAB */}
@@ -634,7 +702,6 @@ export default function VentSim() {
         {/* CONTROLS TAB */}
         {tab==="controls"&&(
           <div style={{padding:"10px 12px"}}>
-            {/* Mode */}
             <div style={{marginBottom:14}}>
               <div style={{fontSize:8,color:"#334155",letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>Ventilator Mode</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:8}}>
@@ -644,7 +711,6 @@ export default function VentSim() {
               </div>
               <div style={{fontSize:9,color:"#334155",lineHeight:1.5,borderLeft:"2px solid #1e3a52",paddingLeft:8}}>{MODES[mode]?.note}</div>
             </div>
-            {/* Vent params */}
             <div style={{borderTop:"1px solid #1e2d3d",paddingTop:12,marginBottom:14}}>
               <div style={{fontSize:8,color:"#334155",letterSpacing:2,textTransform:"uppercase",marginBottom:10}}>Vent Parameters</div>
               <Slider label="Peak Insp Pressure" unit="cmH₂O" value={settings.pip} min={10} max={60} step={1} onChange={v=>updateSetting("pip",v)} color="#4ade80" alert={settings.pip>35}/>
@@ -659,7 +725,6 @@ export default function VentSim() {
                 <div>MV: {((settings.vt*settings.rr)/1000).toFixed(2)} L/min · I:E = 1:{(1/settings.ie-1).toFixed(1)} · Ti = {((60/settings.rr)*settings.ie/(1+settings.ie)).toFixed(2)}s</div>
               </div>
             </div>
-            {/* Physiology */}
             <div style={{borderTop:"1px solid #1e2d3d",paddingTop:12}}>
               <div style={{fontSize:8,color:"#334155",letterSpacing:2,textTransform:"uppercase",marginBottom:10}}>Lung Physiology</div>
               <Slider label="Compliance" unit="×normal" value={physiology.compliance} min={0.1} max={1.5} step={0.05}
@@ -688,7 +753,7 @@ export default function VentSim() {
           </div>
         )}
 
-        {/* PUZZLE TAB — only the non-waveform parts scroll here */}
+        {/* PUZZLE TAB */}
         {tab==="puzzle"&&(
           <div style={{padding:"10px 12px"}}>
             {/* Case tabs */}
@@ -729,7 +794,7 @@ export default function VentSim() {
               <Slider label="Peak Flow" unit="L/min" value={settings.flow} min={3} max={30} step={1} onChange={v=>updateSetting("flow",v)} color="#60a5fa"/>
             </div>
 
-            {/* Goals */}
+            {/* Goals — with collapsible hints */}
             <div style={{marginBottom:12}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                 <div style={{fontSize:8,color:"#334155",letterSpacing:2,textTransform:"uppercase"}}>Goals</div>
@@ -738,26 +803,30 @@ export default function VentSim() {
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
                 {currentPuzzle.goals.map((g,i)=>{
                   const done=g.check(settings,holdResult,mode);
+                  const hintOpen = openHintId === g.id;
                   return(
-                    <div key={g.id} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"8px 10px",borderRadius:6,background:done?"#0a1f0a":"#0a0f14",border:`1px solid ${done?"#22c55e44":"#1e2d3d"}`,transition:"all 0.3s"}}>
-                      <div style={{width:18,height:18,borderRadius:"50%",flexShrink:0,marginTop:1,background:done?"#22c55e":"#1e2d3d",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:done?"#fff":"#334155",transition:"all 0.3s"}}>{done?"✓":i+1}</div>
-                      <div style={{flex:1,fontSize:10,color:done?"#4ade80":"#64748b",lineHeight:1.4}}>{g.label}</div>
-                      {!done&&<button onClick={()=>setHintText(g.hint)} style={{padding:"2px 7px",borderRadius:3,cursor:"pointer",border:"1px solid #1e3a52",background:"transparent",color:"#334155",fontSize:8,letterSpacing:1,fontFamily:"inherit",flexShrink:0}}>HINT</button>}
+                    <div key={g.id}>
+                      <div style={{display:"flex",gap:8,alignItems:"flex-start",padding:"8px 10px",borderRadius:6,background:done?"#0a1f0a":"#0a0f14",border:`1px solid ${done?"#22c55e44":"#1e2d3d"}`,transition:"all 0.3s"}}>
+                        <div style={{width:18,height:18,borderRadius:"50%",flexShrink:0,marginTop:1,background:done?"#22c55e":"#1e2d3d",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:done?"#fff":"#334155",transition:"all 0.3s"}}>{done?"✓":i+1}</div>
+                        <div style={{flex:1,fontSize:10,color:done?"#4ade80":"#64748b",lineHeight:1.4}}>{g.label}</div>
+                        {!done&&(
+                          <button
+                            onClick={()=>setOpenHintId(prev => prev===g.id ? null : g.id)}
+                            style={{padding:"2px 7px",borderRadius:3,cursor:"pointer",border:`1px solid ${hintOpen?"#4ade8066":"#1e3a52"}`,background:hintOpen?"#0f1a00":"transparent",color:hintOpen?"#4ade80":"#334155",fontSize:8,letterSpacing:1,fontFamily:"inherit",flexShrink:0,transition:"all 0.15s"}}>
+                            {hintOpen?"HIDE":"HINT"}
+                          </button>
+                        )}
+                      </div>
+                      {hintOpen&&!done&&(
+                        <div style={{marginTop:3,fontSize:9,color:"#4ade80",background:"#0f1a00",borderRadius:"0 0 6px 6px",padding:"8px 10px 8px 36px",border:"1px solid #4ade8022",borderTop:"none",lineHeight:1.6,animation:"slidein 0.15s ease"}}>
+                          💡 {g.hint}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
               </div>
             </div>
-
-            {/* Hint */}
-            {hintText&&(
-              <div style={{marginBottom:12,background:"#0f1a00",borderRadius:6,padding:"8px 10px",border:"1px solid #4ade8044",animation:"slidein 0.2s ease"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-                  <span style={{fontSize:9,color:"#4ade80",lineHeight:1.5}}>💡 {hintText}</span>
-                  <button onClick={()=>setHintText(null)} style={{background:"none",border:"none",color:"#334155",cursor:"pointer",fontSize:11,marginLeft:8,padding:0,flexShrink:0}}>✕</button>
-                </div>
-              </div>
-            )}
 
             {/* Solved */}
             {puzzleSolved&&(
@@ -768,7 +837,7 @@ export default function VentSim() {
                 {puzzleIdx<PUZZLE_CASES.length-1?(
                   <button onClick={()=>loadPuzzle(puzzleIdx+1)} style={{padding:"7px 14px",borderRadius:4,cursor:"pointer",border:"1px solid #4a9eff",background:"#0d2137",color:"#4a9eff",fontSize:9,letterSpacing:1,textTransform:"uppercase",fontFamily:"inherit"}}>Next Case →</button>
                 ):(
-                  <div style={{fontSize:9,color:"#4ade80"}}>🏆 All 5 cases complete!</div>
+                  <div style={{fontSize:9,color:"#4ade80"}}>🏆 All 10 cases complete!</div>
                 )}
               </div>
             )}
@@ -778,23 +847,24 @@ export default function VentSim() {
 
       {/* BOTTOM TAB BAR */}
       <div style={{display:"flex",borderTop:"1px solid #1e2d3d",background:"#0a0f14",flexShrink:0}}>
-       {[
-  {id:"monitor",   label:"Monitor",   icon: <ChartLine   size={16} /> },
-  {id:"scenarios", label:"Scenarios", icon: <Person      size={16} /> },
-  {id:"controls",  label:"Controls",  icon: <Gear        size={16} /> },
-  {id:"puzzle",    label:"Puzzle",    icon: <PuzzlePiece size={16} /> },
-].map(t=>(
-  <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,padding:"10px 4px 8px",border:"none",cursor:"pointer",background:tab===t.id?"#0d2137":"transparent",borderTop:`2px solid ${tab===t.id?"#4a9eff":"transparent"}`,color:tab===t.id?"#4a9eff":"#334155",fontFamily:'"JetBrains Mono",monospace',fontSize:7,letterSpacing:1.5,textTransform:"uppercase",display:"flex",flexDirection:"column",alignItems:"center",gap:3,transition:"all 0.15s"}}>
-    <span style={{fontSize:16,lineHeight:1}}>{t.icon}</span>
-    {t.label}
-  </button>
-))}
+        {[
+          {id:"monitor",   label:"Monitor",   icon: <ChartLine   size={16} /> },
+          {id:"scenarios", label:"Scenarios", icon: <Person      size={16} /> },
+          {id:"controls",  label:"Controls",  icon: <Gear        size={16} /> },
+          {id:"puzzle",    label:"Puzzle",    icon: <PuzzlePiece size={16} /> },
+        ].map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,padding:"10px 4px 8px",border:"none",cursor:"pointer",background:tab===t.id?"#0d2137":"transparent",borderTop:`2px solid ${tab===t.id?"#4a9eff":"transparent"}`,color:tab===t.id?"#4a9eff":"#334155",fontFamily:'"JetBrains Mono",monospace',fontSize:7,letterSpacing:1.5,textTransform:"uppercase",display:"flex",flexDirection:"column",alignItems:"center",gap:3,transition:"all 0.15s"}}>
+            <span style={{fontSize:16,lineHeight:1}}>{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {/* FOOTER */}
       <div style={{borderTop:"1px solid #1e2d3d",padding:"4px 12px",background:"#0a0f14",flexShrink:0}}>
         <span style={{fontSize:7,color:"#1e3a52",letterSpacing:1}}>Tintinalli · BTS/ATS · PEMVECC 2017 · ARDSnet · OpenPediatrics — Educational simulator only</span>
       </div>
+    </div>
     </div>
   );
 }
