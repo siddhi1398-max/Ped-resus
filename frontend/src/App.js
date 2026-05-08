@@ -389,12 +389,12 @@ function PaywallDialog({ user, onSuccess, onClose }) {
 }
 function TabsSheet({ tab, paid, onTabClick, onClose }) {
   const categories = [
+    { label: "Tools",       tabs: ["copilot"] },
     { label: "Assessment",  tabs: ["calculator", "vitals", "abg"] },
     { label: "Emergency",   tabs: ["resuscitation", "trauma", "prehospital"] },
     { label: "Treatment",   tabs: ["drugs", "fluids", "syrup", "sedation"] },
     { label: "Support",     tabs: ["ventilator", "equipment", "neonatal"] },
     { label: "Reference",   tabs: ["algorithms", "immunisation"] },
-    { label: "Tools",       tabs: ["copilot"] },
   ];
 
   return (
