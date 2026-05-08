@@ -479,41 +479,41 @@ const handleSearchSelect = useCallback((entry) => {
       <TopBar />
 
      {/* Status bar */}
-      <div className="border-b border-slate-100 dark:border-slate-900 px-4 sm:px-6 py-1.5 flex items-center gap-4 max-w-7xl mx-auto">
+      <div className="border-b border-slate-100 dark:border-slate-900 px-4 sm:px-6 py-1.5 max-w-7xl mx-auto">
+  {/* Row 1: badge + user info */}
+  <div className="flex items-center justify-between gap-2 mb-1.5">
+    <div className="flex-shrink-0">
+      {paid ? (
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Full Access
+        </span>
+      ) : authReady ? (
+        <button onClick={() => setShowDialog(true)}
+          className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-amber-600 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded-full hover:bg-amber-100 transition-colors">
+          <Lock size={9} weight="bold" /> Unlock all tabs — ₹{PRICE_INR}
+        </button>
+      ) : null}
+    </div>
 
-        {/* Left: badge */}
-        <div className="flex-shrink-0">
-          {paid ? (
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Full Access
-            </span>
-          ) : authReady ? (
-            <button onClick={() => setShowDialog(true)}
-              className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-amber-600 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded-full hover:bg-amber-100 transition-colors">
-              <Lock size={9} weight="bold" /> Unlock all tabs — ₹{PRICE_INR}
-            </button>
-          ) : null}
-        </div>
+    <div className="flex items-center gap-2 flex-shrink-0">
+      {user ? (
+        <>
+          {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
+          <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[160px]">{user.email}</span>
+          <button onClick={() => { signOut(auth); setPaid(false); setUser(null); setTab("calculator"); }}
+            className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign out</button>
+        </>
+      ) : authReady ? (
+        <button onClick={() => setShowDialog(true)} className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign in</button>
+      ) : null}
+    </div>
+  </div>
 
-        {/* Centre: search bar — was onNavigate, must be onResultSelect */}
-<div className="flex-1 min-w-0">
- <SearchBar onResultSelect={handleSearchSelect} />
+  {/* Row 2: search bar — full width */}
+  <div className="w-full">
+    <SearchBar onResultSelect={handleSearchSelect} />
+  </div>
 </div>
-
-        {/* Right: user info */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {user ? (
-            <>
-              {user.photoURL && <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" />}
-              <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[160px]">{user.email}</span>
-              <button onClick={() => { signOut(auth); setPaid(false); setUser(null); setTab("calculator"); }}
-                className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign out</button>
-            </>
-          ) : authReady ? (
-            <button onClick={() => setShowDialog(true)} className="text-[10px] text-slate-400 hover:text-slate-600 font-mono underline">Sign in</button>
-          ) : null}
-        </div>
-      </div>
         
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <Tabs value={tab} onValueChange={(val) => handleTabClick(val)}>
