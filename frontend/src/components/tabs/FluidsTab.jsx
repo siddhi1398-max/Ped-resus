@@ -15,8 +15,100 @@ import {
   Warning, CheckCircle, ArrowRight, CaretDown, Info,
   Drop, Toilet, Pill, Fire, Lightning, Hospital,
   MagnifyingGlass, PintGlass, Syringe, ChartBar,
-  Ruler, Target, Heartbeat, Gauge, FirstAid,
+  Ruler, Target, Heartbeat, Gauge, FirstAid, Bug,
 } from "@phosphor-icons/react";
+
+// ─── DENGUE DATA ──────────────────────────────────────────────────────────────
+const DENGUE_WARNING_SIGNS = [
+  "Abdominal pain or tenderness",
+  "Persistent vomiting (≥ 3 episodes/hr)",
+  "Clinical fluid accumulation (ascites, pleural effusion)",
+  "Mucosal bleeding",
+  "Lethargy or restlessness",
+  "Liver enlargement > 2 cm",
+  "Rising haematocrit with rapid decline in platelet count",
+];
+
+const DENGUE_SEVERE_CRITERIA = [
+  "Severe plasma leakage → shock (DSS) or fluid accumulation with respiratory distress",
+  "Severe bleeding (clinically significant haemorrhage)",
+  "Severe organ impairment: liver (AST/ALT ≥ 1000), CNS (impaired consciousness), heart, kidneys",
+];
+
+const DENGUE_PHASES = [
+  {
+    phase: "Febrile",
+    duration: "Day 1–3",
+    color: "amber",
+    features: ["High fever (38.5–40 °C), often abrupt onset", "Flushed face, headache, retro-orbital pain", "Myalgia, arthralgia ('breakbone fever')", "Positive tourniquet test (≥ 10 petechiae/inch²)", "WBC starts falling, thrombocytopenia begins"],
+    management: ["Paracetamol 15 mg/kg/dose q6h (max 60 mg/kg/day)", "Avoid NSAIDs and aspirin (bleeding risk)", "Encourage oral hydration", "Monitor CBC daily from day 3", "Caution: fever may mask defervescence = critical period approaching"],
+  },
+  {
+    phase: "Critical",
+    duration: "Day 4–6 (24–48 hr after defervescence)",
+    color: "red",
+    features: ["Defervescence — patient feels better but this is the DANGER window", "Plasma leakage peaks → haemoconcentration (Hct rise ≥ 20%)", "Pleural effusion, ascites", "Platelet nadir", "Shock (DSS): narrow pulse pressure ≤ 20 mmHg, cold extremities, prolonged CRT"],
+    management: ["Admit all patients with warning signs", "IV fluid: start if oral intake poor or Hct rising", "Monitor vitals every 1–4 hr", "Repeat Hct every 4–6 hr in IV group", "Watch for fluid overload in recovery phase"],
+  },
+  {
+    phase: "Recovery",
+    duration: "Day 7–8",
+    color: "emerald",
+    features: ["Reabsorption of leaked fluid → fluid overload risk", "Bradycardia common (benign)", "Diuresis — good sign", "Rising WBC signals recovery", "Platelet count recovers"],
+    management: ["Reduce/stop IV fluids as patient recovers", "Watch for pulmonary oedema if excess fluids given during critical phase", "Resume oral feeding", "Discharge when afebrile ≥ 24 hr, improving, good urine output, no warning signs"],
+  },
+];
+
+// WHO 2009 fluid groups
+const DENGUE_FLUID_GROUPS = {
+  A: {
+    label: "Group A — Outpatient",
+    color: "emerald",
+    criteria: ["No warning signs", "Tolerating oral fluids", "Haematocrit normal or mildly raised"],
+    plan: ["ORS / oral fluids ≥ 5 mL/kg/hr", "Paracetamol for fever control", "Daily review with CBC", "Return immediately if warning signs appear"],
+  },
+  B: {
+    label: "Group B — Admit & Monitor",
+    color: "amber",
+    criteria: ["Warning signs present (any)", "High-risk patient (infant, elderly, obese, diabetes, renal failure, pregnancy)", "Haematocrit rising, platelet falling"],
+    plan: [
+      "IV fluids: 0.9% NaCl or Ringer's Lactate",
+      "Start at 5–7 mL/kg/hr for 1–2 hr, then reduce to 3–5 mL/kg/hr for 2–4 hr",
+      "Reduce further to 2–3 mL/kg/hr if improving",
+      "Reassess every 1 hr — titrate by Hct and clinical response",
+      "If Hct worsening or no improvement: escalate to 10 mL/kg/hr over 1 hr, then reassess",
+    ],
+  },
+  C: {
+    label: "Group C — Dengue Shock (DSS)",
+    color: "red",
+    criteria: ["Compensated shock: narrow PP ≤ 20 mmHg, tachycardia, cold extremities", "Decompensated shock: hypotension, no detectable BP"],
+    plan: [
+      "Crystalloid bolus: 10–20 mL/kg 0.9% NaCl or RL over 15–30 min",
+      "Reassess after each bolus — if improving, step down to Group B rates",
+      "If no improvement after 2–3 boluses: consider colloid (Dextran 40 or 6% HES) 10–20 mL/kg",
+      "Check Hct after resuscitation: if rising → leakage ongoing; if falling → bleeding",
+      "Correct hypoglycaemia, electrolytes (watch K⁺)",
+      "ICU care: consider inotropes if fluid-refractory shock",
+    ],
+  },
+};
+
+const DENGUE_PLATELET_GUIDE = [
+  { range: "> 100,000", action: "Routine monitoring", color: "emerald" },
+  { range: "50,000–100,000", action: "Admit if warning signs. No prophylactic platelet transfusion.", color: "amber" },
+  { range: "20,000–50,000", action: "Admit. Transfuse only if active significant bleeding.", color: "orange" },
+  { range: "< 20,000", action: "Admit. Platelet transfusion if active bleeding or planned invasive procedure. NOT for prophylaxis alone.", color: "red" },
+];
+
+const DENGUE_MONITORING = [
+  "Vitals (HR, BP, RR, temperature, CRT) every 1–4 hr in admitted patients",
+  "Haematocrit: every 4–6 hr in IV group (key marker of plasma leakage)",
+  "Urine output: target ≥ 0.5 mL/kg/hr (catheterise if in shock)",
+  "Platelet count: daily from day 3; twice daily if < 50,000",
+  "Watch for: bleeding (gums, nose, IV sites, melaena), abdominal tenderness, respiratory distress",
+  "Stop IV fluids promptly in recovery phase — avoid overload",
+];
 
 // ─── COLOUR MAPS ──────────────────────────────────────────────────────────────
 const CMAP = {
@@ -694,13 +786,291 @@ function PeriOpSection({ weight }) {
   );
 }
 
+// ─── SUB-TAB: DENGUE ─────────────────────────────────────────────────────────
+function DengueSection({ weight }) {
+  const [activeGroup, setActiveGroup] = useState("B");
+  const [dengueView, setDengueView] = useState("classify");
+
+  const dengueViews = [
+    { id: "classify", label: "1. Classify & Triage", Icon: MagnifyingGlass },
+    { id: "fluids",   label: "2. Fluid Management",  Icon: Drop            },
+    { id: "monitor",  label: "3. Monitoring",         Icon: Gauge           },
+  ];
+
+  const group = DENGUE_FLUID_GROUPS[activeGroup];
+  const gc = CMAP[group.color];
+
+  // Live fluid calcs for Group B
+  const fluidB_start = (weight * 7).toFixed(0);   // 7 mL/kg/hr start
+  const fluidB_mid   = (weight * 5).toFixed(0);   // step down
+  const fluidB_low   = (weight * 3).toFixed(0);   // further step down
+  const fluidB_bolus = (weight * 10).toFixed(0);  // rescue bolus
+  const fluidC_bolus = (weight * 20).toFixed(0);  // shock bolus
+
+  return (
+    <div className="space-y-5">
+      {/* Critical phase warning */}
+      <div className="flex items-start gap-2 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-xs text-red-800 dark:text-red-200">
+        <Warning size={13} weight="fill" className="flex-shrink-0 mt-0.5 text-red-500" />
+        <span>
+          <span className="font-bold">Critical phase = defervescence (day 4–6).</span> Patient may feel better as fever breaks — this is the most dangerous window. Watch for plasma leakage, haemoconcentration, and dengue shock syndrome (DSS).
+        </span>
+      </div>
+
+      {/* View tabs */}
+      <div className="flex flex-wrap gap-2">
+        {dengueViews.map(v => (
+          <button key={v.id} onClick={() => setDengueView(v.id)}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider border transition-all ${
+              dengueView === v.id
+                ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
+                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
+            }`}>
+            <v.Icon size={13} weight="bold" />
+            {v.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── VIEW 1: CLASSIFY ── */}
+      {dengueView === "classify" && (
+        <div className="space-y-4">
+          {/* Disease Phases */}
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-2">Disease Phases</div>
+            <div className="space-y-3">
+              {DENGUE_PHASES.map(ph => {
+                const pc = CMAP[ph.color];
+                return (
+                  <div key={ph.phase} className={`rounded-xl border-2 p-4 ${pc.border} ${pc.bg}`}>
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <span className={`font-bold text-sm ${pc.text}`}
+                            style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{ph.phase} Phase</span>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${pc.badge}`}>{ph.duration}</span>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <div>
+                        <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1.5">Features</div>
+                        <div className="space-y-1">
+                          {ph.features.map((f, i) => (
+                            <div key={i} className="flex items-start gap-1.5 text-xs text-slate-700 dark:text-slate-200">
+                              <ArrowRight size={10} weight="bold" className={`${pc.text} flex-shrink-0 mt-0.5`} />
+                              {f}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1.5">Management</div>
+                        <div className="space-y-1">
+                          {ph.management.map((m, i) => (
+                            <div key={i} className="flex items-start gap-1.5 text-xs text-slate-700 dark:text-slate-200">
+                              <CheckCircle size={10} weight="fill" className="text-emerald-500 flex-shrink-0 mt-0.5" />
+                              {m}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Warning Signs */}
+          <SectionToggle title="Warning Signs (admit all)" IconComp={Warning} defaultOpen={true} accent="amber">
+            <div className="space-y-1.5">
+              {DENGUE_WARNING_SIGNS.map((s, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-200">
+                  <Warning size={11} weight="fill" className="text-amber-500 flex-shrink-0 mt-0.5" />
+                  {s}
+                </div>
+              ))}
+            </div>
+          </SectionToggle>
+
+          {/* Severe Dengue */}
+          <SectionToggle title="Severe Dengue Criteria" IconComp={FirstAid} accent="red">
+            <div className="space-y-1.5">
+              {DENGUE_SEVERE_CRITERIA.map((s, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-200">
+                  <Warning size={11} weight="fill" className="text-red-500 flex-shrink-0 mt-0.5" />
+                  {s}
+                </div>
+              ))}
+            </div>
+          </SectionToggle>
+
+          {/* Platelet guide */}
+          <SectionToggle title="Platelet Count — Action Guide" IconComp={ChartBar}>
+            <div className="space-y-2">
+              {DENGUE_PLATELET_GUIDE.map((row, i) => {
+                const rc = CMAP[row.color];
+                return (
+                  <div key={i} className={`flex flex-wrap items-start gap-3 rounded-lg border px-3 py-2.5 ${rc.border} ${rc.bg}`}>
+                    <span className={`font-mono font-bold text-xs min-w-[130px] ${rc.text}`}>{row.range} /µL</span>
+                    <span className="text-xs text-slate-700 dark:text-slate-200">{row.action}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-[10px] font-mono text-slate-400 mt-3">
+              Prophylactic platelet transfusion is NOT recommended regardless of count unless bleeding or invasive procedure planned. — WHO 2009 / IAP
+            </p>
+          </SectionToggle>
+        </div>
+      )}
+
+      {/* ── VIEW 2: FLUIDS ── */}
+      {dengueView === "fluids" && (
+        <div className="space-y-4">
+          {/* Group selector */}
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-2">Select WHO Management Group</div>
+            <div className="flex gap-2">
+              {Object.entries(DENGUE_FLUID_GROUPS).map(([key, g]) => {
+                const cm = CMAP[g.color];
+                return (
+                  <button key={key} onClick={() => setActiveGroup(key)}
+                    className={`flex-1 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all text-center leading-tight ${activeGroup === key ? `${cm.badge} border-transparent shadow-sm` : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500"}`}
+                    style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                    {g.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Criteria */}
+          <div className={`rounded-xl border p-3 ${gc.border}`} style={{ background: "rgba(0,0,0,0.02)" }}>
+            <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1.5">Criteria for this group</div>
+            <div className="space-y-1">
+              {group.criteria.map((cr, i) => (
+                <div key={i} className="flex items-start gap-1.5 text-xs text-slate-700 dark:text-slate-200">
+                  <ArrowRight size={10} weight="bold" className={`${gc.text} flex-shrink-0 mt-0.5`} />
+                  {cr}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Live dose cards — Group B and C */}
+          {activeGroup === "B" && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <DoseCard testid="dengue-b-start" category="fluid" title="Starting rate"        value={fluidB_start} unit="mL/hr (7 mL/kg/hr)" />
+              <DoseCard testid="dengue-b-mid"   category="fluid" title="Step-down (2–4 hr)"   value={fluidB_mid}   unit="mL/hr (5 mL/kg/hr)" />
+              <DoseCard testid="dengue-b-low"   category="fluid" title="Further step-down"    value={fluidB_low}   unit="mL/hr (3 mL/kg/hr)" />
+              <DoseCard testid="dengue-b-bolus" category="fluid" title="Rescue bolus (no improvement)" value={fluidB_bolus} unit="mL (10 mL/kg over 1 hr)" />
+            </div>
+          )}
+
+          {activeGroup === "C" && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <DoseCard testid="dengue-c-bolus"  category="resuscitation" title="Crystalloid bolus (DSS)"  value={fluidC_bolus} unit="mL (20 mL/kg over 15–30 min)" />
+              <DoseCard testid="dengue-c-repeat" category="resuscitation" title="Max repeat boluses"       value={`${(weight * 60).toFixed(0)}`} unit="mL total (3 × 20 mL/kg)" />
+              <DoseCard testid="dengue-c-colloid" category="fluid"        title="Colloid (if crystalloid fails)" value={`${(weight * 10).toFixed(0)}–${(weight * 20).toFixed(0)}`} unit="mL Dextran 40 or 6% HES" />
+            </div>
+          )}
+
+          {/* Management steps */}
+          <div className={`rounded-xl border-2 p-4 space-y-3 ${gc.border} ${gc.bg}`}>
+            <div className={`font-bold text-sm ${gc.text}`} style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+              {group.label} — Management Steps
+            </div>
+            <div className="space-y-1.5">
+              {group.plan.map((step, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-200">
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 mt-0.5 ${gc.badge}`}>{i + 1}</span>
+                  {step}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Key principle callout */}
+          <div className="flex items-start gap-2 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/30 px-4 py-3 text-xs text-sky-800 dark:text-sky-200">
+            <Info size={13} weight="fill" className="flex-shrink-0 mt-0.5 text-sky-500" />
+            <span>
+              <span className="font-bold">Fluid titration is the cornerstone.</span> Unlike septic shock, the goal is to give just enough fluid to correct plasma leakage — not aggressive resuscitation. Haematocrit is your primary guide; rising Hct = ongoing leakage, falling Hct = bleeding.
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* ── VIEW 3: MONITORING ── */}
+      {dengueView === "monitor" && (
+        <div className="space-y-4">
+          <SectionToggle title="Monitoring Parameters" IconComp={Gauge} defaultOpen={true} accent="sky">
+            <div className="space-y-1.5">
+              {DENGUE_MONITORING.map((m, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-200">
+                  <CheckCircle size={11} weight="fill" className="text-sky-500 flex-shrink-0 mt-0.5" />
+                  {m}
+                </div>
+              ))}
+            </div>
+          </SectionToggle>
+
+          {/* Hct interpretation */}
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400 mb-2">Haematocrit Interpretation</div>
+            <div className="space-y-2">
+              {[
+                { change: "Hct rising ≥ 20% from baseline", meaning: "Active plasma leakage — continue / increase IV fluids", color: "red" },
+                { change: "Hct stable or slowly decreasing", meaning: "Fluid resuscitation adequate — maintain or step down rate", color: "amber" },
+                { change: "Hct falling rapidly + shock persisting", meaning: "Internal bleeding — check for haemorrhage, consider blood products", color: "red" },
+                { change: "Hct falling + clinical improvement", meaning: "Recovery phase — reduce fluids promptly to avoid overload", color: "emerald" },
+              ].map((row, i) => {
+                const rc = CMAP[row.color];
+                return (
+                  <div key={i} className={`rounded-xl border p-3 ${rc.border} ${rc.bg}`}>
+                    <div className={`font-mono font-bold text-xs mb-1 ${rc.text}`}>{row.change}</div>
+                    <div className="text-xs text-slate-700 dark:text-slate-200">{row.meaning}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Discharge criteria */}
+          <SectionToggle title="Discharge Criteria (all must be met)" IconComp={CheckCircle} accent="emerald">
+            <div className="space-y-1.5">
+              {[
+                "Afebrile for at least 24 hours (without antipyretics)",
+                "Improving clinical status — no warning signs",
+                "Good urine output",
+                "Platelet count ≥ 50,000/µL and increasing",
+                "No respiratory distress (reabsorption phase complete)",
+                "Tolerating oral fluids well",
+                "Haematocrit stable",
+              ].map((cr, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-200">
+                  <CheckCircle size={11} weight="fill" className="text-emerald-500 flex-shrink-0 mt-0.5" />
+                  {cr}
+                </div>
+              ))}
+            </div>
+          </SectionToggle>
+
+          <div className="flex items-start gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-[11px] text-slate-500">
+            <Info size={12} className="flex-shrink-0 mt-0.5 text-slate-400" />
+            Reference: WHO 2009 Dengue Guidelines · IAP Dengue Guidelines · Nelson 21st Ed
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
 const SECTIONS = [
   { id: "maintenance", label: "Maintenance",          Icon: Drop      },
-  { id: "diarrhoea",   label: "Dehydration/Diarrhea", Icon: Toilet    },
-  { id: "dka",         label: "DKA",                  Icon: Syringe   },
-  { id: "burns",       label: "Burns",                Icon: Fire      },
   { id: "shock",       label: "Shock",                Icon: Lightning },
+  { id: "burns",       label: "Burns",                Icon: Fire      },
+  { id: "diarrhoea",   label: "Dehydration/Diarrhea", Icon: Toilet    },
+  { id: "dka",         label: "DKA",                  Icon: Syringe   }, 
+  { id: "dengue",      label: "Dengue",               Icon: Bug       },
   { id: "periop",      label: "Peri-op",              Icon: Hospital  },
 ];
 
@@ -736,11 +1106,12 @@ export default function FluidsTab() {
         ))}
       </div>
 
-      {sec === "maintenance" && <MaintenanceSection weight={weight} />}
-      {sec === "diarrhoea"   && <DiarrhoeaSection   weight={weight} />}
-      {sec === "dka"         && <DkaSection          weight={weight} />}
-      {sec === "burns"       && <BurnsSection        weight={weight} />}
+      {sec === "maintenance" && <MaintenanceSection  weight={weight} />}
       {sec === "shock"       && <ShockSection        weight={weight} />}
+      {sec === "burns"       && <BurnsSection        weight={weight} />}
+      {sec === "diarrhoea"   && <DiarrhoeaSection    weight={weight} />}
+      {sec === "dka"         && <DkaSection          weight={weight} />}
+      {sec === "dengue"      && <DengueSection       weight={weight} />}
       {sec === "periop"      && <PeriOpSection       weight={weight} />}
     </div>
   );
