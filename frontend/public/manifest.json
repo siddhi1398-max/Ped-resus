@@ -4,9 +4,9 @@
   "description": "Weight-based pediatric emergency drug doses and clinical protocols",
   "icons": [
     {
-      "src": "browser icon.png",
+      "src": "browser-icon.png",
       "sizes": "40x40",
-      "type": "image/x-icon/png",
+      "type": "image/png",
       "purpose": "any"
     },
     {
