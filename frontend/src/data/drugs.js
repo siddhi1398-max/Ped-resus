@@ -686,7 +686,7 @@ export const DRUGS = [
     name: "Ceftriaxone",
     indication: "Sepsis / meningitis / enteric fever",
     category: "antibiotic",
-    dosePerKg: 50,
+    dosePerKg: 100,
     unit: "mg",
     max: 2000,
     route: "IV / IM",
