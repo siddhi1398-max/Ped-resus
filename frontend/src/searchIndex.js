@@ -692,6 +692,212 @@ export const SEARCH_INDEX = [
     description: "Spacer selection 0–2 yr / 2–6 yr / 6+ yr. MDI+spacer equivalent to nebuliser",
   },
 
+  // ─── NEW ENTRIES TO ADD TO SEARCH_INDEX ────────────────────────────────────
+// Add these after the existing "Nebulised Drugs" entries and before the
+// "SYRUP CALCULATOR" section.
+// ─────────────────────────────────────────────────────────────────────────────
+
+  // ─── DRUGS — PER RECTAL ────────────────────────────────────────────────────
+  {
+    id: "drug-pr-diazepam", tab: "drugs", tabLabel: "Drugs",
+    section: "Per Rectal", drugId: "diazepam-pr",
+    label: "Diazepam PR — Acute Seizure / Febrile Convulsion",
+    keywords: ["diazepam", "pr", "per rectal", "rectal", "seizure", "febrile convulsion", "febrile seizure", "0.5 mg/kg", "no iv", "calmpose", "valium", "rectal diazepam"],
+    description: "0.5 mg/kg PR (max 10 mg). IV solution used rectally. Onset 5–10 min. Hold buttocks 1–2 min",
+  },
+  {
+    id: "drug-pr-midazolam", tab: "drugs", tabLabel: "Drugs",
+    section: "Per Rectal", drugId: "midazolam-pr",
+    label: "Midazolam PR — Acute Seizure (Alternative)",
+    keywords: ["midazolam", "pr", "per rectal", "rectal midazolam", "seizure", "0.4 mg/kg", "no iv", "mezolam", "dormicum", "rectal benzodiazepine"],
+    description: "0.3–0.5 mg/kg PR (max 10 mg). Less preferred than rectal diazepam. Onset 5–10 min",
+  },
+  {
+    id: "drug-pr-paraldehyde", tab: "drugs", tabLabel: "Drugs",
+    section: "Per Rectal", drugId: "paraldehyde-pr",
+    label: "Paraldehyde PR — Refractory Status Epilepticus",
+    keywords: ["paraldehyde", "pr", "per rectal", "rectal", "refractory seizure", "status epilepticus", "0.4 mL/kg", "arachis oil", "glass syringe", "resource limited"],
+    description: "0.4 mL/kg PR mixed 1:1 with arachis oil (max 8 mL). MUST use glass syringe. Onset 15–30 min",
+  },
+  {
+    id: "drug-pr-paracetamol", tab: "drugs", tabLabel: "Drugs",
+    section: "Per Rectal", drugId: "paracetamol-pr",
+    label: "Paracetamol Suppository — Fever / Pain",
+    keywords: ["paracetamol", "suppository", "pr", "per rectal", "fever", "pain", "vomiting", "calpol suppository", "metacin suppository", "15 mg/kg", "rectal paracetamol"],
+    description: "15–20 mg/kg PR (max 1 g). Calpol suppositories 125/250/500 mg. Onset 30–60 min",
+  },
+  {
+    id: "drug-pr-indomethacin", tab: "drugs", tabLabel: "Drugs",
+    section: "Per Rectal", drugId: "indomethacin-pr",
+    label: "Indomethacin Suppository — Pain / Fever",
+    keywords: ["indomethacin", "indocap", "suppository", "pr", "per rectal", "nsaid", "pain", "fever", "older children"],
+    description: "1.5–3 mg/kg/day PR ÷ TDS (max 50 mg/dose). Indocap-25/50 suppositories",
+  },
+  {
+    id: "drug-pr-promethazine", tab: "drugs", tabLabel: "Drugs",
+    section: "Per Rectal", drugId: "promethazine-pr",
+    label: "Promethazine Suppository — Vomiting (>2 yr only)",
+    keywords: ["promethazine", "phenergan", "suppository", "pr", "per rectal", "vomiting", "antiemetic", ">2 years", "0.75 mg/kg", "contraindicated infants"],
+    description: "0.5–1 mg/kg PR (max 25 mg). CONTRAINDICATED <2 yr — fatal respiratory depression",
+  },
+  {
+    id: "drug-pr-bisacodyl", tab: "drugs", tabLabel: "Drugs",
+    section: "Per Rectal", drugId: "bisacodyl-pr",
+    label: "Bisacodyl Suppository — Constipation",
+    keywords: ["bisacodyl", "dulcolax", "suppository", "pr", "per rectal", "constipation", "laxative", "5 mg", "10 mg", "bowel preparation"],
+    description: "<10 kg: 5 mg OD · ≥10 kg: 10 mg OD. Onset 15–60 min. Dulcolax widely available India",
+  },
+  {
+    id: "drug-pr-sodium-phosphate-enema", tab: "drugs", tabLabel: "Drugs",
+    section: "Per Rectal", drugId: "sodium-phosphate-enema",
+    label: "Sodium Phosphate Enema — Faecal Impaction",
+    keywords: ["sodium phosphate enema", "fleet enema", "relaxyl enema", "pr", "per rectal", "constipation", "faecal impaction", "bowel preparation", "2.5 mL/kg", "phosphate"],
+    description: "2.5 mL/kg (max 133 mL). Relaxyl enema available India. Avoid in renal impairment",
+  },
+
+  // ─── DRUGS — INTRANASAL ────────────────────────────────────────────────────
+  {
+    id: "drug-in-fentanyl", tab: "drugs", tabLabel: "Drugs",
+    section: "Intranasal", drugId: "fentanyl-in",
+    label: "Fentanyl IN — Acute Pain Without IV Access",
+    keywords: ["fentanyl", "intranasal", "in", "nasal", "acute pain", "trauma", "fracture", "1.5 mcg/kg", "mad atomiser", "no iv", "opioid nasal"],
+    description: "1.5–2 mcg/kg IN via MAD (max 100 mcg). Use 100 mcg/mL. Max 0.5 mL/nostril. Onset 5–10 min",
+  },
+  {
+    id: "drug-in-ketamine", tab: "drugs", tabLabel: "Drugs",
+    section: "Intranasal", drugId: "ketamine-in",
+    label: "Ketamine IN — Sub-dissociative Analgesia",
+    keywords: ["ketamine", "intranasal", "in", "nasal", "sub dissociative", "analgesia", "1 mg/kg", "pre iv", "trauma pain", "mad atomiser", "50 mg/mL"],
+    description: "1–2 mg/kg IN via MAD (max 75 mg). Use 50 mg/mL. Onset 5–10 min. Opioid-sparing",
+  },
+  {
+    id: "drug-in-midazolam", tab: "drugs", tabLabel: "Drugs",
+    section: "Intranasal", drugId: "midazolam-in",
+    label: "Midazolam IN — Seizure / Procedural Anxiolysis",
+    keywords: ["midazolam", "intranasal", "in", "nasal", "seizure", "no iv", "anxiolysis", "pre mri", "0.2 mg/kg", "mad atomiser", "5 mg/mL", "nasal burning", "mezolam"],
+    description: "0.2–0.3 mg/kg IN via MAD (max 10 mg). Use 5 mg/mL undiluted. Onset 5–10 min",
+  },
+  {
+    id: "drug-in-dexmedetomidine", tab: "drugs", tabLabel: "Drugs",
+    section: "Intranasal", drugId: "dexmedetomidine-in",
+    label: "Dexmedetomidine IN — MRI Sedation / Anxiolysis",
+    keywords: ["dexmedetomidine", "intranasal", "in", "nasal", "mri sedation", "procedural sedation", "1 mcg/kg", "no respiratory depression", "mad atomiser", "dextomid", "precedex"],
+    description: "1–2 mcg/kg IN via MAD (max 100 mcg). Onset 25–30 min. No resp depression. Ideal for MRI",
+  },
+  {
+    id: "drug-in-naloxone", tab: "drugs", tabLabel: "Drugs",
+    section: "Intranasal", drugId: "naloxone-in",
+    label: "Naloxone IN — Opioid Overdose Without IV",
+    keywords: ["naloxone", "intranasal", "in", "nasal", "opioid overdose", "reversal", "0.1 mg/kg", "no iv", "narcan nasal", "mad atomiser", "re narcotisation"],
+    description: "0.1 mg/kg IN via MAD (max 2 mg). Use 1 mg/mL ampoule. Onset 2–5 min. May need repeat doses",
+  },
+  {
+    id: "drug-in-diazepam", tab: "drugs", tabLabel: "Drugs",
+    section: "Intranasal", drugId: "diazepam-in",
+    label: "Diazepam IN — Not Preferred (Poor Bioavailability)",
+    keywords: ["diazepam", "intranasal", "in", "nasal", "seizure", "poor bioavailability", "not recommended", "alternative", "0.25 mg/kg"],
+    description: "NOT preferred IN — poor nasal bioavailability of Indian IV formulation. Use IN midazolam or PR diazepam instead",
+  },
+  {
+    id: "drug-in-mupirocin", tab: "drugs", tabLabel: "Drugs",
+    section: "Intranasal", drugId: "mupirocin-in",
+    label: "Mupirocin 2% Nasal — MRSA Decolonisation",
+    keywords: ["mupirocin", "bactroban nasal", "mupicin nasal", "mrsa", "decolonisation", "nasal ointment", "pre surgery", "bd 5 days"],
+    description: "~0.5 cm each nostril BD × 5 days. MRSA decolonisation before surgery. Bactroban Nasal",
+  },
+
+  // ─── DRUGS — INTRAMUSCULAR ─────────────────────────────────────────────────
+  {
+    id: "drug-im-adrenaline", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "adrenaline-im",
+    label: "Adrenaline IM 1:1000 — Anaphylaxis First Line",
+    keywords: ["adrenaline", "epinephrine", "im", "intramuscular", "anaphylaxis", "1:1000", "0.01 mg/kg", "anterolateral thigh", "epipen", "first line", "allergy"],
+    description: "0.01 mg/kg IM anterolateral thigh (max 0.5 mg). Repeat q5–15 min. No absolute contraindication",
+  },
+  {
+    id: "drug-im-midazolam", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "midazolam-im",
+    label: "Midazolam IM — Status Epilepticus / Pre-sedation",
+    keywords: ["midazolam", "im", "intramuscular", "status epilepticus", "seizure", "0.2 mg/kg", "no iv", "rampart", "prehospital", "mezolam"],
+    description: "0.2 mg/kg IM (max 10 mg). RAMPART trial: equivalent to IV lorazepam for SE. Onset 5–10 min",
+  },
+  {
+    id: "drug-im-diazepam-not-recommended", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "diazepam-im",
+    label: "Diazepam IM — NOT Recommended (Erratic Absorption)",
+    keywords: ["diazepam", "im", "intramuscular", "not recommended", "erratic absorption", "avoid", "use pr instead", "calmpose"],
+    description: "IM diazepam NOT recommended — erratic absorption. Use PR diazepam or IM midazolam instead",
+  },
+  {
+    id: "drug-im-ceftriaxone", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "ceftriaxone-im",
+    label: "Ceftriaxone IM — Sepsis / Meningitis / Enteric Fever",
+    keywords: ["ceftriaxone", "im", "intramuscular", "sepsis", "meningitis", "enteric fever", "pneumonia", "50 mg/kg", "monocef", "rocephin", "lignocaine reconstitution", "outpatient"],
+    description: "50 mg/kg IM OD (max 2 g). Reconstitute in 1% lignocaine. Max 1 g per site",
+  },
+  {
+    id: "drug-im-benzylpenicillin", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "benzylpenicillin-im",
+    label: "Benzylpenicillin IM — Meningococcal / Pre-transfer",
+    keywords: ["benzylpenicillin", "crystalline penicillin", "penicillin g", "im", "intramuscular", "meningococcal", "pre transfer", "50000 units/kg", "crystapen", "purpuric rash"],
+    description: "50,000 units/kg IM stat (max 2.4 MU). Critical pre-transfer dose for suspected meningococcal disease",
+  },
+  {
+    id: "drug-im-procaine-penicillin", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "procaine-penicillin-im",
+    label: "Benzathine / Procaine Penicillin IM — RF Prophylaxis",
+    keywords: ["benzathine penicillin", "procaine penicillin", "penidure", "im", "intramuscular", "rheumatic fever", "prophylaxis", "1.2 mu", "600000 units", "aspirate", "hoigne syndrome", "never iv"],
+    description: "<30 kg: 600,000 units · ≥30 kg: 1.2 MU IM. ALWAYS aspirate — IV injection is fatal (Hoigne syndrome)",
+  },
+  {
+    id: "drug-im-gentamicin", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "gentamicin-im",
+    label: "Gentamicin IM — Gram-negative / Neonatal Sepsis",
+    keywords: ["gentamicin", "im", "intramuscular", "gram negative", "neonatal sepsis", "7.5 mg/kg", "aminoglycoside", "once daily", "genticyn", "ototoxicity", "nephrotoxicity"],
+    description: "7.5 mg/kg IM OD (children). Neonates: 4–5 mg/kg OD. Monitor levels if >5 days",
+  },
+  {
+    id: "drug-im-ketorolac", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "ketorolac-im",
+    label: "Ketorolac IM — Moderate-Severe Pain / Renal Colic",
+    keywords: ["ketorolac", "toradol", "ketanov", "im", "intramuscular", "nsaid", "pain", "renal colic", "0.5 mg/kg", "30 mg", "max 5 days"],
+    description: "0.5 mg/kg IM (max 30 mg). Comparable to morphine 10 mg. Max 5 days total",
+  },
+  {
+    id: "drug-im-ondansetron", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "ondansetron-im",
+    label: "Ondansetron IM — Severe Vomiting Without IV",
+    keywords: ["ondansetron", "im", "intramuscular", "vomiting", "nausea", "0.1 mg/kg", "emeset", "ondem", "zofran", "off label im", "gastroenteritis"],
+    description: "0.1–0.15 mg/kg IM (max 8 mg). Off-label but widely practiced India. Onset 20–30 min",
+  },
+  {
+    id: "drug-im-dexamethasone", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "dexamethasone-im",
+    label: "Dexamethasone IM — Croup / Severe Allergy",
+    keywords: ["dexamethasone", "im", "intramuscular", "croup", "severe allergy", "0.6 mg/kg", "dexona", "decadron", "single dose", "cerebral oedema"],
+    description: "0.6 mg/kg IM (croup, max 10 mg). Single dose sufficient — duration 36–72 hr",
+  },
+  {
+    id: "drug-im-morphine", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "morphine-im",
+    label: "Morphine IM — Severe Pain",
+    keywords: ["morphine", "im", "intramuscular", "severe pain", "fracture", "burns", "0.1 mg/kg", "schedule x", "narcotic", "naloxone", "opioid"],
+    description: "0.1–0.15 mg/kg IM (max 10 mg). Schedule X — special prescription required. Have naloxone ready",
+  },
+  {
+    id: "drug-im-vitamin-k", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "vitamin-k-im",
+    label: "Vitamin K1 IM — Neonatal Prophylaxis / VKDB",
+    keywords: ["vitamin k", "phytomenadione", "im", "intramuscular", "neonatal prophylaxis", "vkdb", "konakion", "1 mg", "at birth", "warfarin reversal", "haemorrhage"],
+    description: "Neonates: 1 mg IM at birth (0.5 mg if <1.5 kg). Konakion MM preferred. IV bolus → anaphylaxis risk",
+  },
+  {
+    id: "drug-im-glucagon", tab: "drugs", tabLabel: "Drugs",
+    section: "Intramuscular", drugId: "glucagon-im",
+    label: "Glucagon IM — Severe Hypoglycaemia Without IV",
+    keywords: ["glucagon", "glucagen", "im", "intramuscular", "hypoglycaemia", "unconscious", "no iv", "0.5 mg", "1 mg", "t1dm", "glycogenolysis", "hypokit"],
+    description: "<25 kg: 0.5 mg IM · ≥25 kg: 1 mg IM. GlucaGen HypoKit. Lateral position — vomiting common",
+  },
   // ─── SYRUP CALCULATOR (one per drug) ──────────────────────────────────────
   {
     id: "syrup-amoxicillin", tab: "syrup", tabLabel: "Syrup Calculator",
