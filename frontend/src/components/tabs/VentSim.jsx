@@ -268,142 +268,109 @@ const ALARM_DATA = {
   },
 };
 
-// ─── WEB AUDIO VENTILATOR ENGINE ───────────────────────────────────────────
-function createVentAudio(audioCtx, settings, physiology) {
-  const { rr, pip, peep, ie } = settings;
-  const { resistance, leak, dyssynch } = physiology;
-  const period = 60 / rr;
-  const ti = period * ie / (1 + ie);
-  const te = period - ti;
-  const now = audioCtx.currentTime;
+// ─── ICU ALARM SOUND ENGINE ────────────────────────────────────────────────
+// Plays realistic ICU-style beep patterns based on alarm type.
+// No breath/ventilator sounds — alarms only.
 
-  // Master gain
-  const master = audioCtx.createGain();
-  master.gain.setValueAtTime(0.18, now);
-  master.connect(audioCtx.destination);
+/**
+ * Plays a single tone beep.
+ * @param {AudioContext} ctx
+ * @param {number} freq      - Hz
+ * @param {number} startTime - AudioContext time
+ * @param {number} duration  - seconds
+ * @param {number} gain      - 0–1
+ * @param {string} type      - OscillatorNode type
+ */
+function playBeep(ctx, freq, startTime, duration, gain = 0.35, type = "sine") {
+  const osc = ctx.createOscillator();
+  const env = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, startTime);
+  // Short attack, hold, fast release
+  env.gain.setValueAtTime(0, startTime);
+  env.gain.linearRampToValueAtTime(gain, startTime + 0.012);
+  env.gain.setValueAtTime(gain, startTime + duration - 0.015);
+  env.gain.linearRampToValueAtTime(0, startTime + duration);
+  osc.connect(env);
+  env.connect(ctx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
 
-  // ── Inspiratory breath: filtered noise burst (high-pass = air rushing in) ──
-  const inspBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * ti * 0.9, audioCtx.sampleRate);
-  const inspData = inspBuf.getChannelData(0);
-  for (let i = 0; i < inspData.length; i++) {
-    // Shaped noise: ramp up then ramp down
-    const env = Math.sin((i / inspData.length) * Math.PI);
-    inspData[i] = (Math.random() * 2 - 1) * env;
+/**
+ * HIGH PIP alarm — IEC 60601-1-8 "high priority" style: triple beep, high pitch.
+ * Pattern: beep-beep-beep (880 Hz, repeated 3×, fast)
+ */
+function playHighPIPAlarm(ctx) {
+  const t = ctx.currentTime + 0.05;
+  for (let i = 0; i < 3; i++) {
+    playBeep(ctx, 880, t + i * 0.18, 0.12, 0.38, "sine");
+    playBeep(ctx, 1320, t + i * 0.18 + 0.06, 0.06, 0.22, "sine"); // harmonic overlay
   }
-  const inspSrc = audioCtx.createBufferSource();
-  inspSrc.buffer = inspBuf;
-  const inspFilter = audioCtx.createBiquadFilter();
-  inspFilter.type = "bandpass";
-  // Higher PIP / resistance = higher pitched turbulence
-  inspFilter.frequency.value = 600 + resistance * 300 + pip * 8;
-  inspFilter.Q.value = 0.8;
-  const inspGain = audioCtx.createGain();
-  inspGain.gain.value = 0.5 + (pip / 50) * 0.5;
-  inspSrc.connect(inspFilter);
-  inspFilter.connect(inspGain);
-  inspGain.connect(master);
-  inspSrc.start(now);
-  inspSrc.stop(now + ti * 0.9);
+}
 
-  // ── Ventilator click / valve click at breath start ──
-  const clickBuf = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.008), audioCtx.sampleRate);
-  const clickData = clickBuf.getChannelData(0);
-  for (let i = 0; i < clickData.length; i++) {
-    const env = 1 - i / clickData.length;
-    clickData[i] = (Math.random() * 2 - 1) * env * env;
+/**
+ * LOW Vt / DISCONNECT alarm — mid-priority: two-tone falling pair, repeated twice.
+ * Pattern: high-low, high-low (660→440 Hz)
+ */
+function playLowVtAlarm(ctx) {
+  const t = ctx.currentTime + 0.05;
+  for (let i = 0; i < 2; i++) {
+    playBeep(ctx, 660, t + i * 0.42, 0.14, 0.32, "sine");
+    playBeep(ctx, 440, t + i * 0.42 + 0.16, 0.14, 0.28, "sine");
   }
-  const clickSrc = audioCtx.createBufferSource();
-  clickSrc.buffer = clickBuf;
-  const clickFilter = audioCtx.createBiquadFilter();
-  clickFilter.type = "highpass";
-  clickFilter.frequency.value = 1800;
-  const clickGain = audioCtx.createGain();
-  clickGain.gain.value = 0.7;
-  clickSrc.connect(clickFilter);
-  clickFilter.connect(clickGain);
-  clickGain.connect(master);
-  clickSrc.start(now);
-  clickSrc.stop(now + 0.01);
+}
 
-  // ── Expiratory whoosh (low-pass exhalation) ──
-  const expBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * te * 0.8, audioCtx.sampleRate);
-  const expData = expBuf.getChannelData(0);
-  for (let i = 0; i < expData.length; i++) {
-    const env = Math.exp(-i / (expData.length * 0.3)) * (1 - i / expData.length);
-    expData[i] = (Math.random() * 2 - 1) * env;
+/**
+ * APNOEA / RATE alarm — urgent continuous: five slow beeps at medium pitch.
+ * Pattern: beep × 5 at 0.5s intervals (550 Hz)
+ */
+function playApnoeaAlarm(ctx) {
+  const t = ctx.currentTime + 0.05;
+  for (let i = 0; i < 5; i++) {
+    playBeep(ctx, 550, t + i * 0.5, 0.18, 0.30, "sine");
   }
-  const expSrc = audioCtx.createBufferSource();
-  expSrc.buffer = expBuf;
-  const expFilter = audioCtx.createBiquadFilter();
-  expFilter.type = "bandpass";
-  expFilter.frequency.value = 300 + resistance * 120;
-  expFilter.Q.value = 1.2;
-  const expGain = audioCtx.createGain();
-  expGain.gain.value = 0.35;
-  expSrc.connect(expFilter);
-  expFilter.connect(expGain);
-  expGain.connect(master);
-  expSrc.start(now + ti);
-  expSrc.stop(now + ti + te * 0.8);
+}
 
-  // ── Expiratory valve click ──
-  const expClickSrc = audioCtx.createBufferSource();
-  expClickSrc.buffer = clickBuf; // reuse
-  const expClickGain = audioCtx.createGain();
-  expClickGain.gain.value = 0.4;
-  expClickSrc.connect(clickFilter);
-  expClickGain.connect(master);
-  expClickSrc.start(now + ti);
-  expClickSrc.stop(now + ti + 0.01);
-
-  // ── Leak: gurgling turbulent noise overlaid ──
-  if (leak > 0.2) {
-    const leakBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * ti, audioCtx.sampleRate);
-    const ld = leakBuf.getChannelData(0);
-    for (let i = 0; i < ld.length; i++) {
-      const env = Math.sin((i / ld.length) * Math.PI * 3) * 0.5 + 0.5;
-      ld[i] = (Math.random() * 2 - 1) * env;
-    }
-    const leakSrc = audioCtx.createBufferSource();
-    leakSrc.buffer = leakBuf;
-    const leakFilter = audioCtx.createBiquadFilter();
-    leakFilter.type = "bandpass";
-    leakFilter.frequency.value = 180 + Math.random() * 80;
-    leakFilter.Q.value = 3;
-    const leakGain = audioCtx.createGain();
-    leakGain.gain.value = leak * 1.2;
-    leakSrc.connect(leakFilter);
-    leakFilter.connect(leakGain);
-    leakGain.connect(master);
-    leakSrc.start(now + 0.05);
-    leakSrc.stop(now + ti);
+/**
+ * GENERIC URGENT alarm — catch-all high-priority: rapid four-beep burst (IEC style).
+ * Pattern: beep × 4, fast (770 Hz)
+ */
+function playGenericAlarm(ctx) {
+  const t = ctx.currentTime + 0.05;
+  for (let i = 0; i < 4; i++) {
+    playBeep(ctx, 770, t + i * 0.15, 0.10, 0.33, "square");
   }
+}
 
-  // ── Dyssynchrony: extra irregular burst mid-expiry ──
-  if (dyssynch && Math.random() < 0.4) {
-    const dBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.12, audioCtx.sampleRate);
-    const dd = dBuf.getChannelData(0);
-    for (let i = 0; i < dd.length; i++) {
-      const env = Math.sin((i / dd.length) * Math.PI);
-      dd[i] = (Math.random() * 2 - 1) * env;
-    }
-    const dSrc = audioCtx.createBufferSource();
-    dSrc.buffer = dBuf;
-    const dFilter = audioCtx.createBiquadFilter();
-    dFilter.type = "bandpass";
-    dFilter.frequency.value = 900;
-    dFilter.Q.value = 2;
-    const dGain = audioCtx.createGain();
-    dGain.gain.value = 0.5;
-    dSrc.connect(dFilter);
-    dFilter.connect(dGain);
-    dGain.connect(master);
-    const offset = ti + te * (0.3 + Math.random() * 0.3);
-    dSrc.start(now + offset);
-    dSrc.stop(now + offset + 0.12);
+/**
+ * Decide which alarm sound to play based on active alarm string + live thresholds.
+ * Returns the repeat interval in ms so the caller can re-schedule.
+ */
+function playAlarmSound(ctx, activeAlarm, settings, liveVals) {
+  const { pip: setPIP, vt: setVt, rr } = settings;
+  const { pip: livePIP } = liveVals;
+
+  // Threshold-based checks (even without a named alarm)
+  const highPIP  = livePIP > 35 || activeAlarm?.includes("HIGH PIP");
+  const lowVt    = activeAlarm?.includes("LOW Vt") || activeAlarm?.includes("CIRCUIT LEAK");
+  const apnoea   = rr < 8 || activeAlarm?.includes("APNOEA");
+  const generic  = !!activeAlarm && !highPIP && !lowVt && !apnoea;
+
+  if (highPIP) {
+    playHighPIPAlarm(ctx);
+    return 2200; // repeat every ~2.2s
+  } else if (lowVt) {
+    playLowVtAlarm(ctx);
+    return 3000;
+  } else if (apnoea) {
+    playApnoeaAlarm(ctx);
+    return 4000;
+  } else if (generic) {
+    playGenericAlarm(ctx);
+    return 2500;
   }
-
-  return period; // return period so scheduler knows when to fire next
+  return null; // no alarm — don't repeat
 }
 
 function generateSample(t, modeKey, settings, physiology, holdState) {
@@ -546,14 +513,16 @@ export default function VentSim() {
   const [holdResult, setHoldResult] = useState(null);
   const [live, setLive] = useState({pip:0,flow:0,vol:0});
 
-  // Sound
+  // Alarm sound
   const [soundOn, setSoundOn] = useState(false);
   const audioCtxRef = useRef(null);
   const soundTimerRef = useRef(null);
   const settingsRef = useRef(settings);
-  const physiologyRef = useRef(physiology);
+  const activeAlarmRef = useRef(activeAlarm);
+  const liveRef = useRef({pip:0,flow:0,vol:0});
   useEffect(() => { settingsRef.current = settings; }, [settings]);
-  useEffect(() => { physiologyRef.current = physiology; }, [physiology]);
+  useEffect(() => { activeAlarmRef.current = activeAlarm; }, [activeAlarm]);
+  useEffect(() => { liveRef.current = live; }, [live]);
 
   // Puzzle
   const [puzzleIdx, setPuzzleIdx] = useState(0);
@@ -579,14 +548,26 @@ export default function VentSim() {
   useEffect(()=>{stateRef.current.physiology=physiology;},[physiology]);
   useEffect(()=>{stateRef.current.hold=holdState;},[holdState]);
 
-  // ── Sound engine ──────────────────────────────────────────────────────────
-  const scheduleSounds = useCallback(() => {
+  // ── Alarm beep scheduler ─────────────────────────────────────────────────
+  const scheduleAlarm = useCallback(() => {
     if (!audioCtxRef.current) return;
     const ctx = audioCtxRef.current;
     if (ctx.state === "suspended") ctx.resume();
-    const period = createVentAudio(ctx, settingsRef.current, physiologyRef.current);
-    soundTimerRef.current = setTimeout(scheduleSounds, period * 1000 - 30);
+    const interval = playAlarmSound(ctx, activeAlarmRef.current, settingsRef.current, liveRef.current);
+    if (interval) {
+      soundTimerRef.current = setTimeout(scheduleAlarm, interval);
+    } else {
+      // No active alarm — poll every 500ms waiting for one
+      soundTimerRef.current = setTimeout(scheduleAlarm, 500);
+    }
   }, []);
+
+  // Re-trigger immediately when alarm changes while sound is on
+  useEffect(() => {
+    if (!soundOn) return;
+    clearTimeout(soundTimerRef.current);
+    scheduleAlarm();
+  }, [activeAlarm, soundOn, scheduleAlarm]);
 
   const toggleSound = useCallback(() => {
     if (soundOn) {
@@ -596,9 +577,9 @@ export default function VentSim() {
     } else {
       setSoundOn(true);
       audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-      scheduleSounds();
+      scheduleAlarm();
     }
-  }, [soundOn, scheduleSounds]);
+  }, [soundOn, scheduleAlarm]);
 
   // Stop sound on unmount
   useEffect(() => () => {
@@ -769,7 +750,7 @@ export default function VentSim() {
           {/* Sound toggle */}
           <button
             onClick={toggleSound}
-            title={soundOn ? "Mute vent sounds" : "Enable vent sounds"}
+            title={soundOn ? "Mute alarm sounds" : "Enable alarm sounds"}
             style={{
               display:"flex",alignItems:"center",gap:4,
               padding:"3px 8px",borderRadius:4,cursor:"pointer",
