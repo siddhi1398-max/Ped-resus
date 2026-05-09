@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
 import {
   maintenanceFluid, maintenanceDaily,
@@ -1074,10 +1074,27 @@ const SECTIONS = [
   { id: "periop",      label: "Peri-op",              Icon: Hospital  },
 ];
 
-export default function FluidsTab() {
+export default function FluidsTab({ searchEntry }) {
   const { weight } = useWeight();
   const [sec, setSec] = useState("maintenance");
 
+  useEffect(() => {
+  if (!searchEntry) return;
+
+  const sectionMap = {
+    "Maintenance": "maintenance",
+    "DKA":         "dka",
+    "Burns":       "burns",
+    "Diarrhoea":   "diarrhoea",
+    "Shock":       "shock",
+    "Peri-op":     "periop",
+    "Dengue":      "dengue",
+  };
+
+  const mapped = sectionMap[searchEntry.section];
+  if (mapped) setSec(mapped);
+}, [searchEntry]);
+  
   return (
     <div className="space-y-6">
       <div>
