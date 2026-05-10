@@ -20,6 +20,163 @@ export const EQUIPMENT_ROWS = [
   { age: "Adolescent (>60 kg)", weight: "999", ett: "7.0–8.0 cuffed",depth:"20–22 cm",suction: "14 Fr",   blade: "3–4 Macintosh",       lma: "4–5", ngt: "14 Fr",   iv: "18G", defib: "240 J" },
 ];
 
+// ─── OPA / NPA SIZING ────────────────────────────────────────────────────────
+// OPA (Guedel) size = distance from centre of mouth to angle of jaw (earlobe tip)
+// NPA (Nasopharyngeal airway) size = distance from tip of nose to earlobe / tragus
+// Sources: Fleischer & Ludwig 7e · APLS 5e · Resuscitation Council UK 2021
+export const OPA_ROWS = [
+  {
+    age:     "Premature / Neonate",
+    weight:  "< 3 kg",
+    size:    "000 (40 mm)",
+    color:   "Pink",
+    colorHex:"#f9a8d4",
+    measure: "Corner of mouth → centre of ear pinna ≈ 4 cm",
+    note:    "Rarely needed. Ensure patent nares. NGT may be safer.",
+  },
+  {
+    age:     "Neonate – Small infant",
+    weight:  "3–5 kg",
+    size:    "00 (50 mm)",
+    color:   "Blue",
+    colorHex:"#93c5fd",
+    measure: "Corner of mouth → centre of ear pinna ≈ 5 cm",
+    note:    "Tongue supports: neutral head position, avoid hyperextension.",
+  },
+  {
+    age:     "Infant",
+    weight:  "5–10 kg",
+    size:    "0 (60 mm)",
+    color:   "Black",
+    colorHex:"#6b7280",
+    measure: "Corner of mouth → centre of ear pinna ≈ 6 cm",
+    note:    "Insert right-way up in infants (NOT inverted like adults — risk epiglottis trauma).",
+  },
+  {
+    age:     "Toddler",
+    weight:  "10–15 kg",
+    size:    "1 (70 mm)",
+    color:   "White",
+    colorHex:"#e2e8f0",
+    measure: "Corner of mouth → angle of jaw ≈ 7 cm",
+    note:    "Insert with tongue depressor or right-way-up in children.",
+  },
+  {
+    age:     "Preschool",
+    weight:  "15–25 kg",
+    size:    "2 (80 mm)",
+    color:   "Green",
+    colorHex:"#86efac",
+    measure: "Corner of mouth → angle of jaw ≈ 8 cm",
+    note:    "From ~5 yr: may insert inverted then rotate 180° (adult technique).",
+  },
+  {
+    age:     "School age",
+    weight:  "25–40 kg",
+    size:    "3 (90 mm)",
+    color:   "Orange",
+    colorHex:"#fdba74",
+    measure: "Corner of mouth → angle of jaw ≈ 9 cm",
+    note:    "Standard adult technique (inverted + rotate) acceptable from ~7 yr.",
+  },
+  {
+    age:     "Adolescent",
+    weight:  "> 40 kg",
+    size:    "4 (100 mm)",
+    color:   "Red",
+    colorHex:"#fca5a5",
+    measure: "Corner of mouth → angle of jaw ≈ 10 cm",
+    note:    "Size 4 fits most adolescents / small adults. Size 5 for large adults.",
+  },
+];
+
+// NPA (Nasopharyngeal airway)
+// Size (mm) = internal diameter. Length selected by distance from nostril to tragus.
+// French size ≈ external diameter × 3 (i.e., 6 mm ID ≈ 18–20 Fr externally)
+export const NPA_ROWS = [
+  {
+    age:      "Infant",
+    weight:   "3–10 kg",
+    sizeID:   "3.0–3.5 mm ID",
+    fr:       "12–14 Fr",
+    length:   "8–10 cm (nostril to tragus)",
+    note:     "Rarely used <1 yr. Soft NPA preferred. Monitor: may kink in infant.",
+  },
+  {
+    age:      "Toddler",
+    weight:   "10–15 kg",
+    sizeID:   "4.0–4.5 mm ID",
+    fr:       "14–16 Fr",
+    length:   "10–12 cm (nostril to tragus)",
+    note:     "Tolerated better than OPA if gag reflex present. Lubricate well.",
+  },
+  {
+    age:      "Preschool",
+    weight:   "15–25 kg",
+    sizeID:   "5.0–5.5 mm ID",
+    fr:       "16–18 Fr",
+    length:   "12–14 cm (nostril to tragus)",
+    note:     "Use safety pin through flange or cut finger of glove to prevent migration.",
+  },
+  {
+    age:      "School age",
+    weight:   "25–40 kg",
+    sizeID:   "6.0–6.5 mm ID",
+    fr:       "18–22 Fr",
+    length:   "14–16 cm (nostril to tragus)",
+    note:     "Equivalent to a cut ETT (same ID). Insert bevel facing the septum.",
+  },
+  {
+    age:      "Adolescent",
+    weight:   "> 40 kg",
+    sizeID:   "6.5–7.0 mm ID",
+    fr:       "22–26 Fr",
+    length:   "16–20 cm (nostril to tragus)",
+    note:     "Adult NPA. Lubricate generously. Right nostril preferred (valve anatomy).",
+  },
+];
+
+// Size-by-weight quick lookup helpers
+export function getOPASize(weight) {
+  if (weight < 3)  return { size: "000 (40 mm)", color: "Pink",   note: "Premature/neonate" };
+  if (weight < 5)  return { size: "00 (50 mm)",  color: "Blue",   note: "Neonate–small infant" };
+  if (weight < 10) return { size: "0 (60 mm)",   color: "Black",  note: "Infant" };
+  if (weight < 15) return { size: "1 (70 mm)",   color: "White",  note: "Toddler" };
+  if (weight < 25) return { size: "2 (80 mm)",   color: "Green",  note: "Preschool" };
+  if (weight < 40) return { size: "3 (90 mm)",   color: "Orange", note: "School age" };
+  return                  { size: "4 (100 mm)",  color: "Red",    note: "Adolescent" };
+}
+
+export function getNPASize(weight) {
+  if (weight < 10) return { sizeID: "3.0–3.5 mm", fr: "12–14 Fr", length: "8–10 cm" };
+  if (weight < 15) return { sizeID: "4.0–4.5 mm", fr: "14–16 Fr", length: "10–12 cm" };
+  if (weight < 25) return { sizeID: "5.0–5.5 mm", fr: "16–18 Fr", length: "12–14 cm" };
+  if (weight < 40) return { sizeID: "6.0–6.5 mm", fr: "18–22 Fr", length: "14–16 cm" };
+  return                  { sizeID: "6.5–7.0 mm", fr: "22–26 Fr", length: "16–20 cm" };
+}
+
+// Key clinical rules for airway adjuncts
+export const OPA_RULES = [
+  "Size = corner of mouth to centre of ear pinna (children) or angle of jaw (older). Too long → laryngospasm; too short → pushes tongue back.",
+  "Use ONLY in unconscious patients with no gag reflex — stimulates vomiting if gag intact.",
+  "Insertion technique: in infants/young children (<5 yr) insert RIGHT-WAY UP with tongue depressor — do NOT use the adult inverted technique (risk of epiglottis trauma).",
+  "From ~5–7 yr: may use adult technique — insert inverted (concave up) then rotate 180° as tip passes hard palate.",
+  "Colour coding: use the Guedel colour sequence (Pink 000 → Blue 00 → Black 0 → White 1 → Green 2 → Orange 3 → Red 4) — consistent across most manufacturers.",
+  "Test fit: holds lips open, flange at teeth/gums, tip curves to base of tongue — check no pharyngeal mucosa folding.",
+];
+
+export const NPA_RULES = [
+  "Size = distance from tip of nose to earlobe (tragus). Slightly shorter is safer than too long (risk: epiglottis/laryngeal entry).",
+  "Internal diameter (ID) ≈ the patient's little finger width — useful bedside estimate.",
+  "Use when OPA not tolerated (gag reflex present), mouth cannot be opened, or in awake/semi-conscious patients.",
+  "CONTRAINDICATED in suspected base-of-skull fracture (clinical signs: Battle's sign, raccoon eyes, CSF rhinorrhoea/otorrhoea).",
+  "Lubricate generously with lignocaine gel (2%) — anaesthetic + lubricant benefit.",
+  "Insert bevel toward the nasal septum. Right nostril preferred (wider anatomically in most patients).",
+  "Safety: pass safety pin through flange or use purpose-made NPA with flange — prevents inward migration.",
+  "Can use cut ETT as NPA in emergency (same ID, softer material). Attach safety pin.",
+  "Topical vasoconstrictant (xylometazoline 0.05% or oxymetazoline) before insertion reduces epistaxis — avoid in children <6 yr except under specialist guidance.",
+];
+
 // ─── FOB SIZING ───────────────────────────────────────────────────────────────
 export const FOB_ROWS = [
   { age: "Neonate",    wt: "<3 kg",    scope: "2.2 mm", ett: "3.0", note: "Ultra-thin scope"  },
@@ -62,6 +219,8 @@ export const FORMULA_ROWS = [
   { label: "ETT cuffed (age ≥2 yr)",    val: "(age÷4) + 3.5"                    },
   { label: "ETT depth — oral",           val: "(age÷2) + 12 cm"                  },
   { label: "ETT depth — nasal",          val: "(age÷2) + 15 cm"                  },
+  { label: "OPA size (Guedel)",          val: "Corner of mouth → centre of ear pinna (cm)" },
+  { label: "NPA size",                   val: "Tip of nose → tragus (earlobe) (cm)" },
   { label: "Defibrillation",             val: "4 J/kg (max 10 J/kg or 360 J)"   },
   { label: "Cardioversion",              val: "0.5–1 J/kg → 2 J/kg"             },
   { label: "Suction catheter (Fr)",      val: "≈ 3 × ETT (mm)"                  },
@@ -323,6 +482,101 @@ export function SpO2ProbeSVG() {
       })}
       <text x="12" y="120" fill="#475569" fontSize="6" fontFamily="monospace">Pre-ductal (right hand) vs post-ductal (foot) difference &gt;3–4% SpO₂ = significant R→L shunting (PPHN).</text>
       <text x="12" y="132" fill="#475569" fontSize="6" fontFamily="monospace">Accuracy validated to SpO₂ ≥70%. Inaccurate: nail polish, methHb, COHb, poor perfusion, pigmented skin.</text>
+    </svg>
+  );
+}
+
+// ─── OPA / NPA SVG ────────────────────────────────────────────────────────────
+// Renders a combined sizing chart: OPA colour-coded rows on left, NPA on right
+export function OPANPASizingSVG() {
+  // OPA colour swatch + data
+  const opaData = [
+    { size: "000 · 40 mm", age: "Premature / Neonate  <3 kg",  fill: "#f9a8d4", text: "#9d174d" },
+    { size: "00 · 50 mm",  age: "Neonate – Infant     3–5 kg", fill: "#93c5fd", text: "#1e3a8a" },
+    { size: "0 · 60 mm",   age: "Infant               5–10 kg",fill: "#6b7280", text: "#f1f5f9" },
+    { size: "1 · 70 mm",   age: "Toddler              10–15 kg",fill: "#e2e8f0", text: "#1e293b" },
+    { size: "2 · 80 mm",   age: "Preschool            15–25 kg",fill: "#86efac", text: "#14532d" },
+    { size: "3 · 90 mm",   age: "School age           25–40 kg",fill: "#fdba74", text: "#7c2d12" },
+    { size: "4 · 100 mm",  age: "Adolescent           >40 kg",  fill: "#fca5a5", text: "#7f1d1d" },
+  ];
+
+  const npaData = [
+    { id: "3.0–3.5 mm", fr: "12–14 Fr", age: "Infant      3–10 kg",  len: "8–10 cm"  },
+    { id: "4.0–4.5 mm", fr: "14–16 Fr", age: "Toddler     10–15 kg", len: "10–12 cm" },
+    { id: "5.0–5.5 mm", fr: "16–18 Fr", age: "Preschool   15–25 kg", len: "12–14 cm" },
+    { id: "6.0–6.5 mm", fr: "18–22 Fr", age: "School age  25–40 kg", len: "14–16 cm" },
+    { id: "6.5–7.0 mm", fr: "22–26 Fr", age: "Adolescent  >40 kg",   len: "16–20 cm" },
+  ];
+
+  const W = 720, H = 310;
+  const opaX = 12, npaX = 378;
+  const colW = 348;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" aria-label="OPA and NPA sizing chart">
+      <rect width={W} height={H} rx="10" fill="#0f172a" />
+
+      {/* ── OPA PANEL ── */}
+      <text x={opaX + colW / 2} y="20" textAnchor="middle" fill="#7dd3fc" fontSize="10" fontWeight="800" fontFamily="monospace">OPA (GUEDEL) — PAEDIATRIC SIZING</text>
+
+      {/* Column headers */}
+      {[["Size", opaX + 8], ["Age / Weight", opaX + 90], ["Colour", opaX + 230]].map(([label, x]) => (
+        <text key={label} x={x} y="36" fill="#64748b" fontSize="7.5" fontWeight="700" fontFamily="monospace">{label}</text>
+      ))}
+      <line x1={opaX} y1="40" x2={opaX + colW} y2="40" stroke="#1e293b" strokeWidth="1" />
+
+      {opaData.map((row, i) => {
+        const y = 52 + i * 33;
+        return (
+          <g key={row.size}>
+            <rect x={opaX} y={y - 10} width={colW} height="28" rx="4"
+              fill={i % 2 === 0 ? "#111827" : "#0f172a"} />
+            {/* colour swatch */}
+            <rect x={opaX + 228} y={y - 7} width="44" height="22" rx="4"
+              fill={row.fill} stroke="#334155" strokeWidth="0.5" />
+            <text x={opaX + 8}  y={y + 8} fill="#e2e8f0" fontSize="8.5" fontFamily="monospace" fontWeight="800">{row.size}</text>
+            <text x={opaX + 90} y={y + 8} fill="#94a3b8" fontSize="7.5" fontFamily="monospace">{row.age}</text>
+          </g>
+        );
+      })}
+
+      {/* Measurement rule */}
+      <rect x={opaX} y={H - 42} width={colW} height="32" rx="4" fill="#0c1420" />
+      <text x={opaX + 8} y={H - 27} fill="#38bdf8" fontSize="7" fontFamily="monospace" fontWeight="700">SIZING RULE:</text>
+      <text x={opaX + 8} y={H - 16} fill="#64748b" fontSize="6.5" fontFamily="monospace">Corner of mouth → centre of ear pinna (children)</text>
+      <text x={opaX + 8} y={H - 7}  fill="#64748b" fontSize="6.5" fontFamily="monospace">Corner of mouth → angle of jaw (older children / adults)</text>
+
+      {/* Divider */}
+      <line x1={npaX - 8} y1="12" x2={npaX - 8} y2={H - 8} stroke="#1e293b" strokeWidth="1.5" />
+
+      {/* ── NPA PANEL ── */}
+      <text x={npaX + colW / 2} y="20" textAnchor="middle" fill="#a78bfa" fontSize="10" fontWeight="800" fontFamily="monospace">NPA (NASOPHARYNGEAL) — PAEDIATRIC SIZING</text>
+
+      {[["ID (mm)", npaX + 8], ["Fr", npaX + 88], ["Age / Weight", npaX + 130], ["Length", npaX + 262]].map(([label, x]) => (
+        <text key={label} x={x} y="36" fill="#64748b" fontSize="7.5" fontWeight="700" fontFamily="monospace">{label}</text>
+      ))}
+      <line x1={npaX} y1="40" x2={npaX + colW} y2="40" stroke="#1e293b" strokeWidth="1" />
+
+      {npaData.map((row, i) => {
+        const y = 52 + i * 33;
+        return (
+          <g key={row.id}>
+            <rect x={npaX} y={y - 10} width={colW} height="28" rx="4"
+              fill={i % 2 === 0 ? "#111827" : "#0f172a"} />
+            <text x={npaX + 8}   y={y + 8} fill="#a78bfa" fontSize="8.5" fontFamily="monospace" fontWeight="800">{row.id}</text>
+            <text x={npaX + 88}  y={y + 8} fill="#94a3b8" fontSize="8"   fontFamily="monospace">{row.fr}</text>
+            <text x={npaX + 130} y={y + 8} fill="#94a3b8" fontSize="7.5" fontFamily="monospace">{row.age}</text>
+            <text x={npaX + 262} y={y + 8} fill="#34d399" fontSize="8"   fontFamily="monospace" fontWeight="700">{row.len}</text>
+          </g>
+        );
+      })}
+
+      {/* NPA measurement rule + key caution */}
+      <rect x={npaX} y={H - 58} width={colW} height="48" rx="4" fill="#0c1420" />
+      <text x={npaX + 8} y={H - 44} fill="#a78bfa" fontSize="7" fontFamily="monospace" fontWeight="700">SIZING RULE:</text>
+      <text x={npaX + 8} y={H - 33} fill="#64748b" fontSize="6.5" fontFamily="monospace">Tip of nose → earlobe (tragus). Width ≈ patient's little finger.</text>
+      <text x={npaX + 8} y={H - 22} fill="#f87171" fontSize="7" fontFamily="monospace" fontWeight="700">⚠ CONTRAINDICATED: suspected base-of-skull fracture</text>
+      <text x={npaX + 8} y={H - 11} fill="#64748b" fontSize="6.5" fontFamily="monospace">Right nostril preferred · Insert bevel toward septum · Lubricate with lignocaine gel</text>
     </svg>
   );
 }
