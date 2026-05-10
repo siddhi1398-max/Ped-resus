@@ -5,7 +5,7 @@
 //          Morgan & Mikhail 7e · AHA PALS 2020
 //          IO Access: AHA PALS 2020 · ERC 2021 · Paediatric IOI guidelines
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useWeight } from "../../context/WeightContext";
 import EtCO2View from "../../data/EtCO2View";
 import {
@@ -1287,9 +1287,20 @@ const TABS = [
   { id: "monitoring", label: "Monitoring",       Icon: Pulse         },
 ];
 
-export default function EquipmentTab() {
+export default function EquipmentTab({ searchEntry }) {
   const { weight }  = useWeight();
   const [activeTab, setActiveTab] = useState("table");
+
+  useEffect(() => {
+    if (!searchEntry?.section) return;
+    const sectionMap = {
+      "Reference Table": "reference",
+      "Difficult Airway": "difficult airway",
+      "Monitoring": "monitoring",
+    };
+    const s = sectionMap[searchEntry.section];
+    if (s) setSec(s);
+  }, [searchEntry]);
 
   return (
     <div className="space-y-5">
