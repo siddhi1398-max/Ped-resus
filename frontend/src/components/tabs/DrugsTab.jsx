@@ -21,7 +21,15 @@ const CAT_COLORS = {
   airway:         "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border-emerald-300 dark:border-emerald-900",
   analgesia:      "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-900",
   anticonvulsant: "bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-950 dark:text-fuchsia-200 border-fuchsia-300 dark:border-fuchsia-900",
-  other:          "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700",
+  antihypertensive: "bg-pink-100 text-pink-800 dark:bg-pink-950 dark:text-pink-200 border-pink-300 dark:border-pink-900",
+  antiarrhythmic:   "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200 border-indigo-300 dark:border-indigo-900",
+  "pulmonary-ht":   "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200 border-rose-300 dark:border-rose-900",
+  endocrine:        "bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200 border-yellow-300 dark:border-yellow-900",
+  toxicology:       "bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-200 border-orange-300 dark:border-orange-900",
+  haematology:      "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200 border-red-300 dark:border-red-900",
+  renal:            "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-200 border-teal-300 dark:border-teal-900",
+  "gi-hepatic":     "bg-lime-100 text-lime-800 dark:bg-lime-950 dark:text-lime-200 border-lime-300 dark:border-lime-900",
+};other:          "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700",
 };
 
 const TONE = {
