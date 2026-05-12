@@ -29,7 +29,7 @@ const CAT_COLORS = {
   haematology:      "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200 border-red-300 dark:border-red-900",
   renal:            "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-200 border-teal-300 dark:border-teal-900",
   "gi-hepatic":     "bg-lime-100 text-lime-800 dark:bg-lime-950 dark:text-lime-200 border-lime-300 dark:border-lime-900",
-};other:          "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700",
+   other:          "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700",
 };
 
 const TONE = {
