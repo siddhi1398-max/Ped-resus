@@ -1630,8 +1630,6 @@ export const DRUGS = [
     route: "PO / IM / IV",
     notes: "Single dose. PO as effective as IM/IV (Piyush Gupta). Injection solution can be given orally.",
   },
-];
-// 1. Salbutamol IV — critical asthma
 {
   id: "salbutamol-iv",
   name: "Salbutamol (IV infusion)",
@@ -1846,7 +1844,7 @@ export const DRUGS = [
   route: "IV over 15–60 min",
   notes: "5 mg/kg IV over 15–60 min (max 300 mg). 2nd/3rd line for SE in India — increasing use. Minimal haemodynamic effects. PR prolongation — ECG monitoring. 100% oral bioavailability — switch to PO. Indian brands: Lacosam (Sun), Lacosamide (Intas, Cipla). Vimpat (UCB — reference brand).",
 },
-
+];
 // ─────────────────────────────────────────────────────────────────────────────
 // DRUG CATEGORIES
 // ─────────────────────────────────────────────────────────────────────────────
