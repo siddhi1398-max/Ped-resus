@@ -290,6 +290,370 @@ export const SEARCH_INDEX = [
   },
 
   // ─── DRUGS — IV (one per drug) ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// MISSING SEARCH INDEX ENTRIES
+// Add these inside the SEARCH_INDEX array in searchIndex.js,
+// after the existing "drug-dexamethasone-croup" entry and before the
+// "─── ANTIHYPERTENSIVES ───" block (or append before the closing bracket).
+// ═══════════════════════════════════════════════════════════════════════════
+
+  // ─── RESUSCITATION — MISSING ───────────────────────────────────────────────
+  {
+    id: "drug-adrenaline-vol",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "adrenaline-vol",
+    label: "Adrenaline 1:10,000 — Volume Calculation",
+    keywords: ["adrenaline", "epinephrine", "1:10000", "0.1 mL/kg", "cardiac arrest", "volume"],
+    description: "0.1 mL/kg of 1:10,000 solution IV/IO = 0.01 mg/kg. Repeat every 3–5 min",
+  },
+  {
+    id: "drug-flumazenil",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "flumazenil",
+    label: "Flumazenil — Benzodiazepine Reversal",
+    keywords: ["flumazenil", "benzodiazepine reversal", "midazolam reversal", "0.01 mg/kg", "seizure risk", "anexate"],
+    description: "0.01 mg/kg IV (max 0.2 mg). Caution: may precipitate seizures in benzo-dependent patients",
+  },
+  {
+    id: "drug-diphenhydramine",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "diphenhydramine",
+    label: "Diphenhydramine IV/IM — Anaphylaxis Adjunct / Dystonia",
+    keywords: ["diphenhydramine", "benadryl", "phenargan", "anaphylaxis adjunct", "dystonic reaction", "1 mg/kg", "antihistamine iv"],
+    description: "1 mg/kg IV/IM (max 50 mg). Adjunct in anaphylaxis — never replaces adrenaline. Also for acute dystonia",
+  },
+  {
+    id: "drug-methylprednisolone",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "methylprednisolone",
+    label: "Methylprednisolone IV — Severe Asthma / SCI / Allergy",
+    keywords: ["methylprednisolone", "solu medrol", "depomedrol", "severe asthma", "spinal cord injury", "2 mg/kg", "steroid iv", "allergy"],
+    description: "1–2 mg/kg/dose IV (max 60 mg). Spinal cord injury: 30 mg/kg load then 5.4 mg/kg/hr × 23 hr",
+  },
+  {
+    id: "drug-naltrexone",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "naltrexone",
+    label: "Naltrexone — Opioid Use Disorder (Not Acute OD)",
+    keywords: ["naltrexone", "opioid use disorder", "alcohol dependence", "vivitrol", "not acute overdose", "use naloxone instead"],
+    description: "NOT for acute opioid OD — use naloxone. Naltrexone is for opioid/alcohol use disorder maintenance",
+  },
+  {
+    id: "drug-lidocaine-antiarrhythmic",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "lidocaine-antiarrhythmic",
+    label: "Lidocaine IV — VT / VF (Alternative to Amiodarone)",
+    keywords: ["lidocaine", "lignocaine", "antiarrhythmic", "vt", "vf", "ventricular tachycardia", "1 mg/kg", "class ib"],
+    description: "1 mg/kg IV/IO bolus (max 100 mg). Infusion 20–50 mcg/kg/min. Alternative when amiodarone unavailable",
+  },
+  {
+    id: "drug-vasopressin",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "vasopressin",
+    label: "Vasopressin Infusion — Catecholamine-Resistant Shock",
+    keywords: ["vasopressin", "adh", "catecholamine resistant shock", "v1 receptor", "0.0003 units/kg/min", "second line vasopressor"],
+    description: "0.0003–0.002 units/kg/min IV. Second-line vasopressor in catecholamine-resistant shock",
+  },
+
+  // ─── ANTIARRHYTHMICS — MISSING ─────────────────────────────────────────────
+  {
+    id: "drug-sotalol-iv",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "sotalol-iv",
+    label: "Sotalol IV/PO — Ventricular Arrhythmias / SVT Prophylaxis",
+    keywords: ["sotalol", "iv", "ventricular arrhythmia", "svt prophylaxis", "1 mg/kg", "beta blocker class iii", "qt prolongation", "torsades", "sotacor"],
+    description: "1 mg/kg IV over 5 min (max 80 mg). PO: 2–8 mg/kg/day ÷ BD. Monitor QT — torsades risk",
+  },
+
+  // ─── PULMONARY HT — MISSING ────────────────────────────────────────────────
+  {
+    id: "drug-iloprost",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "iloprost-inh",
+    label: "Iloprost Inhaled — Pulmonary Arterial Hypertension / iNO Weaning",
+    keywords: ["iloprost", "ventavis", "prostacyclin", "inhaled", "pah", "pulmonary hypertension", "ino weaning", "prodose", "2.5 mcg"],
+    description: "2.5–5 mcg/dose inhaled 6–9×/day via Prodose nebuliser. Prostacyclin analogue. Flushing, hypotension",
+  },
+
+  // ─── ENDOCRINE — MISSING ───────────────────────────────────────────────────
+  {
+    id: "drug-hydrocortisone-stress",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "hydrocortisone-stress",
+    label: "Hydrocortisone Stress Dose — Adrenal Insufficiency / CAH Sick Day",
+    keywords: ["hydrocortisone", "stress dose", "adrenal insufficiency", "cah", "congenital adrenal hyperplasia", "sick day rules", "50 mg/m2", "efcorlin", "solu cortef"],
+    description: "Crisis: 50–100 mg/m² IV/IM stat (or 1–2 mg/kg). CAH sick day: triple oral dose; if vomiting give IM",
+  },
+  {
+    id: "drug-fludrocortisone",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "fludrocortisone",
+    label: "Fludrocortisone PO — Mineralocorticoid Replacement (CAH / Addison's)",
+    keywords: ["fludrocortisone", "florinef", "mineralocorticoid", "cah", "primary adrenal insufficiency", "addisons", "0.05 mg", "0.1 mg", "salt wasting"],
+    description: "0.05–0.2 mg/day PO OD. Neonates: 0.1–0.3 mg/day. Monitor BP, electrolytes, plasma renin",
+  },
+  {
+    id: "drug-propranolol-thyroid",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "propranolol-thyroid",
+    label: "Propranolol IV/PO — Thyroid Storm / SVT / Portal Hypertension",
+    keywords: ["propranolol", "thyroid storm", "svt", "portal hypertension", "0.01 mg/kg", "inderal", "beta blocker", "adrenergic symptoms", "tachycardia"],
+    description: "Thyroid storm IV: 0.01 mg/kg over 10 min (max 3 mg). PO: 0.5–2 mg/kg/day ÷ TDS. Give 1 hr after PTU",
+  },
+  {
+    id: "drug-captopril",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "captopril-po",
+    label: "Captopril PO — Hypertension / Heart Failure / Neonatal HTN",
+    keywords: ["captopril", "capoten", "acten", "ace inhibitor", "hypertension", "heart failure", "neonatal hypertension", "0.1 mg/kg", "po"],
+    description: "Start 0.1 mg/kg/dose TDS (max 6 mg/kg/day). Neonates: 0.01 mg/kg/dose TDS — extreme caution",
+  },
+  {
+    id: "drug-amlodipine",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "amlodipine-iv",
+    label: "Amlodipine PO — Chronic Hypertension (No IV Form)",
+    keywords: ["amlodipine", "amlip", "stamlo", "amlopin", "calcium channel blocker", "hypertension", "0.1 mg/kg", "chronic", "no iv formulation"],
+    description: "0.1–0.3 mg/kg/day PO OD (max 5 mg; up to 10 mg adolescents). No IV formulation. Not for acute emergency",
+  },
+
+  // ─── TOXICOLOGY — MISSING ──────────────────────────────────────────────────
+  {
+    id: "drug-physostigmine",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "physostigmine",
+    label: "Physostigmine IV — Severe Anticholinergic Toxidrome",
+    keywords: ["physostigmine", "anticholinergic toxidrome", "atropine overdose", "antihistamine overdose", "0.02 mg/kg", "crosses bbb", "contraindicated tca"],
+    description: "0.02 mg/kg IV over 5 min (max 0.5 mg child). CONTRAINDICATED in TCA OD. Have atropine ready",
+  },
+
+  // ─── HAEMATOLOGY — MISSING ─────────────────────────────────────────────────
+  {
+    id: "drug-cryoprecipitate",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "cryoprecipitate",
+    label: "Cryoprecipitate — Fibrinogen Deficiency / Haemophilia A / DIC",
+    keywords: ["cryoprecipitate", "fibrinogen", "haemophilia a", "vwd", "dic", "hypofibrinogenaemia", "2 mL/kg", "fviii", "factor viii"],
+    description: "1–2 mL/kg (1 unit per 5 kg) IV over 10–15 min. Target fibrinogen >100 mg/dL",
+  },
+  {
+    id: "drug-protamine",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "protamine",
+    label: "Protamine Sulfate — Heparin Reversal / Post-Cardiac Surgery",
+    keywords: ["protamine", "heparin reversal", "post cardiac surgery", "lmwh overdose", "1 mg per 100 units", "anaphylaxis risk", "fish allergy"],
+    description: "1 mg per 100 units UFH given in past 2 hr (max 50 mg) IV over 10 min. Anaphylaxis risk — have adrenaline ready",
+  },
+  {
+    id: "drug-desmopressin-bleeding",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "desmopressin-bleeding",
+    label: "Desmopressin (DDAVP) — Haemophilia A / Type 1 vWD / Platelet Dysfunction",
+    keywords: ["desmopressin", "ddavp", "minirin", "haemophilia a", "vwd", "platelet dysfunction", "0.3 mcg/kg", "bleeding", "tachyphylaxis"],
+    description: "0.3 mcg/kg IV over 30 min (max 20 mcg). Repeat q12–24h × 2–3 doses only (tachyphylaxis). Restrict fluids after dose",
+  },
+  {
+    id: "drug-albumin-20",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "albumin-20",
+    label: "Albumin 20% — Nephrotic Syndrome / Severe Hypoalbuminaemia",
+    keywords: ["albumin", "20%", "nephrotic syndrome", "hypoalbuminaemia", "oedema", "0.5 g/kg", "1 g/kg", "with furosemide", "albucrit"],
+    description: "0.5–1 g/kg IV over 2–4 hr (= 2.5–5 mL/kg of 20%). Give with furosemide in nephrotic. Monitor for pulmonary oedema",
+  },
+  {
+    id: "drug-calcium-resonium",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "calcium-resonium",
+    label: "Calcium Resonium — Hyperkalaemia (Non-Emergency / Chronic)",
+    keywords: ["calcium resonium", "kayexalate", "hyperkalaemia", "chronic", "1 g/kg", "pr", "po", "not emergency", "not neonates"],
+    description: "1 g/kg/dose PO or PR (max 15 g). Onset hours — NOT for emergency hyperK. Avoid in neonates (ileal necrosis)",
+  },
+  {
+    id: "drug-sodium-zirconium",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "sodium-zirconium",
+    label: "Sodium Zirconium Cyclosilicate (SZC) — Hyperkalaemia",
+    keywords: ["sodium zirconium", "szc", "lokelma", "hyperkalaemia", "potassium binder", "10 g", "faster than resonium", "limited paediatric data"],
+    description: "10 g PO TDS × 48 hr (adult; limited paediatric data). Faster onset than resonium (~1 hr). Safe post-op ileus",
+  },
+
+  // ─── RENAL — MISSING ───────────────────────────────────────────────────────
+  {
+    id: "drug-insulin-dka",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "insulin-dka",
+    label: "Insulin Infusion — DKA",
+    keywords: ["insulin", "dka", "diabetic ketoacidosis", "0.05 units/kg/hr", "0.1 units/kg/hr", "actrapid", "no bolus", "start after fluids"],
+    description: "0.05–0.1 units/kg/hr IV infusion. Start ≥1 hr after fluids. NO IV bolus in DKA",
+  },
+
+  // ─── GI / HEPATIC — MISSING ────────────────────────────────────────────────
+  {
+    id: "drug-omeprazole-iv",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "omeprazole-iv",
+    label: "Omeprazole IV — GI Bleeding / PUD / GERD",
+    keywords: ["omeprazole", "iv", "gi bleeding", "peptic ulcer", "gerd", "1 mg/kg", "ppi", "omez iv", "stress ulcer"],
+    description: "0.5–1 mg/kg IV OD-BD (max 40 mg). GI bleed: bolus then 0.1–0.2 mg/kg/hr infusion. Switch to oral PPI early",
+  },
+  {
+    id: "drug-ranitidine-iv",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "ranitidine-iv",
+    label: "Ranitidine IV — Stress Ulcer Prophylaxis / GERD (Note: Recall Issues)",
+    keywords: ["ranitidine", "iv", "stress ulcer prophylaxis", "gerd", "h2 blocker", "ndma recall", "rantac", "zinetac", "1 mg/kg"],
+    description: "1–2 mg/kg IV q6–8h (max 50 mg). NDMA recalls in many countries — PPIs preferred when available",
+  },
+  {
+    id: "drug-metoclopramide-iv",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "metoclopramide-iv",
+    label: "Metoclopramide IV — Vomiting / Gastric Dysmotility / Migraine",
+    keywords: ["metoclopramide", "perinorm", "reglan", "iv", "vomiting", "gastric dysmotility", "migraine", "0.1 mg/kg", "dystonia", "avoid <1 yr"],
+    description: "0.1 mg/kg IV over 5 min (max 10 mg). Extrapyramidal reactions — give diphenhydramine as rescue. Avoid <1 yr",
+  },
+  {
+    id: "drug-neomycin-gi",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "neomycin-gi",
+    label: "Neomycin PO — Hepatic Encephalopathy / Bowel Preparation",
+    keywords: ["neomycin", "hepatic encephalopathy", "bowel preparation", "gut decontamination", "50 mg/kg", "ammonia", "non absorbable", "lactulose adjunct"],
+    description: "50 mg/kg/day ÷ QDS (max 2 g/day). Non-absorbable — reduces ammonia-producing gut flora. Use with lactulose",
+  },
+
+  // ─── FLUIDS — MISSING ──────────────────────────────────────────────────────
+  {
+    id: "drug-dextrose-25",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "dextrose-25",
+    label: "Dextrose 25% — Hypoglycaemia (Child >1 Month)",
+    keywords: ["dextrose", "d25w", "25%", "glucose", "hypoglycaemia", "2 mL/kg", "large vein", "central", "not neonates"],
+    description: "2 mL/kg IV = 0.5 g/kg glucose. Give via large vein. Not for neonates — use D10W",
+  },
+  {
+    id: "drug-hypertonic-saline",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "hypertonic-saline",
+    label: "Hypertonic Saline 3% — Raised ICP / Symptomatic Hyponatraemia",
+    keywords: ["hypertonic saline", "3%", "raised icp", "hyponatraemia", "sodium correction", "4 mL/kg", "osmotherapy", "tbi", "cerebral oedema"],
+    description: "Raised ICP: 4 mL/kg bolus over 10–20 min. Hyponatraemia: 2 mL/kg over 10–20 min. Monitor Na⁺",
+  },
+
+  // ─── NEUROMUSCULAR BLOCKING — MISSING ─────────────────────────────────────
+  {
+    id: "drug-vecuronium",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "vecuronium",
+    label: "Vecuronium — Non-RSI Paralysis / ICU Paralysis",
+    keywords: ["vecuronium", "non depolarising", "icu paralysis", "intubation", "0.1 mg/kg", "non rsi", "no cardiovascular effects"],
+    description: "0.1 mg/kg IV. Onset 2–3 min. Duration 25–40 min. Infusion: 0.05–0.1 mg/kg/hr. No cardiovascular effects",
+  },
+  {
+    id: "drug-cisatracurium",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "cisatracurium",
+    label: "Cisatracurium — ICU Paralysis (Renal/Hepatic Failure Safe)",
+    keywords: ["cisatracurium", "icu paralysis", "renal failure", "hepatic failure", "hofmann elimination", "0.15 mg/kg", "no histamine", "ards"],
+    description: "0.15 mg/kg bolus, then 1–3 mcg/kg/min infusion. Hofmann elimination — safe in organ failure",
+  },
+
+  // ─── LOCAL ANAESTHETICS — MISSING ─────────────────────────────────────────
+  {
+    id: "drug-lidocaine-local",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "lidocaine-local",
+    label: "Lidocaine — Local Anaesthesia Max Dose",
+    keywords: ["lidocaine", "lignocaine", "local anaesthesia", "max dose", "4.5 mg/kg", "7 mg/kg with epi", "1%", "2%", "infiltration"],
+    description: "Max 4.5 mg/kg plain (7 mg/kg with adrenaline). 1% = 10 mg/mL · 2% = 20 mg/mL",
+  },
+  {
+    id: "drug-bupivacaine-local",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "bupivacaine-local",
+    label: "Bupivacaine — Local / Regional Anaesthesia / Nerve Blocks",
+    keywords: ["bupivacaine", "marcaine", "local anaesthesia", "nerve block", "max dose", "2 mg/kg", "cardiotoxic", "last", "intralipid", "regional"],
+    description: "Max 2 mg/kg (2.5 mg/kg with adrenaline). 0.25% = 2.5 mg/mL. Cardiotoxic in overdose — intralipid rescue",
+  },
+
+  // ─── PAEDIATRIC ANALGESIA — MISSING ───────────────────────────────────────
+  {
+    id: "drug-sucrose-24",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "sucrose-24",
+    label: "Sucrose 24% (Sweet-Ease) — Procedural Analgesia Neonate",
+    keywords: ["sucrose", "sweet ease", "procedural analgesia", "neonate", "infant", "heel prick", "venepuncture", "non pharmacological", "0-3 months"],
+    description: "0.5–2 mL onto tongue 2 min pre-procedure. For neonates/infants ≤3 months. Combine with non-nutritive sucking",
+  },
+  {
+    id: "drug-nitrous-oxide",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "nitrous-oxide",
+    label: "Nitrous Oxide / O₂ (Entonox 50:50) — Procedural Analgesia",
+    keywords: ["nitrous oxide", "entonox", "n2o", "self administered", "procedural analgesia", "cannula insertion", "dressing change", "cooperative", "age 5"],
+    description: "Self-administered 50% N₂O / 50% O₂. ≥5 yr cooperative child. Onset 30–60 s, offset ~5 min",
+  },
+  {
+    id: "drug-ondansetron-iv",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "ondansetron-iv",
+    label: "Ondansetron IV — Post-op Nausea / Vomiting",
+    keywords: ["ondansetron", "iv", "vomiting", "post op nausea", "ponv", "0.15 mg/kg", "emeset", "ondem", "zofran", "qt prolongation"],
+    description: "0.15 mg/kg IV over 15 min (max 4 mg if <15 kg; 8 mg if ≥15 kg). Avoid in long QT",
+  },
+
+  // ─── RESPIRATORY — MISSING ────────────────────────────────────────────────
+  {
+    id: "drug-racemic-epi",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "racemic-epi",
+    label: "Racemic Epinephrine Neb — Croup / Post-extubation Stridor",
+    keywords: ["racemic epinephrine", "croup", "stridor", "post extubation stridor", "0.05 mL/kg", "2.25%", "rebound stridor", "observe 4 hr"],
+    description: "0.05 mL/kg of 2.25% neb (max 0.5 mL). Observe ≥2–4 hr for rebound stridor. Adrenaline 1:1000 acceptable alternative",
+  },
+
+  // ─── NEONATAL — MISSING ────────────────────────────────────────────────────
+  {
+    id: "drug-adrenaline-neonatal",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "adrenaline-neonatal",
+    label: "Adrenaline — Neonatal NRP (HR <60 Despite PPV)",
+    keywords: ["adrenaline", "neonatal", "nrp", "hr less than 60", "ppv", "uvc", "umbilical venous catheter", "0.01 mg/kg", "0.03 mg/kg", "newborn resuscitation"],
+    description: "0.01–0.03 mg/kg IV via UVC (preferred). ETT: 0.05–0.1 mg/kg if IV unavailable. Repeat q3–5 min",
+  },
+  {
+    id: "drug-volume-neonate",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "volume-neonate",
+    label: "Volume Expander — Neonatal NRP / Hypovolaemic Shock",
+    keywords: ["volume expander", "neonate", "nrp", "hypovolaemia", "10 mL/kg", "normal saline", "o negative blood", "uvc", "newborn shock"],
+    description: "10 mL/kg NS or O-negative blood IV/UVC over 5–10 min. May repeat once",
+  },
+  {
+    id: "drug-naloxone-neonate",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "naloxone-neonate",
+    label: "Naloxone Neonatal — Opioid-Induced Respiratory Depression (Not Routine NRP)",
+    keywords: ["naloxone", "neonate", "neonatal", "opioid respiratory depression", "not nrp", "0.1 mg/kg", "maternal opioids", "avoid chronic opioid mother"],
+    description: "0.1 mg/kg IV/IM. NOT first-line in NRP — focus on ventilation. Avoid if mother on chronic opioids",
+  },
+
+  // ─── ANTIVIRAL — MISSING ───────────────────────────────────────────────────
+  {
+    id: "drug-ribavirin-iv",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "ribavirin-iv",
+    label: "Ribavirin IV/Inhaled — RSV Severe / Lassa Fever / CCHF",
+    keywords: ["ribavirin", "rsv severe", "lassa fever", "cchf", "haemorrhagic fever", "33 mg/kg", "inhaled rsv", "spag2", "immunocompromised rsv"],
+    description: "Haemorrhagic fever: 33 mg/kg load then 16 mg/kg q6h × 4d then 8 mg/kg q8h × 6d. RSV inhaled: SPAG-2 device",
+  },
+  {
+    id: "drug-chloroquine-iv",
+    tab: "drugs", tabLabel: "Drugs",
+    section: "Drug Doses", drugId: "chloroquine-iv",
+    label: "Chloroquine IV/IM — P. vivax / Malaria When Oral Not Possible",
+    keywords: ["chloroquine", "iv", "im", "vivax", "malaria", "10 mg/kg", "oral unavailable", "cardiotoxic", "ecg monitor", "lariago iv", "malirid"],
+    description: "IV: 10 mg base/kg over 8 hr then 5 mg base/kg q12h. Cardiotoxic if rapid IV — monitor ECG. Switch to oral ASAP",
+  },  
   {
     id: "drug-adrenaline-arrest", tab: "drugs", tabLabel: "Drugs",
     section: "Drug Doses", drugId: "adrenaline-arrest",
