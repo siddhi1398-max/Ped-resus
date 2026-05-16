@@ -112,6 +112,17 @@ export const DRUGS = [
     notes: "Adjunct only — never replaces adrenaline in anaphylaxis.",
   },
   {
+  id: "chlorpheniramine-iv",
+  name: "Chlorpheniramine (Avil) IV/IM",
+  indication: "Allergic reaction / anaphylaxis adjunct / urticaria / drug reactions",
+  category: "resuscitation",
+  dosePerKg: 0.1,
+  unit: "mg",
+  max: 10,
+  route: "IV slow / IM",
+  notes: "0.1 mg/kg IV slow over 1 min (max 10 mg) or IM. Avil 22.75 mg/mL ampoule (2 mL = 45.5 mg). Common Indian dose: 2.5 mg (<1 yr), 5 mg (1–5 yr), 10 mg (>5 yr). Sedating — monitor for drowsiness and urinary retention. ADJUNCT only — never replaces adrenaline in anaphylaxis.",
+},
+  {
     id: "hydrocortisone",
     name: "Hydrocortisone",
     indication: "Septic shock / adrenal crisis / severe asthma",
