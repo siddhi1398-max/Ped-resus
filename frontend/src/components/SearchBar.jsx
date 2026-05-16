@@ -148,6 +148,7 @@ export default function SearchBar({ onResultSelect }) {
     setQuery("");
     setOpen(false);
     setActive(-1);
+    inputRef.current?.blur();
     onResultSelect?.(entry);
     window._pendingSearchNav = {
       tab:     entry.tab,
