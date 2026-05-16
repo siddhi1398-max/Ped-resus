@@ -1097,7 +1097,7 @@ export const DRUGS = [
     id: "ondansetron-iv",
     name: "Ondansetron (IV)",
     indication: "Vomiting / post-op nausea",
-    category: "analgesia",
+    category: "gi-hepatic",
     dosePerKg: 0.15,
     unit: "mg",
     max: 8,
