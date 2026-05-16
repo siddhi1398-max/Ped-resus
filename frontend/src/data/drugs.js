@@ -1631,6 +1631,221 @@ export const DRUGS = [
     notes: "Single dose. PO as effective as IM/IV (Piyush Gupta). Injection solution can be given orally.",
   },
 ];
+// 1. Salbutamol IV — critical asthma
+{
+  id: "salbutamol-iv",
+  name: "Salbutamol (IV infusion)",
+  indication: "Severe / critical asthma unresponsive to nebulisation",
+  category: "resuscitation",
+  fixedDose: "Loading: 15 mcg/kg over 10 min, then 1–5 mcg/kg/min infusion",
+  unit: "mcg/kg/min",
+  route: "IV infusion",
+  notes: "Load: 15 mcg/kg in 25 mL NS over 10 min. Maintenance: 1–5 mcg/kg/min. Monitor HR, K⁺ (hypokalaemia), glucose. Tachycardia expected. Indian brands: Ventorlin IV (GSK), Asthalin IV (Cipla).",
+},
+
+// 2. Aminophylline IV — still widely used Indian EDs
+{
+  id: "aminophylline-iv",
+  name: "Aminophylline (IV)",
+  indication: "Severe asthma / apnoea of prematurity (loading dose)",
+  category: "resuscitation",
+  dosePerKg: 5,
+  unit: "mg",
+  max: 500,
+  route: "IV over 20–30 min",
+  notes: "Load: 5 mg/kg IV over 20–30 min (max 500 mg). Omit load if already on oral theophylline. Maintenance: 0.5–1 mg/kg/hr. Monitor ECG, HR (arrhythmia risk). Narrow therapeutic index — toxic at >20 mcg/mL. Indian brands: Deriphyllin (Abbott), Aminophylline (Neon).",
+},
+
+// 3. Tramadol IV/IM — most common IV analgesic in Indian EDs
+{
+  id: "tramadol-iv",
+  name: "Tramadol (IV/IM)",
+  indication: "Moderate-severe pain (>12 yr / >50 kg)",
+  category: "analgesia",
+  dosePerKg: 1,
+  unit: "mg",
+  max: 100,
+  route: "IV slow over 15 min / IM",
+  notes: "1–2 mg/kg IV slow over 15 min (max 100 mg/dose). Avoid <12 yr (FDA warning — respiratory depression risk). IM: 1–2 mg/kg. Nausea common — premedicate with ondansetron. Lowers seizure threshold. Indian brands: Tramazac (Zydus), Ultracet (J&J — with paracetamol), Tramadol (Sun).",
+},
+
+// 4. Diclofenac IV/IM — most used IM analgesic in India
+{
+  id: "diclofenac-im",
+  name: "Diclofenac (IV/IM)",
+  indication: "Moderate-severe pain / renal colic / post-op pain (>12 yr)",
+  category: "analgesia",
+  dosePerKg: 1,
+  unit: "mg",
+  max: 75,
+  route: "IM deep / IV slow infusion",
+  notes: "1 mg/kg IM (max 75 mg). IV: dilute in 100 mL NS, infuse over 30–60 min. Do NOT give IV bolus. Max 150 mg/day. Avoid <1 yr, renal impairment, GI bleed, dengue. Give IM into upper outer quadrant gluteal, alternating sides. Indian brands: Voveran (Novartis), Diclofenac (Sun, Cipla), Reactin-D.",
+},
+
+// 5. Metronidazole IV — daily antibiotic, only oral exists in drugs.js
+{
+  id: "metronidazole-iv",
+  name: "Metronidazole (IV)",
+  indication: "Anaerobic infections / intra-abdominal sepsis / brain abscess / C. difficile",
+  category: "antibiotic",
+  dosePerKg: 7.5,
+  unit: "mg",
+  max: 500,
+  route: "IV over 30–60 min",
+  notes: "7.5 mg/kg IV q8h (max 500 mg/dose). Infuse over 30–60 min. Peripheral IV acceptable. Anaerobic cover with ceftriaxone/meropenem for abdominal sepsis. Brain abscess: 10 mg/kg q8h. Switch to oral as soon as tolerated (100% bioavailability). Indian brands: Flagyl IV (Abbott), Metrogyl IV (JB Chemicals).",
+},
+
+// 6. Clindamycin IV — necrotising fasciitis, anaerobic, toxic shock
+{
+  id: "clindamycin-iv",
+  name: "Clindamycin (IV)",
+  indication: "Necrotising fasciitis / toxin suppression (GAS/MRSA) / anaerobic / osteomyelitis",
+  category: "antibiotic",
+  dosePerKg: 10,
+  unit: "mg",
+  max: 600,
+  route: "IV over 30 min",
+  notes: "10 mg/kg IV q6–8h (max 600 mg/dose). Must dilute (≤18 mg/mL) — infuse over 30–60 min; rapid IV causes cardiac arrest. Toxin-suppressing agent in NF/TSS — combine with beta-lactam. C. difficile risk — monitor stools. Indian brands: Dalacin C (Pfizer), Clindamycin (Sun).",
+},
+
+// 7. Azithromycin IV — severe CAP/atypical pneumonia
+{
+  id: "azithromycin-iv",
+  name: "Azithromycin (IV)",
+  indication: "Severe CAP / atypical pneumonia when oral not tolerated",
+  category: "antibiotic",
+  dosePerKg: 10,
+  unit: "mg",
+  max: 500,
+  route: "IV over 60 min",
+  notes: "10 mg/kg IV OD (max 500 mg). Infuse over 60 min (NEVER bolus — thrombophlebitis, QT). Switch to oral azithromycin as soon as tolerated (100% bioavailability). QT monitoring. Indian brands: Azithral IV (Alembic), Azee IV (Cipla).",
+},
+
+// 8. Doxycycline IV — scrub typhus, rickettsial
+{
+  id: "doxycycline-iv",
+  name: "Doxycycline (IV)",
+  indication: "Scrub typhus / rickettsial disease / severe atypical pneumonia (>8 yr)",
+  category: "antibiotic",
+  dosePerKg: 2.2,
+  unit: "mg",
+  max: 100,
+  route: "IV over 1–4 hr",
+  notes: "2.2 mg/kg IV q12h (max 100 mg/dose). Only >8 yr. Dilute in NS/D5W, infuse over 1–4 hr (phlebitis risk — use largest vein). Switch to oral as soon as tolerated. Scrub typhus: 2.2 mg/kg IV OD or BD × 7 days. Indian brands: Doxycycline IV (limited India availability — use oral where possible).",
+},
+
+// 9. Thiamine IV — before glucose in encephalopathy, Wernicke's
+{
+  id: "thiamine-iv",
+  name: "Thiamine (Vitamin B1) IV/IM",
+  indication: "Wernicke's encephalopathy / alcoholic / malnutrition / give BEFORE glucose in AMS",
+  category: "resuscitation",
+  dosePerKg: 1,
+  unit: "mg",
+  max: 100,
+  route: "IV over 30 min / IM",
+  notes: "1–2 mg/kg IV (max 100 mg) over 30 min BEFORE glucose in malnourished/alcoholic encephalopathy. Anaphylaxis risk with rapid IV — give slowly. Wernicke's: 100 mg IV TDS × 3 days. Indian brands: Benfotiamine (oral), Neurobion IV, Thiamine HCl injection (Troikaa, Neon).",
+},
+
+// 10. Activated Charcoal — completely missing, first-line GI decontamination
+{
+  id: "activated-charcoal",
+  name: "Activated Charcoal",
+  indication: "Acute poisoning GI decontamination — within 1–2 hr of ingestion",
+  category: "toxicology",
+  dosePerKg: 1,
+  unit: "g",
+  max: 50,
+  route: "PO / NG",
+  notes: "1 g/kg (max 50 g) in water as slurry. Give within 1–2 hr of ingestion. NOT for: acids, alkalis, hydrocarbons, iron, lithium, alcohols (not adsorbed), comatose patient without protected airway. Multiple-dose: 0.5 g/kg q4h for sustained-release drugs (carbamazepine, theophylline). Indian brands: Medichar (Torrent), Novalcarb (Novalab).",
+},
+
+// 11. Hydroxocobalamin IV — cyanide poisoning / smoke inhalation
+{
+  id: "hydroxocobalamin-iv",
+  name: "Hydroxocobalamin (IV)",
+  indication: "Cyanide poisoning / smoke inhalation with suspected cyanide",
+  category: "toxicology",
+  fixedDose: "5 g IV over 15 min (adult). Child: 70 mg/kg IV over 15 min",
+  unit: "mg/kg",
+  route: "IV over 15 min",
+  notes: "70 mg/kg IV (max 5 g) over 15 min. Repeat up to 3 doses. Turns urine/skin/mucous membranes red — harmless, warn staff. Incompatible with sodium thiosulfate in same line. Indian brands: Cyanokit (Meridian) — very limited India availability; sodium thiosulfate is practical alternative.",
+},
+
+// 12. Sodium Thiosulfate IV — cyanide poisoning (more available in India)
+{
+  id: "sodium-thiosulfate-iv",
+  name: "Sodium Thiosulfate (IV)",
+  indication: "Cyanide poisoning (with sodium nitrite) / cisplatin nephrotoxicity prevention",
+  category: "toxicology",
+  dosePerKg: 400,
+  unit: "mg",
+  max: 12500,
+  route: "IV over 10 min",
+  notes: "400 mg/kg (= 1.65 mL/kg of 25% solution) IV over 10 min (max 12.5 g). Use after sodium nitrite 3% (0.33 mL/kg IV). More available than hydroxocobalamin in India. Indian brands: Sodium Thiosulfate injection (Neon, IDPL).",
+},
+
+// 13. Potassium Chloride IV — hypokalaemia replacement
+{
+  id: "potassium-chloride-iv",
+  name: "Potassium Chloride (IV infusion)",
+  indication: "Hypokalaemia correction",
+  category: "fluid",
+  fixedDose: "0.3–0.5 mEq/kg/hr infusion (max 1 mEq/kg/hr). NEVER bolus.",
+  unit: "mEq/hr",
+  route: "IV infusion (NEVER bolus)",
+  notes: "Max concentration: 40 mEq/L peripheral, 80 mEq/L central. Max rate: 0.5 mEq/kg/hr (ECG monitoring if >0.3 mEq/kg/hr). NEVER give undiluted or as IV push — fatal cardiac arrest. Correct K⁺ before correcting Mg²⁺ if both low. Indian brands: KCl 15% injection (Baxter, Fresenius) — MUST dilute.",
+},
+
+// 14. Isoprenaline IV — complete heart block / refractory bradycardia bridge
+{
+  id: "isoprenaline-iv",
+  name: "Isoprenaline (Isoproterenol) Infusion",
+  indication: "Complete heart block / refractory bradycardia / bridge to pacing",
+  category: "resuscitation",
+  fixedDose: "0.05–2 mcg/kg/min IV infusion — titrate to HR",
+  unit: "mcg/kg/min",
+  route: "IV infusion (central preferred)",
+  notes: "Start 0.05 mcg/kg/min, titrate to target HR. β1+β2 agonist — chronotrope + inotrope. Causes vasodilation (reflex in shock — use with caution). Tachyarrhythmia risk. Bridge to transcutaneous/transvenous pacing in CHB. Indian brands: Isoprenaline HCl (Neon, IDPL — Isuprel). Limited availability.",
+},
+
+// 15. Proxymetacaine eye drops — corneal procedures
+{
+  id: "proxymetacaine-eye",
+  name: "Proxymetacaine 0.5% Eye Drops",
+  indication: "Topical ocular anaesthesia — corneal FB / abrasion / tonometry / slit lamp exam",
+  category: "analgesia",
+  fixedDose: "1–2 drops into affected eye, repeat in 5–10 min if needed",
+  unit: "drops",
+  route: "Topical ocular",
+  notes: "Onset 30 s, duration 15–20 min. Do NOT give bottle to patient (risk of inadvertent repeated use causing corneal damage). Do NOT patch after topical anaesthesia. Indian brands: Proparacaine 0.5% (Sun Ophthalmic), Alcaine (Alcon), Proxymethacaine (Cipla).",
+},
+
+// 16. Pyridoxine IV — INH-induced seizures / neonatal pyridoxine-dependent epilepsy
+{
+  id: "pyridoxine-iv",
+  name: "Pyridoxine (Vitamin B6) IV",
+  indication: "INH toxicity seizures / pyridoxine-dependent epilepsy / neonatal seizures",
+  category: "anticonvulsant",
+  dosePerKg: 70,
+  unit: "mg",
+  max: 5000,
+  route: "IV over 30–60 min",
+  notes: "INH overdose: gram-for-gram with INH ingested (if unknown: 70 mg/kg IV, max 5 g). Pyridoxine-dependent epilepsy: 100 mg IV trial (neonatal). Prophylaxis with INH therapy: 5–10 mg/day oral. Indian brands: Pyridoxine HCl injection (Neon, Troikaa), Benadon (oral).",
+},
+
+// 17. Lacosamide IV — increasingly used 2nd line status epilepticus
+{
+  id: "lacosamide-iv",
+  name: "Lacosamide (IV)",
+  indication: "Status epilepticus 2nd line (after benzodiazepines + LEV/phenytoin) / focal epilepsy",
+  category: "anticonvulsant",
+  dosePerKg: 5,
+  unit: "mg",
+  max: 300,
+  route: "IV over 15–60 min",
+  notes: "5 mg/kg IV over 15–60 min (max 300 mg). 2nd/3rd line for SE in India — increasing use. Minimal haemodynamic effects. PR prolongation — ECG monitoring. 100% oral bioavailability — switch to PO. Indian brands: Lacosam (Sun), Lacosamide (Intas, Cipla). Vimpat (UCB — reference brand).",
+},
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DRUG CATEGORIES
