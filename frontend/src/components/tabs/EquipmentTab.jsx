@@ -1,5 +1,5 @@
 // EquipmentTab.jsx — Airway Equipment & Monitoring
-// Sub-tabs: Reference Table · Difficult Airway · Monitoring
+// Sub-tabs: Reference Table · Difficult Airway · Monitoring · IO Access
 // Sources: Harriet Lane 23e · Fleischer & Ludwig 7e · APLS · AIDAA 2022
 //          Vortex Approach (Chrimes 2016 · vortexapproach.org)
 //          Morgan & Mikhail 7e · AHA PALS 2020
@@ -293,8 +293,6 @@ function OPANPASection({ weight }) {
               </tbody>
             </table>
           </div>
-
-          {/* OPA clinical rules */}
           <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4">
             <div className="font-bold text-xs text-amber-700 dark:text-amber-300 mb-2">Clinical Rules — OPA</div>
             <div className="space-y-1.5">
@@ -343,16 +341,12 @@ function OPANPASection({ weight }) {
               </tbody>
             </table>
           </div>
-
-          {/* NPA critical contraindication callout */}
           <div className="flex items-start gap-2 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-xs text-red-800 dark:text-red-200">
             <Warning size={13} weight="fill" className="flex-shrink-0 mt-0.5 text-red-500" />
             <span>
               <strong>CONTRAINDICATED</strong> in suspected base-of-skull fracture — clinical signs: Battle's sign, raccoon eyes, CSF rhinorrhoea/otorrhoea, haemotympanum.
             </span>
           </div>
-
-          {/* NPA rules */}
           <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 p-4">
             <div className="font-bold text-xs text-violet-700 dark:text-violet-300 mb-2">Clinical Rules — NPA</div>
             <div className="space-y-1.5">
@@ -411,8 +405,7 @@ function ReferenceTableView() {
         Row matching current weight ({weight} kg) highlighted. Tap any row to lock selection.
       </InfoBox>
 
-      {/* Section toggle */}
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5 flex-wrap">
         {[
           { id: "equipment", label: "Equipment table" },
           { id: "opa_npa",   label: "OPA / NPA sizing" },
@@ -766,8 +759,9 @@ function DifficultAirwayView() {
   );
 }
 
-// ─── IO ACCESS VIEW ────────────────────────────────────────────────────────────
-function IOAccessView({ weight }) {
+// ─── TAB 3: IO ACCESS (standalone) ────────────────────────────────────────────
+function IOAccessView() {
+  const { weight } = useWeight();
   const [ioSection, setIOSection] = useState("overview");
 
   const needleSize = weight < 3 ? "15G · 15 mm"
@@ -784,44 +778,49 @@ function IOAccessView({ weight }) {
   ];
 
   const ioSites = [
-    { site: "Proximal Tibia", tone: "emerald", preferred: true,  ages: "All ages — first choice",      landmark: "2 cm below tibial tuberosity, anteromedial flat surface", avoid: "Fracture ipsilateral limb, previous IO same site, bone disease (OI)", tip: "Most reliable landmark. Flat surface confirms correct position. Avoid growth plate — insert medially." },
-    { site: "Distal Tibia",   tone: "blue",    preferred: false, ages: "All ages — second choice",     landmark: "2–3 cm above medial malleolus, flat anteromedial surface", avoid: "Fracture, cellulitis over site", tip: "Good alternative when proximal tibia inaccessible. Less tissue overlying cortex in infants." },
-    { site: "Distal Femur",   tone: "sky",     preferred: false, ages: "Neonates / infants (<2 yr)",   landmark: "3 cm above lateral condyle, anterior surface", avoid: "Fracture, infection over site", tip: "Useful in neonates when tibial sites difficult. Large marrow cavity." },
-    { site: "Proximal Humerus", tone: "violet", preferred: false, ages: "≥2 yr — preferred for drug delivery speed", landmark: "Greater tubercle: arm adducted/internally rotated, 1–2 cm above surgical neck", avoid: "Shoulder fracture, joint infection", tip: "Fastest drug delivery to central circulation after proximal tibia. Preferred in cardiac arrest ≥2 yr if trained." },
-    { site: "Manubrium / Sternal", tone: "orange", preferred: false, ages: "Adults / FAST-1 device only", landmark: "Midline of manubrium at angle of Louis", avoid: "Children <12 yr — thin sternum. Previous sternotomy.", tip: "FAST-1 device only. Not recommended in paediatrics due to thin sternal cortex and proximity to heart." },
+    { site: "Proximal Tibia",     tone: "emerald", preferred: true,  ages: "All ages — first choice",         landmark: "2 cm below tibial tuberosity, anteromedial flat surface",       avoid: "Fracture ipsilateral limb, previous IO same site, bone disease (OI)",  tip: "Most reliable landmark. Flat surface confirms correct position. Avoid growth plate — insert medially." },
+    { site: "Distal Tibia",       tone: "blue",    preferred: false, ages: "All ages — second choice",        landmark: "2–3 cm above medial malleolus, flat anteromedial surface",       avoid: "Fracture, cellulitis over site",                                       tip: "Good alternative when proximal tibia inaccessible. Less tissue overlying cortex in infants." },
+    { site: "Distal Femur",       tone: "sky",     preferred: false, ages: "Neonates / infants (<2 yr)",      landmark: "3 cm above lateral condyle, anterior surface",                    avoid: "Fracture, infection over site",                                        tip: "Useful in neonates when tibial sites difficult. Large marrow cavity." },
+    { site: "Proximal Humerus",   tone: "violet",  preferred: false, ages: "≥2 yr — preferred for drug delivery speed", landmark: "Greater tubercle: arm adducted/internally rotated, 1–2 cm above surgical neck", avoid: "Shoulder fracture, joint infection", tip: "Fastest drug delivery to central circulation after proximal tibia. Preferred in cardiac arrest ≥2 yr if trained." },
+    { site: "Manubrium / Sternal",tone: "orange",  preferred: false, ages: "Adults / FAST-1 device only",    landmark: "Midline of manubrium at angle of Louis",                           avoid: "Children <12 yr — thin sternum. Previous sternotomy.",                  tip: "FAST-1 device only. Not recommended in paediatrics due to thin sternal cortex and proximity to heart." },
   ];
 
   const ezioSteps = [
-    { title: "Prepare",         detail: "Select site · palpate landmarks · clean skin with chlorhexidine or alcohol" },
-    { title: "Select needle",   detail: `EZ-IO needle for ${weight} kg: ${needleSize}. Pink (15G/15mm) for <3–39 kg. Blue (15G/25mm) for ≥40 kg. Yellow (15G/45mm) for excessive tissue.` },
-    { title: "Position",        detail: "Stabilise limb. Insert needle at 90° to bone cortex (slightly caudal for tibia to avoid growth plate)" },
-    { title: "Penetrate cortex",detail: "Drill at gentle forward pressure. STOP when sudden loss of resistance felt (cortex entered) — do NOT drill further" },
-    { title: "Remove stylet",   detail: "Unscrew and remove the stylet. Hub should be flush or slightly above skin." },
-    { title: "Confirm position",detail: "Needle stands unsupported. Aspirate marrow (often bloody/yellow fat). Attach primed EZ-Connect extension set." },
-    { title: "Flush",           detail: "Flush with 5–10 mL 0.9% NaCl. In conscious patient: lignocaine 2% preservative-free 0.5 mg/kg IO before flush (pain)" },
-    { title: "Secure & label",  detail: "Secure with EZ-Stabiliser dressing. Label site and time of insertion. IO access is a BRIDGE — escalate to definitive vascular access." },
+    { title: "Prepare",          detail: "Select site · palpate landmarks · clean skin with chlorhexidine or alcohol" },
+    { title: "Select needle",    detail: `EZ-IO needle for ${weight} kg: ${needleSize}. Pink (15G/15mm) for <3–39 kg. Blue (15G/25mm) for ≥40 kg. Yellow (15G/45mm) for excessive tissue.` },
+    { title: "Position",         detail: "Stabilise limb. Insert needle at 90° to bone cortex (slightly caudal for tibia to avoid growth plate)" },
+    { title: "Penetrate cortex", detail: "Drill at gentle forward pressure. STOP when sudden loss of resistance felt (cortex entered) — do NOT drill further" },
+    { title: "Remove stylet",    detail: "Unscrew and remove the stylet. Hub should be flush or slightly above skin." },
+    { title: "Confirm position", detail: "Needle stands unsupported. Aspirate marrow (often bloody/yellow fat). Attach primed EZ-Connect extension set." },
+    { title: "Flush",            detail: "Flush with 5–10 mL 0.9% NaCl. In conscious patient: lignocaine 2% preservative-free 0.5 mg/kg IO before flush (pain)" },
+    { title: "Secure & label",   detail: "Secure with EZ-Stabiliser dressing. Label site and time of insertion. IO access is a BRIDGE — escalate to definitive vascular access." },
   ];
 
   const manualSteps = [
-    { title: "Identify landmarks", detail: "Proximal tibia preferred. Feel tibial tuberosity, move 2 cm distal and 1 cm medial to the flat anteromedial surface." },
-    { title: "Prep & drape",       detail: "Sterile technique. Clean widely with chlorhexidine. LA: lignocaine 1% down to periosteum if patient conscious." },
-    { title: "Select needle",      detail: "Cook / Jamshidi: 16G for <18 mo · 14G for older children. Butterfly needle 19G acceptable in neonates only." },
-    { title: "Insert with rotation",detail: "Insert at 90° (or 10° away from growth plate). Apply firm downward pressure with rotating motion — do NOT rock side-to-side." },
-    { title: "Confirm entry",      detail: "Sudden give / loss of resistance. Needle stands upright unsupported. Aspirate marrow (not always obtained — do not exclude if negative)." },
-    { title: "Flush & secure",     detail: "Flush 5 mL NaCl. Secure with tape. Observe for extravasation with each flush." },
+    { title: "Identify landmarks",   detail: "Proximal tibia preferred. Feel tibial tuberosity, move 2 cm distal and 1 cm medial to the flat anteromedial surface." },
+    { title: "Prep & drape",         detail: "Sterile technique. Clean widely with chlorhexidine. LA: lignocaine 1% down to periosteum if patient conscious." },
+    { title: "Select needle",        detail: "Cook / Jamshidi: 16G for <18 mo · 14G for older children. Butterfly needle 19G acceptable in neonates only." },
+    { title: "Insert with rotation", detail: "Insert at 90° (or 10° away from growth plate). Apply firm downward pressure with rotating motion — do NOT rock side-to-side." },
+    { title: "Confirm entry",        detail: "Sudden give / loss of resistance. Needle stands upright unsupported. Aspirate marrow (not always obtained — do not exclude if negative)." },
+    { title: "Flush & secure",       detail: "Flush 5 mL NaCl. Secure with tape. Observe for extravasation with each flush." },
   ];
 
   const difficultIVAlternatives = [
     { method: "1. Intraosseous (IO)",              tone: "red",    indication: "Cardiac arrest / collapse / failed 2 attempts / life-threatening emergency", notes: ["AHA PALS: use IO immediately if IV fails after 2 attempts or 90 seconds", "All resuscitation drugs, fluids, blood products and IO contrast can be given", "Equivalent onset of action to central venous access", "Limit: 24 hr maximum · high-viscosity drugs may need pressure infusion"] },
-    { method: "2. Ultrasound-Guided Peripheral IV", tone: "blue",   indication: "Elective / semi-urgent when peripheral veins invisible", notes: ["Basilic, cephalic, brachial vein — arm or AC fossa", "22–20G cannula · dynamic short-axis view during insertion", "Confirm with flash + aspiration · tape wrist in extension", "Requires ultrasound machine + trained operator"] },
-    { method: "3. External Jugular Vein (EJV)",     tone: "sky",    indication: "When peripheral IV fails — non-arrest situation", notes: ["20–22G cannula · patient supine, head turned away, slight Trendelenburg", "EJV runs from angle of mandible to mid-clavicle", "Compress EJV at clavicle to distend vein — insert bevel-up at 20°", "Unreliable in neck trauma / distorted anatomy"] },
-    { method: "4. Central Venous Catheter (CVC)",   tone: "violet", indication: "ICU / theatre — when peripheral IO failed or prolonged access needed", notes: ["Femoral vein — first choice in emergencies (compressible, away from resuscitation field)", "Internal jugular or subclavian if femoral inaccessible", "Ultrasound guidance mandatory — reduces complications by 60%", "Seldinger technique · confirm tip position with CXR before use", "Size: 4Fr (neonate–infant) · 5Fr (child) · 7Fr (adolescent)"] },
-    { method: "5. Umbilical Venous Catheter (UVC)", tone: "emerald", indication: "Neonates ≤7 days — emergency access only", notes: ["Cut cord 1–2 cm from skin · identify thin-walled UV (+ 2 UA)", "Insert 3.5–5 Fr catheter to 4–5 cm (just until blood aspirates freely)", "Do NOT advance deep in emergency — risk of cardiac arrhythmia", "Confirm position with CXR: tip at junction of UV and ductus venosus", "Emergency UVC is bridge only — exchange for CVC within 24 hr"] },
-    { method: "6. Surgical Venous Cut-Down",        tone: "amber",  indication: "Last resort — all above failed, non-arrest, OR unavailable", notes: ["Long saphenous vein at medial malleolus — most accessible in children", "Transverse skin incision 1 cm anterior/superior to medial malleolus", "Blunt dissect to isolate vein · ligate distal, traction suture proximal", "Venotomy with #11 blade · insert cannula or feeding tube · tie off proximal suture", "Requires surgical skill · last resort only"] },
+    { method: "2. Ultrasound-Guided Peripheral IV", tone: "blue",   indication: "Elective / semi-urgent when peripheral veins invisible",                    notes: ["Basilic, cephalic, brachial vein — arm or AC fossa", "22–20G cannula · dynamic short-axis view during insertion", "Confirm with flash + aspiration · tape wrist in extension", "Requires ultrasound machine + trained operator"] },
+    { method: "3. External Jugular Vein (EJV)",     tone: "sky",    indication: "When peripheral IV fails — non-arrest situation",                           notes: ["20–22G cannula · patient supine, head turned away, slight Trendelenburg", "EJV runs from angle of mandible to mid-clavicle", "Compress EJV at clavicle to distend vein — insert bevel-up at 20°", "Unreliable in neck trauma / distorted anatomy"] },
+    { method: "4. Central Venous Catheter (CVC)",   tone: "violet", indication: "ICU / theatre — when peripheral IO failed or prolonged access needed",     notes: ["Femoral vein — first choice in emergencies (compressible, away from resuscitation field)", "Internal jugular or subclavian if femoral inaccessible", "Ultrasound guidance mandatory — reduces complications by 60%", "Seldinger technique · confirm tip position with CXR before use", "Size: 4Fr (neonate–infant) · 5Fr (child) · 7Fr (adolescent)"] },
+    { method: "5. Umbilical Venous Catheter (UVC)", tone: "emerald", indication: "Neonates ≤7 days — emergency access only",                                notes: ["Cut cord 1–2 cm from skin · identify thin-walled UV (+ 2 UA)", "Insert 3.5–5 Fr catheter to 4–5 cm (just until blood aspirates freely)", "Do NOT advance deep in emergency — risk of cardiac arrhythmia", "Confirm position with CXR: tip at junction of UV and ductus venosus", "Emergency UVC is bridge only — exchange for CVC within 24 hr"] },
+    { method: "6. Surgical Venous Cut-Down",        tone: "amber",  indication: "Last resort — all above failed, non-arrest, OR unavailable",                notes: ["Long saphenous vein at medial malleolus — most accessible in children", "Transverse skin incision 1 cm anterior/superior to medial malleolus", "Blunt dissect to isolate vein · ligate distal, traction suture proximal", "Venotomy with #11 blade · insert cannula or feeding tube · tie off proximal suture", "Requires surgical skill · last resort only"] },
   ];
 
   return (
     <div className="space-y-4">
+      <InfoBox tone="red" icon={Warning}>
+        AHA PALS 2020: IO access should be obtained immediately if IV access fails after 2 attempts or 90 seconds
+        in a life-threatening emergency. IO is not a last resort — it is second-line.
+      </InfoBox>
+
       <div className="flex flex-wrap gap-1.5">
         {ioSections.map(s => (
           <button key={s.id} onClick={() => setIOSection(s.id)}
@@ -835,9 +834,6 @@ function IOAccessView({ weight }) {
 
       {ioSection === "overview" && (
         <div className="space-y-4">
-          <InfoBox tone="red" icon={Warning}>
-            AHA PALS 2020: IO access should be obtained immediately if IV access fails after 2 attempts or 90 seconds in a life-threatening emergency. IO is not a last resort — it is second-line.
-          </InfoBox>
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4">
             <div className="font-bold text-sm mb-3" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>IO Sites — {weight} kg</div>
             <div className="space-y-3">
@@ -880,9 +876,9 @@ function IOAccessView({ weight }) {
               <div className="font-bold text-[10px] uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-2">Needle Selection — {weight} kg</div>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 {[
-                  { color: "bg-pink-400",   label: "PINK",   code: "15G · 15mm", range: "3–39 kg",              current: weight >= 3 && weight < 40 },
-                  { color: "bg-blue-400",   label: "BLUE",   code: "15G · 25mm", range: "≥40 kg",               current: weight >= 40 },
-                  { color: "bg-yellow-400", label: "YELLOW", code: "15G · 45mm", range: "Excessive tissue",      current: false },
+                  { color: "bg-pink-400",   label: "PINK",   code: "15G · 15mm", range: "3–39 kg",         current: weight >= 3 && weight < 40 },
+                  { color: "bg-blue-400",   label: "BLUE",   code: "15G · 25mm", range: "≥40 kg",          current: weight >= 40 },
+                  { color: "bg-yellow-400", label: "YELLOW", code: "15G · 45mm", range: "Excessive tissue", current: false },
                 ].map(n => (
                   <div key={n.label} className={`rounded-lg border p-2 text-center ${n.current ? "border-sky-400 dark:border-sky-600 bg-white dark:bg-slate-900" : "border-slate-200 dark:border-slate-700 opacity-60"}`}>
                     <div className={`w-4 h-4 rounded-full mx-auto mb-1 ${n.color}`} />
@@ -927,18 +923,19 @@ function IOAccessView({ weight }) {
       {ioSection === "sternal" && (
         <div className="space-y-4">
           <InfoBox tone="orange" icon={Warning} title="Paediatric caution">
-            Sternal IO (FAST-1) is NOT recommended in children &lt;12 yr. The sternum is thin, growth plates are active, and proximity to the heart increases risk. Use tibial IO in all paediatric emergencies.
+            Sternal IO (FAST-1) is NOT recommended in children &lt;12 yr. The sternum is thin, growth plates are active,
+            and proximity to the heart increases risk. Use tibial IO in all paediatric emergencies.
           </InfoBox>
           <div className="rounded-xl border border-orange-200 dark:border-orange-800 bg-white dark:bg-slate-900/50 p-4">
             <div className="font-bold text-sm mb-3 text-orange-700 dark:text-orange-400" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>FAST-1 Sternal Device — Adults / Adolescents ≥12 yr Only</div>
             <div className="space-y-2 mb-4">
               {[
-                { title: "Indication", detail: "Military / pre-hospital when tibial IO inaccessible (limb trauma, amputation, hypothermia with thick tissue)" },
-                { title: "Landmark",   detail: "Midline of the manubrium at the angle of Louis (sternal angle — T4 level). Palpate notch + angle → midpoint." },
+                { title: "Indication",        detail: "Military / pre-hospital when tibial IO inaccessible (limb trauma, amputation, hypothermia with thick tissue)" },
+                { title: "Landmark",          detail: "Midline of the manubrium at the angle of Louis (sternal angle — T4 level). Palpate notch + angle → midpoint." },
                 { title: "Insert target patch", detail: "Place FAST-1 target patch over manubrium. Align introducer with target patch centre." },
-                { title: "Infuse",     detail: "Push introducer firmly until click. Remove needle — infusion tube remains. Secure with overwrap." },
-                { title: "Flow rate",  detail: "Gravity: ~150 mL/hr. Pressure bag: up to 500 mL/hr. Fastest IO site to central circulation." },
-                { title: "Removal",    detail: "Pull straight out. Apply pressure 5 min. Single-use — do not re-insert at same site." },
+                { title: "Infuse",            detail: "Push introducer firmly until click. Remove needle — infusion tube remains. Secure with overwrap." },
+                { title: "Flow rate",         detail: "Gravity: ~150 mL/hr. Pressure bag: up to 500 mL/hr. Fastest IO site to central circulation." },
+                { title: "Removal",           detail: "Pull straight out. Apply pressure 5 min. Single-use — do not re-insert at same site." },
               ].map((s, i) => (
                 <div key={i} className="flex items-start gap-3 rounded-lg border border-orange-100 dark:border-orange-900 bg-orange-50/50 dark:bg-orange-950/20 px-3 py-2">
                   <span className="font-bold text-[10px] text-orange-600 dark:text-orange-400 flex-shrink-0 w-20">{s.title}</span>
@@ -1045,7 +1042,9 @@ function IOAccessView({ weight }) {
   );
 }
 
-// ─── TAB 3: MONITORING ─────────────────────────────────────────────────────────
+// ─── TAB 4: MONITORING ─────────────────────────────────────────────────────────
+// IO Access has been moved to its own top-level tab.
+// Monitoring now covers: SpO₂ · BP · BVM · EtCO₂
 function MonitoringView() {
   const { weight } = useWeight();
   const [section, setSection] = useState("spo2");
@@ -1109,7 +1108,8 @@ function MonitoringView() {
   return (
     <div className="space-y-4">
       <InfoBox tone="amber" icon={Warning}>
-        ETCO₂ interpretation is covered in the Ventilator tab. For RSI drugs see the Resuscitation tab.
+        ETCO₂ interpretation is covered in the Ventilator tab. IO Access has its own dedicated tab above.
+        For RSI drugs see the Resuscitation tab.
       </InfoBox>
 
       <div className="flex flex-wrap gap-1.5">
@@ -1117,7 +1117,6 @@ function MonitoringView() {
           { id: "spo2",  label: "Pulse Oximetry" },
           { id: "bp",    label: "BP Measurement" },
           { id: "bvm",   label: "BVM"            },
-          { id: "io",    label: "IO Access"      },
           { id: "etco2", label: "EtCO₂"          },
         ].map(s => (
           <button key={s.id} onClick={() => setSection(s.id)}
@@ -1274,16 +1273,17 @@ function MonitoringView() {
         </div>
       )}
 
-      {section === "io"    && <IOAccessView weight={weight} />}
       {section === "etco2" && <EtCO2View />}
     </div>
   );
 }
 
 // ─── MAIN EXPORT ───────────────────────────────────────────────────────────────
+// 4 top-level tabs: Reference Table · Difficult Airway · IO Access · Monitoring
 const TABS = [
   { id: "table",      label: "Reference Table",  Icon: ClipboardText },
   { id: "difficult",  label: "Difficult Airway", Icon: Warning       },
+  { id: "io",         label: "IO Access",        Icon: Syringe       },
   { id: "monitoring", label: "Monitoring",       Icon: Pulse         },
 ];
 
@@ -1294,12 +1294,13 @@ export default function EquipmentTab({ searchEntry }) {
   useEffect(() => {
     if (!searchEntry?.section) return;
     const sectionMap = {
-      "Reference Table": "reference",
-      "Difficult Airway": "difficult airway",
-      "Monitoring": "monitoring",
+      "Reference Table":  "table",
+      "Difficult Airway": "difficult",
+      "IO Access":        "io",
+      "Monitoring":       "monitoring",
     };
-    const s = sectionMap[searchEntry.section];
-    if (s) setSec(s);
+    const t = sectionMap[searchEntry.section];
+    if (t) setActiveTab(t);
   }, [searchEntry]);
 
   return (
@@ -1338,6 +1339,7 @@ export default function EquipmentTab({ searchEntry }) {
 
       {activeTab === "table"      && <ReferenceTableView />}
       {activeTab === "difficult"  && <DifficultAirwayView />}
+      {activeTab === "io"         && <IOAccessView />}
       {activeTab === "monitoring" && <MonitoringView />}
 
       <div className="text-[10px] text-slate-400 dark:text-slate-500 italic text-center pt-2">
