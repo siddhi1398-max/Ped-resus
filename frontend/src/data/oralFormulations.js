@@ -1305,7 +1305,6 @@ export const ORAL_DRUGS = [
     notes: "Dissolve 1 sachet in 1 L clean water — do NOT add extra sugar or salt. Give small sips frequently (5 mL q1–2 min if vomiting). Continue breastfeeding. IAP: mandatory zinc + ORS for diarrhoea.",
     route: "PO — frequent small sips",
   },
-];
 // 1. Tramadol oral — widely used
 {
   id: "tramadol-oral",
@@ -1433,7 +1432,7 @@ export const ORAL_DRUGS = [
   notes: "Scorpion: 30 mcg/kg (0.03 mg/kg) q3h PO until clinical improvement (IAP). Max 0.5 mg/dose. First dose supine (first-dose hypotension). α1-blocker reverses catecholamine surge. Continue until cool extremities/salivation resolve. Indian protocol (Bawaskar).",
   route: "PO supine for first dose",
 },
-
+];
 // ─────────────────────────────────────────────────────────────────────────────
 // CATEGORY FILTER CONFIG
 // ─────────────────────────────────────────────────────────────────────────────
