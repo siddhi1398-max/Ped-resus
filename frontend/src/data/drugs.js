@@ -1104,17 +1104,6 @@ export const DRUGS = [
     route: "Inhaled (self-admin)",
     notes: "Onset 30–60 s, offset ~5 min. Avoid in pneumothorax, bowel obstruction, head injury, B12 deficiency, <4 yr.",
   },
-  {
-    id: "ondansetron-iv",
-    name: "Ondansetron (IV)",
-    indication: "Vomiting / post-op nausea",
-    category: "gi-hepatic",
-    dosePerKg: 0.15,
-    unit: "mg",
-    max: 8,
-    route: "IV over 15 min",
-    notes: "Max 4 mg if <15 kg; 8 mg if ≥15 kg. Avoid in long QT. Dilute, give over 15 min.",
-  },
 
   // ══════════════════════════════════════════════════════════════════
   // GI / HEPATIC
@@ -1151,6 +1140,17 @@ export const DRUGS = [
     max: 50,
     route: "IV over 30 min",
     notes: "1–2 mg/kg IV q6–8h (max 50 mg/dose). NDMA contamination recalls in many countries — PPIs preferred. Still available some Indian centres. H2 blocker. Indian brands: Rantac IV (JB Chemicals), Zinetac IV (GSK).",
+  },
+    {
+    id: "ondansetron-iv",
+    name: "Ondansetron (IV)",
+    indication: "Vomiting / post-op nausea",
+    category: "gi-hepatic",
+    dosePerKg: 0.15,
+    unit: "mg",
+    max: 8,
+    route: "IV over 15 min",
+    notes: "Max 4 mg if <15 kg; 8 mg if ≥15 kg. Avoid in long QT. Dilute, give over 15 min.",
   },
   {
     id: "metoclopramide-iv",
