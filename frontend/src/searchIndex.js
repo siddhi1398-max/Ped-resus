@@ -595,7 +595,7 @@ export const SEARCH_INDEX = [
   {
     id: "drug-ondansetron-iv",
     tab: "drugs", tabLabel: "Drugs",
-    section: "Drug Doses", drugId: "ondansetron-iv",
+    section: "GI/Hepatic", drugId: "ondansetron-iv",
     label: "Ondansetron IV — Post-op Nausea / Vomiting",
     keywords: ["ondansetron", "iv", "vomiting", "post op nausea", "ponv", "0.15 mg/kg", "emeset", "ondem", "zofran", "qt prolongation"],
     description: "0.15 mg/kg IV over 15 min (max 4 mg if <15 kg; 8 mg if ≥15 kg). Avoid in long QT",
