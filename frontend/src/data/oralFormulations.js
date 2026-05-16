@@ -1306,6 +1306,133 @@ export const ORAL_DRUGS = [
     route: "PO — frequent small sips",
   },
 ];
+// 1. Tramadol oral — widely used
+{
+  id: "tramadol-oral",
+  name: "Tramadol",
+  category: "analgesia",
+  indication: "Moderate pain (>12 yr) / cancer pain / post-op",
+  dosePerKg: 1,
+  frequency: "TDS",
+  frequencyHours: 8,
+  unit: "mg",
+  max: 100,
+  maxDaily: 400,
+  ageMin: 144,
+  withFood: true,
+  formulations: [
+    { conc: "50 mg capsule", mgPerMl: null, brands: ["Tramazac-50", "Ultracet (37.5 mg tramadol + 325 mg paracetamol)", "Tramatas-50"] },
+    { conc: "100 mg SR tablet", mgPerMl: null, brands: ["Tramazac-100 SR", "Dolozam-100 SR"] },
+  ],
+  notes: "FDA 2017: CONTRAINDICATED <12 yr. 1–2 mg/kg TDS (max 100 mg/dose). Avoid in adenotonsillectomy (ultra-rapid metabolisers). Nausea common. Lowers seizure threshold.",
+  route: "PO with food",
+},
+
+// 2. Diclofenac oral
+{
+  id: "diclofenac-oral",
+  name: "Diclofenac",
+  category: "analgesia",
+  indication: "Moderate pain / dysmenorrhoea / musculoskeletal / renal colic",
+  dosePerKg: 1,
+  frequency: "TDS",
+  frequencyHours: 8,
+  unit: "mg",
+  max: 50,
+  maxDaily: 150,
+  ageMin: 12,
+  withFood: true,
+  formulations: [
+    { conc: "25 mg/5mL syrup", mgPerMl: 5, brands: ["Voveran-25 syrup", "Reactin-D syrup", "Diclomol syrup"] },
+    { conc: "50 mg tablet", mgPerMl: null, brands: ["Voveran-50", "Reactin-50", "Diclofenac (Cipla)"] },
+  ],
+  notes: "1 mg/kg TDS (max 50 mg/dose). Avoid dengue, dehydration, renal impairment, <12 months. Give with food. GI protection with PPI for >7 days.",
+  route: "PO with food",
+},
+
+// 3. Oseltamivir — exists in drugs.js but NOT in oralFormulations.js with Indian brands
+{
+  id: "oseltamivir-oral",
+  name: "Oseltamivir (Tamiflu)",
+  category: "antibiotic",
+  indication: "Influenza A/B treatment and prophylaxis",
+  dosePerKg: null,
+  frequency: "BD",
+  frequencyHours: 12,
+  unit: "mg",
+  fixedDose: "<1 yr: 3 mg/kg BD | ≤15 kg: 30 mg BD | >15–23 kg: 45 mg BD | >23–40 kg: 60 mg BD | >40 kg: 75 mg BD — all × 5 days",
+  ageMin: 0,
+  withFood: true,
+  formulations: [
+    { conc: "12 mg/mL oral suspension", mgPerMl: 12, brands: ["Tamiflu suspension (Roche)", "Fluvir suspension (Glenmark)", "Osiflu suspension (Cipla)"] },
+    { conc: "75 mg capsule", mgPerMl: null, brands: ["Tamiflu-75 (Roche)", "Fluvir-75", "Osiflu-75"] },
+  ],
+  notes: "Start within 48 hr of symptoms. ICU/severe: 150 mg BD considered. Prophylaxis: half treatment dose OD × 10 days. Give with food (reduces nausea). Suspension: shake well before use.",
+  route: "PO with food",
+},
+
+// 4. Rifaximin — hepatic encephalopathy / traveller's diarrhoea
+{
+  id: "rifaximin-oral",
+  name: "Rifaximin",
+  category: "antibiotic",
+  indication: "Hepatic encephalopathy / traveller's diarrhoea / IBS-D",
+  dosePerKg: null,
+  frequency: "TDS",
+  frequencyHours: 8,
+  unit: "mg",
+  fixedDose: "Hepatic encephalopathy: 550 mg BD (adult) | Traveller's diarrhoea: 200 mg TDS × 3 days",
+  ageMin: 144,
+  withFood: false,
+  formulations: [
+    { conc: "200 mg tablet", mgPerMl: null, brands: ["Rcifax-200", "Xifaxan-200", "Rifagut-200"] },
+    { conc: "550 mg tablet", mgPerMl: null, brands: ["Rcifax-550", "Xifaxan-550"] },
+  ],
+  notes: "Non-absorbable antibiotic — acts locally in GI. No significant systemic effects. Preferred over neomycin for hepatic encephalopathy (better tolerated). Limited paediatric data <12 yr.",
+  route: "PO with or without food",
+},
+
+// 5. Acetazolamide oral — glaucoma, alkalinisation, AMS
+{
+  id: "acetazolamide-oral",
+  name: "Acetazolamide",
+  category: "other",
+  indication: "Acute angle-closure glaucoma / altitude sickness / metabolic alkalosis / pseudotumour cerebri",
+  dosePerKg: 5,
+  frequency: "BD",
+  frequencyHours: 12,
+  unit: "mg",
+  max: 250,
+  maxDaily: 1000,
+  ageMin: 12,
+  withFood: true,
+  formulations: [
+    { conc: "250 mg tablet", mgPerMl: null, brands: ["Iopar-SR-250", "Diamox-250", "Acetamox-250"] },
+  ],
+  notes: "Glaucoma: 5–10 mg/kg BD (max 250 mg BD). Altitude sickness prophylaxis: 5 mg/kg BD starting 24 hr before ascent. Sulfonamide — avoid in sulfa allergy, renal stones. Causes diuresis + tingling in extremities.",
+  route: "PO with food",
+},
+
+// 6. Prazosin oral — scorpion sting (very common India)
+{
+  id: "prazosin-oral",
+  name: "Prazosin",
+  category: "other",
+  indication: "Scorpion envenomation — autonomic storm / hypertensive urgency",
+  dosePerKg: 0.03,
+  frequency: "q3h",
+  frequencyHours: 3,
+  unit: "mg",
+  max: 0.5,
+  ageMin: 12,
+  withFood: false,
+  formulations: [
+    { conc: "0.5 mg tablet", mgPerMl: null, brands: ["Minipress-0.5", "Prazopress-0.5", "Sympress-0.5"] },
+    { conc: "1 mg tablet", mgPerMl: null, brands: ["Minipress-1", "Prazopress-1"] },
+  ],
+  notes: "Scorpion: 30 mcg/kg (0.03 mg/kg) q3h PO until clinical improvement (IAP). Max 0.5 mg/dose. First dose supine (first-dose hypotension). α1-blocker reverses catecholamine surge. Continue until cool extremities/salivation resolve. Indian protocol (Bawaskar).",
+  route: "PO supine for first dose",
+},
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CATEGORY FILTER CONFIG
