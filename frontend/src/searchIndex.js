@@ -86,7 +86,229 @@ export const SEARCH_INDEX = [
     keywords: ["blood pressure", "bp cuff", "nibp", "cuff size", "falsely high", "falsely low"],
     description: "Cuff width = 40% arm circumference. Too small → falsely HIGH",
   },
-
+  {
+  id: "eq-io-overview",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "IO Access",
+  label: "IO Access — Sites, Indications & Contraindications",
+  keywords: [
+    "io", "intraosseous", "io access", "io sites", "proximal tibia",
+    "distal tibia", "distal femur", "proximal humerus", "io contraindications",
+    "bone disease", "osteogenesis imperfecta", "compartment syndrome",
+    "pals io", "2 attempts 90 seconds", "second line iv",
+  ],
+  description:
+    "AHA PALS 2020: IO if IV fails after 2 attempts or 90 s. Sites: proximal tibia (first choice), distal tibia, distal femur, proximal humerus. Contraindications: fracture, previous IO same bone <24 hr, bone disease, infection over site.",
+},
+{
+  id: "eq-io-ezio",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "IO Access",
+  label: "EZ-IO Powered Drill — Step-by-Step & Needle Selection",
+  keywords: [
+    "ez-io", "ezio", "powered drill", "io drill", "vidacare",
+    "pink needle", "blue needle", "yellow needle", "15g 15mm", "15g 25mm",
+    "io needle selection", "io insertion technique", "marrow aspirate",
+    "io flush", "lignocaine io", "ez stabiliser", "io confirmation",
+  ],
+  description:
+    "Pink 15G/15mm (3–39 kg) · Blue 15G/25mm (≥40 kg). Drill at 90°, stop at loss of resistance. Flush 5–10 mL NaCl; lignocaine 0.5 mg/kg IO before flush in conscious patient.",
+},
+{
+  id: "eq-io-manual",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "IO Access",
+  label: "Manual IO — Jamshidi / Cook Needle Technique",
+  keywords: [
+    "manual io", "jamshidi", "cook needle", "io manual insertion",
+    "butterfly needle neonate", "16g io", "14g io", "rotation technique",
+    "io without drill", "io no equipment",
+  ],
+  description:
+    "16G for <18 mo · 14G for older children. Insert at 90° with firm rotating motion — do NOT rock. Loss of resistance = cortex entered. Aspirate marrow, flush 5 mL NaCl.",
+},
+{
+  id: "eq-io-sternal",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "IO Access",
+  label: "Sternal IO — FAST-1 Device (Adults / ≥12 yr Only)",
+  keywords: [
+    "sternal io", "fast-1", "fast1", "manubrium io",
+    "sternal intraosseous", "angle of louis", "not paediatric",
+    "military io", "prehospital io", "io adults",
+  ],
+  description:
+    "FAST-1 device only. NOT recommended <12 yr — thin sternum, growth plates, proximity to heart. Landmark: midline manubrium at angle of Louis. Gravity flow ~150 mL/hr.",
+},
+{
+  id: "eq-io-confirm",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "IO Access",
+  label: "IO Confirmation, Complications & Lab Samples",
+  keywords: [
+    "io confirmation", "io malposition", "io extravasation",
+    "io compartment syndrome", "io osteomyelitis", "io fat embolism",
+    "growth plate io", "io lab samples", "marrow blood gas",
+    "io blood culture", "io complications", "io needle dislodgement",
+  ],
+  description:
+    "Confirm: needle stands unsupported, marrow aspirate, flushes freely. Remove if: rocking needle, swelling, resistance. Complications: extravasation, osteomyelitis (0.6%), growth plate injury. IO aspirate: acceptable for U&E, glucose, blood gas, cross-match, cultures.",
+},
+{
+  id: "eq-io-difficult-iv",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "IO Access",
+  label: "Difficult IV Access Hierarchy — IO → USS-IV → EJV → CVC → UVC → Cut-down",
+  keywords: [
+    "difficult iv access", "difficult iv", "iv access hierarchy",
+    "ultrasound iv", "external jugular", "ejv", "central venous catheter",
+    "cvc paediatric", "femoral vein", "umbilical venous catheter", "uvc",
+    "venous cutdown", "saphenous cutdown", "long saphenous",
+    "seldinger technique", "io vs cvc",
+  ],
+  description:
+    "Hierarchy: IO (cardiac arrest/collapse, after 2 IV fails) → USS-guided peripheral IV → EJV → CVC (USS-guided, femoral first) → UVC (neonates ≤7 days) → saphenous cut-down (last resort). CVC sizes: 4Fr neonate, 5Fr child, 7Fr adolescent.",
+},
+ 
+// ─── DIFFICULT AIRWAY — entries missing from current index ───────────────────
+{
+  id: "eq-video-laryngoscopy",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "Difficult Airway",
+  label: "Video Laryngoscopy — C-MAC / GlideScope",
+  keywords: [
+    "video laryngoscopy", "vl", "c-mac", "cmac", "glidescope",
+    "hyperangulated blade", "indirect laryngoscopy", "difficult intubation",
+    "stylet 60 degrees", "improved cormack lehane", "vl technique",
+    "max 3 attempts", "d blade",
+  ],
+  description:
+    "First-line for anticipated difficult airway ≥10 kg. Improves C-L grade by 1–2. Do NOT align axes — angle blade, look at screen. Stylet 60–90° for GlideScope. Max 3 total attempts.",
+},
+{
+  id: "eq-bougie",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "Difficult Airway",
+  label: "Bougie & Airway Exchange Catheter (AEC)",
+  keywords: [
+    "bougie", "gum elastic bougie", "airway exchange catheter", "aec",
+    "eschmann", "frova", "5fr bougie", "railroad ett",
+    "tracheal rings", "limited view intubation", "difficult intubation aid",
+    "o2 insufflation aec", "barotrauma aec",
+  ],
+  description:
+    "Paeds bougie: 5 Fr Eschmann/Frova for <10 yr. Advance until tracheal rings felt → railroad ETT. AEC: 11 Fr for ETT ≥5 mm · 8 Fr for 3.5–5 mm. O₂ via AEC: 1 L/min only — barotrauma risk.",
+},
+{
+  id: "eq-laryngoscope-blade",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "Reference Table",
+  label: "Laryngoscope Blade Selection by Age",
+  keywords: [
+    "laryngoscope blade", "blade size", "miller blade", "macintosh blade",
+    "straight blade", "curved blade", "size 0 blade", "size 1 blade",
+    "size 2 blade", "size 3 blade", "neonatal blade", "infant blade",
+    "blade selection age", "direct laryngoscopy",
+  ],
+  description:
+    "Neonate/infant: Miller 0–1 (straight). Toddler: Miller 1 or Mac 2. Child: Mac 2. Adolescent: Mac 3. Straight blade lifts epiglottis directly — preferred <2 yr.",
+},
+{
+  id: "eq-suction-technique",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "Reference Table",
+  label: "Suction — Catheter Size, Pressure & Technique",
+  keywords: [
+    "suction", "suction catheter", "suction pressure", "suction technique",
+    "yankauer", "flexible suction", "suction neonate", "deep suction",
+    "suction pressure mmhg", "3 x ett", "suction french",
+    "suction complication", "vagal bradycardia suction",
+  ],
+  description:
+    "Catheter Fr ≈ 3 × ETT mm. Pressure: neonate 60–80 mmHg · infant/child 80–100 mmHg · max 120 mmHg. Pre-oxygenate. Each pass ≤10 s. Vagal bradycardia risk in neonates.",
+},
+{
+  id: "eq-glycopyrrolate-fob",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "Difficult Airway",
+  label: "Glycopyrrolate — Anti-sialagogue for FOB / Awake Intubation",
+  keywords: [
+    "glycopyrrolate", "anti sialagogue", "antisialagogue", "fob premedication",
+    "awake intubation premedication", "dry secretions", "0.01 mg/kg",
+    "robinul", "before fibreoptic", "before bronchoscopy",
+  ],
+  description:
+    "0.01 mg/kg IM/IV 30 min before FOB or awake intubation. Dries secretions, improves visualisation. Does not cross BBB — no CNS effects. Max 0.4 mg.",
+},
+{
+  id: "eq-igel-lma-supreme",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "Difficult Airway",
+  label: "iGel / LMA Supreme — 2nd Gen SGA Sizing & Insertion",
+  keywords: [
+    "igel", "lma supreme", "second generation sga", "supraglottic airway",
+    "2nd gen lma", "gastric drain port", "sga sizing", "lma insertion",
+    "lma cuff", "sga difficult airway", "igel size", "igel insertion",
+    "sga ventilation", "aspirate via sga",
+  ],
+  description:
+    "Sizes: <5 kg=1 · 5–10 kg=1.5 · 10–20 kg=2 · 20–30 kg=2.5 · 30–50 kg=3 · >50 kg=4. iGel: no cuff, gastric drain port, high seal. Lubricate caudal surface, advance along hard palate. Max 2 attempts per operator.",
+},
+{
+  id: "eq-cricothyrotomy",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "Difficult Airway",
+  label: "Cricothyrotomy / Cannula CICO — eFONA Technique",
+  keywords: [
+    "cricothyrotomy", "efona", "cico", "cannot intubate cannot oxygenate",
+    "surgical airway", "scalpel finger tube", "ctm", "cricothyroid membrane",
+    "cannula cricothyrotomy", "16g cannula jet", "jet ventilation",
+    "neck rescue", "emergency airway", "tracheostomy emergency",
+    "age 8 years", "under 8 airway",
+  ],
+  description:
+    "≥8 yr: scalpel–finger–tube via CTM (5.0 cuffed ETT). <8 yr: CTM too small — 16G cannula + jet ventilation 1 s on/4 s off, 3–5 min bridge only (CO₂ rises). Call ENT/surgeons EARLY.",
+},
+{
+  id: "eq-ett-confirmation",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "Reference Table",
+  label: "ETT Confirmation — Waveform ETCO₂ vs Colorimetric",
+  keywords: [
+    "ett confirmation", "endotracheal tube confirmation", "waveform etco2",
+    "colorimetric co2", "chest rise", "misting", "oesophageal intubation",
+    "right main bronchus", "bilateral breath sounds", "etco2 confirmation",
+    "no waveform", "tube placement",
+  ],
+  description:
+    "Gold standard: waveform ETCO₂ — 6 consistent waveforms confirm tracheal placement. Colorimetric alone NOT sufficient. Also: bilateral breath sounds, chest rise, misting, no epigastric gurgle. CXR to confirm depth.",
+},
+{
+  id: "eq-cuffed-vs-uncuffed",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "Reference Table",
+  label: "Cuffed vs Uncuffed ETT — When to Use Each",
+  keywords: [
+    "cuffed ett", "uncuffed ett", "cuffed vs uncuffed", "cuff leak",
+    "inflatable cuff", "microcuff", "cuffed 8kg", "subglottic stenosis risk",
+    "cuff pressure", "20 cmh2o cuff", "high compliance low pressure cuff",
+  ],
+  description:
+    "Cuffed preferred ≥8 kg (better seal, less repeated laryngoscopy, lower aspiration risk). Uncuffed: very small neonates, known subglottic pathology. Cuff pressure ≤20 cmH₂O. Microcuff has distal cuff placement.",
+},
+{
+  id: "eq-nasal-intubation",
+  tab: "equipment", tabLabel: "Equipment",
+  section: "Reference Table",
+  label: "Nasal Intubation — Depth Formula & Indications",
+  keywords: [
+    "nasal intubation", "nasotracheal", "nasal ett depth",
+    "age 2 plus 15", "(age/2)+15", "nasal tube", "nasal airway",
+    "oral vs nasal intubation", "prolonged intubation", "icu intubation",
+  ],
+  description:
+    "Nasal ETT depth: (age÷2) + 15 cm at nares. Use 0.5 mm smaller ETT than oral. Preferred for prolonged intubation (better fixation). Contraindicated: skull base fracture, coagulopathy, nasal polyps.",
+},
   // ─── VITALS ────────────────────────────────────────────────────────────────
   {
     id: "vitals-calculator", tab: "vitals", tabLabel: "Vitals",
