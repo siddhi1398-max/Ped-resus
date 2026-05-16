@@ -354,6 +354,16 @@ export const SEARCH_INDEX = [
     keywords: ["vasopressin", "adh", "catecholamine resistant shock", "v1 receptor", "0.0003 units/kg/min", "second line vasopressor"],
     description: "0.0003–0.002 units/kg/min IV. Second-line vasopressor in catecholamine-resistant shock",
   },
+  {
+  id: "drug-chlorpheniramine-iv",
+  tab: "drugs", tabLabel: "Drugs",
+  section: "Drug Doses", drugId: "chlorpheniramine-iv",
+  label: "Chlorpheniramine (Avil) IV/IM — Allergic Reaction / Anaphylaxis Adjunct",
+  keywords: ["chlorpheniramine", "avil", "iv", "im", "allergic reaction", "anaphylaxis adjunct",
+             "urticaria", "drug reaction", "antihistamine iv", "0.1 mg/kg", "h1 blocker",
+             "sedating antihistamine", "pheniramine"],
+  description: "0.1 mg/kg IV slow/IM (max 10 mg). Avil ampoule 22.75 mg/mL. Adjunct only — never replaces adrenaline in anaphylaxis",
+},
 
   // ─── ANTIARRHYTHMICS — MISSING ─────────────────────────────────────────────
   {
