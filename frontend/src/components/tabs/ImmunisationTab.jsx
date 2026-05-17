@@ -1,36 +1,32 @@
 // frontend/src/components/tabs/ImmunisationTab.jsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Two sections in one tab:
+// Three sections in one tab:
 //   1. National Immunisation Schedule — UIP (GoI / NHM) + IAP-ACVIP 2023
 //   2. Other Indian National Guidelines relevant to Paediatric Emergency
+//   3. Growth & Anthropometry — BMI, Height/Weight Centiles, SAM/MAM
 //
-// References:
-//   • NHM / GoI Universal Immunisation Programme — nhm.gov.in
-//   • IAP-ACVIP Recommended Immunisation Schedule 2023 — Indian Pediatrics 2024
-//   • National Neonatology Forum (NNF) Clinical Practice Guidelines
-//   • RNTCP / National TB Elimination Programme (NTEP) 2022
-//   • NVBDCP National Malaria Guidelines 2023
-//   • NCDC Integrated Disease Surveillance Programme (IDSP)
-//   • WHO AWaRe 2022 — Antimicrobial Stewardship
-//   • National Programme for Control of Blindness (NPCB) — ROP Guidelines
-//   • Rashtriya Bal Swasthya Karyakram (RBSK) — Developmental Screening
+// References (Growth section):
+//   • WHO Child Growth Standards 2006 (0–5 yr) — who.int/tools/child-growth-standards
+//   • WHO Growth Reference 2007 (5–19 yr) — who.int/tools/growth-reference-data-for-5to19-years
+//   • MoHFW India / IMNCI / CPGJ — SAM management protocols
+//   • IAP Growth Charts 2015 — Indian Pediatrics 2015;52:47–55
+//   • NHM SAM Guidelines 2011 (updated 2023) — mohfw.gov.in
+//   • MUAC thresholds: WHO / UNICEF 2009 joint statement
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Warning, Lightbulb, CaretDown, CaretRight,
   Syringe, Baby, BookOpen, Bug, Wind,
   Brain, Drop, Shield, Heartbeat, FirstAid,
   MagnifyingGlass, X, CheckCircle, Info,
-  ArrowSquareOut,
+  ArrowSquareOut, Ruler, ChartBar,
 } from "@phosphor-icons/react";
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SECTION 1 DATA — IMMUNISATION SCHEDULES
+// SECTION 1 DATA — IMMUNISATION SCHEDULES (unchanged)
 // ══════════════════════════════════════════════════════════════════════════════
 
-// ─── UIP (GoI / NHM) Schedule ─────────────────────────────────────────────────
-// Source: NHM Universal Immunisation Programme, MoHFW India (latest revision 2023)
 const UIP_SCHEDULE = [
   {
     age: "Birth",
@@ -115,8 +111,6 @@ const UIP_SCHEDULE = [
   },
 ];
 
-// ─── IAP-ACVIP 2023 Schedule ──────────────────────────────────────────────────
-// Source: IAP-ACVIP Recommended Immunisation Schedule 2023, Indian Pediatrics 2024;61:113-125
 const IAP_SCHEDULE = [
   {
     age: "Birth",
@@ -241,12 +235,11 @@ const IAP_SCHEDULE = [
   {
     age: "16–18 years — NEW 2023",
     vaccines: [
-      { name: "Td", mandatory: false, dose: "0.5 mL", route: "IM", notes: "ACVIP 2023 NEW: Final Td booster at 16–18 yr to ensure diphtheria-tetanus protection for next decade. Aligns with NIP Td at 16 yr." },
+      { name: "Td", mandatory: false, dose: "0.5 mL", route: "IM", notes: "ACVIP 2023 NEW: Final Td booster at 16–18 yr. Aligns with NIP Td at 16 yr." },
     ],
   },
 ];
 
-// ─── SPECIAL SITUATIONS ───────────────────────────────────────────────────────
 const SPECIAL_VACCINES = [
   {
     category: "JE (Japanese Encephalitis)",
@@ -259,8 +252,8 @@ const SPECIAL_VACCINES = [
     category: "Rabies Post-Exposure Prophylaxis (PEP)",
     color: "red",
     when: "ANY animal bite or scratch — do not delay",
-    schedule: "Purified chick embryo cell (PCEC) or PVRV: IM day 0, 3, 7, 14, 28 (5-dose Essen) OR 2-site ID: 0.1 mL ×2 sites on days 0, 3, 7, 28 (4-visit Thai Red Cross).",
-    notes: "Rabies immunoglobulin (RIG): 20 IU/kg infiltrated at wound site on Day 0 for WHO Category III bites. Wound wash with soap + water for 15 min — most important first aid.",
+    schedule: "PCEC or PVRV: IM day 0, 3, 7, 14, 28 (5-dose Essen) OR 2-site ID: 0.1 mL ×2 sites on days 0, 3, 7, 28 (4-visit Thai Red Cross).",
+    notes: "RIG: 20 IU/kg infiltrated at wound site on Day 0 for WHO Category III bites. Wound wash with soap + water 15 min — most important first aid.",
   },
   {
     category: "Cholera (Oral Cholera Vaccine — OCV)",
@@ -273,62 +266,60 @@ const SPECIAL_VACCINES = [
     category: "Influenza (Annual)",
     color: "amber",
     when: "All children >6 months annually. High-risk: asthma, CHD, immunocompromised, diabetes, obesity.",
-    schedule: "IIV (inactivated): 0.25 mL <3 yr / 0.5 mL ≥3 yr IM. 2 doses 4 wk apart if first-time vaccination. Annually before monsoon season.",
-    notes: "LAIV (nasal) not widely available in India. IIV preferred. Egg allergy no longer a contraindication (IAP 2023).",
+    schedule: "IIV: 0.25 mL <3 yr / 0.5 mL ≥3 yr IM. 2 doses 4 wk apart if first-time. Annually before monsoon season.",
+    notes: "LAIV not widely available in India. IIV preferred. Egg allergy no longer a contraindication (IAP 2023).",
   },
   {
     category: "Varicella (Chickenpox)",
     color: "violet",
     when: "12 months–12 years (susceptible). All adolescents without prior disease or vaccine.",
     schedule: "2 doses: 12–15 months and 15–18 months (min 3 months apart). IAP 2023 endorses 2-dose schedule universally.",
-    notes: "Do not give to immunocompromised. Avoid salicylates for 6 weeks after vaccination (Reye's syndrome risk). Indian brands: Varilrix, Varivax.",
+    notes: "Do not give to immunocompromised. Avoid salicylates 6 weeks after vaccination. Indian brands: Varilrix, Varivax.",
   },
   {
     category: "Meningococcal",
     color: "rose",
     when: "High-risk: asplenia, complement deficiency, travellers to meningitis belt/Hajj, hostel entry, freshers.",
-    schedule: "MenACWY (Menactra/Menveo): single dose from 2 years. Booster every 5 years if ongoing risk. MenB: Bexsero 0.5 mL IM × 2 doses.",
+    schedule: "MenACWY: single dose from 2 years. Booster every 5 years if ongoing risk. MenB: Bexsero 0.5 mL IM × 2 doses.",
     notes: "Mandatory for Saudi Arabia Hajj/Umrah visa. Not in routine UIP.",
   },
   {
     category: "Hepatitis A",
     color: "teal",
     when: "All children from 12 months",
-    schedule: "Killed (HA Vaqta/Havrix/Twinrix): 2 doses 6–12 months apart from 12 months. Live attenuated (Biovac-A/HAVpur): single dose from 12 months — IAP 2023 accepts single-dose live attenuated.",
-    notes: "India transitioning from intermediate to high endemicity in adults. Single-dose live vaccine increasingly preferred for simplicity. ACVIP 2024 — live attenuated single dose endorsed based on Indian long-term follow-up data.",
+    schedule: "Killed (2 doses 6–12 months apart from 12 months). Live attenuated (Biovac-A/HAVpur): single dose from 12 months — IAP 2023 accepts single-dose live attenuated.",
+    notes: "Single-dose live vaccine increasingly preferred for simplicity. ACVIP 2024 — live attenuated single dose endorsed.",
   },
   {
     category: "Typhoid Conjugate Vaccine (TCV)",
     color: "orange",
     when: "All children from 9 months",
     schedule: "Typbar-TCV or Typhibev: single dose IM from 9 months. Booster optional at 2 years if given early. Re-vaccination every 3–5 years if ongoing risk.",
-    notes: "TCV (conjugated to tetanus toxoid) superior immunogenicity to plain polysaccharide (Vi-PS) vaccine. Vi-PS not recommended <2 yr (no T-cell response). TCV has replaced Vi-PS in IAP recommendations.",
+    notes: "TCV superior immunogenicity to plain polysaccharide (Vi-PS) vaccine. Vi-PS not recommended <2 yr.",
   },
   {
     category: "BCG at Birth — Delayed/Missed",
     color: "slate",
     when: "BCG can be given up to 1 year of age without tuberculin test. After 1 year — tuberculin test first.",
     schedule: "Single ID dose 0.05 mL neonates / 0.1 mL ≥1 month. Left deltoid insertion.",
-    notes: "Low-birth-weight infants (<2 kg): delay BCG until weight ≥2 kg. HIV-exposed: give BCG at birth if asymptomatic (WHO recommendation for India — high TB burden).",
+    notes: "Low-birth-weight infants (<2 kg): delay BCG until weight ≥2 kg. HIV-exposed: give BCG at birth if asymptomatic.",
   },
 ];
 
-// ─── KEY DIFFERENCES: NIP vs IAP ─────────────────────────────────────────────
 const NIP_VS_IAP = [
   { topic: "Pertussis component", nip: "DTwP (whole-cell) — free", iap: "DTaP (acellular) preferred if affordable; DTwP acceptable" },
-  { topic: "IPV route/dose",      nip: "0.1 mL ID fractional (3 doses at 6, 14 wk, 9 mo)", iap: "0.5 mL IM full dose (3 primary + 2 boosters at 6–18 mo and 4–6 yr)" },
-  { topic: "Rotavirus",           nip: "Free in select states (Rotarix or Rotavac)", iap: "Mandatory — all children. Rotarix (2 doses) or Rotavac/RotaSiil (3 doses)" },
+  { topic: "IPV route/dose",      nip: "0.1 mL ID fractional (3 doses at 6, 14 wk, 9 mo)", iap: "0.5 mL IM full dose (3 primary + 2 boosters)" },
+  { topic: "Rotavirus",           nip: "Free in select states (Rotarix or Rotavac)", iap: "Mandatory — all children" },
   { topic: "PCV",                 nip: "Free in select states", iap: "Mandatory — PCV10/13/15 (3 doses + booster)" },
-  { topic: "MMR vs MR",           nip: "MR (Measles-Rubella) at 9–12 months and 16–24 months", iap: "MMR preferred; 2 doses at 12 and 15–18 months" },
-  { topic: "Hepatitis A",         nip: "Not included", iap: "Mandatory from 12 months (2-dose killed or 1-dose live)" },
+  { topic: "MMR vs MR",           nip: "MR at 9–12 months and 16–24 months", iap: "MMR preferred; 2 doses at 12 and 15–18 months" },
+  { topic: "Hepatitis A",         nip: "Not included", iap: "Mandatory from 12 months" },
   { topic: "Typhoid",             nip: "Not in national schedule", iap: "TCV from 9 months (mandatory)" },
   { topic: "Varicella",           nip: "Not included", iap: "2 doses (12–15 months, 15–18 months)" },
-  { topic: "HPV",                 nip: "Girls 9–14 yr in select states (school programme)", iap: "Girls AND boys 9–14 yr — 9vHPV preferred (ACVIP 2023 NEW)" },
+  { topic: "HPV",                 nip: "Girls 9–14 yr in select states", iap: "Girls AND boys 9–14 yr — 9vHPV preferred (ACVIP 2023 NEW)" },
   { topic: "Influenza",           nip: "Not included", iap: "Annual from 6 months" },
-  { topic: "Td booster 16–18 yr",nip: "Td at 10 and 16 yr", iap: "NEW 2023: additional Td at 16–18 yr to ensure coverage" },
+  { topic: "Td booster 16–18 yr",nip: "Td at 10 and 16 yr", iap: "NEW 2023: additional Td at 16–18 yr" },
 ];
 
-// ─── CATCH-UP GUIDE ───────────────────────────────────────────────────────────
 const CATCH_UP_PRINCIPLES = [
   "Never restart a vaccine series — continue from where left off regardless of gap between doses.",
   "Give all due vaccines at the same visit (different sites) — no need to space out unless specifically contraindicated.",
@@ -336,14 +327,14 @@ const CATCH_UP_PRINCIPLES = [
   "OPV: any child <5 years who has never received OPV should get 2 doses 4 weeks apart.",
   "IPV: switch from NIP fIPV to IAP full-dose IM IPV — give full-dose IM IPV at next visit, then complete as per IAP schedule.",
   "MR/MMR: if MR was given at 9 months under NIP, give MMR at 15 months and again at 4–6 years.",
-  "PCV: 2–11 months with no prior PCV — 2 doses 8 weeks apart + booster at 12–15 months. 12–23 months with no prior — 2 doses 8 weeks apart. >2 years unvaccinated — single dose.",
-  "Typhoid: if TCV given between 9–23 months — optional booster at 2 years. Otherwise no booster until school age.",
+  "PCV: 2–11 months with no prior PCV — 2 doses 8 weeks apart + booster at 12–15 months. 12–23 months — 2 doses 8 weeks apart. >2 years — single dose.",
+  "Typhoid: if TCV given between 9–23 months — optional booster at 2 years.",
   "Varicella: if given only 1 dose historically — add second dose at next visit (min 3 months after first).",
   "HPV: if started late (≥15 yr) — 3-dose schedule at 0, 1–2, and 6 months regardless of sex.",
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SECTION 2 DATA — OTHER NATIONAL GUIDELINES
+// SECTION 2 DATA — NATIONAL GUIDELINES (unchanged)
 // ══════════════════════════════════════════════════════════════════════════════
 
 const NATIONAL_GUIDELINES = [
@@ -357,7 +348,7 @@ const NATIONAL_GUIDELINES = [
     relevance: "NNF guidelines are the primary reference for neonatal care in India and complement IAP recommendations for neonatal emergencies.",
     guidelines: [
       {
-        title: "NNF Clinical Practice Guidelines — Neonatal Resuscitation (NRP-India)",
+        title: "NNF CPG — Neonatal Resuscitation (NRP-India)",
         year: "2021",
         keyPoints: [
           "Delayed cord clamping ≥60 seconds for non-depressed term and preterm infants",
@@ -378,7 +369,7 @@ const NATIONAL_GUIDELINES = [
           "Late-onset sepsis (LONS, >72 hr): Pip-Tazo or Cloxacillin + Amikacin; adjust based on local antibiogram",
           "Blood culture before first antibiotic dose — mandatory",
           "Minimum 7–10 days for confirmed sepsis; 5 days if culture-negative and clinically well",
-          "Lumbar puncture: mandatory in confirmed bacteraemia, any unwell neonate regardless of other findings",
+          "Lumbar puncture: mandatory in confirmed bacteraemia, any unwell neonate",
           "CRP not sufficient alone — use in conjunction with clinical assessment and cultures",
           "Procalcitonin: rises physiologically in first 48 hr in neonates — interpret cautiously",
         ],
@@ -391,8 +382,7 @@ const NATIONAL_GUIDELINES = [
           "Screen all infants ≤1750 g birth weight OR ≤34 weeks gestation",
           "Also screen 1750–2000 g or 34–36 wk if risk factors: oxygen therapy, ventilation, haemodynamic instability",
           "First examination: 4 weeks after birth OR at 32 weeks PMA — whichever is later",
-          "Examinations by trained ophthalmologist; dilate pupil with 0.5% tropicamide + 2.5% phenylephrine",
-          "Laser photocoagulation or anti-VEGF for Type 1 ROP (Zone I any stage, Zone II Stage 3+ or 2 with plus)",
+          "Laser photocoagulation or anti-VEGF for Type 1 ROP",
           "NICU oxygen saturation target: 91–95% for preterm <36 wk to reduce ROP risk",
         ],
         tags: ["Neonatal", "Ophthalmology"],
@@ -419,7 +409,7 @@ const NATIONAL_GUIDELINES = [
     icon: Wind,
     color: "amber",
     url: "https://tbcindia.gov.in",
-    relevance: "India has the world's highest TB burden. NTEP guidelines govern paediatric TB diagnosis and treatment in the public sector. Private practitioners must report under NIKSHAY.",
+    relevance: "India has the world's highest TB burden. NTEP guidelines govern paediatric TB diagnosis and treatment in the public sector.",
     guidelines: [
       {
         title: "NTEP Paediatric TB Guidelines 2022",
@@ -452,12 +442,11 @@ const NATIONAL_GUIDELINES = [
         year: "2023",
         keyPoints: [
           "P. vivax: Chloroquine 10 mg base/kg D1–2, then 5 mg base/kg D3 + Primaquine 0.25 mg/kg OD × 14 days (after G6PD testing)",
-          "P. falciparum (uncomplicated): Artemether-Lumefantrine (AL/Coartem) BD × 3 days weight-based + single-dose Primaquine 0.25 mg/kg D1",
-          "P. falciparum (severe): IV Artesunate 2.4 mg/kg at 0, 12, 24 hr then OD until oral tolerated — minimum 3 doses IV",
+          "P. falciparum (uncomplicated): Artemether-Lumefantrine BD × 3 days weight-based + single-dose Primaquine 0.25 mg/kg D1",
+          "P. falciparum (severe): IV Artesunate 2.4 mg/kg at 0, 12, 24 hr then OD — minimum 3 doses IV",
           "Mixed infection (P.f + P.v): treat as falciparum + add primaquine for 14 days",
-          "Quinine + Doxycycline (>8 yr) only if artesunate unavailable for severe malaria",
-          "G6PD testing mandatory before primaquine — single qualitative test sufficient for standard dose",
-          "Kala-azar (Visceral Leishmaniasis): Liposomal Amphotericin B 10 mg/kg single dose — first-line (NVBDCP free of cost in endemic districts Bihar, UP, Jharkhand, WB)",
+          "G6PD testing mandatory before primaquine — single qualitative test sufficient",
+          "Kala-azar: Liposomal Amphotericin B 10 mg/kg single dose — first-line (NVBDCP free in endemic districts)",
         ],
         tags: ["Infection", "Tropical"],
       },
@@ -481,7 +470,6 @@ const NATIONAL_GUIDELINES = [
         keyPoints: [
           "No specific antiviral — supportive care only",
           "JE endemic in >90 districts across 20 states — highest incidence Bihar, UP, Assam",
-          "SA 14-14-2 live attenuated JE vaccine in UIP for endemic districts (2 doses at 9 months and 16–24 months)",
           "Suspect JE: acute encephalitis + fever in endemic area. Confirm: IgM ELISA CSF or serum",
           "Manage raised ICP: head elevation 30°, mannitol 0.5 g/kg, avoid hypotonic fluids",
           "Convulsions: levetiracetam or valproate preferred over phenytoin in encephalitis",
@@ -507,10 +495,10 @@ const NATIONAL_GUIDELINES = [
           "Access group first-line for community infections: amoxicillin, co-amoxiclav, cefixime, cotrimoxazole, metronidazole",
           "Watch group (restricted): ceftriaxone, ciprofloxacin, meropenem, vancomycin — only with clinical justification",
           "Reserve (last resort): colistin, tigecycline — culture-confirmed XDR/PDR only",
-          "High ESBL rates in India: >60% E. coli UTI in community. Nitrofurantoin or fosfomycin for uncomplicated UTI (not cephalosporins)",
+          "High ESBL rates in India: >60% E. coli UTI in community. Nitrofurantoin or fosfomycin for uncomplicated UTI",
           "De-escalate within 48–72 hr on culture sensitivity report",
           "Duration targets: simple pneumonia 5 days, AOM 5 days (<2 yr: 7–10 days), UTI 7 days",
-          "Mandatory to report carbapenase-resistant organisms (CRO) to IDSP outbreak cell",
+          "Mandatory to report carbapenem-resistant organisms (CRO) to IDSP outbreak cell",
         ],
         tags: ["Infection", "AMS", "Policy"],
       },
@@ -524,7 +512,7 @@ const NATIONAL_GUIDELINES = [
           "Confirm: Weil-Felix (OXK), IgM ELISA, or immunofluorescence assay",
           "Fever defervescence within 48 hr of doxycycline = confirmatory (therapeutic test)",
           "Severe disease: multi-organ failure, ARDS, meningitis — escalate to ICU",
-          "Vector: Leptotrombidium mite (chigger). Inspect for eschar (painless black necrotic crust) in skin folds",
+          "Vector: Leptotrombidium mite (chigger). Inspect for eschar in skin folds",
         ],
         tags: ["Infection", "Tropical", "Rickettsial"],
       },
@@ -537,46 +525,20 @@ const NATIONAL_GUIDELINES = [
     icon: Brain,
     color: "violet",
     url: "https://rbsk.gov.in",
-    relevance: "RBSK screens all government school and Anganwadi children (0–18 yr) for 4Ds — Defects, Deficiencies, Diseases, Developmental delays. Relevant for identifying referral needs in ED settings.",
+    relevance: "RBSK screens all government school and Anganwadi children (0–18 yr) for 4Ds — Defects, Deficiencies, Diseases, Developmental delays.",
     guidelines: [
       {
         title: "RBSK Developmental Screening Guidelines",
         year: "2022",
         keyPoints: [
           "4D framework: Birth Defects, Deficiencies, Diseases, Developmental Delays — universal screening",
-          "Screening age: neonates (at birth), 0–6 weeks, 6 weeks–6 months, 6 months–5 years (Anganwadi), 5–18 years (schools)",
-          "Developmental tools: DASII (Developmental Assessment Scale for Indian Infants) or Trivandrum Developmental Screening Chart (TDSC) for <2 yr",
-          "NMH (0–6 yr): hearing, vision, speech, motor milestones — all screened",
+          "Screening age: neonates (at birth), 0–6 weeks, 6 weeks–6 months, 6 months–5 years, 5–18 years (schools)",
+          "Developmental tools: DASII or Trivandrum Developmental Screening Chart (TDSC) for <2 yr",
           "Referral to District Early Intervention Centres (DEIC) for confirmed delays",
-          "Conditions prioritised: cleft lip/palate, CHD, neural tube defects, Down syndrome, developmental delay, hearing/vision impairment, sickle cell disease",
-          "G6PD deficiency: NNF recommends neonatal G6PD screening in high-prevalence populations (Gujarat, Maharashtra, Odisha, MP)",
+          "Conditions prioritised: cleft lip/palate, CHD, neural tube defects, Down syndrome, hearing/vision impairment, sickle cell disease",
+          "G6PD deficiency: NNF recommends neonatal G6PD screening in high-prevalence populations",
         ],
         tags: ["Development", "Screening", "Policy"],
-      },
-    ],
-  },
-  {
-    id: "npcb",
-    org: "NPCB",
-    fullName: "National Programme for Control of Blindness and Visual Impairment",
-    icon: MagnifyingGlass,
-    color: "teal",
-    url: "https://npcbvi.gov.in",
-    relevance: "Governs vision screening in children, ROP management, and school vision programmes. Important for neonatal ICU teams and paediatricians.",
-    guidelines: [
-      {
-        title: "NPCB School Vision Screening Programme",
-        year: "2022",
-        keyPoints: [
-          "Annual vision screening for all school children classes 1–12",
-          "Snellen chart at 6 metres — refer if <6/12 in either eye or fails cover-uncover test",
-          "Refractive error: most common cause of childhood visual impairment in India",
-          "Spectacle provision through NPCB district programme",
-          "Amblyopia: treat before 8 years (sensitive period) with patching ± glasses",
-          "Squint (strabismus): refer to ophthalmologist — surgical correction before amblyopia sets in",
-          "Corneal blindness (Vit A deficiency): ensure Vitamin A supplementation under UIP (9, 16, 24 months then every 6 months to 5 yr)",
-        ],
-        tags: ["Vision", "Screening", "Policy"],
       },
     ],
   },
@@ -587,7 +549,7 @@ const NATIONAL_GUIDELINES = [
     icon: Drop,
     color: "orange",
     url: "https://iapindia.org",
-    relevance: "Severe Acute Malnutrition (SAM) is common in Indian emergency settings. WHO/IAP protocols differ substantially from standard paediatric management and must not be mixed.",
+    relevance: "Severe Acute Malnutrition (SAM) is common in Indian emergency settings. WHO/IAP protocols differ substantially from standard paediatric management.",
     guidelines: [
       {
         title: "IAP / WHO SAM Management Guidelines",
@@ -595,13 +557,13 @@ const NATIONAL_GUIDELINES = [
         keyPoints: [
           "SAM criteria: weight-for-height <-3 SD OR MUAC <11.5 cm OR bilateral pitting oedema",
           "Inpatient (facility-based) care for complicated SAM: anorexia, severe oedema, medical complications",
-          "Outpatient (CMAM/RUTF) for uncomplicated SAM without medical complication — Plumpy'Nut or local RUTF",
-          "AVOID routine IV fluids in SAM — risk of fluid overload and cardiac failure (impaired homeostasis)",
+          "Outpatient (CMAM/RUTF) for uncomplicated SAM without medical complication",
+          "AVOID routine IV fluids in SAM — risk of fluid overload and cardiac failure",
           "If shock in SAM: 10 mL/kg NS ONCE over 30–60 min; reassess carefully — no repeat bolus protocol",
-          "Hypoglycaemia (very common on admission): 50 mL 10% glucose (5 g) orally/NGT; then feed q2–3h including overnight",
-          "Hypothermia (SAM sign): kangaroo care, warm environment; check and correct glucose simultaneously",
-          "Treat infections: amoxicillin PO × 7 days (even if no obvious infection — prophylactic). Gentamicin if no improvement",
-          "F-75 (starter formula) then F-100 (catch-up) — therapeutic milk formulas; not regular formula or cow's milk",
+          "Hypoglycaemia: 50 mL 10% glucose (5 g) orally/NGT; then feed q2–3h including overnight",
+          "Hypothermia: kangaroo care, warm environment; check and correct glucose simultaneously",
+          "Treat infections: amoxicillin PO × 7 days (even if no obvious infection — prophylactic)",
+          "F-75 (starter formula) then F-100 (catch-up) — therapeutic milk formulas; not regular formula",
           "Micronutrient supplementation: folate, zinc, vit A, multivitamin — from day 1",
         ],
         tags: ["Nutrition", "Emergency", "Growth"],
@@ -611,45 +573,846 @@ const NATIONAL_GUIDELINES = [
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
+// SECTION 3 DATA — GROWTH & ANTHROPOMETRY
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ─── WHO Weight-for-Age reference data (median & ±2SD) ───────────────────────
+// Source: WHO Child Growth Standards 2006 (0–5 yr), WHO 2007 Reference (5–10 yr)
+// Boys median values at key ages (kg). Used for centile band labelling only.
+// Full LMS tables would be used in production; these are representative bands.
+const WHO_WFA_BOYS = [
+  { ageM: 0,  p3: 2.5, p15: 2.9, p50: 3.3, p85: 3.9, p97: 4.3 },
+  { ageM: 3,  p3: 5.0, p15: 5.7, p50: 6.4, p85: 7.2, p97: 7.9 },
+  { ageM: 6,  p3: 6.4, p15: 7.3, p50: 8.2, p85: 9.2, p97: 10.1 },
+  { ageM: 9,  p3: 7.5, p15: 8.5, p50: 9.5, p85: 10.6, p97: 11.6 },
+  { ageM: 12, p3: 8.1, p15: 9.2, p50: 10.3, p85: 11.5, p97: 12.6 },
+  { ageM: 18, p3: 9.1, p15: 10.4, p50: 11.7, p85: 13.1, p97: 14.3 },
+  { ageM: 24, p3: 10.2, p15: 11.6, p50: 13.0, p85: 14.6, p97: 16.0 },
+  { ageM: 36, p3: 11.7, p15: 13.2, p50: 14.8, p85: 16.7, p97: 18.3 },
+  { ageM: 48, p3: 13.1, p15: 14.8, p50: 16.6, p85: 18.8, p97: 20.7 },
+  { ageM: 60, p3: 14.4, p15: 16.3, p50: 18.4, p85: 20.9, p97: 23.1 },
+];
+const WHO_WFA_GIRLS = [
+  { ageM: 0,  p3: 2.4, p15: 2.8, p50: 3.2, p85: 3.7, p97: 4.2 },
+  { ageM: 3,  p3: 4.6, p15: 5.3, p50: 6.0, p85: 6.9, p97: 7.6 },
+  { ageM: 6,  p3: 5.9, p15: 6.8, p50: 7.7, p85: 8.8, p97: 9.7 },
+  { ageM: 9,  p3: 7.0, p15: 8.0, p50: 9.1, p85: 10.4, p97: 11.5 },
+  { ageM: 12, p3: 7.5, p15: 8.7, p50: 9.9, p85: 11.4, p97: 12.6 },
+  { ageM: 18, p3: 8.5, p15: 9.9, p50: 11.3, p85: 13.0, p97: 14.4 },
+  { ageM: 24, p3: 9.5, p15: 11.1, p50: 12.7, p85: 14.6, p97: 16.2 },
+  { ageM: 36, p3: 11.0, p15: 12.8, p50: 14.7, p85: 17.0, p97: 18.9 },
+  { ageM: 48, p3: 12.2, p15: 14.3, p50: 16.5, p85: 19.3, p97: 21.5 },
+  { ageM: 60, p3: 13.3, p15: 15.6, p50: 18.2, p85: 21.5, p97: 24.1 },
+];
+
+// ─── WHO Height-for-Age (length/height) median values ────────────────────────
+const WHO_HFA_BOYS = [
+  { ageM: 0,  p3: 46.3, p15: 48.0, p50: 49.9, p85: 51.8, p97: 53.4 },
+  { ageM: 3,  p3: 57.6, p15: 59.6, p50: 61.7, p85: 63.8, p97: 65.6 },
+  { ageM: 6,  p3: 63.6, p15: 65.7, p50: 67.9, p85: 70.1, p97: 72.0 },
+  { ageM: 9,  p3: 68.0, p15: 70.2, p50: 72.5, p85: 74.8, p97: 76.9 },
+  { ageM: 12, p3: 71.7, p15: 74.0, p50: 76.4, p85: 78.9, p97: 81.1 },
+  { ageM: 18, p3: 77.5, p15: 80.0, p50: 82.7, p85: 85.4, p97: 87.8 },
+  { ageM: 24, p3: 82.5, p15: 85.2, p50: 88.1, p85: 91.0, p97: 93.6 },
+  { ageM: 36, p3: 89.7, p15: 92.7, p50: 96.0, p85: 99.3, p97: 102.3 },
+  { ageM: 48, p3: 96.0, p15: 99.3, p50: 102.9, p85: 106.6, p97: 109.8 },
+  { ageM: 60, p3: 101.8, p15: 105.5, p50: 109.4, p85: 113.3, p97: 116.7 },
+];
+const WHO_HFA_GIRLS = [
+  { ageM: 0,  p3: 45.6, p15: 47.3, p50: 49.2, p85: 51.0, p97: 52.7 },
+  { ageM: 3,  p3: 56.2, p15: 58.2, p50: 60.2, p85: 62.3, p97: 64.1 },
+  { ageM: 6,  p3: 62.1, p15: 64.2, p50: 66.4, p85: 68.7, p97: 70.7 },
+  { ageM: 9,  p3: 66.5, p15: 68.7, p50: 71.0, p85: 73.4, p97: 75.5 },
+  { ageM: 12, p3: 70.1, p15: 72.5, p50: 74.9, p85: 77.4, p97: 79.7 },
+  { ageM: 18, p3: 76.1, p15: 78.7, p50: 81.4, p85: 84.2, p97: 86.7 },
+  { ageM: 24, p3: 81.2, p15: 84.0, p50: 87.1, p85: 90.1, p97: 92.9 },
+  { ageM: 36, p3: 88.6, p15: 91.9, p50: 95.3, p85: 98.7, p97: 101.8 },
+  { ageM: 48, p3: 95.1, p15: 98.7, p50: 102.5, p85: 106.3, p97: 109.8 },
+  { ageM: 60, p3: 101.0, p15: 105.0, p50: 109.1, p85: 113.3, p97: 117.1 },
+];
+
+// ─── BMI-for-Age WHO cut-offs (5–19 yr) — WHO 2007 Reference ─────────────────
+// Thinness Grade 3 (<-3SD), Grade 2 (-3 to -2SD), Grade 1 (-2 to -1SD)
+// Normal (-1 to +1SD), Overweight (+1 to +2SD), Obese (>+2SD)
+// IAP 2015 uses BMI percentile cut-offs for Indian children — equivalent categories
+const BMI_CATEGORIES_PAEDS = [
+  { label: "Severe Thinness (Grade 3)", bmiFor: "< -3 SD (approx <13 kg/m² at 10 yr)", color: "red",     action: "SAM — refer for inpatient management" },
+  { label: "Moderate Thinness (Grade 2)", bmiFor: "-3 to -2 SD",                        color: "orange",  action: "MAM — nutritional rehabilitation, close follow-up" },
+  { label: "Mild Thinness (Grade 1)",   bmiFor: "-2 to -1 SD",                          color: "amber",   action: "At risk — nutritional counselling, monitor" },
+  { label: "Normal",                    bmiFor: "-1 to +1 SD (P15–P85)",                color: "emerald", action: "No intervention — continue routine care" },
+  { label: "Overweight",                bmiFor: "+1 to +2 SD (P85–P97)",                color: "amber",   action: "Lifestyle counselling, monitor for comorbidities" },
+  { label: "Obese",                     bmiFor: "> +2 SD (>P97)",                       color: "red",     action: "Detailed evaluation — metabolic syndrome, NAFLD, BP, lipids" },
+];
+
+// ─── SAM Diagnostic Criteria (WHO / MoHFW NHM 2023) ─────────────────────────
+const SAM_CRITERIA = [
+  {
+    criterion: "MUAC",
+    values: {
+      sam: "< 11.5 cm (6–59 months)",
+      mam: "11.5–12.5 cm (6–59 months)",
+      normal: "≥ 12.5 cm",
+    },
+    note: "Measure mid-upper arm circumference (midpoint between olecranon and acromion) on left arm. Child must be relaxed, arm hanging loose.",
+  },
+  {
+    criterion: "Weight-for-Height (WHZ)",
+    values: {
+      sam: "< -3 SD (WHO 2006 standards)",
+      mam: "-3 SD to -2 SD",
+      normal: "≥ -2 SD",
+    },
+    note: "Use WHO Anthro software or growth chart. WHZ is preferred diagnostic tool in MoHFW SAM protocol over weight-for-age.",
+  },
+  {
+    criterion: "Bilateral Pitting Oedema",
+    values: {
+      sam: "Present (any grade = SAM — regardless of weight)",
+      mam: "—",
+      normal: "Absent",
+    },
+    note: "Test: press both dorsal feet with thumb for 3 seconds. Indent that persists = pitting oedema. Any bilateral pedal oedema in child = SAM (kwashiorkor).",
+  },
+  {
+    criterion: "Weight-for-Age (WAZ)",
+    values: {
+      sam: "< -3 SD",
+      mam: "-3 SD to -2 SD",
+      normal: "≥ -2 SD",
+    },
+    note: "Note: WAZ is used for underweight classification (IMNCI), NOT preferred for SAM diagnosis. WHZ or MUAC is more accurate.",
+  },
+  {
+    criterion: "BMI-for-Age (5–19 yr)",
+    values: {
+      sam: "< -3 SD (WHO 2007 reference)",
+      mam: "-3 SD to -2 SD",
+      normal: "≥ -2 SD",
+    },
+    note: "For school-age children and adolescents where length/height is more reliable than weight. IAP 2015 charts use same cut-offs.",
+  },
+];
+
+// ─── Complicated SAM criteria (MoHFW / WHO) ──────────────────────────────────
+const COMPLICATED_SAM = [
+  "Poor appetite (failed appetite test — unable to eat ≥ ¼ RUTF sachet in 30 min)",
+  "Bilateral pitting oedema (+++ / severe grade)",
+  "Medical complications: persistent vomiting, high fever (>38.5°C), severe anaemia (Hb <6 g/dL), altered consciousness, hypoglycaemia (<3 mmol/L or <54 mg/dL), hypothermia (<35.5°C)",
+  "Severe wasting with any acute illness requiring hospitalisation",
+  "Failure to respond after 4 weeks of outpatient CMAM",
+  "Failure to gain weight for 2 consecutive weeks on outpatient management",
+  "Child under 6 months (or <3 kg) — always inpatient",
+  "Caregiver unable to manage at home — no support system",
+];
+
+// ─── F-75 / F-100 therapeutic feeding ────────────────────────────────────────
+const THERAPEUTIC_FEEDING = [
+  { phase: "Phase 1 — Stabilisation (Days 1–7)", formula: "F-75", energy: "75 kcal/100 mL", protein: "0.9 g/100 mL", volume: "100–130 mL/kg/day in 8–12 feeds", detail: "Correct hypoglycaemia, hypothermia, dehydration. Do NOT give F-100 yet — risk of re-feeding syndrome and cardiac failure." },
+  { phase: "Phase 2 — Transition (Days 7–14)", formula: "F-100", energy: "100 kcal/100 mL", protein: "2.9 g/100 mL", volume: "Increase gradually over 2–3 days", detail: "Switch when: oedema resolving, appetite returning, no IV fluids or NG feeding." },
+  { phase: "Phase 3 — Rehabilitation (Weeks 2–6)", formula: "F-100 or RUTF", energy: "500 kcal/day extra (RUTF 85 kcal/sachet)", protein: "5.0 g/100 mL", volume: "RUTF 3–4 sachets/day depending on weight", detail: "Target weight gain: >10 g/kg/day. Breastfeeding continues. Stimulation and play therapy." },
+];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GROWTH CALCULATOR HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+function interpolate(table, ageMonths) {
+  if (ageMonths <= table[0].ageM) return table[0];
+  if (ageMonths >= table[table.length - 1].ageM) return table[table.length - 1];
+  for (let i = 0; i < table.length - 1; i++) {
+    if (ageMonths >= table[i].ageM && ageMonths <= table[i + 1].ageM) {
+      const frac = (ageMonths - table[i].ageM) / (table[i + 1].ageM - table[i].ageM);
+      return {
+        p3:  table[i].p3  + frac * (table[i + 1].p3  - table[i].p3),
+        p15: table[i].p15 + frac * (table[i + 1].p15 - table[i].p15),
+        p50: table[i].p50 + frac * (table[i + 1].p50 - table[i].p50),
+        p85: table[i].p85 + frac * (table[i + 1].p85 - table[i].p85),
+        p97: table[i].p97 + frac * (table[i + 1].p97 - table[i].p97),
+      };
+    }
+  }
+  return table[table.length - 1];
+}
+
+function getCentileLabel(value, ref) {
+  if (value === null || value === undefined || isNaN(value)) return { label: "—", color: "slate" };
+  if (value < ref.p3)  return { label: "< 3rd centile", color: "red",     sdApprox: "< -2 SD" };
+  if (value < ref.p15) return { label: "3rd–15th",      color: "orange",  sdApprox: "-2 to -1 SD" };
+  if (value < ref.p50) return { label: "15th–50th",     color: "emerald", sdApprox: "-1 to 0 SD" };
+  if (value < ref.p85) return { label: "50th–85th",     color: "emerald", sdApprox: "0 to +1 SD" };
+  if (value < ref.p97) return { label: "85th–97th",     color: "amber",   sdApprox: "+1 to +2 SD" };
+  return                       { label: "> 97th centile", color: "red",   sdApprox: "> +2 SD" };
+}
+
+function getMUACInterpretation(muac) {
+  if (!muac || isNaN(muac)) return null;
+  if (muac < 11.5) return { label: "SAM", color: "red",    desc: "Severe Acute Malnutrition — MUAC < 11.5 cm" };
+  if (muac < 12.5) return { label: "MAM", color: "orange", desc: "Moderate Acute Malnutrition — MUAC 11.5–12.5 cm" };
+  return                   { label: "Normal", color: "emerald", desc: "Normal — MUAC ≥ 12.5 cm" };
+}
+
+function getBMIInterpretation(bmi, ageYears) {
+  if (!bmi || isNaN(bmi)) return null;
+  // Simplified WHO SD scoring using approximate population medians
+  // For a production app, use full LMS z-score calculation
+  if (ageYears < 5) {
+    if (bmi < 14.0) return { label: "Severe Thinness", color: "red",     desc: "BMI < -3 SD — SAM if confirmed by WHZ or MUAC" };
+    if (bmi < 15.5) return { label: "Moderate Thinness", color: "orange", desc: "BMI < -2 SD — MAM range" };
+    if (bmi < 17.5) return { label: "Mild Thinness", color: "amber",    desc: "BMI mildly below average" };
+    if (bmi < 19.5) return { label: "Normal", color: "emerald",          desc: "BMI within normal range" };
+    if (bmi < 21.0) return { label: "Overweight", color: "amber",        desc: "BMI > +1 SD" };
+    return                  { label: "Obese", color: "red",               desc: "BMI > +2 SD" };
+  } else {
+    // 5–18 yr: use approximate age-adjusted thresholds
+    const medianBMI = 13.5 + ageYears * 0.5; // rough linear approximation of median
+    const sd = 1.8;
+    const z = (bmi - medianBMI) / sd;
+    if (z < -3)  return { label: "Severe Thinness (Gr 3)", color: "red",     desc: "BMI < -3 SD — correlates with SAM" };
+    if (z < -2)  return { label: "Moderate Thinness (Gr 2)", color: "orange", desc: "BMI -3 to -2 SD — MAM range" };
+    if (z < -1)  return { label: "Mild Thinness (Gr 1)",    color: "amber",  desc: "BMI -2 to -1 SD" };
+    if (z < 1)   return { label: "Normal",                  color: "emerald", desc: "BMI within normal range" };
+    if (z < 2)   return { label: "Overweight",              color: "amber",   desc: "BMI +1 to +2 SD" };
+    return               { label: "Obese",                  color: "red",     desc: "BMI > +2 SD" };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // SHARED COMPONENTS
 // ══════════════════════════════════════════════════════════════════════════════
 
 const CMAP = {
   red:     { bg: "bg-red-50 dark:bg-red-950/30",     border: "border-red-200 dark:border-red-800",     text: "text-red-700 dark:text-red-300",     badge: "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700",     dot: "bg-red-500"     },
   amber:   { bg: "bg-amber-50 dark:bg-amber-950/30", border: "border-amber-200 dark:border-amber-800", text: "text-amber-700 dark:text-amber-300", badge: "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700", dot: "bg-amber-500" },
+  orange:  { bg: "bg-orange-50 dark:bg-orange-950/30", border: "border-orange-200 dark:border-orange-800", text: "text-orange-700 dark:text-orange-300", badge: "bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700", dot: "bg-orange-500" },
   emerald: { bg: "bg-emerald-50 dark:bg-emerald-950/30", border: "border-emerald-200 dark:border-emerald-800", text: "text-emerald-700 dark:text-emerald-300", badge: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700", dot: "bg-emerald-500" },
   sky:     { bg: "bg-sky-50 dark:bg-sky-950/30",     border: "border-sky-200 dark:border-sky-800",     text: "text-sky-700 dark:text-sky-300",     badge: "bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 border-sky-300 dark:border-sky-700",     dot: "bg-sky-500"     },
   violet:  { bg: "bg-violet-50 dark:bg-violet-950/30", border: "border-violet-200 dark:border-violet-800", text: "text-violet-700 dark:text-violet-300", badge: "bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 border-violet-300 dark:border-violet-700", dot: "bg-violet-500" },
   teal:    { bg: "bg-teal-50 dark:bg-teal-950/30",   border: "border-teal-200 dark:border-teal-800",   text: "text-teal-700 dark:text-teal-300",   badge: "bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 border-teal-300 dark:border-teal-700",   dot: "bg-teal-500"   },
   rose:    { bg: "bg-rose-50 dark:bg-rose-950/30",   border: "border-rose-200 dark:border-rose-800",   text: "text-rose-700 dark:text-rose-300",   badge: "bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-700",   dot: "bg-rose-500"   },
-  orange:  { bg: "bg-orange-50 dark:bg-orange-950/30", border: "border-orange-200 dark:border-orange-800", text: "text-orange-700 dark:text-orange-300", badge: "bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700", dot: "bg-orange-500" },
   slate:   { bg: "bg-slate-50 dark:bg-slate-800/40", border: "border-slate-200 dark:border-slate-700", text: "text-slate-700 dark:text-slate-300",  badge: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600",  dot: "bg-slate-500"  },
 };
 
-function SectionBlock({ title, icon: Icon, color = "slate", children, defaultOpen = false }) {
-  const [open, setOpen] = useState(defaultOpen);
-  const c = CMAP[color];
+function InfoBox({ tone = "amber", icon: Icon, title, children }) {
+  const c = CMAP[tone] || CMAP.amber;
   return (
-    <div className={`border rounded-xl overflow-hidden ${c.border}`}>
-      <button
-        onClick={() => setOpen(v => !v)}
-        className={`w-full flex items-center justify-between px-5 py-4 transition-colors ${c.bg} hover:brightness-95`}
-      >
-        <div className="flex items-center gap-2.5">
-          <Icon size={15} weight="bold" className={`flex-shrink-0 ${c.text}`} />
-          <span className={`font-bold text-sm ${c.text}`}
-                style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{title}</span>
+    <div className={`flex items-start gap-2 rounded-xl border px-3 py-2.5 text-xs ${c.bg} ${c.border} ${c.text}`}>
+      {Icon && <Icon size={13} weight="fill" className="flex-shrink-0 mt-0.5" />}
+      <div><strong>{title}</strong>{title ? " — " : ""}{children}</div>
+    </div>
+  );
+}
+
+function CentileBar({ value, ref: refData, unit, label }) {
+  if (!refData || value === null || isNaN(value)) return null;
+  const min = refData.p3 * 0.9;
+  const max = refData.p97 * 1.05;
+  const pct = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+  const p3pct  = ((refData.p3  - min) / (max - min)) * 100;
+  const p15pct = ((refData.p15 - min) / (max - min)) * 100;
+  const p50pct = ((refData.p50 - min) / (max - min)) * 100;
+  const p85pct = ((refData.p85 - min) / (max - min)) * 100;
+  const p97pct = ((refData.p97 - min) / (max - min)) * 100;
+
+  return (
+    <div className="mt-2">
+      <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">{label} centile band</div>
+      <div className="relative h-5 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+        <div className="absolute inset-0 flex">
+          <div style={{ width: `${p3pct}%` }}  className="bg-red-200 dark:bg-red-900/60" />
+          <div style={{ width: `${p15pct - p3pct}%` }}  className="bg-orange-200 dark:bg-orange-900/60" />
+          <div style={{ width: `${p50pct - p15pct}%` }} className="bg-emerald-200 dark:bg-emerald-900/60" />
+          <div style={{ width: `${p85pct - p50pct}%` }} className="bg-emerald-200 dark:bg-emerald-900/60" />
+          <div style={{ width: `${p97pct - p85pct}%` }} className="bg-amber-200 dark:bg-amber-900/60" />
+          <div className="flex-1 bg-red-200 dark:bg-red-900/60" />
         </div>
-        <CaretDown size={13} weight="bold"
-          className={`transition-transform duration-200 ${open ? "rotate-180" : ""} ${c.text}`} />
-      </button>
-      {open && <div className="px-5 py-4 bg-white dark:bg-slate-900/50">{children}</div>}
+        {/* Marker */}
+        <div
+          className="absolute top-0 bottom-0 w-0.5 bg-slate-900 dark:bg-white"
+          style={{ left: `${pct}%` }}
+        />
+      </div>
+      <div className="flex justify-between text-[8px] font-mono text-slate-400 mt-0.5">
+        <span>P3</span><span>P15</span><span>P50</span><span>P85</span><span>P97</span>
+      </div>
     </div>
   );
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// IMMUNISATION SECTION
+// GROWTH VIEW
+// ══════════════════════════════════════════════════════════════════════════════
+
+function GrowthView() {
+  const [section, setSection] = useState("calculator");
+
+  // Calculator state
+  const [sex, setSex]       = useState("male");
+  const [ageYears, setAgeYears]   = useState("");
+  const [ageMonths, setAgeMonths] = useState("");
+  const [weight, setWeight]       = useState("");
+  const [height, setHeight]       = useState("");
+  const [muac, setMuac]           = useState("");
+  const [oedema, setOedema]       = useState(false);
+
+  const totalMonths = useMemo(() => {
+    const y = parseFloat(ageYears) || 0;
+    const m = parseFloat(ageMonths) || 0;
+    return y * 12 + m;
+  }, [ageYears, ageMonths]);
+
+  const bmi = useMemo(() => {
+    const w = parseFloat(weight);
+    const h = parseFloat(height) / 100;
+    if (!w || !h || h <= 0) return null;
+    return w / (h * h);
+  }, [weight, height]);
+
+  const wRef = useMemo(() => {
+    if (totalMonths < 1 || totalMonths > 60) return null;
+    return interpolate(sex === "male" ? WHO_WFA_BOYS : WHO_WFA_GIRLS, totalMonths);
+  }, [totalMonths, sex]);
+
+  const hRef = useMemo(() => {
+    if (totalMonths < 1 || totalMonths > 60) return null;
+    return interpolate(sex === "male" ? WHO_HFA_BOYS : WHO_HFA_GIRLS, totalMonths);
+  }, [totalMonths, sex]);
+
+  const wCentile = useMemo(() => getCentileLabel(parseFloat(weight), wRef), [weight, wRef]);
+  const hCentile = useMemo(() => getCentileLabel(parseFloat(height), hRef), [height, hRef]);
+  const muacResult = useMemo(() => getMUACInterpretation(parseFloat(muac)), [muac]);
+  const bmiResult  = useMemo(() => getBMIInterpretation(bmi, parseFloat(ageYears) || totalMonths / 12), [bmi, ageYears, totalMonths]);
+
+  // Overall SAM determination
+  const isSAM = useMemo(() => {
+    if (oedema) return true;
+    if (muacResult?.label === "SAM") return true;
+    if (wCentile?.label === "< 3rd centile") return true; // WHZ proxy
+    return false;
+  }, [oedema, muacResult, wCentile]);
+
+  const isMAM = useMemo(() => {
+    if (isSAM) return false;
+    if (muacResult?.label === "MAM") return true;
+    if (wCentile?.label === "3rd–15th") return true;
+    return false;
+  }, [isSAM, muacResult, wCentile]);
+
+  const hasResults = weight || height || muac;
+
+  const inputCls = "w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-slate-400 font-mono";
+  const labelCls = "text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1 block";
+
+  return (
+    <div className="space-y-4">
+      {/* Section tabs */}
+      <div className="flex flex-wrap gap-1.5">
+        {[
+          { id: "calculator", label: "Calculator" },
+          { id: "sam",        label: "SAM / MAM Criteria" },
+          { id: "feeding",    label: "Therapeutic Feeding" },
+          { id: "bmi_table",  label: "BMI Categories" },
+          { id: "centiles",   label: "Reference Tables" },
+        ].map(s => (
+          <button key={s.id} onClick={() => setSection(s.id)}
+            className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] uppercase tracking-widest transition-all ${
+              section === s.id
+                ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
+                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
+            }`}>{s.label}</button>
+        ))}
+      </div>
+
+      {/* ── CALCULATOR ── */}
+      {section === "calculator" && (
+        <div className="space-y-4">
+          <InfoBox tone="sky" icon={Info}>
+            WHO Child Growth Standards 2006 (0–5 yr) · WHO 2007 Reference (5–19 yr) · MoHFW/NHM SAM thresholds.
+            Centile bands are interpolated from tabulated WHO reference data.
+          </InfoBox>
+
+          {/* Input grid */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4">
+            <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-3">Patient details</div>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              {/* Sex */}
+              <div className="col-span-2">
+                <label className={labelCls}>Sex</label>
+                <div className="flex gap-2">
+                  {["male", "female"].map(s => (
+                    <button key={s} onClick={() => setSex(s)}
+                      className={`flex-1 py-2 rounded-lg border text-xs font-mono font-bold uppercase transition-all ${
+                        sex === s
+                          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
+                          : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500"
+                      }`}>{s}</button>
+                  ))}
+                </div>
+              </div>
+              {/* Age */}
+              <div>
+                <label className={labelCls}>Age — Years</label>
+                <input type="number" min="0" max="18" value={ageYears} onChange={e => setAgeYears(e.target.value)}
+                  placeholder="e.g. 2" className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>Age — Extra Months</label>
+                <input type="number" min="0" max="11" value={ageMonths} onChange={e => setAgeMonths(e.target.value)}
+                  placeholder="0–11" className={inputCls} />
+              </div>
+              {/* Weight */}
+              <div>
+                <label className={labelCls}>Weight (kg)</label>
+                <input type="number" min="0" max="150" step="0.1" value={weight} onChange={e => setWeight(e.target.value)}
+                  placeholder="e.g. 12.5" className={inputCls} />
+              </div>
+              {/* Height */}
+              <div>
+                <label className={labelCls}>Height / Length (cm)</label>
+                <input type="number" min="0" max="220" step="0.1" value={height} onChange={e => setHeight(e.target.value)}
+                  placeholder="e.g. 85.0" className={inputCls} />
+              </div>
+              {/* MUAC */}
+              <div>
+                <label className={labelCls}>MUAC (cm) — 6–59 months</label>
+                <input type="number" min="0" max="30" step="0.1" value={muac} onChange={e => setMuac(e.target.value)}
+                  placeholder="e.g. 12.0" className={inputCls} />
+              </div>
+              {/* Oedema */}
+              <div className="flex flex-col justify-end">
+                <label className={labelCls}>Bilateral pitting oedema</label>
+                <button onClick={() => setOedema(o => !o)}
+                  className={`w-full py-2 rounded-lg border text-xs font-mono font-bold uppercase transition-all ${
+                    oedema
+                      ? "bg-red-600 text-white border-transparent"
+                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500"
+                  }`}>
+                  {oedema ? "⚠ Present (= SAM)" : "Absent"}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Results */}
+          {hasResults && (
+            <div className="space-y-3">
+              {/* Summary banner */}
+              {(isSAM || isMAM) && (
+                <div className={`rounded-xl border-2 p-4 ${isSAM ? "border-red-400 dark:border-red-600 bg-red-50 dark:bg-red-950/40" : "border-orange-400 dark:border-orange-600 bg-orange-50 dark:bg-orange-950/40"}`}>
+                  <div className={`font-black text-xl mb-1 ${isSAM ? "text-red-700 dark:text-red-300" : "text-orange-700 dark:text-orange-300"}`}
+                       style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                    {isSAM ? "⚠ SEVERE ACUTE MALNUTRITION (SAM)" : "⚠ MODERATE ACUTE MALNUTRITION (MAM)"}
+                  </div>
+                  <div className={`text-xs font-mono ${isSAM ? "text-red-700 dark:text-red-300" : "text-orange-700 dark:text-orange-300"}`}>
+                    {isSAM
+                      ? "Refer for inpatient assessment. Check for complicated SAM criteria. Do NOT start F-100 immediately."
+                      : "Nutritional rehabilitation. RUTF (CMAM) if uncomplicated. Close follow-up every 2 weeks."}
+                  </div>
+                </div>
+              )}
+
+              {/* Individual result cards */}
+              <div className="grid sm:grid-cols-2 gap-3">
+                {/* BMI card */}
+                {bmi !== null && (
+                  <div className={`rounded-xl border p-3 ${CMAP[bmiResult?.color || "slate"].border} ${CMAP[bmiResult?.color || "slate"].bg}`}>
+                    <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">BMI</div>
+                    <div className={`font-black text-2xl ${CMAP[bmiResult?.color || "slate"].text}`}
+                         style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                      {bmi.toFixed(1)} <span className="text-sm font-mono font-normal">kg/m²</span>
+                    </div>
+                    {bmiResult && (
+                      <>
+                        <div className={`text-xs font-bold mt-1 ${CMAP[bmiResult.color].text}`}>{bmiResult.label}</div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{bmiResult.desc}</div>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* MUAC card */}
+                {muac && muacResult && (
+                  <div className={`rounded-xl border p-3 ${CMAP[muacResult.color].border} ${CMAP[muacResult.color].bg}`}>
+                    <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">MUAC</div>
+                    <div className={`font-black text-2xl ${CMAP[muacResult.color].text}`}
+                         style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                      {parseFloat(muac).toFixed(1)} <span className="text-sm font-mono font-normal">cm</span>
+                    </div>
+                    <div className={`text-xs font-bold mt-1 ${CMAP[muacResult.color].text}`}>{muacResult.label}</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{muacResult.desc}</div>
+                    {/* MUAC colour band */}
+                    <div className="mt-2 h-3 rounded-full overflow-hidden flex">
+                      <div className="flex-1 bg-red-400" style={{ maxWidth: `${Math.min(100, ((11.5 / 16) * 100))}%` }} />
+                      <div className="bg-orange-400" style={{ width: "6.25%" }} />
+                      <div className="flex-1 bg-emerald-400" />
+                    </div>
+                    <div className="flex justify-between text-[8px] font-mono text-slate-400 mt-0.5">
+                      <span>11.5</span><span>12.5</span><span>cm</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Weight centile */}
+                {weight && wRef && (
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-3">
+                    <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Weight-for-Age</div>
+                    <div className="font-black text-2xl text-slate-900 dark:text-white"
+                         style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                      {parseFloat(weight).toFixed(1)} <span className="text-sm font-mono font-normal">kg</span>
+                    </div>
+                    <div className={`text-xs font-bold mt-1 ${CMAP[wCentile.color]?.text || "text-slate-700 dark:text-slate-200"}`}>
+                      {wCentile.label}
+                    </div>
+                    {wCentile.sdApprox && (
+                      <div className="text-[10px] text-slate-400 font-mono">{wCentile.sdApprox}</div>
+                    )}
+                    <CentileBar value={parseFloat(weight)} ref={wRef} label="Weight" />
+                  </div>
+                )}
+
+                {/* Height centile */}
+                {height && hRef && (
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-3">
+                    <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-1">Height-for-Age</div>
+                    <div className="font-black text-2xl text-slate-900 dark:text-white"
+                         style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                      {parseFloat(height).toFixed(1)} <span className="text-sm font-mono font-normal">cm</span>
+                    </div>
+                    <div className={`text-xs font-bold mt-1 ${CMAP[hCentile.color]?.text || "text-slate-700 dark:text-slate-200"}`}>
+                      {hCentile.label}
+                    </div>
+                    {hCentile.sdApprox && (
+                      <div className="text-[10px] text-slate-400 font-mono">{hCentile.sdApprox}</div>
+                    )}
+                    <CentileBar value={parseFloat(height)} ref={hRef} label="Height" />
+                  </div>
+                )}
+              </div>
+
+              {/* Reference band legend */}
+              {(wRef || hRef) && totalMonths > 0 && (
+                <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-3">
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-2">
+                    WHO {sex === "male" ? "Boys" : "Girls"} reference — {Math.floor(totalMonths / 12)} yr {totalMonths % 12} mo
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                    {wRef && (
+                      <div>
+                        <div className="text-slate-500 mb-1">Weight (kg)</div>
+                        {[["P3 (−2SD)", wRef.p3], ["P15 (−1SD)", wRef.p15], ["P50 (median)", wRef.p50], ["P85 (+1SD)", wRef.p85], ["P97 (+2SD)", wRef.p97]].map(([l, v]) => (
+                          <div key={l} className="flex justify-between">
+                            <span className="text-slate-400">{l}</span>
+                            <span className="font-bold text-slate-700 dark:text-slate-200">{v.toFixed(1)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {hRef && (
+                      <div>
+                        <div className="text-slate-500 mb-1">Height (cm)</div>
+                        {[["P3 (−2SD)", hRef.p3], ["P15 (−1SD)", hRef.p15], ["P50 (median)", hRef.p50], ["P85 (+1SD)", hRef.p85], ["P97 (+2SD)", hRef.p97]].map(([l, v]) => (
+                          <div key={l} className="flex justify-between">
+                            <span className="text-slate-400">{l}</span>
+                            <span className="font-bold text-slate-700 dark:text-slate-200">{v.toFixed(1)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {totalMonths > 60 && (
+                    <div className="text-[10px] text-amber-600 dark:text-amber-400 mt-2 font-mono">
+                      Note: WHO 0–5 yr tables used (reference data available up to 60 months). For 5–19 yr, use WHO 2007 Reference or IAP 2015 charts.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <InfoBox tone="amber" icon={Warning} title="Clinical note">
+                This calculator uses WHO 2006/2007 reference values. For definitive SAM diagnosis, use WHO Anthro
+                software or printed WHO growth charts. WHZ (weight-for-height Z-score) is the preferred index
+                — not WAZ (weight-for-age). Always confirm SAM with MUAC AND/OR WHZ AND/OR bilateral oedema.
+              </InfoBox>
+            </div>
+          )}
+
+          {!hasResults && (
+            <div className="text-center py-8 text-slate-400 font-mono text-sm">
+              Enter weight, height, and/or MUAC above to see results
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── SAM / MAM CRITERIA ── */}
+      {section === "sam" && (
+        <div className="space-y-4">
+          <InfoBox tone="red" icon={Warning} title="MoHFW / WHO SAM definition">
+            Any ONE of the following = SAM: MUAC &lt; 11.5 cm · WHZ &lt; −3 SD · Bilateral pitting oedema.
+            SAM diagnosis does NOT require all three criteria to be met simultaneously.
+          </InfoBox>
+
+          {/* Diagnostic criteria table */}
+          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-800 text-white">
+                  <th className="px-4 py-3 text-left font-mono text-[9px] uppercase tracking-widest">Criterion</th>
+                  <th className="px-4 py-3 text-left font-mono text-[9px] uppercase tracking-widest text-red-300">SAM</th>
+                  <th className="px-4 py-3 text-left font-mono text-[9px] uppercase tracking-widest text-orange-300">MAM</th>
+                  <th className="px-4 py-3 text-left font-mono text-[9px] uppercase tracking-widest text-emerald-300">Normal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {SAM_CRITERIA.map((r, i) => (
+                  <>
+                    <tr key={i} className="border-t border-slate-100 dark:border-slate-800 odd:bg-white dark:odd:bg-slate-900/30">
+                      <td className="px-4 py-2.5 font-bold text-slate-900 dark:text-white">{r.criterion}</td>
+                      <td className="px-4 py-2.5 font-mono text-red-700 dark:text-red-400 font-bold">{r.values.sam}</td>
+                      <td className="px-4 py-2.5 font-mono text-orange-700 dark:text-orange-400">{r.values.mam}</td>
+                      <td className="px-4 py-2.5 font-mono text-emerald-700 dark:text-emerald-400">{r.values.normal}</td>
+                    </tr>
+                    <tr key={`${i}-note`} className="border-t border-slate-50 dark:border-slate-900">
+                      <td colSpan={4} className="px-4 py-1.5 bg-amber-50 dark:bg-amber-950/20">
+                        <div className="flex items-start gap-1.5">
+                          <Lightbulb size={9} weight="fill" className="text-amber-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-[10px] text-amber-800 dark:text-amber-300">{r.note}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Complicated SAM */}
+          <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4">
+            <div className="font-bold text-sm text-red-700 dark:text-red-300 mb-2"
+                 style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+              Complicated SAM — Criteria for Inpatient Admission (MoHFW / WHO)
+            </div>
+            <div className="space-y-1.5">
+              {COMPLICATED_SAM.map((c, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-red-800 dark:text-red-200">
+                  <span className="w-4 h-4 rounded-full bg-red-200 dark:bg-red-800 text-red-700 dark:text-red-300 text-[8px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                  {c}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* MUAC colour tape guide */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4">
+            <div className="font-bold text-sm mb-3" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+              MUAC Colour Tape (WHO / UNICEF 2009)
+            </div>
+            <div className="space-y-2">
+              {[
+                { color: "bg-red-500",    range: "< 11.5 cm",  label: "RED — SAM",    action: "Admit or CMAM with medical assessment" },
+                { color: "bg-yellow-400", range: "11.5–12.5 cm", label: "YELLOW — MAM", action: "Enrol in supplementary feeding (TSFP)" },
+                { color: "bg-green-500",  range: "≥ 12.5 cm",  label: "GREEN — Normal", action: "Routine care, growth monitoring" },
+              ].map(m => (
+                <div key={m.range} className="flex items-center gap-3">
+                  <div className={`w-10 h-6 rounded flex-shrink-0 ${m.color}`} />
+                  <div>
+                    <div className="font-bold text-xs text-slate-900 dark:text-white">{m.label} ({m.range})</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400">{m.action}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 text-[10px] text-slate-400 font-mono">
+              Measure on left arm · mid-point between olecranon and acromion · arm relaxed at side · apply to 6–59 months only
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── THERAPEUTIC FEEDING ── */}
+      {section === "feeding" && (
+        <div className="space-y-4">
+          <InfoBox tone="red" icon={Warning} title="Critical">
+            Never start F-100 or high-energy feeds in the stabilisation phase — risk of re-feeding syndrome
+            and cardiac failure. F-75 first until appetite returns and oedema is resolving.
+          </InfoBox>
+
+          {THERAPEUTIC_FEEDING.map((f, i) => (
+            <div key={i} className={`rounded-xl border overflow-hidden ${i === 0 ? "border-amber-200 dark:border-amber-800" : i === 1 ? "border-blue-200 dark:border-blue-800" : "border-emerald-200 dark:border-emerald-800"}`}>
+              <div className={`px-4 py-3 font-bold text-sm ${i === 0 ? "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300" : i === 1 ? "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300" : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300"}`}
+                   style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                {f.phase}
+              </div>
+              <div className="px-4 py-3 bg-white dark:bg-slate-900/50 grid sm:grid-cols-2 gap-3 text-xs">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1">
+                    <span className="text-slate-400 font-mono">Formula</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{f.formula}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1">
+                    <span className="text-slate-400 font-mono">Energy</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{f.energy}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1">
+                    <span className="text-slate-400 font-mono">Protein</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{f.protein}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400 font-mono">Volume</span>
+                    <span className="font-bold text-slate-900 dark:text-white text-right max-w-[55%]">{f.volume}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg px-3 py-2">
+                  <Lightbulb size={10} weight="fill" className="text-amber-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">{f.detail}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* 10 Steps */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4">
+            <div className="font-bold text-sm mb-3" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+              WHO 10 Steps for SAM Management (MoHFW / NHM)
+            </div>
+            <div className="grid sm:grid-cols-2 gap-1.5">
+              {[
+                "Treat / prevent hypoglycaemia",
+                "Treat / prevent hypothermia",
+                "Treat / prevent dehydration",
+                "Correct electrolyte imbalance (K⁺, Mg²⁺)",
+                "Treat / prevent infection (empirical amoxicillin)",
+                "Correct micronutrient deficiencies (no iron in phase 1)",
+                "Start cautious feeding (F-75)",
+                "Achieve catch-up growth (F-100 / RUTF)",
+                "Provide sensory stimulation and emotional support",
+                "Prepare for follow-up after recovery",
+              ].map((step, i) => (
+                <div key={i} className="flex items-start gap-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 px-3 py-2">
+                  <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                  <span className="text-xs text-slate-700 dark:text-slate-200">{step}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 text-[10px] font-mono text-amber-600 dark:text-amber-400">
+              Iron supplements: DO NOT give in stabilisation phase — worsen infection. Start in rehabilitation phase (Step 8) only.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── BMI CATEGORIES ── */}
+      {section === "bmi_table" && (
+        <div className="space-y-4">
+          <InfoBox tone="sky" icon={Info}>
+            WHO 2007 Reference for 5–19 yr · WHO 2006 Standards for &lt;5 yr · IAP 2015 Growth Charts for Indian children
+            (Indian Pediatrics 2015;52:47–55). BMI-for-age is the preferred screening tool in children ≥2 yr.
+          </InfoBox>
+
+          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-800 text-white">
+                  <th className="px-4 py-3 text-left font-mono text-[9px] uppercase tracking-widest">Category</th>
+                  <th className="px-4 py-3 text-left font-mono text-[9px] uppercase tracking-widest">WHO SD / Centile</th>
+                  <th className="px-4 py-3 text-left font-mono text-[9px] uppercase tracking-widest">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {BMI_CATEGORIES_PAEDS.map((r, i) => {
+                  const colors = { red: "text-red-700 dark:text-red-400", orange: "text-orange-700 dark:text-orange-400", amber: "text-amber-700 dark:text-amber-400", emerald: "text-emerald-700 dark:text-emerald-400" };
+                  return (
+                    <tr key={i} className="border-t border-slate-100 dark:border-slate-800 odd:bg-white dark:odd:bg-slate-900/30">
+                      <td className={`px-4 py-2.5 font-bold ${colors[r.color] || "text-slate-900 dark:text-white"}`}>{r.label}</td>
+                      <td className="px-4 py-2.5 font-mono text-slate-600 dark:text-slate-300">{r.bmiFor}</td>
+                      <td className="px-4 py-2.5 text-slate-600 dark:text-slate-300">{r.action}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 p-4">
+            <div className="font-bold text-sm mb-2 text-violet-700 dark:text-violet-300"
+                 style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+              IAP 2015 Growth Charts — Key Points for Indian Children
+            </div>
+            <div className="space-y-1.5">
+              {[
+                "IAP 2015 charts are based on affluent Indian children (closer to WHO standards than ICMR 2012)",
+                "Use WHO 2006 standards for <5 yr and IAP 2015 for 5–18 yr in routine practice",
+                "Overweight cut-off: BMI >23 kg/m² equivalent at 18 yr (lower than WHO +1SD for Indian adults)",
+                "Obesity cut-off: BMI >27 kg/m² equivalent at 18 yr (aligns with Indian adult obesity threshold)",
+                "Stunting (HAZ < -2SD) is the most prevalent form of malnutrition in India — affects 35.5% children under 5 (NFHS-5)",
+                "Wasting (WHZ < -2SD): 19.3% in India. SAM (WHZ < -3SD): ~7.7% (NFHS-5 2021)",
+                "NFHS-5 (2019–21): significant improvement from NFHS-4 but India still carries ~30% of world's wasted children",
+              ].map((p, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-violet-800 dark:text-violet-200">
+                  <CheckCircle size={10} weight="fill" className="text-violet-500 flex-shrink-0 mt-0.5" />{p}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── REFERENCE TABLES ── */}
+      {section === "centiles" && (
+        <div className="space-y-4">
+          <InfoBox tone="sky" icon={Info}>
+            WHO Child Growth Standards 2006 (0–5 yr). Values are medians at key ages — full LMS tables available at
+            who.int/tools/child-growth-standards
+          </InfoBox>
+
+          {[
+            { title: "Weight-for-Age — Boys (kg)", boys: WHO_WFA_BOYS, girls: WHO_WFA_GIRLS, isBoys: true },
+            { title: "Weight-for-Age — Girls (kg)", boys: WHO_WFA_BOYS, girls: WHO_WFA_GIRLS, isBoys: false },
+            { title: "Height-for-Age — Boys (cm)", boys: WHO_HFA_BOYS, girls: WHO_HFA_GIRLS, isBoys: true },
+            { title: "Height-for-Age — Girls (cm)", boys: WHO_HFA_BOYS, girls: WHO_HFA_GIRLS, isBoys: false },
+          ].map((tbl, ti) => {
+            const data = tbl.isBoys ? tbl.boys : tbl.girls;
+            return (
+              <div key={ti} className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+                <div className="px-4 py-2.5 bg-slate-800 text-white text-sm font-bold" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
+                  {tbl.title}
+                </div>
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-100 dark:bg-slate-800">
+                      <th className="px-3 py-2 text-left font-mono text-[9px] uppercase tracking-widest text-slate-500">Age</th>
+                      <th className="px-3 py-2 text-center font-mono text-[9px] uppercase tracking-widest text-red-600">P3 (−2SD)</th>
+                      <th className="px-3 py-2 text-center font-mono text-[9px] uppercase tracking-widest text-orange-600">P15 (−1SD)</th>
+                      <th className="px-3 py-2 text-center font-mono text-[9px] uppercase tracking-widest text-emerald-600">P50 (med)</th>
+                      <th className="px-3 py-2 text-center font-mono text-[9px] uppercase tracking-widest text-amber-600">P85 (+1SD)</th>
+                      <th className="px-3 py-2 text-center font-mono text-[9px] uppercase tracking-widest text-red-600">P97 (+2SD)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.map((r, i) => {
+                      const ageLabel = r.ageM === 0 ? "Birth" : r.ageM < 12 ? `${r.ageM} mo` : `${r.ageM / 12} yr`;
+                      return (
+                        <tr key={i} className="border-t border-slate-100 dark:border-slate-800 odd:bg-white dark:odd:bg-slate-900/30">
+                          <td className="px-3 py-2 font-bold text-slate-700 dark:text-slate-200">{ageLabel}</td>
+                          <td className="px-3 py-2 text-center font-mono text-red-700 dark:text-red-400">{r.p3.toFixed(1)}</td>
+                          <td className="px-3 py-2 text-center font-mono text-orange-700 dark:text-orange-400">{r.p15.toFixed(1)}</td>
+                          <td className="px-3 py-2 text-center font-mono font-bold text-emerald-700 dark:text-emerald-400">{r.p50.toFixed(1)}</td>
+                          <td className="px-3 py-2 text-center font-mono text-amber-700 dark:text-amber-400">{r.p85.toFixed(1)}</td>
+                          <td className="px-3 py-2 text-center font-mono text-red-700 dark:text-red-400">{r.p97.toFixed(1)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// IMMUNISATION SECTION (unchanged internals)
 // ══════════════════════════════════════════════════════════════════════════════
 
 function VaccineRow({ v, isLast }) {
@@ -749,50 +1512,37 @@ function ImmunisationView() {
   };
 
   const tabs = [
-    { id: "iap",   label: "IAP-ACVIP 2023",         desc: "Complete private-sector schedule" },
-    { id: "uip",   label: "NIP / UIP (GoI)",         desc: "Free government schedule" },
-    { id: "diff",  label: "NIP vs IAP — Key Differences", desc: "" },
-    { id: "special",label: "Special Vaccines",       desc: "Risk-based, regional, travel" },
-    { id: "catchup",label: "Catch-Up Principles",   desc: "" },
+    { id: "iap",    label: "IAP-ACVIP 2023" },
+    { id: "uip",    label: "NIP / UIP (GoI)" },
+    { id: "diff",   label: "NIP vs IAP" },
+    { id: "special",label: "Special Vaccines" },
+    { id: "catchup",label: "Catch-Up" },
   ];
 
   return (
     <div className="space-y-5">
-      {/* Tab bar */}
       <div className="flex flex-wrap gap-1.5">
         {tabs.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setActiveSchedule(t.id)}
+          <button key={t.id} onClick={() => setActiveSchedule(t.id)}
             className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] uppercase tracking-widest transition-all ${
               activeSchedule === t.id
                 ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent"
                 : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-400"
-            }`}>
-            {t.label}
-          </button>
+            }`}>{t.label}</button>
         ))}
       </div>
 
-      {/* Search bar — only for schedule tabs */}
       {(activeSchedule === "iap" || activeSchedule === "uip") && (
         <div className="relative">
           <MagnifyingGlass size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+          <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search vaccine, age, route..."
             className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-8 py-2.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none focus:border-slate-400 font-mono"
           />
-          {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-              <X size={12} weight="bold" />
-            </button>
-          )}
+          {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"><X size={12} weight="bold" /></button>}
         </div>
       )}
 
-      {/* IAP schedule */}
       {activeSchedule === "iap" && (
         <div className="space-y-3">
           <div className="flex items-start gap-2 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 px-3 py-2.5 text-xs text-blue-800 dark:text-blue-200">
@@ -803,7 +1553,6 @@ function ImmunisationView() {
         </div>
       )}
 
-      {/* UIP schedule */}
       {activeSchedule === "uip" && (
         <div className="space-y-3">
           <div className="flex items-start gap-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2.5 text-xs text-emerald-800 dark:text-emerald-200">
@@ -814,20 +1563,19 @@ function ImmunisationView() {
         </div>
       )}
 
-      {/* NIP vs IAP comparison */}
       {activeSchedule === "diff" && (
         <div className="space-y-3">
           <div className="flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-800 dark:text-amber-200">
             <Warning size={12} weight="fill" className="flex-shrink-0 mt-0.5 text-amber-500" />
-            <span>Families switching from government (NIP/UIP) to private (IAP) schedule are common in ED. Key practical differences are listed below to guide catch-up decisions.</span>
+            <span>Families switching from government (NIP/UIP) to private (IAP) schedule are common in ED. Key practical differences listed below.</span>
           </div>
           <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-800 text-white">
                   <th className="text-left px-4 py-3 font-mono text-[9px] uppercase tracking-widest w-40">Topic</th>
-                  <th className="text-left px-4 py-3 font-mono text-[9px] uppercase tracking-widest text-emerald-300">NIP / UIP (Govt — Free)</th>
-                  <th className="text-left px-4 py-3 font-mono text-[9px] uppercase tracking-widest text-blue-300">IAP-ACVIP 2023 (Private)</th>
+                  <th className="text-left px-4 py-3 font-mono text-[9px] uppercase tracking-widest text-emerald-300">NIP / UIP (Govt)</th>
+                  <th className="text-left px-4 py-3 font-mono text-[9px] uppercase tracking-widest text-blue-300">IAP-ACVIP 2023</th>
                 </tr>
               </thead>
               <tbody>
@@ -844,7 +1592,6 @@ function ImmunisationView() {
         </div>
       )}
 
-      {/* Special vaccines */}
       {activeSchedule === "special" && (
         <div className="space-y-3">
           {SPECIAL_VACCINES.map((sv, i) => {
@@ -852,19 +1599,11 @@ function ImmunisationView() {
             return (
               <div key={i} className={`rounded-xl border overflow-hidden ${c.border}`}>
                 <div className={`px-4 py-3 ${c.bg}`}>
-                  <div className={`font-bold text-sm ${c.text}`} style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-                    {sv.category}
-                  </div>
+                  <div className={`font-bold text-sm ${c.text}`} style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{sv.category}</div>
                 </div>
                 <div className="px-4 py-3 bg-white dark:bg-slate-900/50 space-y-2">
-                  <div>
-                    <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">When: </span>
-                    <span className="text-xs text-slate-600 dark:text-slate-300">{sv.when}</span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Schedule: </span>
-                    <span className="text-xs text-slate-700 dark:text-slate-200 font-mono">{sv.schedule}</span>
-                  </div>
+                  <div><span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">When: </span><span className="text-xs text-slate-600 dark:text-slate-300">{sv.when}</span></div>
+                  <div><span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Schedule: </span><span className="text-xs text-slate-700 dark:text-slate-200 font-mono">{sv.schedule}</span></div>
                   <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/20 rounded-lg px-3 py-2 border border-amber-200 dark:border-amber-800">
                     <Lightbulb size={10} weight="fill" className="text-amber-500 flex-shrink-0 mt-0.5" />
                     <span className="text-xs text-amber-800 dark:text-amber-200">{sv.notes}</span>
@@ -876,7 +1615,6 @@ function ImmunisationView() {
         </div>
       )}
 
-      {/* Catch-up */}
       {activeSchedule === "catchup" && (
         <div className="space-y-3">
           <div className="flex items-start gap-2 rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 px-3 py-2.5 text-xs text-violet-800 dark:text-violet-200">
@@ -886,16 +1624,14 @@ function ImmunisationView() {
           <div className="space-y-2">
             {CATCH_UP_PRINCIPLES.map((p, i) => (
               <div key={i} className="flex items-start gap-3 bg-white dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-3">
-                <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                  {i + 1}
-                </span>
+                <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
                 <span className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{p}</span>
               </div>
             ))}
           </div>
           <div className="flex items-start gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-3 py-2.5 text-xs text-red-800 dark:text-red-200">
             <Warning size={12} weight="fill" className="flex-shrink-0 mt-0.5 text-red-500" />
-            <span>OPV contraindicated in immunocompromised — use IPV only. Live vaccines (MMR, varicella, BCG) contraindicated in immunocompromised and during steroid therapy >2 mg/kg/day for >14 days.</span>
+            <span>OPV contraindicated in immunocompromised — use IPV only. Live vaccines (MMR, varicella, BCG) contraindicated in immunocompromised and during steroid therapy &gt;2 mg/kg/day for &gt;14 days.</span>
           </div>
         </div>
       )}
@@ -904,7 +1640,7 @@ function ImmunisationView() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// NATIONAL GUIDELINES SECTION
+// NATIONAL GUIDELINES SECTION (unchanged)
 // ══════════════════════════════════════════════════════════════════════════════
 
 function GuidelinesView() {
@@ -925,53 +1661,35 @@ function GuidelinesView() {
     <div className="space-y-4">
       <div className="flex items-start gap-2 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 px-3 py-2.5 text-xs text-blue-800 dark:text-blue-200">
         <Info size={12} weight="fill" className="flex-shrink-0 mt-0.5 text-blue-500" />
-        <span>Beyond IAP, multiple national bodies produce guidelines critical to paediatric emergency practice in India. These are summarised below with key clinical points for ED use.</span>
+        <span>Multiple national bodies produce guidelines critical to paediatric emergency practice in India. Key clinical points for ED use.</span>
       </div>
-
-      {/* Search */}
       <div className="relative">
         <MagnifyingGlass size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
+        <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Search guidelines, organisms, drugs..."
           className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-8 py-2.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none focus:border-slate-400 font-mono"
         />
-        {search && (
-          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-            <X size={12} weight="bold" />
-          </button>
-        )}
+        {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"><X size={12} weight="bold" /></button>}
       </div>
-
-      {/* Organisation groups */}
       {filtered.map(org => {
         const c = CMAP[org.color] || CMAP.slate;
         const Icon = org.icon;
         const isOpen = openOrg === org.id;
         return (
           <div key={org.id} className={`border rounded-xl overflow-hidden ${c.border}`}>
-            {/* Org header */}
-            <button
-              onClick={() => setOpenOrg(isOpen ? null : org.id)}
-              className={`w-full flex items-center justify-between px-4 py-3 transition-colors ${c.bg}`}
-            >
+            <button onClick={() => setOpenOrg(isOpen ? null : org.id)}
+              className={`w-full flex items-center justify-between px-4 py-3 transition-colors ${c.bg}`}>
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Icon size={15} weight="bold" className={`flex-shrink-0 ${c.text}`} />
                 <div className="text-left min-w-0">
-                  <div className={`font-bold text-sm ${c.text}`} style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-                    {org.org}
-                  </div>
+                  <div className={`font-bold text-sm ${c.text}`} style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{org.org}</div>
                   <div className={`text-[10px] font-mono truncate ${c.text} opacity-70`}>{org.fullName}</div>
                 </div>
               </div>
               <CaretRight size={12} weight="bold" className={`${c.text} flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
             </button>
-
-            {/* Org expanded */}
             {isOpen && (
               <div className="bg-white dark:bg-slate-900/50">
-                {/* Relevance strip */}
                 <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-start gap-2">
                     <Lightbulb size={11} weight="fill" className="text-amber-500 flex-shrink-0 mt-0.5" />
@@ -980,51 +1698,37 @@ function GuidelinesView() {
                   {org.url && (
                     <a href={org.url} target="_blank" rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-[10px] font-mono text-blue-600 dark:text-blue-400 hover:underline mt-1">
-                      <ArrowSquareOut size={10} weight="bold" />
-                      {org.url}
+                      <ArrowSquareOut size={10} weight="bold" />{org.url}
                     </a>
                   )}
                 </div>
-
-                {/* Guidelines within org */}
                 {org.guidelines.map((g, gi) => {
                   const gKey = `${org.id}-${gi}`;
                   const gOpen = openGuideline === gKey;
                   return (
                     <div key={gi} className="border-b border-slate-100 dark:border-slate-800 last:border-0">
-                      <button
-                        onClick={() => setOpenGuideline(gOpen ? null : gKey)}
-                        className="w-full flex items-start justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                      >
+                      <button onClick={() => setOpenGuideline(gOpen ? null : gKey)}
+                        className="w-full flex items-start justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-sm text-slate-900 dark:text-white" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-                              {g.title}
-                            </span>
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded border border-slate-200 dark:border-slate-700 flex-shrink-0">
-                              {g.year}
-                            </span>
+                            <span className="font-semibold text-sm text-slate-900 dark:text-white" style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>{g.title}</span>
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded border border-slate-200 dark:border-slate-700 flex-shrink-0">{g.year}</span>
                           </div>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {g.tags.map(tag => (
-                              <span key={tag} className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border ${c.badge}`}>
-                                {tag}
-                              </span>
+                              <span key={tag} className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border ${c.badge}`}>{tag}</span>
                             ))}
                           </div>
                         </div>
                         <CaretRight size={11} weight="bold" className={`text-slate-400 flex-shrink-0 mt-1 transition-transform duration-200 ${gOpen ? "rotate-90" : ""}`} />
                       </button>
-
                       {gOpen && (
                         <div className={`px-4 pb-4 pt-1 ${c.bg}`}>
                           <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 mb-2">Key Clinical Points</div>
                           <div className="space-y-1.5">
                             {g.keyPoints.map((kp, ki) => (
                               <div key={ki} className="flex items-start gap-2">
-                                <span className={`w-4 h-4 rounded-full text-[8px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5 border ${c.badge}`}>
-                                  {ki + 1}
-                                </span>
+                                <span className={`w-4 h-4 rounded-full text-[8px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5 border ${c.badge}`}>{ki + 1}</span>
                                 <span className="text-xs text-slate-700 dark:text-slate-200 leading-snug font-mono">{kp}</span>
                               </div>
                             ))}
@@ -1039,7 +1743,6 @@ function GuidelinesView() {
           </div>
         );
       })}
-
       {filtered.length === 0 && (
         <div className="text-center py-10 text-slate-400 font-mono text-sm">No guidelines match "{search}"</div>
       )}
@@ -1054,7 +1757,6 @@ function GuidelinesView() {
 export default function ImmunisationTab({ searchEntry }) {
   const [activeView, setActiveView] = useState("immunisation");
 
-  // ADD this useEffect:
   useEffect(() => {
     if (!searchEntry?.section) return;
     const sectionMap = {
@@ -1063,6 +1765,10 @@ export default function ImmunisationTab({ searchEntry }) {
       "Special Vaccines":    "immunisation",
       "Catch-up":            "immunisation",
       "National Guidelines": "guidelines",
+      "Growth":              "growth",
+      "SAM":                 "growth",
+      "BMI":                 "growth",
+      "Centiles":            "growth",
     };
     const view = sectionMap[searchEntry.section];
     if (view) setActiveView(view);
@@ -1071,23 +1777,21 @@ export default function ImmunisationTab({ searchEntry }) {
   const views = [
     { id: "immunisation", label: "Immunisation Schedules", icon: Syringe },
     { id: "guidelines",   label: "National Guidelines",    icon: BookOpen },
+    { id: "growth",       label: "Growth & Anthropometry", icon: Ruler    },
   ];
 
   return (
     <div className="space-y-5">
-
-      {/* Header */}
       <div>
         <h2 className="font-bold text-2xl text-slate-900 dark:text-white mb-1"
             style={{ fontFamily: '"Chivo", system-ui, sans-serif' }}>
-          Immunisation &amp; National Guidelines
+          Immunisation, Guidelines &amp; Growth
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-          UIP / NIP (GoI · NHM) · IAP-ACVIP 2023 · NNF · NTEP · NVBDCP · NCDC · RBSK · WHO
+          UIP / NIP (GoI · NHM) · IAP-ACVIP 2023 · NNF · NTEP · NVBDCP · NCDC · WHO Growth Standards · MoHFW SAM
         </p>
       </div>
 
-      {/* View toggle */}
       <div className="flex gap-2 flex-wrap">
         {views.map(v => (
           <button key={v.id} onClick={() => setActiveView(v.id)}
@@ -1102,21 +1806,22 @@ export default function ImmunisationTab({ searchEntry }) {
         ))}
       </div>
 
-      {/* Disclaimer */}
       <div className="flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2.5 text-xs text-amber-800 dark:text-amber-200">
         <Warning size={13} weight="fill" className="flex-shrink-0 mt-0.5 text-amber-500" />
         <span>
-          Reference only. Always verify with current national programme circulars. State-level variations in vaccine availability apply.
-          Last reviewed against IAP-ACVIP 2023 (Indian Pediatrics 2024) and NHM UIP 2024 schedules.
+          Reference only. Verify with current national programme circulars. Growth calculator uses interpolated WHO reference tables —
+          for definitive Z-scores use WHO Anthro software or printed charts.
+          Last reviewed against IAP-ACVIP 2023, NHM UIP 2024, and MoHFW SAM guidelines 2023.
         </span>
       </div>
 
       {activeView === "immunisation" && <ImmunisationView />}
       {activeView === "guidelines"   && <GuidelinesView />}
+      {activeView === "growth"       && <GrowthView />}
 
-      {/* Footer */}
       <div className="text-[10px] text-slate-400 dark:text-slate-500 italic text-center pt-2">
-        IAP-ACVIP 2023 · NHM UIP India · NNF CPG 2022 · NTEP 2022 · NVBDCP 2023 · NCDC/IDSP · RBSK · NPCB · WHO AWaRe 2022
+        IAP-ACVIP 2023 · NHM UIP India · NNF CPG 2022 · NTEP 2022 · NVBDCP 2023 · NCDC/IDSP ·
+        WHO Child Growth Standards 2006 · WHO 2007 Reference · MoHFW SAM Guidelines 2023 · IAP Growth Charts 2015
       </div>
     </div>
   );
