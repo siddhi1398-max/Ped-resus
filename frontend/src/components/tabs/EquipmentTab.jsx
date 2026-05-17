@@ -18,7 +18,6 @@ import {
   OPA_ROWS, NPA_ROWS,
   getOPASize, getNPASize,
   OPA_RULES, NPA_RULES,
-  OPANPASizingSVG,
 } from "../../data/equipment";
 
 // ─── COLOUR HELPERS ────────────────────────────────────────────────────────────
@@ -237,12 +236,11 @@ function OPANPASection({ weight }) {
         </div>
       </div>
 
-      {/* Sub-tab: OPA / NPA / Chart */}
+      {/* Sub-tab: OPA / NPA */}
       <div className="flex gap-1.5">
         {[
-          { id: "opa",   label: "OPA sizes" },
-          { id: "npa",   label: "NPA sizes" },
-          { id: "chart", label: "Sizing chart" },
+          { id: "opa", label: "OPA sizes" },
+          { id: "npa", label: "NPA sizes" },
         ].map(s => (
           <button key={s.id} onClick={() => setView(s.id)}
             className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] uppercase tracking-widest transition-all ${
@@ -361,15 +359,6 @@ function OPANPASection({ weight }) {
         </div>
       )}
 
-      {/* CHART */}
-      {view === "chart" && (
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 p-4">
-          <p className="text-[10px] font-mono text-slate-400 mb-3">
-            Colour-coded OPA (Guedel) sizing on the left · NPA sizes with insertion lengths on the right.
-          </p>
-          <OPANPASizingSVG />
-        </div>
-      )}
     </div>
   );
 }
