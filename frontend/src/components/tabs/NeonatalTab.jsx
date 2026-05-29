@@ -55,30 +55,43 @@ const CATEGORY_STYLES = {
   },
 };
 
+// ─── Golden Minute steps — NRP 2025 (9th Ed.) ────────────────────────────────
+// DCC added as Phase 0 pre-resus step per 2025 major update
+
 const GOLDEN_MINUTE_STEPS = [
+  {
+    phase: "Pre-resus (before/at birth)",
+    items: [
+      {
+        label: "Delayed cord clamping",
+        sub: "≥ 60 s for term/preterm not needing immediate resus · Cord milking: reasonable ≥ 28 wk if DCC not possible · NOT < 28 wk",
+        cue: 0,
+      },
+    ],
+  },
   {
     phase: "Immediate (0–20 s)",
     items: [
-      { label: "Warm and dry", sub: "Pre-warm radiant warmer · use warm dry towels", cue: 0 },
-      { label: "Position airway", sub: "Sniffing position · slight neck extension · shoulder roll if needed", cue: 5 },
-      { label: "Clear secretions if needed", sub: "Bulb suction mouth then nose · avoid deep suction", cue: 10 },
-      { label: "Stimulate", sub: "Rub back or flick soles", cue: 15 },
+      { label: "Warm and dry",                  sub: "Pre-warm radiant warmer · use warm dry towels",                         cue: 0  },
+      { label: "Position airway",               sub: "Sniffing position · slight neck extension · shoulder roll if needed",   cue: 5  },
+      { label: "Clear secretions if needed",    sub: "Bulb suction mouth then nose · avoid deep suction",                    cue: 10 },
+      { label: "Stimulate",                     sub: "Rub back or flick soles",                                              cue: 15 },
     ],
   },
   {
     phase: "Assess (20–30 s)",
     items: [
-      { label: "Assess respirations", sub: "Apnoea, gasping, or laboured breathing?", cue: 20 },
-      { label: "Assess heart rate", sub: "Auscultate or feel umbilical cord · target HR > 100 bpm", cue: 25 },
-      { label: "Assess tone and colour", sub: "Central cyanosis vs acrocyanosis · preductal SpO₂", cue: 30 },
+      { label: "Assess respirations",  sub: "Apnoea, gasping, or laboured breathing?",                             cue: 20 },
+      { label: "Assess heart rate",    sub: "Auscultate or feel umbilical cord · target HR > 100 bpm",             cue: 25 },
+      { label: "Assess tone and colour", sub: "Central cyanosis vs acrocyanosis · preductal SpO₂",                 cue: 30 },
     ],
   },
   {
     phase: "Intervene if needed (30–60 s)",
     items: [
-      { label: "Begin PPV if HR < 100 or apnoeic", sub: "21% O₂ term · 21–30% preterm · 40–60 breaths/min", cue: 30 },
-      { label: "Apply pulse oximeter", sub: "Right hand (preductal) · confirm SpO₂ target per NRP table", cue: 40 },
-      { label: "Escalate if no improvement", sub: "Consider ETT / LMA · chest compressions if HR < 60 · call for help", cue: 60 },
+      { label: "Begin PPV if HR < 100 or apnoeic",  sub: "21% O₂ term · 21–30% preterm · 40–60 breaths/min",                                                                          cue: 30 },
+      { label: "Apply pulse oximeter",              sub: "Right hand (preductal) · confirm SpO₂ target per NRP table",                                                                cue: 40 },
+      { label: "Escalate if no improvement",        sub: "Consider ETT / LMA · chest compressions if HR < 60 · IO access if UVC not possible · call for help",                       cue: 60 },
     ],
   },
 ];
@@ -366,8 +379,9 @@ function GoldenMinuteChecklist() {
         ))}
       </div>
 
+      {/* ── NRP 2025 footer ── */}
       <p className="text-xs text-slate-400 dark:text-slate-500 italic">
-        NRP 2020. Timer is a guide only — resuscitation decisions based on real-time HR, tone, and respirations.
+        NRP 2025 (9th Ed). Timer is a guide only — resuscitation decisions based on real-time HR, tone, and respirations.
       </p>
     </div>
   );
@@ -386,12 +400,12 @@ function QuickRefHeader({ weight }) {
   const uvc = uvcDepth(weight);
 
   const items = [
-    { label: "Adrenaline IV", value: `${adrenalineIV} mg`, sub: "0.01–0.03 mg/kg · 1:10,000" },
-    { label: "ETT size", value: `${ettSize} mm`, sub: "uncuffed" },
-    { label: "ETT depth", value: `${ettDepth} cm`, sub: "from upper lip" },
-    { label: "UVC depth", value: `${uvc} cm`, sub: "emergency low" },
-    { label: "Volume expander", value: `${(weight * 10).toFixed(0)} mL`, sub: "10 mL/kg NS" },
-    { label: "HR target", value: "> 100", sub: "bpm" },
+    { label: "Adrenaline IV",    value: `${adrenalineIV} mg`, sub: "0.01–0.03 mg/kg · 1:10,000" },
+    { label: "ETT size",         value: `${ettSize} mm`,      sub: "uncuffed" },
+    { label: "ETT depth",        value: `${ettDepth} cm`,     sub: "from upper lip" },
+    { label: "UVC depth",        value: `${uvc} cm`,          sub: "emergency low" },
+    { label: "Volume expander",  value: `${(weight * 10).toFixed(0)} mL`, sub: "10 mL/kg NS" },
+    { label: "HR target",        value: "> 100",              sub: "bpm" },
   ];
 
   return (
@@ -427,8 +441,9 @@ export default function NeonatalTab() {
         <Baby size={36} weight="fill" className="text-red-600 dark:text-red-400 flex-shrink-0" />
         <div>
           <h2 className="font-sans font-bold text-2xl sm:text-3xl tracking-tight">Neonatal Resuscitation</h2>
+          {/* ── NRP 2025 string update ── */}
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-            NRP 2020 / Harriet Lane reference. Delivery-room flow in{" "}
+            NRP 2025 (9th Ed) / Harriet Lane reference. Delivery-room flow in{" "}
             <span className="font-mono font-bold">Algorithms → Neonatal Resuscitation</span>.
           </p>
         </div>
@@ -441,6 +456,17 @@ export default function NeonatalTab() {
           <span className="text-sm text-amber-800 dark:text-amber-200">
             Current weight <span className="font-mono font-bold">{weight} kg</span> is outside typical neonatal
             range (≤ 5 kg). Calculations below still use it.
+          </span>
+        </div>
+      )}
+
+      {/* very preterm thermoregulation callout — NEW */}
+      {weight < 1.5 && (
+        <div className="flex items-center gap-2 rounded-md border border-purple-300 dark:border-purple-900 bg-purple-50 dark:bg-purple-950/40 p-3">
+          <Warning size={18} weight="fill" className="text-purple-600 dark:text-purple-400" />
+          <span className="text-sm text-purple-800 dark:text-purple-200">
+            Weight &lt; 1.5 kg — place in <strong>polyethylene bag immediately</strong> after birth without drying.
+            Target temp 36.5–37.5 °C. Radiant warmer on.
           </span>
         </div>
       )}
@@ -464,16 +490,129 @@ export default function NeonatalTab() {
           Tap a card to mark as given — a timestamp is logged automatically.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-          <InteractiveDoseCard testid="neo-adren-iv" category="resuscitation" title="Adrenaline IV (NRP)" value={(weight * 0.02).toFixed(2)} unit="mg (0.01–0.03 mg/kg)" note="1:10,000 · 0.1–0.3 mL/kg" />
-          <InteractiveDoseCard testid="neo-adren-ett" category="resuscitation" title="Adrenaline ETT (NRP)" value={(weight * 0.075).toFixed(2)} unit="mg (0.05–0.1 mg/kg)" note="Only if no IV. 1:10,000 0.5–1 mL/kg" />
-          <InteractiveDoseCard testid="neo-volume" category="fluid" title="Volume expander" value={(weight * 10).toFixed(0)} unit="mL (10 mL/kg NS)" note="Over 5–10 min IV/UVC" />
-          <InteractiveDoseCard testid="neo-d10" category="fluid" title="D10W hypoglycaemia" value={(weight * 2).toFixed(0)} unit="mL (2 mL/kg)" note="Treat if glucose < 40 mg/dL" />
-          <InteractiveDoseCard testid="neo-ett" category="airway" title="ETT size" value={weight < 1 ? "2.5" : weight < 2 ? "3.0" : weight < 3 ? "3.0–3.5" : "3.5"} unit="mm ID (uncuffed)" />
-          <InteractiveDoseCard testid="neo-ett-depth" category="airway" title="ETT depth (6 + wt)" value={nrpETTDepth(weight)} unit="cm from upper lip" />
-          <InteractiveDoseCard testid="neo-uvc" category="airway" title="UVC depth" value={uvcDepth(weight)} unit="cm (1.5×wt + 5.5)" note="Emergency low placement: 3–5 cm" />
-          <InteractiveDoseCard testid="neo-phenobarb" category="anticonvulsant" title="Phenobarbital load" value={(weight * 20).toFixed(0)} unit="mg IV (20 mg/kg)" note="Neonatal seizure 1st line" />
-          <InteractiveDoseCard testid="neo-caffeine" category="other" title="Caffeine citrate load" value={(weight * 20).toFixed(0)} unit="mg IV/PO (20 mg/kg)" note="Apnoea of prematurity" />
-          <InteractiveDoseCard testid="neo-vitk" category="other" title="Vitamin K IM" value={weight < 1.5 ? "0.5" : "1.0"} unit="mg IM at birth" note="VKDB prophylaxis" />
+          {/* ── existing cards ── */}
+          <InteractiveDoseCard
+            testid="neo-adren-iv"
+            category="resuscitation"
+            title="Adrenaline IV (NRP)"
+            value={(weight * 0.02).toFixed(2)}
+            unit="mg (0.01–0.03 mg/kg)"
+            note="1:10,000 · 0.1–0.3 mL/kg"
+          />
+          <InteractiveDoseCard
+            testid="neo-adren-ett"
+            category="resuscitation"
+            title="Adrenaline ETT (NRP)"
+            value={(weight * 0.075).toFixed(2)}
+            unit="mg (0.05–0.1 mg/kg)"
+            note="Only if no IV. 1:10,000 0.5–1 mL/kg"
+          />
+          {/* ── volume expander note updated ── */}
+          <InteractiveDoseCard
+            testid="neo-volume"
+            category="fluid"
+            title="Volume expander"
+            value={(weight * 10).toFixed(0)}
+            unit="mL (10 mL/kg)"
+            note="NS or O-neg blood (if haemorrhagic shock) · over 5–10 min · IO route valid"
+          />
+          {/* ── D10W threshold updated to age-stratified ── */}
+          <InteractiveDoseCard
+            testid="neo-d10"
+            category="fluid"
+            title="D10W hypoglycaemia"
+            value={(weight * 2).toFixed(0)}
+            unit="mL (2 mL/kg)"
+            note="<25 (0–4h) / <35 (4–24h) / <45 (>24h) mg/dL · symptomatic: treat immediately"
+          />
+          <InteractiveDoseCard
+            testid="neo-ett"
+            category="airway"
+            title="ETT size"
+            value={weight < 1 ? "2.5" : weight < 2 ? "3.0" : weight < 3 ? "3.0–3.5" : "3.5"}
+            unit="mm ID (uncuffed)"
+          />
+          <InteractiveDoseCard
+            testid="neo-ett-depth"
+            category="airway"
+            title="ETT depth (6 + wt)"
+            value={nrpETTDepth(weight)}
+            unit="cm from upper lip"
+          />
+          <InteractiveDoseCard
+            testid="neo-uvc"
+            category="airway"
+            title="UVC depth"
+            value={uvcDepth(weight)}
+            unit="cm (1.5×wt + 5.5)"
+            note="Emergency low placement: 3–5 cm"
+          />
+          <InteractiveDoseCard
+            testid="neo-phenobarb"
+            category="anticonvulsant"
+            title="Phenobarbital load"
+            value={(weight * 20).toFixed(0)}
+            unit="mg IV (20 mg/kg)"
+            note="Neonatal seizure 1st line"
+          />
+          <InteractiveDoseCard
+            testid="neo-caffeine"
+            category="other"
+            title="Caffeine citrate load"
+            value={(weight * 20).toFixed(0)}
+            unit="mg IV/PO (20 mg/kg)"
+            note="Apnoea of prematurity"
+          />
+          <InteractiveDoseCard
+            testid="neo-vitk"
+            category="other"
+            title="Vitamin K IM"
+            value={weight < 1.5 ? "0.5" : "1.0"}
+            unit="mg IM at birth"
+            note="VKDB prophylaxis"
+          />
+
+          {/* ── NEW cards from 2025 review ── */}
+          <InteractiveDoseCard
+            testid="neo-pge1"
+            category="resuscitation"
+            title="Prostaglandin E1 (PGE₁) infusion"
+            value={(weight * 0.05).toFixed(3)}
+            unit="mcg/min (start: 0.05 mcg/kg/min)"
+            note="Duct-dependent CHD · apnoea is a side effect · have airway ready"
+          />
+          <InteractiveDoseCard
+            testid="neo-adenosine"
+            category="resuscitation"
+            title="Adenosine — neonatal SVT"
+            value={(weight * 0.1).toFixed(2)}
+            unit="mg IV (0.1 mg/kg)"
+            note="Rapid push + flush · may repeat 0.2 mg/kg · max 0.3 mg/kg"
+          />
+          <InteractiveDoseCard
+            testid="neo-pyridoxine"
+            category="anticonvulsant"
+            title="Pyridoxine (empiric trial)"
+            value="100"
+            unit="mg IV"
+            note="Pyridoxine-dependent seizures · give if seizures refractory to phenobarb"
+          />
+          <InteractiveDoseCard
+            testid="neo-lev"
+            category="anticonvulsant"
+            title="Levetiracetam load"
+            value={(weight * 50).toFixed(0)}
+            unit="mg IV (40–60 mg/kg)"
+            note="2nd line if phenobarb fails · over 15 min"
+          />
+          <InteractiveDoseCard
+            testid="neo-io"
+            category="airway"
+            title="IO needle — tibial"
+            value={weight < 3 ? "18G manual" : "15G EZ-IO"}
+            unit="proximal tibia"
+            note="2 cm below tibial tuberosity · all drugs/fluids can go via IO"
+          />
         </div>
       </section>
 
@@ -552,7 +691,7 @@ export default function NeonatalTab() {
         </div>
       </section>
 
-      {/* SpO2 targets + equipment */}
+      {/* SpO2 targets + equipment — LMA column added */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h3 className="font-sans font-bold text-lg mb-3">Preductal SpO₂ targets (NRP)</h3>
@@ -588,6 +727,7 @@ export default function NeonatalTab() {
                   <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">ETT</th>
                   <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Depth</th>
                   <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">Mask</th>
+                  <th className="p-3 text-left font-mono text-[10px] uppercase tracking-[0.15em]">LMA</th>
                 </tr>
               </thead>
               <tbody>
@@ -597,11 +737,15 @@ export default function NeonatalTab() {
                     <td className="p-3 font-mono text-emerald-700 dark:text-emerald-400">{e.ett}</td>
                     <td className="p-3 font-mono">{e.depth}</td>
                     <td className="p-3">{e.mask}</td>
+                    <td className="p-3 font-mono text-purple-700 dark:text-purple-400">{e.lma}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+            LMA size 1 for all neonates ≥ 34 wk and &gt; 1.5 kg · not recommended &lt; 28 wk.
+          </p>
         </div>
       </section>
 
@@ -618,8 +762,9 @@ export default function NeonatalTab() {
         </ul>
       </section>
 
+      {/* ── footer string updated to NRP 2025 ── */}
       <div className="text-xs text-slate-500 dark:text-slate-400 italic">
-        Source: NRP 2020 guidelines · Harriet Lane Handbook 23rd ed. · Reference only — verify with local protocols.
+        Source: NRP 2025 guidelines (AHA/AAP 9th Ed) · Harriet Lane Handbook 23rd ed. · Reference only — verify with local protocols.
       </div>
     </div>
   );
