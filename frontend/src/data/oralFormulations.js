@@ -15,7 +15,10 @@ export const ORAL_DRUGS = [
     name: "Amoxicillin",
     category: "antibiotic",
     indication: "Pneumonia / AOM / pharyngitis / UTI / skin infections",
-    dosePerKg: 30,
+    // FIX #1: dosePerKg was 30 (=90 mg/kg/day TDS — high-dose only).
+    // Standard IAP/WHO: 40–45 mg/kg/day ÷ TDS → ~13–15 mg/kg/dose.
+    // Changed to 15 mg/kg/dose (= 45 mg/kg/day). High-dose protocol noted below.
+    dosePerKg: 15,
     frequency: "TDS",
     frequencyHours: 8,
     unit: "mg",
@@ -28,7 +31,7 @@ export const ORAL_DRUGS = [
       { conc: "250 mg/5mL", mgPerMl: 50, brands: ["Mox-250", "Novamox-250", "Amoxil-250"] },
       { conc: "500 mg DT (dispersible)", mgPerMl: null, brands: ["Mox-500 DT", "Novamox-500 DT"] },
     ],
-    notes: "40–50 mg/kg/day ÷ TDS (IAP/WHO). High-dose (DRSP/AOM failure): 80–90 mg/kg/day ÷ BD. Duration: 5–7 days RTI, 7–10 days AOM. Give on empty stomach (better absorption) but food acceptable.",
+    notes: "Standard: 15 mg/kg/dose TDS (= 45 mg/kg/day; IAP/WHO). High-dose for DRSP/AOM failure: 27–30 mg/kg/dose TDS (= 80–90 mg/kg/day). Duration: 5–7 days RTI, 7–10 days AOM. Give on empty stomach (better absorption) but food acceptable.",
     route: "PO",
   },
 
@@ -37,7 +40,10 @@ export const ORAL_DRUGS = [
     name: "Amoxicillin-Clavulanate (Co-amoxiclav)",
     category: "antibiotic",
     indication: "AOM / sinusitis / LRTI / UTI / skin / animal bite",
-    dosePerKg: 45,
+    // FIX #2: dosePerKg was 45 (treated as per-dose → 90 mg/kg/day BD — high dose).
+    // Standard IAP: 45 mg/kg/DAY ÷ BD = 22.5 mg/kg/dose.
+    // Changed to 22.5 mg/kg/dose. High-dose noted below.
+    dosePerKg: 22.5,
     frequency: "BD",
     frequencyHours: 12,
     unit: "mg",
@@ -50,7 +56,7 @@ export const ORAL_DRUGS = [
       { conc: "457 mg/5mL (amox 400 + clav 57)", mgPerMl: 80, brands: ["Augmentin-457 ES", "Moxclav-457", "Clavam-457"] },
       { conc: "625 mg tablet (amox 500 + clav 125)", mgPerMl: null, brands: ["Augmentin-625 DUO", "Moxclav-625"] },
     ],
-    notes: "45 mg/kg/day ÷ BD (amoxicillin component). High-dose: 80–90 mg/kg/day for DRSP. Give with food (reduces GI effects). Add probiotic for prolonged courses. IV: Augmentin 1.2 g vial 30 mg/kg q8h.",
+    notes: "Standard: 22.5 mg/kg/dose BD (= 45 mg/kg/day amoxicillin component; IAP). High-dose for DRSP: 40–45 mg/kg/dose BD (= 80–90 mg/kg/day). Give with food (reduces GI effects). Add probiotic for prolonged courses. IV: Augmentin 1.2 g vial 30 mg/kg q8h.",
     route: "PO with food",
   },
 
@@ -230,7 +236,8 @@ export const ORAL_DRUGS = [
       { conc: "200 mg/5mL", mgPerMl: 40, brands: ["Azithral-200", "Azee-200", "Zithromax-200"] },
       { conc: "500 mg tablet", mgPerMl: null, brands: ["Azithral-500", "Azee-500"] },
     ],
-    notes: "Standard: 10 mg/kg day 1 (max 500 mg), then 5 mg/kg days 2–5 (max 250 mg). Typhoid (IAP): 20 mg/kg OD × 7 days (max 1 g/day). Pertussis: 10 mg/kg OD × 5 days. Scrub typhus <8 yr: 10 mg/kg OD × 5 days. Give 1 hr before or 2 hr after food. QT prolongation — check ECG in neonates.",
+    // FIX #7: Clarified that calculated dose = Day 1 only; days 2–5 = half dose.
+    notes: "⚠️ CALCULATOR GIVES DAY 1 DOSE ONLY. Days 2–5 = 5 mg/kg OD (half the calculated dose; max 250 mg). Standard: 10 mg/kg day 1 (max 500 mg), then 5 mg/kg days 2–5. Typhoid (IAP): 20 mg/kg OD × 7 days (max 1 g/day — use typhoid entry). Pertussis: 10 mg/kg OD × 5 days. Scrub typhus <8 yr: 10 mg/kg OD × 5 days. Give 1 hr before or 2 hr after food. QT prolongation — check ECG in neonates.",
     route: "PO — 1 hr before food",
   },
 
@@ -402,13 +409,14 @@ export const ORAL_DRUGS = [
     frequencyHours: null,
     unit: "mg",
     max: 2000,
-    ageMin: 12,
+    // FIX #9: ageMin was 12 months. Most references avoid <3 yr; aligned with tinidazole at 36 months.
+    ageMin: 36,
     withFood: true,
     formulations: [
       { conc: "1 g granule sachet (mix in water)", mgPerMl: null, brands: ["Secnil-1g sachet", "Flagentyl-1g", "Seczole sachet"] },
       { conc: "1.5 g tablet", mgPerMl: null, brands: ["Secnil Forte-1.5g", "Seczole-1.5g"] },
     ],
-    notes: "30 mg/kg single dose (max 2 g). IAP-recommended for amoebiasis. Granule sachet: dissolve in 2–3 mL water or applesauce — give immediately. Single-dose compliance advantage ideal for outpatient management.",
+    notes: "30 mg/kg single dose (max 2 g). Avoid <3 years (ageMin aligned with tinidazole). IAP-recommended for amoebiasis. Granule sachet: dissolve in 2–3 mL water or applesauce — give immediately. Single-dose compliance advantage ideal for outpatient management.",
     route: "PO with food",
   },
 
@@ -441,7 +449,10 @@ export const ORAL_DRUGS = [
     name: "Chloramphenicol",
     category: "antibiotic",
     indication: "Typhoid (susceptible) / meningitis (penicillin allergy) — resource-limited settings",
-    dosePerKg: 25,
+    // FIX #3: dosePerKg was 25 (= 100 mg/kg/day QID — exceeds therapeutic range).
+    // Standard (Piyush Gupta, Nelson, Harriet Lane): 50–75 mg/kg/day ÷ QID = 12.5–18.75 mg/kg/dose.
+    // Changed to 12.5 mg/kg/dose (= 50 mg/kg/day minimum therapeutic dose).
+    dosePerKg: 12.5,
     frequency: "QID",
     frequencyHours: 6,
     unit: "mg",
@@ -453,7 +464,7 @@ export const ORAL_DRUGS = [
       { conc: "125 mg/5mL", mgPerMl: 25, brands: ["Paraxin-125 suspension", "Kemicetine palmitate susp"] },
       { conc: "250 mg capsule", mgPerMl: null, brands: ["Paraxin-250", "Kemicetine-250"] },
     ],
-    notes: "50–75 mg/kg/day ÷ QID (max 3–4 g/day). Typhoid: 75 mg/kg/day × 14 days. Still used in resource-limited India — cheap and widely available. AVOID in neonates (Grey Baby Syndrome). Monitor CBC weekly (aplastic anaemia risk). Confirm sensitivity — most Indian strains now resistant.",
+    notes: "12.5–18.75 mg/kg QID (= 50–75 mg/kg/day; max 4 g/day). Typhoid: 75 mg/kg/day × 14 days. Still used in resource-limited India — cheap and widely available. AVOID in neonates (Grey Baby Syndrome). Monitor CBC weekly (aplastic anaemia risk). Confirm sensitivity — most Indian strains now resistant.",
     route: "PO on empty stomach",
   },
 
@@ -466,6 +477,8 @@ export const ORAL_DRUGS = [
     category: "antibiotic",
     indication: "Scrub typhus / rickettsial / brucellosis / atypical pneumonia (>8 yr)",
     dosePerKg: 2.2,
+    // FIX #6 (clarification): BD is pharmacologically correct (Harriet Lane: 2.2 mg/kg/dose q12h).
+    // IAP scrub typhus protocol uses OD × 7–14 days — noted explicitly below.
     frequency: "BD",
     frequencyHours: 12,
     unit: "mg",
@@ -477,7 +490,7 @@ export const ORAL_DRUGS = [
       { conc: "100 mg capsule (open for children)", mgPerMl: null, brands: ["Doxybid-100", "Tetradox-100", "Biodoxi-100", "Doxt-100"] },
       { conc: "100 mg tablet (scored)", mgPerMl: null, brands: ["Doxy-1 100mg", "Doxt-SL 100mg"] },
     ],
-    notes: "Only >8 years (permanent teeth staining in younger). Scrub typhus (IAP): 2.2 mg/kg OD × 7–14 days. No paediatric syrup in India — open capsule, mix with food. Take with full glass of water, remain upright 30 min (oesophageal ulcer risk). Avoid dairy/antacids within 2 hr. For <8 yr: use azithromycin 10 mg/kg OD × 5 days (IAP).",
+    notes: "Only >8 years (permanent teeth staining in younger). Standard (Harriet Lane): 2.2 mg/kg/dose BD × 7–14 days. IAP scrub typhus protocol: 2.2 mg/kg OD (single daily dose) × 7–14 days — OD may be used for scrub typhus specifically. No paediatric syrup in India — open capsule, mix with food. Take with full glass of water, remain upright 30 min (oesophageal ulcer risk). Avoid dairy/antacids within 2 hr. For <8 yr: use azithromycin 10 mg/kg OD × 5 days (IAP).",
     route: "PO with food and full glass of water",
   },
 
@@ -606,13 +619,15 @@ export const ORAL_DRUGS = [
     frequencyHours: 24,
     unit: "mg",
     max: 600,
+    // FIX #10: Added missing maxDaily field.
+    maxDaily: 1200,
     ageMin: 0,
     withFood: true,
     formulations: [
       { conc: "50 mg base/5mL syrup", mgPerMl: 10, brands: ["Lariago syrup", "Malarex syrup", "Resochin syrup"] },
       { conc: "250 mg tablet (= 150 mg base)", mgPerMl: null, brands: ["Lariago-250", "Malarex-250"] },
     ],
-    notes: "10 mg base/kg day 1 & 2, then 5 mg base/kg day 3 (max 600 mg days 1–2, 300 mg day 3). P. vivax largely chloroquine-sensitive in India (NVBDCP 2023). MANDATORY: follow with primaquine for radical cure (check G6PD first). Bitter taste — mix with juice. Give after food.",
+    notes: "10 mg base/kg day 1 & 2, then 5 mg base/kg day 3 (max 600 mg days 1–2, 300 mg day 3; maxDaily reflects the loading days). P. vivax largely chloroquine-sensitive in India (NVBDCP 2023). MANDATORY: follow with primaquine for radical cure (check G6PD first). Bitter taste — mix with juice. Give after food.",
     route: "PO after food",
   },
 
@@ -638,12 +653,13 @@ export const ORAL_DRUGS = [
   },
 
   // ══════════════════════════════════════════════════════════════════
-  // ANTIBIOTICS — ANTI-FUNGAL (ORAL)
+  // ANTIFUNGALS (ORAL) — category corrected from "antibiotic"
   // ══════════════════════════════════════════════════════════════════
   {
     id: "fluconazole-oral",
     name: "Fluconazole",
-    category: "antibiotic",
+    // FIX #8: category corrected from "antibiotic" to "antifungal".
+    category: "antifungal",
     indication: "Candidiasis / oropharyngeal thrush / tinea / prophylaxis",
     dosePerKg: 6,
     frequency: "OD",
@@ -664,7 +680,8 @@ export const ORAL_DRUGS = [
   {
     id: "nystatin-oral",
     name: "Nystatin (oral suspension)",
-    category: "antibiotic",
+    // FIX #8: category corrected from "antibiotic" to "antifungal".
+    category: "antifungal",
     indication: "Oral candidiasis (thrush) / GI candida prophylaxis in neonates",
     dosePerKg: null,
     frequency: "QID",
@@ -682,12 +699,13 @@ export const ORAL_DRUGS = [
   },
 
   // ══════════════════════════════════════════════════════════════════
-  // ANTIBIOTICS — ANTIPARASITIC
+  // ANTIPARASITALS (ORAL) — category corrected from "antibiotic"
   // ══════════════════════════════════════════════════════════════════
   {
     id: "albendazole-oral",
     name: "Albendazole",
-    category: "antibiotic",
+    // FIX #8: category corrected from "antibiotic" to "antiparasitic".
+    category: "antiparasitic",
     indication: "Intestinal helminths / neurocysticercosis / giardia / hydatid",
     dosePerKg: 7.5,
     frequency: "BD",
@@ -707,7 +725,8 @@ export const ORAL_DRUGS = [
   {
     id: "mebendazole-oral",
     name: "Mebendazole",
-    category: "antibiotic",
+    // FIX #8: category corrected from "antibiotic" to "antiparasitic".
+    category: "antiparasitic",
     indication: "Intestinal worms / pinworm / hookworm (alternative to albendazole)",
     dosePerKg: null,
     frequency: "BD",
@@ -727,7 +746,8 @@ export const ORAL_DRUGS = [
   {
     id: "ivermectin-oral",
     name: "Ivermectin",
-    category: "antibiotic",
+    // FIX #8: category corrected from "antibiotic" to "antiparasitic".
+    category: "antiparasitic",
     indication: "Scabies / strongyloidiasis / filariasis (>15 kg / >5 yr)",
     dosePerKg: 0.2,
     frequency: "single",
@@ -746,14 +766,17 @@ export const ORAL_DRUGS = [
   },
 
   // ══════════════════════════════════════════════════════════════════
-  // ANTIBIOTICS — ANTIVIRAL
+  // ANTIVIRALS (ORAL) — category corrected from "antibiotic"
   // ══════════════════════════════════════════════════════════════════
   {
     id: "acyclovir-oral",
     name: "Acyclovir",
-    category: "antibiotic",
-    indication: "Varicella / herpes labialis / HSV (oral maintenance after IV)",
+    // FIX #8: category corrected from "antibiotic" to "antiviral".
+    category: "antiviral",
+    indication: "Varicella / herpes labialis / HSV gingivostomatitis (oral maintenance after IV)",
     dosePerKg: 20,
+    // FIX #5: frequency was "QID" — correct for varicella. HSV gingivostomatitis requires
+    // 5× daily (q4–5h). QID retained for the primary calculated dose (varicella); HSV clarified in notes.
     frequency: "QID",
     frequencyHours: 6,
     unit: "mg",
@@ -766,7 +789,7 @@ export const ORAL_DRUGS = [
       { conc: "400 mg tablet", mgPerMl: null, brands: ["Zovirax-400", "Acivir-400"] },
       { conc: "800 mg tablet", mgPerMl: null, brands: ["Zovirax-800", "Acivir-800"] },
     ],
-    notes: "Oral varicella: 20 mg/kg QID × 5 days (max 800 mg/dose). HSV oral: 15–20 mg/kg 5× daily. IV (severe): 10–20 mg/kg q8h. Ensure adequate hydration during IV therapy (nephrotoxic if dehydrated). IV: infuse over 1 hr.",
+    notes: "⚠️ FREQUENCY IS INDICATION-SPECIFIC. Varicella (this calculator): 20 mg/kg QID × 5 days (max 800 mg/dose). HSV gingivostomatitis: 15 mg/kg FIVE TIMES DAILY (q4h while awake) × 7 days — increase frequency manually for this indication. IV (severe HSV/encephalitis): 10–20 mg/kg q8h. Ensure adequate hydration during IV therapy (nephrotoxic if dehydrated).",
     route: "PO — maintain adequate hydration",
   },
 
@@ -1174,13 +1197,17 @@ export const ORAL_DRUGS = [
     notes: "Pre-op/procedural: 0.5–1 mg/kg oral 1 hr before (max 50 mg). Antihistamine with anxiolytic, antiemetic, antipruritic effects. Safe from 6 months.",
     route: "PO",
   },
-{
-    id: "Triclofos Sodium",
-    name: "Triclofos (Pedicloryl)",
+
+  {
+    id: "triclofos-oral",
+    name: "Triclofos Sodium (Pedicloryl)",
     category: "sedation",
-    indication: "procedural sedation",
-    dosePerKg: 50,
-    frequency: "5mg/kg every 5 mins, upto 60 mins",
+    indication: "Procedural sedation (non-painful diagnostic procedures)",
+    // FIX #4: dosePerKg was 50 but notes stated 80 mg/kg. Standard Indian practice (Piyush Gupta)
+    // / published protocols: 70–75 mg/kg initial dose. Changed to 75 mg/kg.
+    // The supplemental 5 mg/kg q5min top-up is a separate titration step, not the initial dose field.
+    dosePerKg: 75,
+    frequency: "single",
     frequencyHours: null,
     unit: "mg",
     max: null,
@@ -1188,11 +1215,12 @@ export const ORAL_DRUGS = [
     ageMin: 1,
     withFood: false,
     formulations: [
-      { conc: "500 mg/5mL", mgPerMl: 100, brands: ["Pedicloryl syrup",  "Mitflos-kid suspension", "Silence", "PediClix", "Clofris" ] },
+      { conc: "500 mg/5mL", mgPerMl: 100, brands: ["Pedicloryl syrup", "Mitflos-kid suspension", "Silence", "PediClix", "Clofris"] },
     ],
-    notes: "Initial dose: 80 mg/kg orally is the established starting dose for children undergoing non-painful diagnostic procedures.Supplemental dosing: 5 mg/kg every 5 minutes can be given starting at 30 minutes post-administration if the child remains inadequately sedated, continuing up to 60 minutes after the initial dose. Effective dose range: 25–75 mg/kg",
+    notes: "Initial dose: 75 mg/kg PO (effective range 25–100 mg/kg; Piyush Gupta). If inadequate sedation at 30 min: supplement with 5 mg/kg q5 min (up to 60 min post-initial dose). Onset 20–45 min. Duration 1–2 hr. Monitor SpO₂. Use for non-painful procedures (EEG, imaging) only.",
     route: "PO",
   },
+
   {
     id: "melatonin-oral",
     name: "Melatonin",
@@ -1305,140 +1333,146 @@ export const ORAL_DRUGS = [
     notes: "Dissolve 1 sachet in 1 L clean water — do NOT add extra sugar or salt. Give small sips frequently (5 mL q1–2 min if vomiting). Continue breastfeeding. IAP: mandatory zinc + ORS for diarrhoea.",
     route: "PO — frequent small sips",
   },
-// 1. Tramadol oral — widely used
-{
-  id: "tramadol-oral",
-  name: "Tramadol",
-  category: "analgesia",
-  indication: "Moderate pain (>12 yr) / cancer pain / post-op",
-  dosePerKg: 1,
-  frequency: "TDS",
-  frequencyHours: 8,
-  unit: "mg",
-  max: 100,
-  maxDaily: 400,
-  ageMin: 144,
-  withFood: true,
-  formulations: [
-    { conc: "50 mg capsule", mgPerMl: null, brands: ["Tramazac-50", "Ultracet (37.5 mg tramadol + 325 mg paracetamol)", "Tramatas-50"] },
-    { conc: "100 mg SR tablet", mgPerMl: null, brands: ["Tramazac-100 SR", "Dolozam-100 SR"] },
-  ],
-  notes: "FDA 2017: CONTRAINDICATED <12 yr. 1–2 mg/kg TDS (max 100 mg/dose). Avoid in adenotonsillectomy (ultra-rapid metabolisers). Nausea common. Lowers seizure threshold.",
-  route: "PO with food",
-},
 
-// 2. Diclofenac oral
-{
-  id: "diclofenac-oral",
-  name: "Diclofenac",
-  category: "analgesia",
-  indication: "Moderate pain / dysmenorrhoea / musculoskeletal / renal colic",
-  dosePerKg: 1,
-  frequency: "TDS",
-  frequencyHours: 8,
-  unit: "mg",
-  max: 50,
-  maxDaily: 150,
-  ageMin: 12,
-  withFood: true,
-  formulations: [
-    { conc: "25 mg/5mL syrup", mgPerMl: 5, brands: ["Voveran-25 syrup", "Reactin-D syrup", "Diclomol syrup"] },
-    { conc: "50 mg tablet", mgPerMl: null, brands: ["Voveran-50", "Reactin-50", "Diclofenac (Cipla)"] },
-  ],
-  notes: "1 mg/kg TDS (max 50 mg/dose). Avoid dengue, dehydration, renal impairment, <12 months. Give with food. GI protection with PPI for >7 days.",
-  route: "PO with food",
-},
+  // ══════════════════════════════════════════════════════════════════
+  // ADDITIONAL DRUGS
+  // ══════════════════════════════════════════════════════════════════
+  {
+    id: "tramadol-oral",
+    name: "Tramadol",
+    category: "analgesia",
+    indication: "Moderate pain (>12 yr) / cancer pain / post-op",
+    dosePerKg: 1,
+    frequency: "TDS",
+    frequencyHours: 8,
+    unit: "mg",
+    max: 100,
+    maxDaily: 400,
+    ageMin: 144,
+    withFood: true,
+    formulations: [
+      { conc: "50 mg capsule", mgPerMl: null, brands: ["Tramazac-50", "Ultracet (37.5 mg tramadol + 325 mg paracetamol)", "Tramatas-50"] },
+      { conc: "100 mg SR tablet", mgPerMl: null, brands: ["Tramazac-100 SR", "Dolozam-100 SR"] },
+    ],
+    notes: "FDA 2017: CONTRAINDICATED <12 yr. 1–2 mg/kg TDS (max 100 mg/dose). Avoid in adenotonsillectomy (ultra-rapid metabolisers). Nausea common. Lowers seizure threshold.",
+    route: "PO with food",
+  },
 
-// 3. Oseltamivir — exists in drugs.js but NOT in oralFormulations.js with Indian brands
-{
-  id: "oseltamivir-oral",
-  name: "Oseltamivir (Tamiflu)",
-  category: "antibiotic",
-  indication: "Influenza A/B treatment and prophylaxis",
-  dosePerKg: null,
-  frequency: "BD",
-  frequencyHours: 12,
-  unit: "mg",
-  fixedDose: "<1 yr: 3 mg/kg BD | ≤15 kg: 30 mg BD | >15–23 kg: 45 mg BD | >23–40 kg: 60 mg BD | >40 kg: 75 mg BD — all × 5 days",
-  ageMin: 0,
-  withFood: true,
-  formulations: [
-    { conc: "12 mg/mL oral suspension", mgPerMl: 12, brands: ["Tamiflu suspension (Roche)", "Fluvir suspension (Glenmark)", "Osiflu suspension (Cipla)"] },
-    { conc: "75 mg capsule", mgPerMl: null, brands: ["Tamiflu-75 (Roche)", "Fluvir-75", "Osiflu-75"] },
-  ],
-  notes: "Start within 48 hr of symptoms. ICU/severe: 150 mg BD considered. Prophylaxis: half treatment dose OD × 10 days. Give with food (reduces nausea). Suspension: shake well before use.",
-  route: "PO with food",
-},
+  {
+    id: "diclofenac-oral",
+    name: "Diclofenac",
+    category: "analgesia",
+    indication: "Moderate pain / dysmenorrhoea / musculoskeletal / renal colic",
+    dosePerKg: 1,
+    frequency: "TDS",
+    frequencyHours: 8,
+    unit: "mg",
+    max: 50,
+    maxDaily: 150,
+    ageMin: 12,
+    withFood: true,
+    formulations: [
+      { conc: "25 mg/5mL syrup", mgPerMl: 5, brands: ["Voveran-25 syrup", "Reactin-D syrup", "Diclomol syrup"] },
+      { conc: "50 mg tablet", mgPerMl: null, brands: ["Voveran-50", "Reactin-50", "Diclofenac (Cipla)"] },
+    ],
+    notes: "1 mg/kg TDS (max 50 mg/dose). Avoid dengue, dehydration, renal impairment, <12 months. Give with food. GI protection with PPI for >7 days.",
+    route: "PO with food",
+  },
 
-// 4. Rifaximin — hepatic encephalopathy / traveller's diarrhoea
-{
-  id: "rifaximin-oral",
-  name: "Rifaximin",
-  category: "antibiotic",
-  indication: "Hepatic encephalopathy / traveller's diarrhoea / IBS-D",
-  dosePerKg: null,
-  frequency: "TDS",
-  frequencyHours: 8,
-  unit: "mg",
-  fixedDose: "Hepatic encephalopathy: 550 mg BD (adult) | Traveller's diarrhoea: 200 mg TDS × 3 days",
-  ageMin: 144,
-  withFood: false,
-  formulations: [
-    { conc: "200 mg tablet", mgPerMl: null, brands: ["Rcifax-200", "Xifaxan-200", "Rifagut-200"] },
-    { conc: "550 mg tablet", mgPerMl: null, brands: ["Rcifax-550", "Xifaxan-550"] },
-  ],
-  notes: "Non-absorbable antibiotic — acts locally in GI. No significant systemic effects. Preferred over neomycin for hepatic encephalopathy (better tolerated). Limited paediatric data <12 yr.",
-  route: "PO with or without food",
-},
+  {
+    id: "oseltamivir-oral",
+    name: "Oseltamivir (Tamiflu)",
+    // FIX #8: category corrected from "antibiotic" to "antiviral".
+    category: "antiviral",
+    indication: "Influenza A/B treatment and prophylaxis",
+    dosePerKg: null,
+    frequency: "BD",
+    frequencyHours: 12,
+    unit: "mg",
+    fixedDose: "<1 yr: 3 mg/kg BD | ≤15 kg: 30 mg BD | >15–23 kg: 45 mg BD | >23–40 kg: 60 mg BD | >40 kg: 75 mg BD — all × 5 days",
+    ageMin: 0,
+    withFood: true,
+    formulations: [
+      { conc: "12 mg/mL oral suspension", mgPerMl: 12, brands: ["Tamiflu suspension (Roche)", "Fluvir suspension (Glenmark)", "Osiflu suspension (Cipla)"] },
+      { conc: "75 mg capsule", mgPerMl: null, brands: ["Tamiflu-75 (Roche)", "Fluvir-75", "Osiflu-75"] },
+    ],
+    notes: "Start within 48 hr of symptoms. ICU/severe: 150 mg BD considered. Prophylaxis: half treatment dose OD × 10 days. Give with food (reduces nausea). Suspension: shake well before use.",
+    route: "PO with food",
+  },
 
-// 5. Acetazolamide oral — glaucoma, alkalinisation, AMS
-{
-  id: "acetazolamide-oral",
-  name: "Acetazolamide",
-  category: "other",
-  indication: "Acute angle-closure glaucoma / altitude sickness / metabolic alkalosis / pseudotumour cerebri",
-  dosePerKg: 5,
-  frequency: "BD",
-  frequencyHours: 12,
-  unit: "mg",
-  max: 250,
-  maxDaily: 1000,
-  ageMin: 12,
-  withFood: true,
-  formulations: [
-    { conc: "250 mg tablet", mgPerMl: null, brands: ["Iopar-SR-250", "Diamox-250", "Acetamox-250"] },
-  ],
-  notes: "Glaucoma: 5–10 mg/kg BD (max 250 mg BD). Altitude sickness prophylaxis: 5 mg/kg BD starting 24 hr before ascent. Sulfonamide — avoid in sulfa allergy, renal stones. Causes diuresis + tingling in extremities.",
-  route: "PO with food",
-},
+  {
+    id: "rifaximin-oral",
+    name: "Rifaximin",
+    category: "antibiotic",
+    indication: "Hepatic encephalopathy / traveller's diarrhoea / IBS-D",
+    dosePerKg: null,
+    frequency: "TDS",
+    frequencyHours: 8,
+    unit: "mg",
+    fixedDose: "Hepatic encephalopathy: 550 mg BD (adult) | Traveller's diarrhoea: 200 mg TDS × 3 days",
+    ageMin: 144,
+    withFood: false,
+    formulations: [
+      { conc: "200 mg tablet", mgPerMl: null, brands: ["Rcifax-200", "Xifaxan-200", "Rifagut-200"] },
+      { conc: "550 mg tablet", mgPerMl: null, brands: ["Rcifax-550", "Xifaxan-550"] },
+    ],
+    notes: "Non-absorbable antibiotic — acts locally in GI. No significant systemic effects. Preferred over neomycin for hepatic encephalopathy (better tolerated). Limited paediatric data <12 yr.",
+    route: "PO with or without food",
+  },
 
-// 6. Prazosin oral — scorpion sting (very common India)
-{
-  id: "prazosin-oral",
-  name: "Prazosin",
-  category: "other",
-  indication: "Scorpion envenomation — autonomic storm / hypertensive urgency",
-  dosePerKg: 0.03,
-  frequency: "q3h",
-  frequencyHours: 3,
-  unit: "mg",
-  max: 0.5,
-  ageMin: 12,
-  withFood: false,
-  formulations: [
-    { conc: "0.5 mg tablet", mgPerMl: null, brands: ["Minipress-0.5", "Prazopress-0.5", "Sympress-0.5"] },
-    { conc: "1 mg tablet", mgPerMl: null, brands: ["Minipress-1", "Prazopress-1"] },
-  ],
-  notes: "Scorpion: 30 mcg/kg (0.03 mg/kg) q3h PO until clinical improvement (IAP). Max 0.5 mg/dose. First dose supine (first-dose hypotension). α1-blocker reverses catecholamine surge. Continue until cool extremities/salivation resolve. Indian protocol (Bawaskar).",
-  route: "PO supine for first dose",
-},
+  {
+    id: "acetazolamide-oral",
+    name: "Acetazolamide",
+    category: "other",
+    indication: "Acute angle-closure glaucoma / altitude sickness / metabolic alkalosis / pseudotumour cerebri",
+    dosePerKg: 5,
+    frequency: "BD",
+    frequencyHours: 12,
+    unit: "mg",
+    max: 250,
+    maxDaily: 1000,
+    ageMin: 12,
+    withFood: true,
+    formulations: [
+      { conc: "250 mg tablet", mgPerMl: null, brands: ["Iopar-SR-250", "Diamox-250", "Acetamox-250"] },
+    ],
+    notes: "Glaucoma: 5–10 mg/kg BD (max 250 mg BD). Altitude sickness prophylaxis: 5 mg/kg BD starting 24 hr before ascent. Sulfonamide — avoid in sulfa allergy, renal stones. Causes diuresis + tingling in extremities.",
+    route: "PO with food",
+  },
+
+  {
+    id: "prazosin-oral",
+    name: "Prazosin",
+    category: "other",
+    indication: "Scorpion envenomation — autonomic storm / hypertensive urgency",
+    dosePerKg: 0.03,
+    frequency: "q3h",
+    frequencyHours: 3,
+    unit: "mg",
+    max: 0.5,
+    // FIX: ageMin was 12 months. Bawaskar protocol is used across all paediatric ages;
+    // no clear lower age limit — set to 1 month (0 would include neonates which is unverified).
+    ageMin: 1,
+    withFood: false,
+    formulations: [
+      { conc: "0.5 mg tablet", mgPerMl: null, brands: ["Minipress-0.5", "Prazopress-0.5", "Sympress-0.5"] },
+      { conc: "1 mg tablet", mgPerMl: null, brands: ["Minipress-1", "Prazopress-1"] },
+    ],
+    notes: "Scorpion: 30 mcg/kg (0.03 mg/kg) q3h PO until clinical improvement (IAP / Bawaskar protocol). Max 0.5 mg/dose. First dose supine (first-dose hypotension). α1-blocker reverses catecholamine surge. Continue until cool extremities/salivation resolve. No strict lower age limit in Bawaskar protocol — use clinical judgement in infants.",
+    route: "PO supine for first dose",
+  },
 ];
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CATEGORY FILTER CONFIG
+// Updated to include corrected antifungal, antiviral, antiparasitic categories
 // ─────────────────────────────────────────────────────────────────────────────
 export const ORAL_CATEGORIES = [
   { id: "all",            label: "All",              matches: null },
   { id: "antibiotic",    label: "Antibiotics",       matches: ["antibiotic"] },
+  { id: "antifungal",    label: "Antifungals",       matches: ["antifungal"] },
+  { id: "antiviral",     label: "Antivirals",        matches: ["antiviral"] },
+  { id: "antiparasitic", label: "Antiparasitics",    matches: ["antiparasitic"] },
   { id: "analgesia",     label: "Analgesics",        matches: ["analgesia"] },
   { id: "anticonvulsant",label: "Anticonvulsants",   matches: ["anticonvulsant"] },
   { id: "sedation",      label: "Sedation",          matches: ["sedation"] },
