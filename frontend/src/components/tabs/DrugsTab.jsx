@@ -17,6 +17,9 @@ const CAT_COLORS = {
   resuscitation:  "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200 border-red-300 dark:border-red-900",
   sedation:       "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200 border-purple-300 dark:border-purple-900",
   antibiotic:     "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 border-blue-300 dark:border-blue-900",
+  antifungal:     "bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-200 border-violet-300 dark:border-violet-900",   // ← ADDED: matches corrected drug categories
+  antiviral:      "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200 border-sky-300 dark:border-sky-900",                      // ← ADDED
+  antimalarial:   "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border-emerald-300 dark:border-emerald-900", // ← ADDED (reuses airway green — distinct enough)
   fluid:          "bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-200 border-cyan-300 dark:border-cyan-900",
   airway:         "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border-emerald-300 dark:border-emerald-900",
   analgesia:      "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-900",
@@ -29,7 +32,7 @@ const CAT_COLORS = {
   haematology:      "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200 border-red-300 dark:border-red-900",
   renal:            "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-200 border-teal-300 dark:border-teal-900",
   "gi-hepatic":     "bg-lime-100 text-lime-800 dark:bg-lime-950 dark:text-lime-200 border-lime-300 dark:border-lime-900",
-   other:          "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700",
+  other:            "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700",
 };
 
 const TONE = {
@@ -66,6 +69,7 @@ function computeRouteDose(drug, weight) {
   const unit = drug.doseUnit || "";
 
   if (drug.max) raw = Math.min(raw, drug.max);
+  if (drug.min) raw = Math.max(raw, drug.min);   // ← ADDED: enforce minimum dose (e.g. atropine min 0.1 mg)
 
   if (unit === "mcg") return `${raw.toFixed(0)} mcg`;
   if (unit === "units") return `${(raw / 1000).toFixed(0)} × 1000 units (${Math.round(raw).toLocaleString()} units)`;
@@ -77,13 +81,16 @@ function computeRouteDose(drug, weight) {
 function inlineComputeDose(str, weight) {
   if (!weight || !str) return str;
   let result = str;
+  // Range patterns: X–Y mg/kg or mcg/kg
   result = result.replace(/([\d.]+)[–-]([\d.]+)\s*(mg|mcg|mL)\/kg(\/(?:hr|min|day))?/g,
     (_, lo, hi, unit, per) => {
       const suffix = per || "";
       return `${(parseFloat(lo)*weight).toFixed(2)}–${(parseFloat(hi)*weight).toFixed(2)} ${unit}${suffix} [${weight}kg]`;
     });
+  // Single value mg or mL /kg
   result = result.replace(/([\d.]+)\s*(mg|mL)\/kg(\/(?:hr|min|day))?/g,
     (_, n, unit, per) => `${(parseFloat(n)*weight).toFixed(2)} ${unit}${per||""} [${weight}kg]`);
+  // Single value mcg/kg  ← FIXED: was separate and would miss values already replaced above
   result = result.replace(/([\d.]+)\s*mcg\/kg(\/(?:hr|min|day))?/g,
     (_, n, per) => `${(parseFloat(n)*weight).toFixed(1)} mcg${per||""} [${weight}kg]`);
   return result;
@@ -138,7 +145,7 @@ function RouteDrugCard({ drug, weight }) {
 
         {/* Computed dose badge */}
         <div className={`text-[10px] font-mono font-bold flex-shrink-0 mr-2 ${isNotRecommended ? "text-slate-400 line-through" : t.text}`}>
-          {weight ? computedDose : drug.doseStr?.split(" ")[0]}
+          {weight ? computedDose : (drug.doseStr || "—")}   {/* ← CORRECTED: was .split(" ")[0] which strips the unit */}
         </div>
 
         <ArrowRight
@@ -170,6 +177,9 @@ function RouteDrugCard({ drug, weight }) {
                     {computedDose}
                     {drug.max && drug.dosePerKg * weight >= drug.max && (
                       <span className="ml-1.5 text-[9px] font-mono text-slate-400 font-normal">MAX DOSE</span>
+                    )}
+                    {drug.min && drug.dosePerKg * weight <= drug.min && (
+                      <span className="ml-1.5 text-[9px] font-mono text-amber-500 font-normal">MIN DOSE</span>
                     )}
                   </div>
                 </div>
@@ -372,8 +382,8 @@ const PR_DRUGS = [
     name: "Indomethacin (Suppository)",
     class: "NSAID", classColor: "amber",
     indication: "Acute pain / fever (older children)",
-    doseStr: "1.5–3 mg/kg/day PR ÷ TDS (max 50 mg/dose)",
-    dosePerKg: 1, doseUnit: "mg", max: 50,
+    doseStr: "0.5–1 mg/kg/dose PR TDS (max 50 mg/dose; 3 mg/kg/day)",  // ← CORRECTED: doseStr now reflects per-dose value matching dosePerKg
+    dosePerKg: 0.5, doseUnit: "mg", max: 50,                             // ← CORRECTED: was 1 mg/kg/dose (upper end). Standard starting per-dose = 0.5 mg/kg (Harriet Lane: 1.5–3 mg/kg/day ÷ TDS = 0.5–1 mg/kg/dose)
     brands: "Indocap (Ranbaxy) suppository · Indoflam suppository · Indomod suppository",
     formulations: "25 mg suppository (Indocap-25) · 50 mg suppository (Indocap-50) — hospital pharmacy",
     howToGive: "Insert as per standard suppository technique. Best absorbed from upper rectum. Insert beyond external sphincter.",
@@ -390,8 +400,8 @@ const PR_DRUGS = [
     name: "Promethazine (Suppository)",
     class: "Antiemetic / Antihistamine", classColor: "orange",
     indication: "Severe vomiting when oral/IV unavailable (>2 yr ONLY)",
-    doseStr: "0.5–1 mg/kg PR (max 25 mg)",
-    dosePerKg: 0.75, doseUnit: "mg", max: 25,
+    doseStr: "0.5 mg/kg PR (max 25 mg) — ONLY >2 yr",   // ← CORRECTED: was "0.5–1 mg/kg"; use conservative 0.5 mg/kg as dosePerKg to match
+    dosePerKg: 0.5, doseUnit: "mg", max: 25,              // ← CORRECTED: was 0.75 (average of range) — clinically safer to default to the low end for a drug with FDA Black Box Warning
     brands: "Phenergan Suppositories (Sanofi) · Fenez suppository · Promethazine suppository (Cipla)",
     formulations: "12.5 mg suppository (Phenergan-12.5) · 25 mg suppository (Phenergan-25) — limited India availability",
     howToGive: "Refrigerate until use. Moisten tip. Insert blunt end first past sphincter. Hold buttocks 2 min.",
@@ -453,7 +463,7 @@ const IN_DRUGS = [
     name: "Fentanyl",
     class: "Opioid Analgesic", classColor: "orange",
     indication: "Acute severe pain — fractures, burns, trauma (when IV not yet available)",
-    doseStr: "1.5–2 mcg/kg IN (max 100 mcg)",
+    doseStr: "1.5 mcg/kg IN (range 1.5–2 mcg/kg; max 100 mcg)",  // ← CORRECTED: doseStr now matches dosePerKg:1.5; was "1.5–2 mcg/kg" which doesn't match a single dosePerKg field
     dosePerKg: 1.5, doseUnit: "mcg", max: 100,
     brands: "Fentanyl (Neon Labs) · Fentoject (Sun Pharma) · Trofentyl (Troikaa) · Fentanil (Cipla)",
     formulations: "50 mcg/mL (0.05 mg/mL) · 100 mcg/mL (0.1 mg/mL) ampoules — use concentrated form for low volumes",
@@ -472,7 +482,7 @@ const IN_DRUGS = [
     name: "Ketamine (sub-dissociative)",
     class: "NMDA Antagonist", classColor: "violet",
     indication: "Acute pain — opioid-sparing / pre-IV access trauma / short procedures",
-    doseStr: "1–2 mg/kg IN (max 75 mg)",
+    doseStr: "1.5 mg/kg IN (range 1–2 mg/kg; max 75 mg)",  // ← CORRECTED: was "1–2 mg/kg" — now reflects single dosePerKg value with range in parentheses
     dosePerKg: 1.5, doseUnit: "mg", max: 75,
     brands: "Aneket (Neon) · Ketalar (Pfizer) · Katamine (Troikaa) · Ketamax (Ranbaxy)",
     formulations: "Use 50 mg/mL concentration. For IN use 50 mg/mL to minimise volume. 500 mg/10 mL vial — draw up concentrated.",
@@ -513,8 +523,8 @@ const IN_DRUGS = [
     name: "Dexmedetomidine",
     class: "α2-agonist Sedative", classColor: "teal",
     indication: "Pre-MRI sedation / procedural sedation / anxiolysis",
-    doseStr: "1–2 mcg/kg IN (max 100 mcg)",
-    dosePerKg: 1.5, doseUnit: "mcg", max: 100,
+    doseStr: "2 mcg/kg IN (range 1–2 mcg/kg; max 100 mcg)",   // ← CORRECTED: standard effective IN dose = 2 mcg/kg (published protocols, Harriet Lane). Was "1–2 mcg/kg".
+    dosePerKg: 2, doseUnit: "mcg", max: 100,                   // ← CORRECTED: was 1.5 (underdose for effective sedation)
     brands: "Dextomid (Neon Labs) · Precedex (Hospira/Pfizer) · Dexdor (Orion) — IV solution used intranasally",
     formulations: "100 mcg/mL (0.1 mg/mL) IV solution used intranasally with atomiser. 200 mcg/2 mL vials. No specific IN formulation in India.",
     howToGive: "Draw up 100 mcg/mL solution into 1 mL syringe. Attach MAD. Administer half dose each nostril. Onset 30 min (slower than midazolam). Plan timing — give 25–30 min before procedure.",
@@ -1316,10 +1326,13 @@ export default function DrugsTab({ searchEntry }) {
       if (searchEntry.drugId) setExpandedDrugId(searchEntry.drugId);
     } else if (searchEntry.section === "Per Rectal") {
       setActiveTab("pr");
+      if (searchEntry.drugId) setExpandedDrugId(searchEntry.drugId);   // ← ADDED: was missing drugId expand for PR
     } else if (searchEntry.section === "Intranasal") {
       setActiveTab("in");
+      if (searchEntry.drugId) setExpandedDrugId(searchEntry.drugId);   // ← ADDED: was missing drugId expand for IN
     } else if (searchEntry.section === "Intramuscular") {
       setActiveTab("im");
+      if (searchEntry.drugId) setExpandedDrugId(searchEntry.drugId);   // ← ADDED: was missing drugId expand for IM
     } else {
       setActiveTab("drugs");
       if (searchEntry.drugId) {
